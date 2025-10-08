@@ -1,119 +1,331 @@
 @plugin '@tailwindcss/typography';
 
 @layer base {
-  /* ===== Override default Tailwind Typography styles ===== */
-  .app-prose {
-    @apply prose;
+/**
+Typography System: Content-Focused Hierarchy with Minimalist Aesthetics
 
-    h1,
-    h2,
-    h3,
-    h4,
-    th {
-      @apply mb-3 text-foreground;
-    }
+Emphasis on readability and clean design inspired by arduin.io:
+- Generous line-height (1.6-1.8 for body text)
+- Clear heading hierarchy with refined spacing
+- Subtle colors for secondary text
+- Academic-focused code block styling
+- Profile section for hero/home pages
+*/
 
-    h3 {
-      @apply italic;
-    }
+/* Import system font stack for better performance */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
 
-    p,
-    strong,
-    ol,
-    ul,
-    figcaption,
-    table,
-    code {
-      @apply text-foreground;
-    }
+.app-prose {
+@apply prose;
+color: var(--foreground);
+line-height: 1.8;
 
-    a {
-      @apply break-words text-foreground decoration-dashed underline-offset-4 hover:text-accent focus-visible:no-underline;
-    }
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+th {
+  @apply mb-4 text-foreground;
+  line-height: 1.4;
+  letter-spacing: 0.2px;
+  font-weight: 600;
+}
 
-    ul {
-      @apply overflow-x-clip;
-    }
+h1 {
+  @apply text-3xl mb-6;
+  letter-spacing: -0.5px;
+  font-weight: 700;
+}
 
-    li {
-      @apply marker:text-accent;
-    }
+h2 {
+  @apply text-2xl mb-5 mt-8;
+  font-weight: 700;
+}
 
-    hr {
-      @apply border-border;
-    }
+h3 {
+  @apply text-xl mb-4 mt-6;
+  font-weight: 700;
+}
 
-    img {
-      @apply mx-auto border border-border;
-    }
+h4 {
+  @apply text-lg mb-3 mt-5;
+  font-weight: 700;
+}
 
-    figcaption {
-      @apply opacity-75;
-    }
+p,
+strong,
+ol,
+ul,
+figcaption,
+table,
+code {
+  @apply text-foreground;
+}
 
-    table {
-      th,
-      td {
-        @apply border border-border p-2;
-      }
+/**
+ * Links: Minimal but clear
+ * Using dashed underline for semantic clarity
+ */
+a {
+  @apply wrap-break-word text-accent decoration-dashed underline-offset-4 hover:text-accent/80 focus-visible:no-underline transition-colors;
+}
 
-      th {
-        @apply py-1.5;
-      }
+ul,
+ol {
+  @apply overflow-x-clip my-4;
+}
 
-      code {
-        @apply break-all sm:break-normal;
-      }
-    }
+li {
+  @apply marker:text-accent my-2;
+  margin-left: 1.5em;
+}
 
-    code {
-      @apply rounded bg-muted/75 p-1 break-words text-foreground before:content-none after:content-none;
-    }
+hr {
+  @apply border-border my-8;
+}
 
-    .astro-code code {
-      @apply flex-[1_0_100%] bg-inherit p-0;
-    }
+img {
+  @apply mx-auto border border-border my-6 rounded;
+}
 
-    blockquote {
-      @apply border-s-accent/80 break-words opacity-80;
-    }
+figcaption {
+  @apply opacity-70 italic text-sm my-2;
+}
 
-    details {
-      @apply inline-block cursor-pointer text-foreground select-none [&_p]:hidden [&_ul]:!my-0;
-    }
-
-    summary {
-      @apply focus-visible:no-underline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-accent focus-visible:outline-dashed;
-    }
-
-    pre {
-      @apply focus-visible:border-transparent focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-dashed;
-    }
+/**
+ * Tables: Academic styling for data presentation
+ */
+table {
+  @apply my-6;
+  th,
+  td {
+    @apply border border-border p-3;
   }
 
-  /* ===== Code Blocks & Syntax Highlighting ===== */
-  .astro-code {
-    @apply flex border bg-(--shiki-light-bg) text-(--shiki-light) outline-border [&_span]:text-(--shiki-light);
+  th {
+    @apply py-2 font-semibold bg-muted/30;
   }
 
-  html[data-theme="dark"] .astro-code {
-    @apply bg-(--shiki-dark-bg) text-(--shiki-dark) [&_span]:text-(--shiki-dark);
+  code {
+    @apply break-all sm:break-normal;
   }
+}
 
-  /* Styles for Shiki transformers */
-  /* https://shiki.style/packages/transformers */
-  .astro-code {
-    .line.diff.add {
-      @apply relative inline-block w-full bg-green-400/20 before:absolute before:-left-3 before:text-green-500 before:content-['+'];
-    }
-    .line.diff.remove {
-      @apply relative inline-block w-full bg-red-500/20 before:absolute before:-left-3 before:text-red-500 before:content-['-'];
-    }
-    .line.highlighted {
-      @apply inline-block w-full bg-slate-400/20;
-    }
-    .highlighted-word {
-      @apply rounded-sm border border-border px-0.5 py-px;
-    }
-  }
+/**
+ * Inline Code: Subtle, readable
+ * Uses background for distinction without overwhelming
+ */
+code {
+  @apply rounded bg-muted px-1.5 py-0.5 wrap-break-word text-foreground before:content-none after:content-none;
+  font-size: 0.95em;
+  color: var(--foreground);
+}
+
+.astro-code code {
+  @apply flex-[1_0_100%] bg-inherit p-0 text-inherit;
+}
+
+/**
+ * Blockquotes: Editorial styling for pull quotes
+ */
+blockquote {
+  @apply border-s-4 border-s-accent/40 wrap-break-word opacity-80 ps-4 my-6 italic;
+}
+
+/**
+ * Details/Expandable Sections
+ */
+details {
+  @apply inline-block cursor-pointer text-foreground select-none [&_p]:hidden [&_ul]:my-0! my-4;
+}
+
+summary {
+  @apply focus-visible:no-underline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-accent focus-visible:outline-dashed font-medium cursor-pointer;
+}
+
+pre {
+  @apply focus-visible:border-transparent focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-dashed my-6;
+}
+
+}
+
+/**
+Code Blocks & Syntax Highlighting
+
+Optimized for academic and technical content
+*/
+.astro-code {
+@apply flex border bg-(--shiki-light-bg) text-(--shiki-light) outline-border my-6 rounded overflow-x-auto [&_span]:text-(--shiki-light);
+padding: 1em;
+line-height: 1.6;
+}
+
+html[data-theme="dark"] .astro-code {
+@apply bg-(--shiki-dark-bg) text-(--shiki-dark) [&_span]:text-(--shiki-dark);
+}
+
+/**
+Shiki Transformers
+
+Visual indicators for code changes and highlights
+*/
+.astro-code {
+.line.diff.add {
+@apply relative inline-block w-full bg-green-400/10 before:absolute before:-left-3 before:text-green-600 before:content-['+'];
+}
+.line.diff.remove {
+@apply relative inline-block w-full bg-red-500/10 before:absolute before:-left-3 before:text-red-600 before:content-['-'];
+}
+.line.highlighted {
+@apply inline-block w-full bg-yellow-400/10;
+}
+.highlighted-word {
+@apply rounded-sm border border-border px-0.5 py-px;
+}
+}
+}
+
+/**
+ * Profile Section Styling (arduin.io inspired)
+ * 
+ * Hero section for home pages with:
+ * - Centered profile image
+ * - Main headline
+ * - Bio/description
+ * - Social icons
+ */
+.profile {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  text-align: center;
+  padding: 2rem;
+}
+
+.profile-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  max-width: 720px;
+}
+
+.profile img {
+  border-radius: 50%;
+  display: block;
+  max-width: 160px;
+  width: 160px;
+  height: 160px;
+  object-fit: cover;
+  border: 2px solid var(--border);
+}
+
+.profile h1 {
+  margin: 0;
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--foreground);
+}
+
+.profile-bio {
+  font-size: 1rem;
+  line-height: 1.8;
+  color: var(--text-secondary);
+  max-width: 100%;
+}
+
+/**
+ * Social Icons Styling
+ *
+ * Horizontal layout for social media links
+ */
+.social-icons {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin: 1rem 0;
+}
+
+.social-icons a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+  text-decoration: none;
+  color: var(--foreground);
+  border: 1px solid transparent;
+}
+
+.social-icons a:hover {
+  background-color: var(--muted);
+  border-color: var(--accent);
+  transform: translateY(-2px);
+}
+
+.social-icons svg {
+  width: 24px;
+  height: 24px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/**
+ * Newsbox Component (arduin.io inspired)
+ * 
+ * Custom styled box for news/announcements
+ * with border and background highlight
+ */
+.newsbox {
+  display: inline-block;
+  border: 2px solid #d6694e;
+  padding: 1.25rem;
+  margin: 1.5rem auto;
+  border-radius: 0.625rem;
+  background-color: rgba(214, 105, 78, 0.08);
+  width: 100%;
+  max-width: 600px;
+}
+
+.newsbox-title {
+  font-weight: 700;
+  font-size: 1.25rem;
+  margin-bottom: 0.75rem;
+  color: var(--foreground);
+}
+
+.newsbox-line {
+  margin-bottom: 0.5rem;
+  text-align: left;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--foreground);
+}
+
+.newsbox-line:last-child {
+  margin-bottom: 0;
+}
+
+.newsbox-line-date {
+  font-weight: 600;
+  color: var(--foreground);
+  margin-right: 0.5rem;
+}
+
+.newsbox-line a {
+  text-decoration: underline;
+  text-decoration-style: dashed;
+}
+
+.newsbox-line a:hover {
+  text-decoration-style: solid;
 }

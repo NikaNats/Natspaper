@@ -1,23 +1,57 @@
 @import "tailwindcss";
 @import "./typography.css";
+@import "./components.css";
 
 @custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
 
+/**
+Color System: Scholarly Minimalism (inspired by arduin.io)
+
+Light mode: Black/dark gray text on white background
+
+Dark mode: Light gray text on near-black background
+
+Accent: Used sparingly for links and interactive elements
+
+Minimal decorative colors, content-first approach
+*/
 :root,
 html[data-theme="light"] {
-  --background: #fdfdfd;
-  --foreground: #282728;
-  --accent: #006cac;
-  --muted: #e6e6e6;
-  --border: #ece9e9;
+  --gap: 24px;
+  --content-gap: 20px;
+  --nav-width: 1024px;
+  --main-width: 720px;
+  --header-height: 60px;
+  --footer-height: 100px;
+  --radius: 8px;
+  
+  --background: #ffffff;
+  --foreground: #1e1e1e;
+  --accent: #0066cc;
+  --muted: #f5f5f5;
+  --border: #e8e8e8;
+  --text-secondary: #6c6c6c;
+  --code-block-bg: #1c1d21;
+  --code-bg: #f5f5f5;
 }
 
 html[data-theme="dark"] {
-  --background: #212737;
-  --foreground: #eaedf3;
-  --accent: #ff6b01;
-  --muted: #343f60;
-  --border: #ab4b08;
+  --gap: 24px;
+  --content-gap: 20px;
+  --nav-width: 1024px;
+  --main-width: 720px;
+  --header-height: 60px;
+  --footer-height: 100px;
+  --radius: 8px;
+  
+  --background: #1d1e20;
+  --foreground: #dadadb;
+  --accent: #66b3ff;
+  --muted: #2e2e33;
+  --border: #333333;
+  --text-secondary: #9b9c9d;
+  --code-block-bg: #2e2e33;
+  --code-bg: #373e42;
 }
 
 @theme inline {
@@ -26,28 +60,51 @@ html[data-theme="dark"] {
   --color-accent: var(--accent);
   --color-muted: var(--muted);
   --color-border: var(--border);
+  --color-text-secondary: var(--text-secondary);
 }
 
 @layer base {
+  /**
+  System Font Stack
+
+  Performance-optimized: Uses native fonts for maximum speed
+
+  Familiar and legible across all devices
+  */
+
   * {
     @apply border-border outline-accent/75;
     scrollbar-width: auto;
     scrollbar-color: var(--color-muted) transparent;
   }
+
   html {
     @apply overflow-y-scroll scroll-smooth;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   }
+
   body {
     @apply flex min-h-svh flex-col bg-background font-mono text-foreground selection:bg-accent/75 selection:text-background;
+    line-height: 1.7;
+    letter-spacing: 0.3px;
   }
+
   a,
   button {
     @apply outline-offset-1 outline-accent focus-visible:no-underline focus-visible:outline-2 focus-visible:outline-dashed;
+    transition: color 0.2s ease;
   }
+
   button:not(:disabled),
   [role="button"]:not(:disabled) {
     cursor: pointer;
   }
+
+  /**
+  Main content area: ~720px width is optimal for text readability
+
+  Generous whitespace on either side reduces cognitive load
+  */
   section,
   footer {
     @apply mx-auto max-w-app px-4;
@@ -55,7 +112,7 @@ html[data-theme="dark"] {
 }
 
 @utility max-w-app {
-  @apply max-w-3xl;
+  @apply max-w-2xl;
 }
 
 .active-nav {

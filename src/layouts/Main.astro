@@ -24,21 +24,21 @@ const backUrl = SITE.showBackButton ? Astro.url.pathname : "/";
 <main
   data-backUrl={backUrl}
   id="main-content"
-  class="mx-auto w-full max-w-app px-4 pb-4"
+  class="mx-auto w-full max-w-app px-4 py-6 pb-12"
 >
   {
     "titleTransition" in props ? (
-      <h1 class="text-2xl font-semibold sm:text-3xl">
+      <h1 class="text-3xl font-bold sm:text-4xl mb-6">
         {props.pageTitle[0]}
         <span transition:name={props.titleTransition}>
           {props.pageTitle[1]}
         </span>
       </h1>
     ) : (
-      <h1 class="text-2xl font-semibold sm:text-3xl">{props.pageTitle}</h1>
+      <h1 class="text-3xl font-bold sm:text-4xl mb-6">{props.pageTitle}</h1>
     )
   }
-  <p class="mt-2 mb-6 italic">{props.pageDesc}</p>
+  {props.pageDesc && <p class="text-lg text-text-secondary mb-8 leading-relaxed">{props.pageDesc}</p>}
   <slot />
 </main>
 

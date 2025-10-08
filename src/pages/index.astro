@@ -22,90 +22,58 @@ const recentPosts = sortedPosts.filter(({ data }) => !data.featured);
 
 <Layout>
   <Header />
-  <main id="main-content" data-layout="index">
-    <section id="hero" class="pt-8 pb-6">
-      <h1 class="my-4 inline-block text-4xl font-bold sm:my-8 sm:text-5xl">
-        Mingalaba
-      </h1>
-      <a
-        target="_blank"
-        href="/rss.xml"
-        class="inline-block"
-        aria-label="rss feed"
-        title="RSS Feed"
-      >
-        <IconRss
-          width={20}
-          height={20}
-          class="scale-125 stroke-accent stroke-3 rtl:-rotate-90"
+  <main id="main-content" data-layout="index" class="mx-auto w-full max-w-app px-4 pb-12">
+    <section id="hero" class="py-8">
+      <div class="flex flex-col items-center justify-center gap-4 text-center">
+        <img 
+          draggable="false" 
+          src="https://arduin.io/profile_200x200.jpg" 
+          alt="Profile Picture" 
+          title="Profile Picture" 
+          height={160} 
+          width={160}
+          class="rounded-full"
         />
-        <span class="sr-only">RSS Feed</span>
-      </a>
-
-      <p>
-        AstroPaper is a minimal, responsive, accessible and SEO-friendly Astro
-        blog theme. This theme follows best practices and provides accessibility
-        out of the box. Light and dark mode are supported by default. Moreover,
-        additional color schemes can also be configured.
-      </p>
-      <p class="mt-2">
-        Read the blog posts or check
-        <LinkButton
-          class="underline decoration-dashed underline-offset-4 hover:text-accent"
-          href="https://github.com/satnaing/astro-paper#readme"
-        >
-          README
-        </LinkButton> for more info.
-      </p>
-      {
-        // only display if at least one social link is enabled
-        SOCIALS.length > 0 && (
-          <div class="mt-4 flex flex-col sm:flex-row sm:items-center">
-            <div class="me-2 mb-1 whitespace-nowrap sm:mb-0">Social Links:</div>
-            <Socials />
-          </div>
-        )
-      }
+        <h1 class="mb-4 inline-block text-4xl font-bold sm:mb-8 sm:text-5xl">
+          Mingalaba
+        </h1>
+        <p class="max-w-2xl">
+          Hi there! I am a machine learning (ML) researcher who likes to build software. My research focuses on the evaluation of ML systems: which systems are <em>"better"</em> or <em>"worse"</em>. In particular, for <em>language model</em> and <em>reinforcement learning</em> applications.
+        </p>
+        <p class="mt-2 max-w-2xl">
+          Recent projects include <a href="https://github.com/rdnfn/feedback-forensics" class="underline decoration-dashed underline-offset-4 hover:text-accent">Feedback Forensics</a>, <a href="https://github.com/rdnfn/icai" class="underline decoration-dashed underline-offset-4 hover:text-accent">Inverse Constitutional AI (ICAI)</a> and <a href="https://github.com/rdnfn/beobench" class="underline decoration-dashed underline-offset-4 hover:text-accent">Beobench</a>.
+        </p>
+        <p class="mt-2 max-w-2xl">
+          I am a PhD candidate in the <a href="https://www.cst.cam.ac.uk/" class="underline decoration-dashed underline-offset-4 hover:text-accent">Department of Computer Science</a> at the University of Cambridge and member of the <a href="https://ai4er-cdt.esc.cam.ac.uk/" class="underline decoration-dashed underline-offset-4 hover:text-accent">AI4ER CDT</a>, and was recently ML intern at <a href="https://machinelearning.apple.com/" class="underline decoration-dashed underline-offset-4 hover:text-accent">Apple</a>. Reach out by <a href="mailto:contact@arduin.io" class="underline decoration-dashed underline-offset-4 hover:text-accent">sending an email</a> or <a href="https://cal.com/arduin/meeting-public" class="underline decoration-dashed underline-offset-4 hover:text-accent">scheduling a call</a>.
+        </p>
+        {
+          // only display if at least one social link is enabled
+          SOCIALS.length > 0 && (
+            <div class="mt-4 flex flex-col sm:flex-row sm:items-center justify-center gap-4">
+              <Socials />
+              <a
+                target="_blank"
+                href="/rss.xml"
+                class="inline-block"
+                aria-label="rss feed"
+                title="RSS Feed"
+              >
+                <IconRss
+                  width={20}
+                  height={20}
+                  class="scale-125 stroke-accent stroke-3 rtl:-rotate-90"
+                />
+                <span class="sr-only">RSS Feed</span>
+              </a>
+            </div>
+          )
+        }
+      </div>
     </section>
 
     <Hr />
 
-    {
-      featuredPosts.length > 0 && (
-        <>
-          <section id="featured" class="pt-12 pb-6">
-            <h2 class="text-2xl font-semibold tracking-wide">Featured</h2>
-            <ul>
-              {featuredPosts.map(data => (
-                <Card variant="h3" {...data} />
-              ))}
-            </ul>
-          </section>
-          {recentPosts.length > 0 && <Hr />}
-        </>
-      )
-    }
 
-    {
-      recentPosts.length > 0 && (
-        <section id="recent-posts" class="pt-12 pb-6">
-          <h2 class="text-2xl font-semibold tracking-wide">Recent Posts</h2>
-          <ul>
-            {recentPosts.map(
-              (data, index) =>
-                index < SITE.postPerIndex && <Card variant="h3" {...data} />
-            )}
-          </ul>
-        </section>
-      )
-    }
-
-    <div class="my-8 text-center">
-      <LinkButton href="/posts/">
-        All Posts
-        <IconArrowRight class="inline-block rtl:-rotate-180" />
-      </LinkButton>
-    </div>
   </main>
   <Footer />
 </Layout>
