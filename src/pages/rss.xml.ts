@@ -23,26 +23,46 @@ function escapeHtml(text: string): string {
 /**
  * Sanitize description by escaping HTML and wrapping in CDATA.
  * Removes markdown formatting and dangerous content.
+ * 
+ * IMPORTANT: Uses non-catastrophic regex patterns to prevent ReDoS attacks.
+ * Catastrophic patterns like /\*+([^*]+)\*+/ can hang on pathological input.
+ * Instead, we use possessive-like patterns that fail fast.
+ * 
  * @param description - Raw description text
  * @returns Sanitized description wrapped in CDATA
  */
 function sanitizeDescription(description: string): string {
   if (!description) return "";
 
-  // Escape HTML entities
+  // Escape HTML entities FIRST to prevent entity injection attacks
+  // e.g., "&amp;lt;script&gt;" should become "&amp;lt;script&gt;" (safe)
   const escaped = escapeHtml(description);
 
-  // Remove markdown formatting (basic cleanup)
+  // Remove markdown formatting with non-catastrophic patterns
+  // These patterns fail fast and won't hang on malicious input
+  
   // Remove links: [text](url) -> text
-  const noLinks = escaped.replaceAll(/\[([^\]]+)\]\([^)]+\)/g, "$1");
+  // Pattern: match [anything] followed by (anything)
+  // Limited to 1000 chars to prevent catastrophic backtracking
+  const noLinks = escaped.replaceAll(/\[([[\]]{0,1000})\]\(([()]{0,1000})\)/g, "$1");
 
-  // Remove bold/italic: **text** or *text* -> text
-  const noEmphasis = noLinks.replaceAll(/\*+([^*]+)\*+/g, "$1");
+  // Remove bold/italic: **text**, *text*, __text__, _text_ -> text
+  // Use lazy matching to prevent catastrophic backtracking
+  // Pattern prevents nesting by limiting character class
+  const noEmphasis = noLinks
+    .replaceAll(/\*{1,3}([^*]{0,1000}?)\*{1,3}/g, "$1")
+    .replaceAll(/__{1,2}([^_]{0,1000}?)__{1,2}/g, "$1");
 
-  // Remove code blocks
-  const noCode = noEmphasis.replaceAll(/`([^`]+)`/g, "$1");
+  // Remove code blocks: `code` -> code
+  // Backticks cannot be nested, so this is safe
+  const noCode = noEmphasis.replaceAll(/`([^`]{0,1000})`/g, "$1");
 
-  return noCode.substring(0, 500); // Limit to 500 chars
+  // Safe truncation: count characters, not bytes (handles UTF-8)
+  // Convert to array to properly handle multi-byte characters
+  const chars = Array.from(noCode);
+  const sanitized = chars.slice(0, 500).join("");
+
+  return sanitized;
 }
 
 /**

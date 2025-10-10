@@ -172,7 +172,12 @@ async function fetchFontFileFromCss(
 /**
  * Load a single Google Font with retry logic and timeout protection.
  * Implements exponential backoff for resilience against network failures.
- * Deduplicates concurrent identical requests to prevent wasteful parallel fetches.
+ * Atomically deduplicates concurrent identical requests to prevent wasteful parallel fetches.
+ * 
+ * CRITICAL: This function must be atomic to avoid race conditions in concurrent builds.
+ * The check-then-set pattern is atomic at JavaScript event loop level since both
+ * operations occur synchronously before any await.
+ * 
  * @param font - Font name (URL-encoded)
  * @param text - Text to optimize font subset for
  * @param weight - Font weight (400, 700, etc.)
@@ -186,19 +191,23 @@ async function loadGoogleFont(
   weight: number,
   maxRetries: number = 3
 ): Promise<ArrayBuffer> {
-  // Check cache first to avoid duplicate network requests
   const cacheKey = `${font}-${weight}`;
-  if (fontCache.has(cacheKey)) {
-    return fontCache.get(cacheKey)!;
+  
+  // Check persistent cache first (successfully loaded fonts)
+  const cachedFont = fontCache.get(cacheKey);
+  if (cachedFont) {
+    return cachedFont;
   }
 
-  // Check if this font is already being loaded concurrently
-  // If so, wait for the existing request instead of fetching again
-  if (fontLoadingPromises.has(cacheKey)) {
-    return fontLoadingPromises.get(cacheKey)!;
+  // ATOMIC SECTION: Check and set in-flight promise atomically
+  // Both operations must complete before any await to prevent race condition
+  const existingPromise = fontLoadingPromises.get(cacheKey);
+  if (existingPromise) {
+    // Another request is already loading this font, wait for it
+    return existingPromise;
   }
 
-  // Create the loading promise
+  // Create the loading promise (but don't await yet - this keeps us atomic)
   const loadingPromise = (async () => {
     const timeoutMs = 10000;
     let lastError: Error = new Error("Unknown error");
@@ -207,6 +216,8 @@ async function loadGoogleFont(
       try {
         const css = await fetchGoogleFontCss(font, text, weight, timeoutMs);
         const fontBuffer = await fetchFontFileFromCss(css, timeoutMs);
+        
+        // Add to persistent cache
         fontCache.set(cacheKey, fontBuffer);
         return fontBuffer;
       } catch (error) {
@@ -226,15 +237,16 @@ async function loadGoogleFont(
     );
   })();
 
-  // Track this in-flight request
+  // NOW we set the promise (still synchronous, before any await)
   fontLoadingPromises.set(cacheKey, loadingPromise);
 
   try {
-    // Wait for the result and return
+    // NOW we await the result
     const result = await loadingPromise;
     return result;
   } finally {
     // Always clean up the promise tracking when done
+    // This allows subsequent calls to fetch again if needed (e.g., after timeout)
     fontLoadingPromises.delete(cacheKey);
   }
 }

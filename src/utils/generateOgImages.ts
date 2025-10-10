@@ -6,21 +6,47 @@ import siteOgImage from "./og-templates/site";
 /**
  * Convert SVG buffer to PNG with proper memory cleanup.
  * Resvg is a native C++ binding that requires explicit cleanup to prevent memory leaks.
+ * 
+ * IMPORTANT: Memory management strategy:
+ * 1. Create Resvg from SVG string
+ * 2. Call render() to get PngData
+ * 3. Extract PNG bytes from PngData BEFORE freeing Resvg
+ * 4. Explicitly null references to allow GC before returning
+ * 
  * @param svg - SVG string to convert
  * @returns PNG buffer
+ * @throws Error if Resvg rendering fails
  */
 function svgBufferToPngBuffer(svg: string): Uint8Array {
   let resvg: Resvg | null = null;
+  let pngDataRef: { asPng(): Uint8Array } | null = null;
+  
   try {
-    resvg = new Resvg(svg);
-    const pngData = resvg.render();
-    return pngData.asPng();
+    resvg = new Resvg(svg, { logLevel: "error" });
+    pngDataRef = resvg.render();
+    
+    // Extract PNG bytes while pngDataRef is still valid
+    const buffer = pngDataRef.asPng();
+    
+    return buffer;
   } finally {
     // Explicitly release native C++ memory if available
-    // @ts-expect-error Resvg may have free method depending on version
-    if (resvg?.free && typeof resvg.free === "function") {
+    if (resvg) {
       // @ts-expect-error Resvg may have free method depending on version
-      resvg.free();
+      if (typeof resvg.free === "function") {
+        // @ts-expect-error Resvg.free() is not typed
+        resvg.free();
+      }
+      resvg = null;
+    }
+    
+    // Ensure PngData reference is cleared
+    pngDataRef = null;
+    
+    // Hint to V8 garbage collector if available (useful in long-running builds)
+    // This is safe to call even if globalThis.gc is undefined
+    if (typeof globalThis.gc === "function") {
+      globalThis.gc();
     }
   }
 }
