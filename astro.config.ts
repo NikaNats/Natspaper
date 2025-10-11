@@ -34,6 +34,9 @@ export default defineConfig({
       ],
     },
   },
+  middleware: {
+    dir: new URL("./src/middleware", import.meta.url),
+  },
   vite: {
     // eslint-disable-next-line
     // @ts-ignore

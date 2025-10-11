@@ -4,6 +4,52 @@ import postOgImage from "./og-templates/post";
 import siteOgImage from "./og-templates/site";
 
 /**
+ * Helper: Clean up Resvg native memory
+ */
+function cleanupResvg(resvg: Resvg | null): void {
+  if (!resvg) return;
+  try {
+    // @ts-expect-error Resvg may have free method depending on version
+    if (typeof resvg.free === "function") {
+      try {
+        // @ts-expect-error Resvg.free() is not typed
+        resvg.free();
+      } catch (freeError) {
+        // eslint-disable-next-line no-console
+        console.warn(
+          `[OG Image] Failed to free Resvg: ${
+            freeError instanceof Error
+              ? freeError.message
+              : String(freeError)
+          }`
+        );
+      }
+    }
+  } catch (cleanupError) {
+    // eslint-disable-next-line no-console
+    console.warn(
+      `[OG Image] Unexpected error during Resvg cleanup: ${
+        cleanupError instanceof Error
+          ? cleanupError.message
+          : String(cleanupError)
+      }`
+    );
+  }
+}
+
+/**
+ * Helper: Trigger garbage collection if available
+ */
+function triggerGarbageCollection(): void {
+  if (typeof globalThis.gc !== "function") return;
+  try {
+    globalThis.gc();
+  } catch {
+    // GC failures are non-critical, ignore silently
+  }
+}
+
+/**
  * Convert SVG buffer to PNG with proper memory cleanup.
  * Resvg is a native C++ binding that requires explicit cleanup to prevent memory leaks.
  * 
@@ -12,6 +58,7 @@ import siteOgImage from "./og-templates/site";
  * 2. Call render() to get PngData
  * 3. Extract PNG bytes from PngData BEFORE freeing Resvg
  * 4. Explicitly null references to allow GC before returning
+ * 5. Handle all exceptions to ensure cleanup always runs
  * 
  * @param svg - SVG string to convert
  * @returns PNG buffer
@@ -29,25 +76,21 @@ function svgBufferToPngBuffer(svg: string): Uint8Array {
     const buffer = pngDataRef.asPng();
     
     return buffer;
+  } catch (error) {
+    // Log rendering errors but continue with cleanup
+    // eslint-disable-next-line no-console
+    console.error(
+      `[OG Image] Resvg rendering error: ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
+    throw error;
   } finally {
-    // Explicitly release native C++ memory if available
-    if (resvg) {
-      // @ts-expect-error Resvg may have free method depending on version
-      if (typeof resvg.free === "function") {
-        // @ts-expect-error Resvg.free() is not typed
-        resvg.free();
-      }
-      resvg = null;
-    }
-    
-    // Ensure PngData reference is cleared
+    // CRITICAL: Always clean up native memory, even on exception
+    cleanupResvg(resvg);
+    resvg = null;
     pngDataRef = null;
-    
-    // Hint to V8 garbage collector if available (useful in long-running builds)
-    // This is safe to call even if globalThis.gc is undefined
-    if (typeof globalThis.gc === "function") {
-      globalThis.gc();
-    }
+    triggerGarbageCollection();
   }
 }
 
