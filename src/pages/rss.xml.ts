@@ -3,6 +3,7 @@ import { getCollection } from "astro:content";
 import { getPath } from "@/utils/getPath";
 import getSortedPosts from "@/utils/getSortedPosts";
 import { SITE } from "@/config";
+import { buildLogger } from "@/utils/buildLogger";
 
 /**
  * Escape HTML special characters to prevent XSS attacks and XML parsing errors.
@@ -68,35 +69,79 @@ function sanitizeDescription(description: string): string {
 /**
  * Generate RSS feed with pagination, XSS protection, and proper XML formatting.
  * Limits to 50 most recent posts to maintain reasonable feed size.
+ * 
+ * Includes error handling and graceful degradation:
+ * - Catches errors during post collection and processing
+ * - Continues with available posts if one fails
+ * - Falls back to minimal feed on complete failure
  */
 export async function GET() {
-  const posts = await getCollection("blog");
-  const sortedPosts = getSortedPosts(posts);
+  try {
+    const posts = await getCollection("blog");
+    const sortedPosts = getSortedPosts(posts);
 
-  // Limit to 50 most recent posts for reasonable RSS feed size
-  // RSS readers and crawlers typically expect <= 50 items
-  const recentPosts = sortedPosts.slice(0, 50);
+    // Limit to 50 most recent posts for reasonable RSS feed size
+    // RSS readers and crawlers typically expect <= 50 items
+    const recentPosts = sortedPosts.slice(0, 50);
 
-  return rss({
-    title: SITE.title,
-    description: SITE.desc,
-    site: SITE.website,
-    items: recentPosts.map(({ data, id, filePath }) => {
-      const postUrl = getPath(id, filePath);
-      const guid = `${SITE.website.replace(/\/$/, "")}${postUrl}`;
+    // Process feed items with error handling for individual posts
+    const feedItems: Array<{
+      link: string;
+      title: string;
+      description: string;
+      pubDate: Date;
+      guid: string;
+    }> = [];
 
-      return {
-        link: postUrl,
-        // Escape title to prevent XML injection and XSS
-        title: escapeHtml(data.title),
-        // Wrap description in CDATA to handle special characters safely
-        // CDATA sections preserve content without needing to escape
-        description: `<![CDATA[${sanitizeDescription(data.description)}]]>`,
-        pubDate: new Date(data.modDatetime ?? data.pubDatetime),
-        // Unique identifier for each post (required by RSS spec)
-        // Helps readers detect duplicate/updated posts
-        guid: guid,
-      };
-    }),
-  });
+    for (const { data, id, filePath } of recentPosts) {
+      try {
+        const postUrl = getPath(id, filePath);
+        const guid = `${SITE.website.replace(/\/$/, "")}${postUrl}`;
+
+        feedItems.push({
+          link: postUrl,
+          // Escape title to prevent XML injection and XSS
+          title: escapeHtml(data.title),
+          // Wrap description in CDATA to handle special characters safely
+          // CDATA sections preserve content without needing to escape
+          description: `<![CDATA[${sanitizeDescription(data.description)}]]>`,
+          pubDate: new Date(data.modDatetime ?? data.pubDatetime),
+          // Unique identifier for each post (required by RSS spec)
+          // Helps readers detect duplicate/updated posts
+          guid: guid,
+        });
+      } catch (error) {
+        // Log individual post processing errors but continue with other posts
+        // eslint-disable-next-line no-console
+        console.warn(
+          `⚠️  Failed to process post "${id}" in RSS feed: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
+      }
+    }
+
+    return rss({
+      title: SITE.title,
+      description: SITE.desc,
+      site: SITE.website,
+      items: feedItems,
+    });
+  } catch (error) {
+    // Fallback: Return minimal valid RSS feed if generation fails
+    // eslint-disable-next-line no-console
+    console.error(
+      `❌ Failed to generate RSS feed: ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
+
+    // Return a minimal valid RSS structure so feeds don't break completely
+    return rss({
+      title: SITE.title,
+      description: SITE.desc,
+      site: SITE.website,
+      items: [],
+    });
+  }
 }
