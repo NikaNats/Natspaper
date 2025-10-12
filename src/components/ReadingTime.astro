@@ -1,0 +1,54 @@
+---
+/**
+ * ReadingTime Component
+ * 
+ * Displays estimated reading time for blog posts with optional word count.
+ * Improves UX by helping users understand content commitment.
+ * 
+ * Features:
+ * - Responsive sizing (sm/lg)
+ * - Optional word count display
+ * - Icon integration
+ * - Accessible metadata markup
+ */
+
+import IconSunHigh from "@/assets/icons/IconSunHigh.svg";
+import { getReadingTimeDisplay } from "@/utils/readingTime";
+
+export interface Props {
+  class?: string;
+  size?: "sm" | "lg";
+  content: string;
+  includeWordCount?: boolean;
+}
+
+const {
+  content,
+  size = "sm",
+  class: className = "",
+  includeWordCount = true,
+} = Astro.props;
+
+const readingTimeText = getReadingTimeDisplay(content, includeWordCount);
+---
+
+<div class:list={["reading-time metadata", className]}>
+  <IconSunHigh
+    class:list={[
+      "inline-block size-5 min-w-5",
+      { "scale-90": size === "sm" },
+    ]}
+  />
+  <span class:list={["text-sm", { "sm:text-base": size === "lg" }]}>
+    {readingTimeText}
+  </span>
+</div>
+
+<style>
+  .reading-time {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--color-text-secondary, currentColor);
+  }
+</style>
