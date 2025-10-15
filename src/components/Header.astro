@@ -36,22 +36,19 @@ const isActive = (path: string) => {
   >
     <div
       id="top-nav-wrap"
-      class="relative flex w-full items-center justify-between bg-background px-4 py-5 border-b border-border sm:px-6"
+      class="relative flex w-full items-center justify-between border-b border-border bg-background px-4 py-5 sm:px-6"
     >
       <a
         href="/"
-        class="text-lg font-bold text-foreground hover:text-accent transition-colors no-underline"
+        class="text-lg font-bold text-foreground no-underline transition-colors hover:text-accent"
         title="Home"
       >
         {SITE.title}
       </a>
-      <nav
-        id="nav-menu"
-        class="flex w-auto flex-row items-center gap-6"
-      >
+      <nav id="nav-menu" class="flex w-auto flex-row items-center gap-6">
         <button
           id="menu-btn"
-          class="hidden focus-outline p-2 sm:hidden"
+          class="focus-outline hidden p-2 sm:hidden"
           aria-label="Open Menu"
           aria-expanded="false"
           aria-controls="menu-items"
@@ -61,22 +58,32 @@ const isActive = (path: string) => {
         </button>
         <ul
           id="menu-items"
-          class:list={[
-            "flex flex-row items-center gap-1 sm:gap-3",
-          ]}
+          class:list={["flex flex-row items-center gap-1 sm:gap-3"]}
         >
           <li>
-            <a href="/posts" class:list={{ "active-nav": isActive("/posts") }} class="text-sm font-medium hover:text-accent transition-colors">
+            <a
+              href="/posts"
+              class:list={{ "active-nav": isActive("/posts") }}
+              class="text-sm font-medium transition-colors hover:text-accent"
+            >
               Posts
             </a>
           </li>
           <li>
-            <a href="/tags" class:list={{ "active-nav": isActive("/tags") }} class="text-sm font-medium hover:text-accent transition-colors">
+            <a
+              href="/tags"
+              class:list={{ "active-nav": isActive("/tags") }}
+              class="text-sm font-medium transition-colors hover:text-accent"
+            >
               Tags
             </a>
           </li>
           <li>
-            <a href="/about" class:list={{ "active-nav": isActive("/about") }} class="text-sm font-medium hover:text-accent transition-colors">
+            <a
+              href="/about"
+              class:list={{ "active-nav": isActive("/about") }}
+              class="text-sm font-medium transition-colors hover:text-accent"
+            >
               About
             </a>
           </li>
@@ -124,8 +131,8 @@ const isActive = (path: string) => {
                   aria-label="auto"
                   aria-live="polite"
                 >
-                  <IconMoon class="absolute top-[50%] left-[50%] -translate-[50%] scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90 size-5" />
-                  <IconSunHigh class="absolute top-[50%] left-[50%] -translate-[50%] scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0 size-5" />
+                  <IconMoon class="absolute top-[50%] left-[50%] size-5 -translate-[50%] scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90" />
+                  <IconSunHigh class="absolute top-[50%] left-[50%] size-5 -translate-[50%] scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0" />
                 </button>
               </li>
             )

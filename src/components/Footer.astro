@@ -1,6 +1,4 @@
 ---
-import Socials from "./Socials.astro";
-
 const currentYear = new Date().getFullYear();
 
 export interface Props {
@@ -11,7 +9,7 @@ const { noMarginTop = false } = Astro.props;
 ---
 
 <footer class:list={["w-full", { "mt-auto": !noMarginTop }]}>
-    <div class="flex flex-col items-center gap-1 text-sm text-text-secondary">
-      <p>Copyright &#169; {currentYear} • All rights reserved.</p>
-    </div>
+  <div class="flex flex-col items-center gap-1 text-sm text-text-secondary">
+    <p>Copyright &#169; {currentYear} • All rights reserved.</p>
+  </div>
 </footer>

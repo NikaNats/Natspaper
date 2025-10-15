@@ -20,12 +20,8 @@ export default async function generateSiteOgImage() {
         <div
           style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 90%; max-height: 90%; overflow: hidden; text-align: center;"
         >
-          <p style="font-size: 72px; font-weight: bold;">
-            ${SITE.title}
-          </p>
-          <p style="font-size: 28px;">
-            ${SITE.desc}
-          </p>
+          <p style="font-size: 72px; font-weight: bold;">${SITE.title}</p>
+          <p style="font-size: 28px;">${SITE.desc}</p>
         </div>
         <div
           style="display: flex; justify-content: flex-end; width: 100%; margin-bottom: 8px; font-size: 28px;"
@@ -44,4 +40,4 @@ export default async function generateSiteOgImage() {
     embedFont: true,
     fonts: await loadGoogleFonts(SITE.title + SITE.desc + SITE.website),
   });
-};
+}

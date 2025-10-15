@@ -9,7 +9,13 @@ export interface Props {
 const { centered = false } = Astro.props;
 ---
 
-<div class:list={["flex flex-wrap justify-center gap-2", { "items-center": centered }, { "flex-row": centered }]}>
+<div
+  class:list={[
+    "flex flex-wrap justify-center gap-2",
+    { "items-center": centered },
+    { "flex-row": centered },
+  ]}
+>
   {
     SOCIALS.map(social => (
       <LinkButton

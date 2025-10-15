@@ -1,7 +1,7 @@
 @plugin '@tailwindcss/typography';
 
 @layer base {
-/**
+  /**
 Typography System: Content-Focused Hierarchy with Minimalist Aesthetics
 
 Emphasis on readability and clean design inspired by arduin.io:
@@ -12,179 +12,178 @@ Emphasis on readability and clean design inspired by arduin.io:
 - Profile section for hero/home pages
 */
 
-/* Import system font stack for better performance */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
+  /* Import system font stack for better performance */
+  @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap");
 
-.app-prose {
-@apply prose;
-color: var(--foreground);
-line-height: 1.8;
+  .app-prose {
+    @apply prose;
+    color: var(--foreground);
+    line-height: 1.8;
 
-h1,
-h2,
-h3,
-h4,
-h5,
-h6,
-th {
-  @apply mb-4 text-foreground;
-  line-height: 1.4;
-  letter-spacing: 0.2px;
-  font-weight: 600;
-}
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    th {
+      @apply mb-4 text-foreground;
+      line-height: 1.4;
+      letter-spacing: 0.2px;
+      font-weight: 600;
+    }
 
-h1 {
-  @apply text-3xl mb-6;
-  letter-spacing: -0.5px;
-  font-weight: 700;
-}
+    h1 {
+      @apply mb-6 text-3xl;
+      letter-spacing: -0.5px;
+      font-weight: 700;
+    }
 
-h2 {
-  @apply text-2xl mb-5 mt-8;
-  font-weight: 700;
-}
+    h2 {
+      @apply mt-8 mb-5 text-2xl;
+      font-weight: 700;
+    }
 
-h3 {
-  @apply text-xl mb-4 mt-6;
-  font-weight: 700;
-}
+    h3 {
+      @apply mt-6 mb-4 text-xl;
+      font-weight: 700;
+    }
 
-h4 {
-  @apply text-lg mb-3 mt-5;
-  font-weight: 700;
-}
+    h4 {
+      @apply mt-5 mb-3 text-lg;
+      font-weight: 700;
+    }
 
-p,
-strong,
-ol,
-ul,
-figcaption,
-table,
-code {
-  @apply text-foreground;
-}
+    p,
+    strong,
+    ol,
+    ul,
+    figcaption,
+    table,
+    code {
+      @apply text-foreground;
+    }
 
-/**
+    /**
  * Links: Minimal but clear
  * Using dashed underline for semantic clarity
  */
-a {
-  @apply wrap-break-word text-accent decoration-dashed underline-offset-4 hover:text-accent/80 focus-visible:no-underline transition-colors;
-}
+    a {
+      @apply wrap-break-word text-accent decoration-dashed underline-offset-4 transition-colors hover:text-accent/80 focus-visible:no-underline;
+    }
 
-ul,
-ol {
-  @apply overflow-x-clip my-4;
-}
+    ul,
+    ol {
+      @apply my-4 overflow-x-clip;
+    }
 
-li {
-  @apply marker:text-accent my-2;
-  margin-left: 1.5em;
-}
+    li {
+      @apply my-2 marker:text-accent;
+      margin-left: 1.5em;
+    }
 
-hr {
-  @apply border-border my-8;
-}
+    hr {
+      @apply my-8 border-border;
+    }
 
-img {
-  @apply mx-auto border border-border my-6 rounded;
-}
+    img {
+      @apply mx-auto my-6 rounded border border-border;
+    }
 
-figcaption {
-  @apply opacity-70 italic text-sm my-2;
-}
+    figcaption {
+      @apply my-2 text-sm italic opacity-70;
+    }
 
-/**
+    /**
  * Tables: Academic styling for data presentation
  */
-table {
-  @apply my-6;
-  th,
-  td {
-    @apply border border-border p-3;
-  }
+    table {
+      @apply my-6;
+      th,
+      td {
+        @apply border border-border p-3;
+      }
 
-  th {
-    @apply py-2 font-semibold bg-muted/30;
-  }
+      th {
+        @apply bg-muted/30 py-2 font-semibold;
+      }
 
-  code {
-    @apply break-all sm:break-normal;
-  }
-}
+      code {
+        @apply break-all sm:break-normal;
+      }
+    }
 
-/**
+    /**
  * Inline Code: Subtle, readable
  * Uses background for distinction without overwhelming
  */
-code {
-  @apply rounded bg-muted px-1.5 py-0.5 wrap-break-word text-foreground before:content-none after:content-none;
-  font-size: 0.95em;
-  color: var(--foreground);
-}
+    code {
+      @apply rounded bg-muted px-1.5 py-0.5 wrap-break-word text-foreground before:content-none after:content-none;
+      font-size: 0.95em;
+      color: var(--foreground);
+    }
 
-.astro-code code {
-  @apply flex-[1_0_100%] bg-inherit p-0 text-inherit;
-}
+    .astro-code code {
+      @apply flex-[1_0_100%] bg-inherit p-0 text-inherit;
+    }
 
-/**
+    /**
  * Blockquotes: Editorial styling for pull quotes
  */
-blockquote {
-  @apply border-s-4 border-s-accent/40 wrap-break-word opacity-80 ps-4 my-6 italic;
-}
+    blockquote {
+      @apply my-6 border-s-4 border-s-accent/40 ps-4 wrap-break-word italic opacity-80;
+    }
 
-/**
+    /**
  * Details/Expandable Sections
  */
-details {
-  @apply inline-block cursor-pointer text-foreground select-none [&_p]:hidden [&_ul]:my-0! my-4;
-}
+    details {
+      @apply my-4 inline-block cursor-pointer text-foreground select-none [&_p]:hidden [&_ul]:my-0!;
+    }
 
-summary {
-  @apply focus-visible:no-underline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-accent focus-visible:outline-dashed font-medium cursor-pointer;
-}
+    summary {
+      @apply cursor-pointer font-medium focus-visible:no-underline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-accent focus-visible:outline-dashed;
+    }
 
-pre {
-  @apply focus-visible:border-transparent focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-dashed my-6;
-}
+    pre {
+      @apply my-6 focus-visible:border-transparent focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-dashed;
+    }
+  }
 
-}
-
-/**
+  /**
 Code Blocks & Syntax Highlighting
 
 Optimized for academic and technical content
 */
-.astro-code {
-@apply flex border bg-(--shiki-light-bg) text-(--shiki-light) outline-border my-6 rounded overflow-x-auto [&_span]:text-(--shiki-light);
-padding: 1em;
-line-height: 1.6;
-}
+  .astro-code {
+    @apply my-6 flex overflow-x-auto rounded border bg-(--shiki-light-bg) text-(--shiki-light) outline-border [&_span]:text-(--shiki-light);
+    padding: 1em;
+    line-height: 1.6;
+  }
 
-html[data-theme="dark"] .astro-code {
-@apply bg-(--shiki-dark-bg) text-(--shiki-dark) [&_span]:text-(--shiki-dark);
-}
+  html[data-theme="dark"] .astro-code {
+    @apply bg-(--shiki-dark-bg) text-(--shiki-dark) [&_span]:text-(--shiki-dark);
+  }
 
-/**
+  /**
 Shiki Transformers
 
 Visual indicators for code changes and highlights
 */
-.astro-code {
-.line.diff.add {
-@apply relative inline-block w-full bg-green-400/10 before:absolute before:-left-3 before:text-green-600 before:content-['+'];
-}
-.line.diff.remove {
-@apply relative inline-block w-full bg-red-500/10 before:absolute before:-left-3 before:text-red-600 before:content-['-'];
-}
-.line.highlighted {
-@apply inline-block w-full bg-yellow-400/10;
-}
-.highlighted-word {
-@apply rounded-sm border border-border px-0.5 py-px;
-}
-}
+  .astro-code {
+    .line.diff.add {
+      @apply relative inline-block w-full bg-green-400/10 before:absolute before:-left-3 before:text-green-600 before:content-['+'];
+    }
+    .line.diff.remove {
+      @apply relative inline-block w-full bg-red-500/10 before:absolute before:-left-3 before:text-red-600 before:content-['-'];
+    }
+    .line.highlighted {
+      @apply inline-block w-full bg-yellow-400/10;
+    }
+    .highlighted-word {
+      @apply rounded-sm border border-border px-0.5 py-px;
+    }
+  }
 }
 
 /**
@@ -257,7 +256,9 @@ Visual indicators for code changes and highlights
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  transition: background-color 0.2s ease, transform 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease;
   text-decoration: none;
   color: var(--foreground);
   border: 1px solid transparent;

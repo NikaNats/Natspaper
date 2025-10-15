@@ -41,7 +41,7 @@ function isValidDate(dateString: unknown): dateString is string {
  * Sanitize string to prevent XSS
  */
 function sanitizeString(str: string): string {
-  const sanitized = str.replaceAll(/[<>"]/g, (char) => {
+  const sanitized = str.replaceAll(/[<>"]/g, char => {
     const escapeMap: Record<string, string> = {
       "<": "&lt;",
       ">": "&gt;",
@@ -225,10 +225,7 @@ export function validateFrontmatter(
   );
   if (modDatetime) validatedData.modDatetime = modDatetime;
 
-  const description = validateDescriptionField(
-    frontmatter.description,
-    errors
-  );
+  const description = validateDescriptionField(frontmatter.description, errors);
   if (description) validatedData.description = description;
 
   const tags = validateTagsField(frontmatter.tags, errors);
@@ -253,7 +250,9 @@ export function validateFrontmatter(
 
   if (errors.length > 0) {
     // eslint-disable-next-line no-console
-    console.warn(`⚠️  [FRONTMATTER WARNING] Invalid frontmatter in ${filePath}:`);
+    console.warn(
+      `⚠️  [FRONTMATTER WARNING] Invalid frontmatter in ${filePath}:`
+    );
     for (const error of errors) {
       // eslint-disable-next-line no-console
       console.warn(`  - ${error}`);
@@ -262,7 +261,8 @@ export function validateFrontmatter(
 
   return {
     isValid: errors.length === 0,
-    data: errors.length === 0 ? (validatedData as ValidatedFrontmatter) : undefined,
+    data:
+      errors.length === 0 ? (validatedData as ValidatedFrontmatter) : undefined,
     errors,
   };
 }
@@ -272,7 +272,10 @@ export function validateFrontmatter(
  */
 export function validateMultipleFrontmatter(
   items: Array<{ frontmatter: Record<string, unknown>; filePath: string }>
-): { valid: ValidatedFrontmatter[]; invalid: Array<{ filePath: string; errors: string[] }> } {
+): {
+  valid: ValidatedFrontmatter[];
+  invalid: Array<{ filePath: string; errors: string[] }>;
+} {
   const valid: ValidatedFrontmatter[] = [];
   const invalid: Array<{ filePath: string; errors: string[] }> = [];
 

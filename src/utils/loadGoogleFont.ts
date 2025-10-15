@@ -1,7 +1,7 @@
 /**
  * LRU (Least Recently Used) Font Cache to prevent unbounded memory growth.
  * Limits to 20 font entries (~2MB max) across multiple font families and weights.
- * 
+ *
  * Why LRU?
  * - Simple Map cache grows unbounded (5-10MB after 100 builds in dev)
  * - Serverless functions accumulate fonts across invocations
@@ -77,7 +77,7 @@ const fontLoadingPromises = new Map<string, Promise<ArrayBuffer>>();
  * @param ms - Milliseconds to delay
  */
 function delay(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 /**
@@ -145,8 +145,7 @@ async function fetchFontFileFromCss(
   css: string,
   timeoutMs: number
 ): Promise<ArrayBuffer> {
-  const fontUrlPattern =
-    /src: url\((.+?)\) format\('(opentype|truetype)'\)/;
+  const fontUrlPattern = /src: url\((.+?)\) format\('(opentype|truetype)'\)/;
   const match = fontUrlPattern.exec(css);
 
   if (!match?.[1]) {
@@ -173,11 +172,11 @@ async function fetchFontFileFromCss(
  * Load a single Google Font with retry logic and timeout protection.
  * Implements exponential backoff for resilience against network failures.
  * Atomically deduplicates concurrent identical requests to prevent wasteful parallel fetches.
- * 
+ *
  * CRITICAL: This function must be atomic to avoid race conditions in concurrent builds.
  * The check-then-set pattern is atomic at JavaScript event loop level since both
  * operations occur synchronously before any await.
- * 
+ *
  * @param font - Font name (URL-encoded)
  * @param text - Text to optimize font subset for
  * @param weight - Font weight (400, 700, etc.)
@@ -192,7 +191,7 @@ async function loadGoogleFont(
   maxRetries: number = 3
 ): Promise<ArrayBuffer> {
   const cacheKey = `${font}-${weight}`;
-  
+
   // Check persistent cache first (successfully loaded fonts)
   const cachedFont = fontCache.get(cacheKey);
   if (cachedFont) {
@@ -216,7 +215,7 @@ async function loadGoogleFont(
       try {
         const css = await fetchGoogleFontCss(font, text, weight, timeoutMs);
         const fontBuffer = await fetchFontFileFromCss(css, timeoutMs);
-        
+
         // Add to persistent cache
         fontCache.set(cacheKey, fontBuffer);
         return fontBuffer;

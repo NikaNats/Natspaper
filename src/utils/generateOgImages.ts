@@ -18,9 +18,7 @@ function cleanupResvg(resvg: Resvg | null): void {
         // eslint-disable-next-line no-console
         console.warn(
           `[OG Image] Failed to free Resvg: ${
-            freeError instanceof Error
-              ? freeError.message
-              : String(freeError)
+            freeError instanceof Error ? freeError.message : String(freeError)
           }`
         );
       }
@@ -52,14 +50,14 @@ function triggerGarbageCollection(): void {
 /**
  * Convert SVG buffer to PNG with proper memory cleanup.
  * Resvg is a native C++ binding that requires explicit cleanup to prevent memory leaks.
- * 
+ *
  * IMPORTANT: Memory management strategy:
  * 1. Create Resvg from SVG string
  * 2. Call render() to get PngData
  * 3. Extract PNG bytes from PngData BEFORE freeing Resvg
  * 4. Explicitly null references to allow GC before returning
  * 5. Handle all exceptions to ensure cleanup always runs
- * 
+ *
  * @param svg - SVG string to convert
  * @returns PNG buffer
  * @throws Error if Resvg rendering fails
@@ -67,14 +65,14 @@ function triggerGarbageCollection(): void {
 function svgBufferToPngBuffer(svg: string): Uint8Array {
   let resvg: Resvg | null = null;
   let pngDataRef: { asPng(): Uint8Array } | null = null;
-  
+
   try {
     resvg = new Resvg(svg, { logLevel: "error" });
     pngDataRef = resvg.render();
-    
+
     // Extract PNG bytes while pngDataRef is still valid
     const buffer = pngDataRef.asPng();
-    
+
     return buffer;
   } catch (error) {
     // Log rendering errors but continue with cleanup

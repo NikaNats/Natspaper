@@ -28,10 +28,14 @@ export default async function generatePostOgImage(post) {
           <span>
             by
             <span style="color: transparent;">"</span>
-            <span style="overflow: hidden; font-weight: bold;">${post.data.author}</span>
+            <span style="overflow: hidden; font-weight: bold;"
+              >${post.data.author}</span
+            >
           </span>
 
-          <span style="overflow: hidden; font-weight: bold;">${SITE.title}</span>
+          <span style="overflow: hidden; font-weight: bold;"
+            >${SITE.title}</span
+          >
         </div>
       </div>
     </div>
@@ -45,4 +49,4 @@ export default async function generatePostOgImage(post) {
       post.data.title + post.data.author + SITE.title + "by"
     ),
   });
-};
+}

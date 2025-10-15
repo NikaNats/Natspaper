@@ -4,33 +4,34 @@ import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
 import Footer from "@/components/Footer.astro";
 import Socials from "@/components/Socials.astro";
-import LinkButton from "@/components/LinkButton.astro";
-import Card from "@/components/Card.astro";
 import Hr from "@/components/Hr.astro";
+import PostCard from "@/components/PostCard.astro";
 import getSortedPosts from "@/utils/getSortedPosts";
 import IconRss from "@/assets/icons/IconRss.svg";
-import IconArrowRight from "@/assets/icons/IconArrowRight.svg";
-import { SITE } from "@/config";
 import { SOCIALS } from "@/constants";
 
 const posts = await getCollection("blog");
 
 const sortedPosts = getSortedPosts(posts);
 const featuredPosts = sortedPosts.filter(({ data }) => data.featured);
-const recentPosts = sortedPosts.filter(({ data }) => !data.featured);
+const recentPosts = sortedPosts.slice(0, 4);
 ---
 
 <Layout>
   <Header />
-  <main id="main-content" data-layout="index" class="mx-auto w-full max-w-app px-4 pb-12">
+  <main
+    id="main-content"
+    data-layout="index"
+    class="mx-auto w-full max-w-app px-4 pb-12"
+  >
     <section id="hero" class="py-8">
       <div class="flex flex-col items-center justify-center gap-4 text-center">
-        <img 
-          draggable="false" 
-          src="https://arduin.io/profile_200x200.jpg" 
-          alt="Profile Picture" 
-          title="Profile Picture" 
-          height={160} 
+        <img
+          draggable="false"
+          src="https://arduin.io/profile_200x200.jpg"
+          alt="Profile Picture"
+          title="Profile Picture"
+          height={160}
           width={160}
           class="rounded-full"
         />
@@ -38,18 +39,54 @@ const recentPosts = sortedPosts.filter(({ data }) => !data.featured);
           Mingalaba
         </h1>
         <p class="max-w-2xl">
-          Hi there! I am a machine learning (ML) researcher who likes to build software. My research focuses on the evaluation of ML systems: which systems are <em>"better"</em> or <em>"worse"</em>. In particular, for <em>language model</em> and <em>reinforcement learning</em> applications.
+          Hi there! I am a machine learning (ML) researcher who likes to build
+          software. My research focuses on the evaluation of ML systems: which
+          systems are <em>"better"</em> or <em>"worse"</em>. In particular, for <em
+            >language model</em
+          > and <em>reinforcement learning</em> applications.
         </p>
         <p class="mt-2 max-w-2xl">
-          Recent projects include <a href="https://github.com/rdnfn/feedback-forensics" class="underline decoration-dashed underline-offset-4 hover:text-accent">Feedback Forensics</a>, <a href="https://github.com/rdnfn/icai" class="underline decoration-dashed underline-offset-4 hover:text-accent">Inverse Constitutional AI (ICAI)</a> and <a href="https://github.com/rdnfn/beobench" class="underline decoration-dashed underline-offset-4 hover:text-accent">Beobench</a>.
+          Recent projects include <a
+            href="https://github.com/rdnfn/feedback-forensics"
+            class="underline decoration-dashed underline-offset-4 hover:text-accent"
+            >Feedback Forensics</a
+          >, <a
+            href="https://github.com/rdnfn/icai"
+            class="underline decoration-dashed underline-offset-4 hover:text-accent"
+            >Inverse Constitutional AI (ICAI)</a
+          > and <a
+            href="https://github.com/rdnfn/beobench"
+            class="underline decoration-dashed underline-offset-4 hover:text-accent"
+            >Beobench</a
+          >.
         </p>
         <p class="mt-2 max-w-2xl">
-          I am a PhD candidate in the <a href="https://www.cst.cam.ac.uk/" class="underline decoration-dashed underline-offset-4 hover:text-accent">Department of Computer Science</a> at the University of Cambridge and member of the <a href="https://ai4er-cdt.esc.cam.ac.uk/" class="underline decoration-dashed underline-offset-4 hover:text-accent">AI4ER CDT</a>, and was recently ML intern at <a href="https://machinelearning.apple.com/" class="underline decoration-dashed underline-offset-4 hover:text-accent">Apple</a>. Reach out by <a href="mailto:contact@arduin.io" class="underline decoration-dashed underline-offset-4 hover:text-accent">sending an email</a> or <a href="https://cal.com/arduin/meeting-public" class="underline decoration-dashed underline-offset-4 hover:text-accent">scheduling a call</a>.
+          I am a PhD candidate in the <a
+            href="https://www.cst.cam.ac.uk/"
+            class="underline decoration-dashed underline-offset-4 hover:text-accent"
+            >Department of Computer Science</a
+          > at the University of Cambridge and member of the <a
+            href="https://ai4er-cdt.esc.cam.ac.uk/"
+            class="underline decoration-dashed underline-offset-4 hover:text-accent"
+            >AI4ER CDT</a
+          >, and was recently ML intern at <a
+            href="https://machinelearning.apple.com/"
+            class="underline decoration-dashed underline-offset-4 hover:text-accent"
+            >Apple</a
+          >. Reach out by <a
+            href="mailto:contact@arduin.io"
+            class="underline decoration-dashed underline-offset-4 hover:text-accent"
+            >sending an email</a
+          > or <a
+            href="https://cal.com/arduin/meeting-public"
+            class="underline decoration-dashed underline-offset-4 hover:text-accent"
+            >scheduling a call</a
+          >.
         </p>
         {
           // only display if at least one social link is enabled
           SOCIALS.length > 0 && (
-            <div class="mt-4 flex flex-col sm:flex-row sm:items-center justify-center gap-4">
+            <div class="mt-4 flex flex-col justify-center gap-4 sm:flex-row sm:items-center">
               <Socials />
               <a
                 target="_blank"
@@ -73,7 +110,34 @@ const recentPosts = sortedPosts.filter(({ data }) => !data.featured);
 
     <Hr />
 
+    {
+      recentPosts.length > 0 && (
+        <section id="recent-posts" class="py-8">
+          <h2 class="mb-6 text-2xl font-bold">Recent Posts</h2>
+          <ul class="grid gap-4 sm:grid-cols-2">
+            {recentPosts.map(({ data, id }) => (
+              <PostCard href={`/posts/${id}`} frontmatter={data} />
+            ))}
+          </ul>
+        </section>
+      )
+    }
 
+    {
+      featuredPosts.length > 0 && (
+        <>
+          <Hr />
+          <section id="featured-posts" class="py-8">
+            <h2 class="mb-6 text-2xl font-bold">Featured Posts</h2>
+            <ul class="grid gap-4 sm:grid-cols-2">
+              {featuredPosts.map(({ data, id }) => (
+                <PostCard href={`/posts/${id}`} frontmatter={data} />
+              ))}
+            </ul>
+          </section>
+        </>
+      )
+    }
   </main>
   <Footer />
 </Layout>

@@ -1,7 +1,7 @@
 /**
  * Markdown URL Sanitization Utility
  * Sanitizes URLs in markdown content to prevent XSS attacks
- * 
+ *
  * Protects against:
  * - javascript: protocol execution
  * - data: protocol attacks
@@ -70,7 +70,7 @@ export function sanitizeMarkdownUrls(markdown: string): string {
   // Match markdown links: [text](url)
   const linkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
 
-  return markdown.replaceAll(linkRegex, (match, text, url) => {
+  return markdown.replaceAll(linkRegex, (_match, text, url) => {
     const safeUrl = sanitizeUrl(url);
     return `[${text}](${safeUrl})`;
   });
@@ -85,7 +85,7 @@ export function sanitizeHtmlAttributeUrls(html: string): string {
   const attributeRegex =
     /(href|src|srcset|data|action|poster)=["']([^"']+)["']/g;
 
-  return html.replaceAll(attributeRegex, (match, attr, url) => {
+  return html.replaceAll(attributeRegex, (_match, attr, url) => {
     const safeUrl = sanitizeUrl(url);
     return `${attr}="${safeUrl}"`;
   });

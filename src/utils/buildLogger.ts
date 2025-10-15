@@ -1,7 +1,7 @@
 /**
  * Centralized Error Logging & Handler System
  * Provides consistent error handling, logging, and reporting across the build process.
- * 
+ *
  * Features:
  * - Centralized error collection
  * - Build warnings and errors tracking

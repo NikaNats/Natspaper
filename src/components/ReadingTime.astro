@@ -1,10 +1,10 @@
 ---
 /**
  * ReadingTime Component
- * 
+ *
  * Displays estimated reading time for blog posts with optional word count.
  * Improves UX by helping users understand content commitment.
- * 
+ *
  * Features:
  * - Responsive sizing (sm/lg)
  * - Optional word count display
@@ -34,10 +34,7 @@ const readingTimeText = getReadingTimeDisplay(content, includeWordCount);
 
 <div class:list={["reading-time metadata", className]}>
   <IconSunHigh
-    class:list={[
-      "inline-block size-5 min-w-5",
-      { "scale-90": size === "sm" },
-    ]}
+    class:list={["inline-block size-5 min-w-5", { "scale-90": size === "sm" }]}
   />
   <span class:list={["text-sm", { "sm:text-base": size === "lg" }]}>
     {readingTimeText}

@@ -1,13 +1,13 @@
 /**
  * Security Headers Middleware
  * Applies Content Security Policy and other security headers to all responses.
- * 
+ *
  * This middleware runs on every request and adds:
  * - Content-Security-Policy (prevents XSS)
  * - X-Frame-Options (prevents clickjacking)
  * - X-Content-Type-Options (prevents MIME sniffing)
  * - And other security headers
- * 
+ *
  * Environment-aware:
  * - Development: Allows unsafe-inline for debugging
  * - Production: Strict policy with no unsafe-inline

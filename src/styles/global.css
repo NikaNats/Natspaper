@@ -24,7 +24,7 @@ html[data-theme="light"] {
   --header-height: 60px;
   --footer-height: 100px;
   --radius: 8px;
-  
+
   --background: #ffffff;
   --foreground: #1e1e1e;
   --accent: #0066cc;
@@ -43,7 +43,7 @@ html[data-theme="dark"] {
   --header-height: 60px;
   --footer-height: 100px;
   --radius: 8px;
-  
+
   --background: #1d1e20;
   --foreground: #dadadb;
   --accent: #66b3ff;
@@ -80,7 +80,9 @@ html[data-theme="dark"] {
 
   html {
     @apply overflow-y-scroll scroll-smooth;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-family:
+      -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
+      Arial, sans-serif;
   }
 
   body {

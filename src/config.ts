@@ -2,7 +2,7 @@
  * Validate that the timezone is a valid IANA timezone identifier.
  * Prevents silent failures where typos like "Asia/Bangkk" go unnoticed.
  * This validation runs at config load time (build-time) so errors are caught immediately.
- * 
+ *
  * @param timezone - Timezone string to validate (IANA format)
  * @throws Error if timezone is invalid
  * @example

@@ -29,8 +29,7 @@ function getUtcTimestampForTimezone(
         : String(dateString);
 
     // Parse ISO format: YYYY-MM-DDTHH:mm:ss
-    const dateRegex =
-      /(\d{4})-(\d{2})-(\d{2})[T\s](\d{2}):(\d{2}):(\d{2})/;
+    const dateRegex = /(\d{4})-(\d{2})-(\d{2})[T\s](\d{2}):(\d{2}):(\d{2})/;
     const match = dateRegex.exec(dateStr);
     if (!match) {
       // Fallback for unparseable dates
@@ -70,27 +69,27 @@ function getUtcTimestampForTimezone(
       const parts = formatter.formatToParts(new Date(ms));
       return {
         year: Number.parseInt(
-          parts.find((p) => p.type === "year")?.value || "0",
+          parts.find(p => p.type === "year")?.value || "0",
           10
         ),
         month: Number.parseInt(
-          parts.find((p) => p.type === "month")?.value || "0",
+          parts.find(p => p.type === "month")?.value || "0",
           10
         ),
         day: Number.parseInt(
-          parts.find((p) => p.type === "day")?.value || "0",
+          parts.find(p => p.type === "day")?.value || "0",
           10
         ),
         hour: Number.parseInt(
-          parts.find((p) => p.type === "hour")?.value || "0",
+          parts.find(p => p.type === "hour")?.value || "0",
           10
         ),
         minute: Number.parseInt(
-          parts.find((p) => p.type === "minute")?.value || "0",
+          parts.find(p => p.type === "minute")?.value || "0",
           10
         ),
         second: Number.parseInt(
-          parts.find((p) => p.type === "second")?.value || "0",
+          parts.find(p => p.type === "second")?.value || "0",
           10
         ),
       };

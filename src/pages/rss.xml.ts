@@ -18,17 +18,17 @@ function escapeHtml(text: string): string {
     '"': "&quot;",
     "'": "&#39;",
   };
-  return text.replaceAll(/[&<>"']/g, (char) => htmlEscapeMap[char] || char);
+  return text.replaceAll(/[&<>"']/g, char => htmlEscapeMap[char] || char);
 }
 
 /**
  * Sanitize description by removing HTML tags, escaping entities, and removing markdown.
  * Defense-in-depth approach to prevent XSS in RSS feeds.
- * 
+ *
  * IMPORTANT: Uses non-catastrophic regex patterns to prevent ReDoS attacks.
  * Catastrophic patterns like /\*+([^*]+)\*+/ can hang on pathological input.
  * Instead, we use possessive-like patterns that fail fast.
- * 
+ *
  * @param description - Raw description text
  * @returns Sanitized description safe for CDATA
  */
@@ -46,11 +46,14 @@ function sanitizeDescription(description: string): string {
 
   // LAYER 3: Remove markdown formatting with non-catastrophic patterns
   // These patterns fail fast and won't hang on malicious input
-  
+
   // Remove links: [text](url) -> text
   // Pattern: match [anything] followed by (anything)
   // Limited to 1000 chars to prevent catastrophic backtracking
-  const noLinks = escaped.replaceAll(/\[([[\]]{0,1000})\]\(([()]{0,1000})\)/g, "$1");
+  const noLinks = escaped.replaceAll(
+    /\[([[\]]{0,1000})\]\(([()]{0,1000})\)/g,
+    "$1"
+  );
 
   // Remove bold/italic: **text**, *text*, __text__, _text_ -> text
   // Use lazy matching to prevent catastrophic backtracking
@@ -74,7 +77,7 @@ function sanitizeDescription(description: string): string {
 /**
  * Generate RSS feed with pagination, XSS protection, and proper XML formatting.
  * Limits to 50 most recent posts to maintain reasonable feed size.
- * 
+ *
  * Includes error handling and graceful degradation:
  * - Catches errors during post collection and processing
  * - Continues with available posts if one fails

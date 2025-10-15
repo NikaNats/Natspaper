@@ -109,7 +109,9 @@ export function getSecurityHeaders(
 /**
  * Format security headers for Astro middleware
  */
-export function formatSecurityHeaders(config: SecurityHeadersConfig): Record<string, string> {
+export function formatSecurityHeaders(
+  config: SecurityHeadersConfig
+): Record<string, string> {
   const headers: Record<string, string> = {};
 
   if (config.contentSecurityPolicy) {
@@ -140,7 +142,7 @@ export function formatSecurityHeaders(config: SecurityHeadersConfig): Record<str
 /**
  * Create middleware for applying security headers
  * Usage in astro.config.ts:
- * 
+ *
  * export default defineConfig({
  *   middleware: async (request, { next }) => {
  *     const response = await next();

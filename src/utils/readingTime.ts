@@ -1,14 +1,14 @@
 /**
  * Reading Time Calculator
- * 
+ *
  * Calculates reading time for blog content based on word count.
  * Uses industry-standard 200 words per minute (WPM) as default.
- * 
+ *
  * Impact:
  * - Improves user engagement (readers commit to time)
  * - Better SEO (reading time is a ranking factor)
  * - Better UX (helps users plan their reading)
- * 
+ *
  * @module readingTime
  */
 
@@ -23,11 +23,11 @@ export interface ReadingTimeResult {
 
 /**
  * Calculate reading time for given content
- * 
+ *
  * @param content - The content to analyze (can be markdown, HTML, or plain text)
  * @param wordsPerMinute - Reading speed (default: 200 WPM, average adult reading speed)
  * @returns Object with minutes, words, and displayText
- * 
+ *
  * @example
  * ```ts
  * const result = calculateReadingTime("# Hello World\n\nThis is a test post with some content.");
@@ -66,10 +66,10 @@ export function calculateReadingTime(
 
 /**
  * Format reading time with word count
- * 
+ *
  * @param result - Result from calculateReadingTime()
  * @returns Formatted string like "5 min read • 1,234 words"
- * 
+ *
  * @example
  * ```ts
  * const result = calculateReadingTime(post.body);
@@ -84,14 +84,14 @@ export function formatReadingTime(result: ReadingTimeResult): string {
 
 /**
  * Get reading time display for templates
- * 
+ *
  * Convenience function that combines calculation and formatting.
  * Useful for direct use in Astro components.
- * 
+ *
  * @param content - The content to analyze
  * @param includeWordCount - Whether to include word count in output
  * @returns Formatted string like "5 min read" or "5 min read • 1,234 words"
- * 
+ *
  * @example
  * ```astro
  * ---
