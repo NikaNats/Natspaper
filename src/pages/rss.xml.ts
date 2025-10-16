@@ -25,9 +25,10 @@ function escapeHtml(text: string): string {
  * Sanitize description by removing HTML tags, escaping entities, and removing markdown.
  * Defense-in-depth approach to prevent XSS in RSS feeds.
  *
- * IMPORTANT: Uses non-catastrophic regex patterns to prevent ReDoS attacks.
- * Catastrophic patterns like /\*+([^*]+)\*+/ can hang on pathological input.
- * Instead, we use possessive-like patterns that fail fast.
+ * Uses simple, safe string operations instead of complex regex to avoid ReDoS:
+ * - String methods like replace() with literal patterns
+ * - Explicit loops for safe transformation
+ * - No nested quantifiers or alternation patterns
  *
  * @param description - Raw description text
  * @returns Sanitized description safe for CDATA
@@ -36,42 +37,71 @@ function sanitizeDescription(description: string): string {
   if (!description) return "";
 
   // LAYER 1: Remove all HTML tags (most important - blocks <img>, <script>, etc.)
-  // Pattern: match < followed by anything until > (including attributes)
-  // This removes all HTML tags including event handlers: <img onerror=...>, etc.
-  const noHtml = description.replaceAll(/<[^>]*>/g, "");
+  // Simple approach: find all <...> patterns and remove them
+  let result = description;
+  
+  // Remove HTML tags by finding < and >
+  // This is safer than complex regex and handles nested/malformed tags
+  let inTag = false;
+  let sanitized = "";
+  
+  for (const char of result) {
+    if (char === "<") {
+      inTag = true;
+    } else if (char === ">") {
+      inTag = false;
+    } else if (!inTag) {
+      sanitized += char;
+    }
+  }
+  
+  result = sanitized;
 
   // LAYER 2: Escape HTML entities to prevent entity injection
-  // e.g., "&amp;lt;script&gt;" should stay as "&amp;lt;script&gt;" (safe)
-  const escaped = escapeHtml(noHtml);
+  const escaped = escapeHtml(result);
 
-  // LAYER 3: Remove markdown formatting with non-catastrophic patterns
-  // These patterns fail fast and won't hang on malicious input
+  // LAYER 3: Remove markdown formatting using simple string replacement
+  // Process links: [text](url) -> text
+  let noLinks = escaped;
+  let linkIndex = 0;
+  while ((linkIndex = noLinks.indexOf("[", linkIndex)) !== -1) {
+    const closeIndex = noLinks.indexOf("]", linkIndex);
+    const parenIndex = noLinks.indexOf("(", closeIndex);
+    const closeParenIndex = noLinks.indexOf(")", parenIndex);
+    
+    if (closeIndex !== -1 && parenIndex === closeIndex + 1 && closeParenIndex !== -1) {
+      const linkText = noLinks.substring(linkIndex + 1, closeIndex);
+      noLinks = noLinks.substring(0, linkIndex) + linkText + noLinks.substring(closeParenIndex + 1);
+      linkIndex += linkText.length;
+    } else {
+      linkIndex++;
+    }
+  }
 
-  // Remove links: [text](url) -> text
-  // Pattern: match [anything] followed by (anything)
-  // Limited to 1000 chars to prevent catastrophic backtracking
-  const noLinks = escaped.replaceAll(
-    /\[([[\]]{0,1000})\]\(([()]{0,1000})\)/g,
-    "$1"
-  );
-
-  // Remove bold/italic: **text**, *text*, __text__, _text_ -> text
-  // Use lazy matching to prevent catastrophic backtracking
-  // Pattern prevents nesting by limiting character class
+  // Process bold/italic: **text**, *text*, __text__, _text_ -> text
+  // Use simple replace for common patterns
   const noEmphasis = noLinks
-    .replaceAll(/\*{1,3}([^*]{0,1000}?)\*{1,3}/g, "$1")
-    .replaceAll(/__{1,2}([^_]{0,1000}?)__{1,2}/g, "$1");
+    .replaceAll("**", "")
+    .replaceAll("__", "")
+    .replaceAll("*", "")
+    .replaceAll("_", "");
 
   // Remove code blocks: `code` -> code
-  // Backticks cannot be nested, so this is safe
-  const noCode = noEmphasis.replaceAll(/`([^`]{0,1000})`/g, "$1");
+  let noCode = "";
+  let inCode = false;
+  for (const char of noEmphasis) {
+    if (char === "`") {
+      inCode = !inCode;
+    } else if (!inCode) {
+      noCode += char;
+    }
+  }
 
   // LAYER 4: Safe truncation: count characters, not bytes (handles UTF-8)
-  // Convert to array to properly handle multi-byte characters
   const chars = Array.from(noCode);
-  const sanitized = chars.slice(0, 500).join("");
+  const truncated = chars.slice(0, 500).join("");
 
-  return sanitized;
+  return truncated.trim();
 }
 
 /**

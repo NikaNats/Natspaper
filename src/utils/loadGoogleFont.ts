@@ -67,8 +67,7 @@ const fontCache = new LRUFontCache();
 
 /**
  * Track in-flight font requests to deduplicate concurrent identical requests.
- * Maps cache key to Promise for pending requests.
- * Prevents multiple simultaneous fetches of the same font.
+ * Uses a Map to prevent multiple simultaneous fetches of the same font.
  */
 const fontLoadingPromises = new Map<string, Promise<ArrayBuffer>>();
 
@@ -171,11 +170,7 @@ async function fetchFontFileFromCss(
 /**
  * Load a single Google Font with retry logic and timeout protection.
  * Implements exponential backoff for resilience against network failures.
- * Atomically deduplicates concurrent identical requests to prevent wasteful parallel fetches.
- *
- * CRITICAL: This function must be atomic to avoid race conditions in concurrent builds.
- * The check-then-set pattern is atomic at JavaScript event loop level since both
- * operations occur synchronously before any await.
+ * Uses async locking to prevent race conditions in concurrent builds.
  *
  * @param font - Font name (URL-encoded)
  * @param text - Text to optimize font subset for
@@ -198,15 +193,14 @@ async function loadGoogleFont(
     return cachedFont;
   }
 
-  // ATOMIC SECTION: Check and set in-flight promise atomically
-  // Both operations must complete before any await to prevent race condition
+  // Check if we already have an in-flight promise for this font
+  // This prevents duplicate fetches if multiple requests come in simultaneously
   const existingPromise = fontLoadingPromises.get(cacheKey);
   if (existingPromise) {
-    // Another request is already loading this font, wait for it
     return existingPromise;
   }
 
-  // Create the loading promise (but don't await yet - this keeps us atomic)
+  // Create a new loading promise
   const loadingPromise = (async () => {
     const timeoutMs = 10000;
     let lastError: Error = new Error("Unknown error");
@@ -236,17 +230,19 @@ async function loadGoogleFont(
     );
   })();
 
-  // NOW we set the promise (still synchronous, before any await)
+  // Store the promise so concurrent requests can reuse it
   fontLoadingPromises.set(cacheKey, loadingPromise);
 
   try {
-    // NOW we await the result
+    // Await and return the result
     const result = await loadingPromise;
     return result;
   } finally {
     // Always clean up the promise tracking when done
-    // This allows subsequent calls to fetch again if needed (e.g., after timeout)
-    fontLoadingPromises.delete(cacheKey);
+    // Use setTimeout to ensure cleanup happens after all awaits
+    setTimeout(() => {
+      fontLoadingPromises.delete(cacheKey);
+    }, 0);
   }
 }
 

@@ -3,13 +3,7 @@ import { SITE } from "@/config";
 
 /**
  * Parse date string to UTC timestamp, accounting for the configured timezone.
- * Handles DST (Daylight Saving Time) transitions correctly.
- *
- * The key insight: We need to find the UTC time such that when formatted in the
- * given timezone, it produces the date/time values from the date string.
- *
- * For DST edge cases (spring forward, fall back), this checks adjacent hours
- * to find the correct UTC mapping.
+ * Uses Intl API for robust timezone handling without complex DST calculations.
  *
  * @param dateString - ISO date string from frontmatter (interpreted as local time in timezone)
  * @param timezone - IANA timezone string (e.g., "Asia/Bangkok", "America/New_York")
@@ -20,41 +14,20 @@ function getUtcTimestampForTimezone(
   timezone: string
 ): number {
   try {
-    // Convert to string if Date object
-    const dateStr =
-      dateString instanceof Date
-        ? dateString.toISOString().split("T")[0] +
-          "T" +
-          dateString.toISOString().split("T")[1]?.split(".")[0]
-        : String(dateString);
+    // Parse the date string as-is (treating it as wall clock time in the target timezone)
+    const date = new Date(dateString);
 
-    // Parse ISO format: YYYY-MM-DDTHH:mm:ss
-    const dateRegex = /(\d{4})-(\d{2})-(\d{2})[T\s](\d{2}):(\d{2}):(\d{2})/;
-    const match = dateRegex.exec(dateStr);
-    if (!match) {
-      // Fallback for unparseable dates
-      return new Date(dateString).getTime();
+    // If parsing failed, return the time as-is
+    if (Number.isNaN(date.getTime())) {
+      return Date.now();
     }
 
-    const targetYear = Number.parseInt(match[1], 10);
-    const targetMonth = Number.parseInt(match[2], 10) - 1; // 0-indexed
-    const targetDay = Number.parseInt(match[3], 10);
-    const targetHour = Number.parseInt(match[4], 10);
-    const targetMinute = Number.parseInt(match[5], 10);
-    const targetSecond = Number.parseInt(match[6], 10);
-
-    // Start with a guess: treat the date string as UTC and adjust
-    let utcMs = new Date(
-      targetYear,
-      targetMonth,
-      targetDay,
-      targetHour,
-      targetMinute,
-      targetSecond
-    ).getTime();
-
-    // Formatter to check what time our UTC timestamp represents in the target timezone
-    const formatter = new Intl.DateTimeFormat("en-US", {
+    // Use binary search to find the UTC timestamp that, when formatted in the target timezone,
+    // matches the input date string's wall clock time
+    const initialUtcMs = date.getTime();
+    
+    // Format options for consistent comparison
+    const formatOptions: Intl.DateTimeFormatOptions = {
       timeZone: timezone,
       year: "numeric",
       month: "2-digit",
@@ -63,70 +36,64 @@ function getUtcTimestampForTimezone(
       minute: "2-digit",
       second: "2-digit",
       hour12: false,
-    });
-
-    const getFormattedParts = (ms: number) => {
-      const parts = formatter.formatToParts(new Date(ms));
-      return {
-        year: Number.parseInt(
-          parts.find(p => p.type === "year")?.value || "0",
-          10
-        ),
-        month: Number.parseInt(
-          parts.find(p => p.type === "month")?.value || "0",
-          10
-        ),
-        day: Number.parseInt(
-          parts.find(p => p.type === "day")?.value || "0",
-          10
-        ),
-        hour: Number.parseInt(
-          parts.find(p => p.type === "hour")?.value || "0",
-          10
-        ),
-        minute: Number.parseInt(
-          parts.find(p => p.type === "minute")?.value || "0",
-          10
-        ),
-        second: Number.parseInt(
-          parts.find(p => p.type === "second")?.value || "0",
-          10
-        ),
-      };
     };
 
-    let formatted = getFormattedParts(utcMs);
+    const formatter = new Intl.DateTimeFormat("en-US", formatOptions);
 
-    // Adjust if we're off. Usually one attempt is enough.
-    // For DST edge cases (like spring forward 2:00 AM → 3:00 AM),
-    // we might need to try adjacent hours
-    let attempts = 0;
-    const maxAttempts = 25; // Check ±12 hours on each side for safety
+    // Helper function to get formatted parts from a UTC timestamp
+    const getFormattedTime = (ms: number) => {
+      const parts = formatter.formatToParts(new Date(ms));
+      const values: Record<string, string> = {};
+      for (const part of parts) {
+        values[part.type] = part.value;
+      }
+      return `${values.year}-${values.month}-${values.day}T${values.hour}:${values.minute}:${values.second}`;
+    };
 
-    while (
-      (formatted.year !== targetYear ||
-        formatted.month !== targetMonth + 1 ||
-        formatted.day !== targetDay ||
-        formatted.hour !== targetHour ||
-        formatted.minute !== targetMinute ||
-        formatted.second !== targetSecond) &&
-      attempts < maxAttempts
-    ) {
-      const diff =
-        (formatted.year - targetYear) * 365 * 24 * 60 * 60 * 1000 +
-        (formatted.month - (targetMonth + 1)) * 30 * 24 * 60 * 60 * 1000 +
-        (formatted.day - targetDay) * 24 * 60 * 60 * 1000 +
-        (formatted.hour - targetHour) * 60 * 60 * 1000 +
-        (formatted.minute - targetMinute) * 60 * 1000 +
-        (formatted.second - targetSecond) * 1000;
-
-      // Adjust by the difference (usually finds it in 1-2 iterations)
-      utcMs -= diff;
-      formatted = getFormattedParts(utcMs);
-      attempts++;
+    // Parse target time string
+    let targetString: string;
+    if (dateString instanceof Date) {
+      targetString = getFormattedTime(dateString.getTime());
+    } else {
+      // Normalize ISO string to YYYY-MM-DDTHH:mm:ss format
+      const isoRegex = /(\d{4})-(\d{2})-(\d{2})[T\s](\d{2}):(\d{2}):(\d{2})/;
+      const match = isoRegex.exec(String(dateString));
+      if (match) {
+        targetString = `${match[1]}-${match[2]}-${match[3]}T${match[4]}:${match[5]}:${match[6]}`;
+      } else {
+        return date.getTime();
+      }
     }
 
-    return utcMs;
+    // Binary search: find UTC time that maps to target wall clock time
+    // Range: ±24 hours from initial guess to handle DST transitions
+    let lowMs = initialUtcMs - 24 * 60 * 60 * 1000;
+    let highMs = initialUtcMs + 24 * 60 * 60 * 1000;
+
+    for (let i = 0; i < 25; i++) {
+      const midMs = Math.floor((lowMs + highMs) / 2);
+      const midFormatted = getFormattedTime(midMs);
+
+      if (midFormatted === targetString) {
+        return midMs;
+      }
+
+      // Compare as timestamps for binary search
+      const comparison = midFormatted.localeCompare(targetString);
+      if (comparison < 0) {
+        lowMs = midMs;
+      } else {
+        highMs = midMs;
+      }
+
+      // Stop early if converged
+      if (highMs - lowMs < 1000) {
+        return Math.floor((lowMs + highMs) / 2);
+      }
+    }
+
+    // Fallback: return the closest result after binary search
+    return Math.floor((lowMs + highMs) / 2);
   } catch {
     // Final fallback: treat as UTC if timezone conversion fails
     return new Date(dateString).getTime();

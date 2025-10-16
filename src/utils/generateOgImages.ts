@@ -113,6 +113,7 @@ function createFallbackPngBuffer(): Uint8Array {
  * Generate OG image for a blog post.
  * Processes sequentially to avoid memory accumulation from concurrent Resvg instances.
  * Returns fallback image if font loading fails to prevent build cascade failure.
+ *
  * @param post - Blog post to generate OG image for
  * @returns PNG buffer (or fallback if generation fails)
  */
@@ -123,10 +124,27 @@ export async function generateOgImageForPost(
     const svg = await postOgImage(post);
     return svgBufferToPngBuffer(svg);
   } catch (error) {
+    // Log the full error for debugging in verbose mode
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    const errorStack = error instanceof Error ? error.stack : "";
+    
     // eslint-disable-next-line no-console
     console.warn(
-      `[OG Image] Failed to generate OG for post "${post.id}", using fallback: ${error instanceof Error ? error.message : String(error)}`
+      `[OG Image] Failed to generate OG for post "${post.id}":`,
+      errorMessage
     );
+    if (errorStack) {
+      // eslint-disable-next-line no-console
+      console.warn(`[OG Image] Stack trace:`, errorStack);
+    }
+    
+    // Log that we're falling back to prevent confusion about missing images
+    // eslint-disable-next-line no-console
+    console.warn(
+      `[OG Image] Using 1x1 fallback image for "${post.id}". ` +
+      `This post will need a custom OG image or proper fonts to render correctly.`
+    );
+    
     // Return fallback instead of throwing - prevents entire build failure
     return createFallbackPngBuffer();
   }

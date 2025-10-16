@@ -11,9 +11,9 @@ dayjs.extend(timezone);
 export interface Props {
   class?: string;
   size?: "sm" | "lg";
-  timezone: string | undefined;
+  timezone?: string;
   pubDatetime: string | Date;
-  modDatetime: string | Date | undefined | null;
+  modDatetime?: string | Date | null;
 }
 
 const {
@@ -25,10 +25,12 @@ const {
 } = Astro.props;
 
 /* ========== Formatted Datetime ========== */
-const isModified = modDatetime && modDatetime > pubDatetime;
+// Safely handle undefined/null timezone with fallback to site default
+const effectiveTimezone = postTimezone ?? SITE.timezone;
+const isModified = modDatetime && new Date(modDatetime) > new Date(pubDatetime);
 
 const datetime = dayjs(isModified ? modDatetime : pubDatetime).tz(
-  postTimezone || SITE.timezone
+  effectiveTimezone
 );
 
 const date = datetime.format("D MMM, YYYY"); // e.g., '22 Mar, 2025'
@@ -37,7 +39,7 @@ const date = datetime.format("D MMM, YYYY"); // e.g., '22 Mar, 2025'
 <div class:list={["metadata", className]}>
   <IconCalendar
     class:list={[
-      "inline-block size-5 min-w-[1.25rem]",
+      "inline-block size-5 min-w-5",
       { "scale-90": size === "sm" },
     ]}
   />
