@@ -91,14 +91,12 @@ const recentPosts = sortedPosts.slice(0, 4);
               <a
                 target="_blank"
                 href="/rss.xml"
-                class="inline-block"
+                class="inline-block transition-transform hover:rotate-6"
                 aria-label="rss feed"
                 title="RSS Feed"
               >
                 <IconRss
-                  width={20}
-                  height={20}
-                  class="scale-125 stroke-accent stroke-3 rtl:-rotate-90"
+                  class="size-6 scale-125 fill-transparent stroke-current stroke-2 opacity-90 transition-colors hover:stroke-blue-500 sm:scale-110"
                 />
                 <span class="sr-only">RSS Feed</span>
               </a>
