@@ -14,6 +14,7 @@ import { SITE } from "./src/config";
 // https://astro.build/config
 export default defineConfig({
   site: SITE.website,
+  output: 'static', // Fully static build - no server-side rendering
   integrations: [
     sitemap({
       filter: page => SITE.showArchives || !page.endsWith("/archives"),
@@ -33,9 +34,6 @@ export default defineConfig({
         transformerNotationDiff({ matchAlgorithm: "v3" }),
       ],
     },
-  },
-  middleware: {
-    dir: new URL("./src/middleware", import.meta.url),
   },
   vite: {
     // @ts-expect-error Vite v4/v5 compatibility - will be resolved in Astro 6
