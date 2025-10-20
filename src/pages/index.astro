@@ -9,6 +9,7 @@ import PostCard from "@/components/PostCard.astro";
 import getSortedPosts from "@/utils/getSortedPosts";
 import IconRss from "@/assets/icons/IconRss.svg";
 import { SOCIALS } from "@/constants";
+import { SITE } from "@/config";
 import profilePic from "@/assets/images/me.jpeg";
 
 const posts = await getCollection("blog");
@@ -37,52 +38,34 @@ const recentPosts = sortedPosts.slice(0, 4);
           class="rounded-full"
         />
         <h1 class="mb-4 inline-block text-4xl font-bold sm:mb-8 sm:text-5xl">
-          Nika Natsvlishvili
+          {SITE.author}
         </h1>
+        <p class="text-lg font-semibold text-accent">
+          .NET Developer | Software Engineer
+        </p>
         <p class="max-w-2xl">
-          Hi there! I am a machine learning (ML) researcher who likes to build
-          software. My research focuses on the evaluation of ML systems: which
-          systems are <em>"better"</em> or <em>"worse"</em>. In particular, for <em
-            >language model</em
-          > and <em>reinforcement learning</em> applications.
+          {SITE.desc}
         </p>
         <p class="mt-2 max-w-2xl">
-          Recent projects include <a
-            href="https://github.com/rdnfn/feedback-forensics"
+          Recent highlights include leading the migration of a credit reporting system 
+          from monolith to microservices (40% performance improvement), architecting a 
+          Georgian-language AI assistant that won the <a
+            href="#"
             class="underline decoration-dashed underline-offset-4 hover:text-accent"
-            >Feedback Forensics</a
-          >, <a
-            href="https://github.com/rdnfn/icai"
+            >Jury's Favorite Award at GAIA Hackathon</a
+          >, and designing enterprise-grade systems like <a
+            href="https://github.com/NikaNats"
             class="underline decoration-dashed underline-offset-4 hover:text-accent"
-            >Inverse Constitutional AI (ICAI)</a
-          > and <a
-            href="https://github.com/rdnfn/beobench"
-            class="underline decoration-dashed underline-offset-4 hover:text-accent"
-            >Beobench</a
-          >.
+            >Blogify API</a
+          > and fintech microservices ecosystems.
         </p>
         <p class="mt-2 max-w-2xl">
-          I am a PhD candidate in the <a
-            href="https://www.cst.cam.ac.uk/"
-            class="underline decoration-dashed underline-offset-4 hover:text-accent"
-            >Department of Computer Science</a
-          > at the University of Cambridge and member of the <a
-            href="https://ai4er-cdt.esc.cam.ac.uk/"
-            class="underline decoration-dashed underline-offset-4 hover:text-accent"
-            >AI4ER CDT</a
-          >, and was recently ML intern at <a
-            href="https://machinelearning.apple.com/"
-            class="underline decoration-dashed underline-offset-4 hover:text-accent"
-            >Apple</a
-          >. Reach out by <a
-            href="mailto:contact@arduin.io"
+          Currently pursuing a Master's in Data Science at Georgian National University while 
+          working as a .NET Software Engineer at Credo Bank. Reach out by <a
+            href="mailto:nika.nacvlishvili1@gmail.com"
             class="underline decoration-dashed underline-offset-4 hover:text-accent"
             >sending an email</a
-          > or <a
-            href="https://cal.com/arduin/meeting-public"
-            class="underline decoration-dashed underline-offset-4 hover:text-accent"
-            >scheduling a call</a
-          >.
+          > to discuss .NET, microservices, or AI/ML integration.
         </p>
         {
           // only display if at least one social link is enabled
