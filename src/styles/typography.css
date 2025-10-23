@@ -1,5 +1,8 @@
 @plugin '@tailwindcss/typography';
 
+/* Import system font stack for better performance */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap");
+
 @layer base {
   /**
 Typography System: Content-Focused Hierarchy with Minimalist Aesthetics
@@ -11,9 +14,6 @@ Emphasis on readability and clean design inspired by arduin.io:
 - Academic-focused code block styling
 - Profile section for hero/home pages
 */
-
-  /* Import system font stack for better performance */
-  @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap");
 
   .app-prose {
     @apply prose;
