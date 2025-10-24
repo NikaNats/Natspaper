@@ -29,7 +29,7 @@ export function transformerFileName(
       // Extract filename from data-file-name attribute if present
       const fileNameRegex = /data-file-name="([^"]+)"/;
       const fileNameMatch = fileNameRegex.exec(html);
-      
+
       if (!fileNameMatch?.[1]) {
         return html;
       }

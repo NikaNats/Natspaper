@@ -14,7 +14,7 @@ import { SITE } from "./src/config";
 // https://astro.build/config
 export default defineConfig({
   site: SITE.website,
-  output: 'static', // Fully static build - no server-side rendering
+  output: "static", // Fully static build - no server-side rendering
   integrations: [
     sitemap({
       filter: page => SITE.showArchives || !page.endsWith("/archives"),

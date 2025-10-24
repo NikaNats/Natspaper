@@ -25,7 +25,7 @@ function getUtcTimestampForTimezone(
     // Use binary search to find the UTC timestamp that, when formatted in the target timezone,
     // matches the input date string's wall clock time
     const initialUtcMs = date.getTime();
-    
+
     // Format options for consistent comparison
     const formatOptions: Intl.DateTimeFormatOptions = {
       timeZone: timezone,

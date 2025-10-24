@@ -39,12 +39,12 @@ function sanitizeDescription(description: string): string {
   // LAYER 1: Remove all HTML tags (most important - blocks <img>, <script>, etc.)
   // Simple approach: find all <...> patterns and remove them
   let result = description;
-  
+
   // Remove HTML tags by finding < and >
   // This is safer than complex regex and handles nested/malformed tags
   let inTag = false;
   let sanitized = "";
-  
+
   for (const char of result) {
     if (char === "<") {
       inTag = true;
@@ -54,7 +54,7 @@ function sanitizeDescription(description: string): string {
       sanitized += char;
     }
   }
-  
+
   result = sanitized;
 
   // LAYER 2: Escape HTML entities to prevent entity injection
@@ -68,10 +68,17 @@ function sanitizeDescription(description: string): string {
     const closeIndex = noLinks.indexOf("]", linkIndex);
     const parenIndex = noLinks.indexOf("(", closeIndex);
     const closeParenIndex = noLinks.indexOf(")", parenIndex);
-    
-    if (closeIndex !== -1 && parenIndex === closeIndex + 1 && closeParenIndex !== -1) {
+
+    if (
+      closeIndex !== -1 &&
+      parenIndex === closeIndex + 1 &&
+      closeParenIndex !== -1
+    ) {
       const linkText = noLinks.substring(linkIndex + 1, closeIndex);
-      noLinks = noLinks.substring(0, linkIndex) + linkText + noLinks.substring(closeParenIndex + 1);
+      noLinks =
+        noLinks.substring(0, linkIndex) +
+        linkText +
+        noLinks.substring(closeParenIndex + 1);
       linkIndex += linkText.length;
     } else {
       linkIndex++;
