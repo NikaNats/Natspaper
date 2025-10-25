@@ -156,27 +156,4 @@ export function formatSecurityHeaders(
  * });
  */
 
-/**
- * Get CSP nonce for inline scripts
- * This is used to allow specific inline scripts while maintaining CSP
- */
-export function generateCspNonce(): string {
-  // Generate a random nonce for this request
-  const chars =
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-  let nonce = "";
-  for (let i = 0; i < 16; i += 1) {
-    nonce += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return nonce;
-}
 
-/**
- * Build CSP with nonce for inline scripts
- */
-export function buildCspWithNonce(basePolicy: string, nonce: string): string {
-  return basePolicy.replaceAll(
-    "script-src 'self'",
-    `script-src 'self' 'nonce-${nonce}'`
-  );
-}

@@ -49,20 +49,6 @@ function isSafeUrl(url: string): boolean {
 }
 
 /**
- * Sanitize a URL for use in href attributes
- */
-export function sanitizeUrl(url: string): string {
-  const trimmed = url.trim();
-
-  if (!isSafeUrl(trimmed)) {
-    // Return safe fallback URL
-    return "about:blank";
-  }
-
-  return trimmed;
-}
-
-/**
  * Sanitize URLs in markdown links
  * Replaces unsafe URLs with safe fallback
  */
@@ -71,70 +57,13 @@ export function sanitizeMarkdownUrls(markdown: string): string {
   const linkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
 
   return markdown.replaceAll(linkRegex, (_match, text, url) => {
-    const safeUrl = sanitizeUrl(url);
-    return `[${text}](${safeUrl})`;
-  });
-}
-
-/**
- * Sanitize URLs in HTML attributes
- * Handles href, src, and other URL attributes
- */
-export function sanitizeHtmlAttributeUrls(html: string): string {
-  // Match various URL attributes: href="...", src="...", etc.
-  const attributeRegex =
-    /(href|src|srcset|data|action|poster)=["']([^"']+)["']/g;
-
-  return html.replaceAll(attributeRegex, (_match, attr, url) => {
-    const safeUrl = sanitizeUrl(url);
-    return `${attr}="${safeUrl}"`;
-  });
-}
-
-/**
- * Validate and normalize a URL for safe display
- */
-export function validateDisplayUrl(url: string): string | null {
-  try {
-    if (!isSafeUrl(url)) {
-      return null;
-    }
-
     const trimmed = url.trim();
 
-    // For display purposes, don't show mailto: or tel: protocols
-    if (trimmed.startsWith("mailto:") || trimmed.startsWith("tel:")) {
-      return trimmed;
+    if (!isSafeUrl(trimmed)) {
+      // Return safe fallback URL
+      return `[${text}](about:blank)`;
     }
 
-    // Normalize HTTP/HTTPS URLs
-    if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
-      const urlObj = new URL(trimmed);
-      return urlObj.toString();
-    }
-
-    return trimmed;
-  } catch {
-    return null;
-  }
-}
-
-/**
- * Extract domain from URL for link preview
- */
-export function extractDomain(url: string): string {
-  try {
-    if (!isSafeUrl(url)) {
-      return "invalid";
-    }
-
-    if (url.startsWith("/")) return "same-origin";
-    if (url.startsWith("mailto:")) return "mailto";
-    if (url.startsWith("tel:")) return "tel";
-
-    const urlObj = new URL(url, "https://example.com");
-    return urlObj.hostname;
-  } catch {
-    return "invalid";
-  }
+    return `[${text}](${trimmed})`;
+  });
 }

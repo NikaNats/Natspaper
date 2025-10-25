@@ -1,7 +1,6 @@
 import { Resvg } from "@resvg/resvg-js";
 import { type CollectionEntry } from "astro:content";
 import postOgImage from "./og-templates/post";
-import siteOgImage from "./og-templates/site";
 
 /**
  * Helper: Clean up Resvg native memory
@@ -148,13 +147,4 @@ export async function generateOgImageForPost(
     // Return fallback instead of throwing - prevents entire build failure
     return createFallbackPngBuffer();
   }
-}
-
-/**
- * Generate OG image for the site.
- * @returns PNG buffer
- */
-export async function generateOgImageForSite(): Promise<Uint8Array> {
-  const svg = await siteOgImage();
-  return svgBufferToPngBuffer(svg);
 }

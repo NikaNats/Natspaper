@@ -1,6 +1,9 @@
 @plugin '@tailwindcss/typography';
 
-/* Import system font stack for better performance */
+/**
+ * Note: The system font stack is now defined in global.css
+ * This Google Fonts import provides the Inter font family for typography
+ */
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap");
 
 @layer base {
