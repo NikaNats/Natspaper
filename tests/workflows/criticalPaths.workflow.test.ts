@@ -101,7 +101,7 @@ describe('E2E: Critical User Paths', () => {
       const metaTags = {
         title: 'Nika Natsvlishvili',
         description: '.NET Developer | Software Engineer',
-        canonical: 'https://nika-natsvlishvili.dev/',
+        canonical: 'https://natspaper.vercel.app/',
         ogType: 'website',
         ogImage: 'astropaper-og.jpg',
         twitterCard: 'summary_large_image',
@@ -346,12 +346,12 @@ describe('E2E: Critical User Paths', () => {
         version: '2.0',
         channel: {
           title: 'Nika Natsvlishvili',
-          link: 'https://nika-natsvlishvili.dev/',
+          link: 'https://natspaper.vercel.app/',
           description: 'Blog Feed',
           items: [
             {
               title: 'Post 1',
-              link: 'https://nika-natsvlishvili.dev/posts/post-1/',
+              link: 'https://natspaper.vercel.app/posts/post-1/',
               pubDate: new Date().toUTCString(),
             },
           ],

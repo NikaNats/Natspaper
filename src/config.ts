@@ -34,7 +34,7 @@ function validateTimezone(timezone: string): void {
 }
 
 export const SITE = {
-  website: "https://nika-natsvlishvili.dev/", // replace this with your deployed domain
+  website: "https://natspaper.vercel.app/", // replace this with your deployed domain
   author: "Nika Natsvlishvili",
   profile: "https://www.linkedin.com/in/nika-natsvlishvili/",
   desc: ".NET Developer | Software Engineer specializing in microservices architecture and enterprise solutions",
