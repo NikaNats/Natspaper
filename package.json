@@ -4,7 +4,8 @@
   "version": "5.5.0",
   "scripts": {
     "dev": "astro dev",
-    "build": "astro check && astro build && pagefind --site dist && npm run copy-pagefind",
+    "build": "astro check && astro build && pagefind --site dist && npm run copy-pagefind && npm run verify-build",
+    "verify-build": "node scripts/verify-build.js",
     "copy-pagefind": "node scripts/copy-pagefind.js",
     "preview": "astro preview",
     "sync": "astro sync",

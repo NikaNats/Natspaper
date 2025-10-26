@@ -11,9 +11,12 @@ import {
 import { transformerFileName } from "./src/utils/transformers/fileName";
 import { SITE } from "./src/config";
 
+// Get site URL from environment or use default from config
+const siteUrl = process.env.SITE_WEBSITE || SITE.website;
+
 // https://astro.build/config
 export default defineConfig({
-  site: SITE.website,
+  site: siteUrl,
   output: "static", // Fully static build - no server-side rendering
   integrations: [
     sitemap({

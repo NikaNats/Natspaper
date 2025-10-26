@@ -52,13 +52,14 @@ const DEFAULT_CSP = [
 ].join("; ");
 
 /**
- * Strict CSP for production (no unsafe-inline)
- * Requires all scripts and styles to be in separate files with hashes
+ * Strict CSP for production (no unsafe-inline for scripts, but allows for styles)
+ * Astro embeds inline styles in the HTML, so we need unsafe-inline for style-src
+ * Scripts remain strict without unsafe-inline for better security
  */
 const STRICT_CSP = [
   "default-src 'self'",
   "script-src 'self'",
-  "style-src 'self'",
+  "style-src 'self' 'unsafe-inline'", // Astro embeds inline styles
   "img-src 'self' data: https:",
   "font-src 'self' data: https://fonts.googleapis.com https://fonts.gstatic.com",
   "form-action 'self'",
