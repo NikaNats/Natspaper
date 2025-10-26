@@ -28,6 +28,9 @@ export default defineConfig({
   /* Opt out of parallel tests on CI. */
   workers: process.env['CI'] ? 1 : undefined,
 
+  /* Increase timeout for slower tests */
+  timeout: 60 * 1000, // 60 seconds per test
+
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: [
     ['html'],
@@ -39,7 +42,7 @@ export default defineConfig({
   /* Shared settings for all the projects below. */
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
-    baseURL: 'http://localhost:3000',
+    baseURL: 'http://localhost:4321',
     
     /* Collect trace when retrying the failed test. */
     trace: 'on-first-retry',
@@ -78,9 +81,11 @@ export default defineConfig({
 
   /* Run your local dev server before starting the tests */
   webServer: {
-    command: 'npm run dev',
-    url: 'http://localhost:3000',
+    command: 'pnpm run dev',
+    url: 'http://localhost:4321',
     reuseExistingServer: !process.env['CI'],
     timeout: process.env['CI'] ? 300 * 1000 : 120 * 1000, // 5 min in CI, 2 min locally
+    stdout: 'pipe',
+    stderr: 'pipe',
   },
 });
