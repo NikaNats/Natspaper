@@ -8,8 +8,6 @@
  * ```
  */
 
-import type { ShikiTransformer } from "shiki";
-
 export interface TransformerFileNameOptions {
   /** Style version: 'v1' or 'v2' */
   style?: "v1" | "v2";
@@ -19,12 +17,12 @@ export interface TransformerFileNameOptions {
 
 export function transformerFileName(
   options: TransformerFileNameOptions = {}
-): ShikiTransformer {
+): Record<string, unknown> {
   const { style = "v2", hideDot = false } = options;
 
   return {
     name: "transformer-filename",
-    postprocess(html) {
+    postprocess(html: string) {
       // This runs after code highlighting
       // Extract filename from data-file-name attribute if present
       const fileNameRegex = /data-file-name="([^"]+)"/;

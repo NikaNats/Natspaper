@@ -63,7 +63,7 @@ function triggerGarbageCollection(): void {
  */
 function svgBufferToPngBuffer(svg: string): Uint8Array {
   let resvg: Resvg | null = null;
-  let pngDataRef: { asPng(): Uint8Array } | null = null;
+  let pngDataRef: ReturnType<Resvg['render']> | null = null;
 
   try {
     resvg = new Resvg(svg, { logLevel: "error" });
@@ -72,7 +72,7 @@ function svgBufferToPngBuffer(svg: string): Uint8Array {
     // Extract PNG bytes while pngDataRef is still valid
     const buffer = pngDataRef.asPng();
 
-    return buffer;
+    return new Uint8Array(buffer);
   } catch (error) {
     // Log rendering errors but continue with cleanup
     // eslint-disable-next-line no-console

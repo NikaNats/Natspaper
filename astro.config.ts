@@ -47,7 +47,6 @@ export default defineConfig({
     },
   },
   vite: {
-    // @ts-expect-error Vite v4/v5 compatibility - will be resolved in Astro 6
     plugins: [tailwindcss()],
     optimizeDeps: {
       exclude: ["@resvg/resvg-js"],
