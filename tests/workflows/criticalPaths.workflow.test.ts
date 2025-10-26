@@ -1,17 +1,21 @@
 import { describe, it, expect } from 'vitest';
 
 /**
- * E2E Tests for Critical User Paths
- * Tests complete workflows from user perspective
+ * Workflow Tests for Critical User Paths
+ * High-level integration tests verifying logic flows and data structures
  *
- * Tests:
- * - Home page load and navigation
- * - Blog post creation and display
- * - Search functionality
- * - RSS feed generation
- * - Tag filtering
- * - Pagination
- * - Error handling
+ * NOTE: These are NOT true end-to-end (E2E) tests. They run in a Node.js environment
+ * (Vitest) and test logic flows, data transformations, and business logic.
+ * For true browser-based E2E tests, see tests/e2e-browser/ with Playwright.
+ *
+ * Tests verify:
+ * - Home page logic and navigation flow
+ * - Blog post processing and display logic
+ * - Search functionality implementation
+ * - RSS feed generation and structure
+ * - Tag filtering logic
+ * - Pagination calculations
+ * - Error handling and graceful degradation
  */
 
 describe('E2E: Critical User Paths', () => {

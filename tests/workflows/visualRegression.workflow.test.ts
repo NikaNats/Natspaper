@@ -1,19 +1,24 @@
 import { describe, it, expect } from 'vitest';
 
 /**
- * Visual Regression Tests
- * Tests for UI consistency and component rendering
+ * Visual Regression Workflow Tests
+ * High-level integration tests for UI consistency and component specifications
  *
- * Note: This test file sets up baseline specifications and assertions for
- * visual regression testing. In a real implementation, use Playwright or
- * Percy for automated screenshot comparison.
+ * NOTE: This test file verifies baseline specifications and component structure
+ * in a Node.js environment. For true visual regression testing with screenshot
+ * comparison, see tests/e2e-browser/ with Playwright and visual comparisons.
  *
- * Tests verify:
- * - Component DOM structure consistency
- * - Styling class presence
- * - Responsive breakpoint handling
- * - Theme switching
- * - Animation states
+ * Current tests verify:
+ * - Component specification compliance (structure, classes, attributes)
+ * - Responsive design breakpoint definitions
+ * - Theme configuration consistency
+ * - Animation timing specifications
+ * - Form component structure
+ * - Accessibility baseline specifications
+ *
+ * These are NOT visual regression tests in the traditional sense. They validate
+ * that component specs match expected configurations. True visual regression
+ * requires rendering in a browser and capturing/comparing visual output.
  */
 
 interface ComponentSpec {

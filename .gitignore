@@ -50,3 +50,9 @@ tmp/
 # pagefind
 public/pagefind
 .vercel
+
+# Playwright
+playwright-report/
+test-results/
+.playwright/
+
