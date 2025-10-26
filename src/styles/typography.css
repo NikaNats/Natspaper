@@ -153,6 +153,15 @@ Emphasis on readability and clean design inspired by arduin.io:
   }
 
   /**
+KaTeX text color
+
+Ensures LaTeX equations display in the correct text color
+*/
+  .prose .katex-display {
+    @apply text-foreground;
+  }
+
+  /**
 Code Blocks & Syntax Highlighting
 
 Optimized for academic and technical content
