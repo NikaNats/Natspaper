@@ -1,11 +1,21 @@
 import { describe, it, expect } from 'vitest';
 
 /**
- * Integration tests combining multiple fixes
- * Tests end-to-end scenarios with realistic data
+ * End-to-End Integration Tests
+ * Tests complete workflows and critical paths combining multiple components
+ *
+ * These tests verify:
+ * - Build pipeline integrity
+ * - Error handling across components
+ * - Security throughout workflows
+ * - Performance under realistic conditions
+ * - Concurrent operation handling
  */
 
-// Helper functions at outer scope
+// ============================================================================
+// Helper Functions
+// ============================================================================
+
 function escapeHtml(text: string): string {
   const htmlEscapeMap: Record<string, string> = {
     '&': '&amp;',

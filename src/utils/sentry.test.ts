@@ -1,6 +1,6 @@
 /**
  * Sentry Error Monitoring Test Suite
- * 
+ *
  * ამ ფაილის გამოყენება:
  * 1. პირველი, dsvn-ი დაკონფიგურირება უნდა იყოს
  * 2. npm run build && npm run preview
@@ -123,7 +123,9 @@ export const SentryTests = {
   checkStatus: () => {
     console.log("🔍 Sentry Status Check:");
     console.log(`DSN დაკონფიგურირებული: ${isSentryEnabled ? "✅" : "❌"}`);
-    console.log(`PUBLIC_SENTRY_DSN: ${import.meta.env.PUBLIC_SENTRY_DSN || "undefined"}`);
+    console.log(
+      `PUBLIC_SENTRY_DSN: ${import.meta.env.PUBLIC_SENTRY_DSN || "undefined"}`
+    );
     console.log(`MODE: ${import.meta.env.MODE}`);
 
     if (isSentryEnabled) {
@@ -141,9 +143,7 @@ export const SentryTests = {
 
     if (!isSentryEnabled) {
       console.error("❌ ᲨᲔᲪᲓᲝᲛᲐ: DSN არ დაკონფიგურირებული!");
-      console.log(
-        "დაამატე PUBLIC_SENTRY_DSN თქვენს .env.production ფაილში"
-      );
+      console.log("დაამატე PUBLIC_SENTRY_DSN თქვენს .env.production ფაილში");
       return;
     }
 

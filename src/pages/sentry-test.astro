@@ -30,7 +30,10 @@ import Layout from "@/layouts/Layout.astro";
       </button>
     </section>
 
-    <section id="status" style="margin-top: 2rem; padding: 1rem; background: #f0f0f0; border-radius: 8px; display: none;">
+    <section
+      id="status"
+      style="margin-top: 2rem; padding: 1rem; background: #f0f0f0; border-radius: 8px; display: none;"
+    >
       <h3>Sentry Status</h3>
       <pre id="status-output"></pre>
     </section>
@@ -96,7 +99,9 @@ import Layout from "@/layouts/Layout.astro";
         console.log("✅ Sentry is enabled and ready!");
       } else {
         // eslint-disable-next-line no-console
-        console.warn("⚠️ Sentry is not configured. Add PUBLIC_SENTRY_DSN to .env");
+        console.warn(
+          "⚠️ Sentry is not configured. Add PUBLIC_SENTRY_DSN to .env"
+        );
       }
     }
 

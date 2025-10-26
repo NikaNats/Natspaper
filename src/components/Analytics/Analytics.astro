@@ -1,0 +1,88 @@
+---
+/**
+ * Analytics & Error Tracking Component
+ * Initializes Sentry and other analytics services
+ *
+ * Should be placed in the <head> of your main layout
+ *
+ * Usage in Layout.astro:
+ * <head>
+ *   <Analytics />
+ * </head>
+ */
+---
+
+<script>
+  /**
+   * Initialize client-side error tracking with Sentry
+   * Captures unhandled errors, promise rejections, and other events
+   */
+
+  const initializeSentryErrorTracking = () => {
+    // Only run in browser
+    if (!globalThis.window) {
+      return;
+    }
+
+    const sentryDsn = import.meta.env.PUBLIC_SENTRY_DSN;
+    if (!sentryDsn) {
+      return; // Sentry not configured
+    }
+
+    // Set up error event listener
+    globalThis.window.addEventListener("error", (event: ErrorEvent) => {
+      const sentry = (
+        globalThis as unknown as Record<
+          string,
+          {
+            captureException: (
+              error: unknown,
+              options?: Record<string, unknown>
+            ) => void;
+          }
+        >
+      ).__SENTRY__;
+      if (sentry?.captureException) {
+        sentry.captureException(event.error, {
+          contexts: {
+            browser: {
+              url: globalThis.window?.location.href,
+              userAgent: globalThis.navigator?.userAgent,
+            },
+          },
+        });
+      }
+    });
+
+    // Set up unhandled promise rejection listener
+    globalThis.window.addEventListener(
+      "unhandledrejection",
+      (event: PromiseRejectionEvent) => {
+        const sentry = (
+          globalThis as unknown as Record<
+            string,
+            {
+              captureException: (
+                error: unknown,
+                options?: Record<string, unknown>
+              ) => void;
+            }
+          >
+        ).__SENTRY__;
+        if (sentry?.captureException) {
+          sentry.captureException(event.reason, {
+            contexts: {
+              browser: {
+                url: globalThis.window?.location.href,
+                userAgent: globalThis.navigator?.userAgent,
+              },
+            },
+          });
+        }
+      }
+    );
+  };
+
+  // Initialize when script loads
+  initializeSentryErrorTracking();
+</script>

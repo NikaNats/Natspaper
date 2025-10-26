@@ -1,0 +1,148 @@
+---
+/**
+ * Error Boundary Component
+ * Provides a fallback UI when components fail to render
+ *
+ * Usage:
+ * <ErrorBoundary>
+ *   <SomeComponent />
+ * </ErrorBoundary>
+ *
+ * If a child component throws an error, the fallback UI will be displayed
+ * and the error will be captured by Sentry for monitoring
+ */
+
+export interface Props {
+  children?: unknown;
+}
+---
+
+<div class="error-boundary">
+  <slot />
+</div>
+
+<style>
+  .error-boundary {
+    display: contents;
+  }
+</style>
+
+<script>
+  /**
+   * Client-side error boundary implementation
+   * Catches and handles errors in child components
+   */
+
+  interface SentryInterface {
+    captureException: (
+      error: unknown,
+      options?: Record<string, unknown>
+    ) => void;
+  }
+
+  class ErrorBoundary extends HTMLElement {
+    private errorContainer: HTMLDivElement | null = null;
+
+    connectedCallback() {
+      // Wrap content for error recovery
+      const slot = this.querySelector("slot");
+
+      if (slot) {
+        const assignedNodes = slot.assignedElements({ flatten: true });
+
+        for (const node of assignedNodes) {
+          if (node instanceof HTMLElement) {
+            this.wrapChild(node);
+          }
+        }
+      }
+    }
+
+    private wrapChild(element: HTMLElement) {
+      try {
+        element.addEventListener(
+          "error",
+          (event: Event) => {
+            if (event instanceof ErrorEvent) {
+              this.handleError(event.error);
+            }
+          },
+          true
+        );
+      } catch (error) {
+        this.handleError(error);
+      }
+    }
+
+    private handleError(error: unknown) {
+      // Capture with Sentry if available
+      if (globalThis.window) {
+        const sentry = (
+          globalThis as unknown as Record<string, SentryInterface>
+        ).__SENTRY__;
+        if (sentry?.captureException) {
+          sentry.captureException(error, {
+            tags: {
+              component: "ErrorBoundary",
+            },
+            contexts: {
+              error: {
+                message: error instanceof Error ? error.message : String(error),
+              },
+            },
+          });
+        }
+      }
+
+      this.showErrorUI();
+    }
+
+    private showErrorUI() {
+      if (!this.errorContainer) {
+        this.errorContainer = document.createElement("div");
+        this.errorContainer.className = "error-boundary-fallback";
+        this.errorContainer.innerHTML = `
+          <div class="error-message">
+            <h2>Something went wrong</h2>
+            <p>We're sorry for the inconvenience. The error has been reported to our team.</p>
+            <button onclick="window.location.reload()">Reload page</button>
+          </div>
+        `;
+
+        const style = document.createElement("style");
+        style.textContent = `
+          .error-boundary-fallback {
+            padding: 2rem;
+            margin: 1rem 0;
+            border: 1px solid #ff6b6b;
+            border-radius: 0.5rem;
+            background: #ffe0e0;
+            color: #c92a2a;
+          }
+          .error-message h2 {
+            margin-top: 0;
+          }
+          .error-message button {
+            padding: 0.5rem 1rem;
+            background: #c92a2a;
+            color: white;
+            border: none;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            font-size: 1rem;
+          }
+          .error-message button:hover {
+            background: #a61e4d;
+          }
+        `;
+        document.head.appendChild(style);
+
+        this.appendChild(this.errorContainer);
+      }
+    }
+  }
+
+  if (!customElements.get("error-boundary")) {
+    customElements.define("error-boundary", ErrorBoundary);
+  }
+</script>
