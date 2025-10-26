@@ -10,7 +10,72 @@ on:
       - master
 
 jobs:
+  pre-deployment-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.11.1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      # Validate Environment Variables
+      - name: Validate Environment Variables
+        env:
+          ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          echo "Validating required environment variables..."
+          
+          # Check secrets are properly configured
+          if [ -z "$ORG_ID" ]; then
+            echo "❌ VERCEL_ORG_ID secret is not configured"
+            exit 1
+          fi
+          
+          if [ -z "$PROJECT_ID" ]; then
+            echo "❌ VERCEL_PROJECT_ID secret is not configured"
+            exit 1
+          fi
+          
+          if [ -z "$TOKEN" ]; then
+            echo "❌ VERCEL_TOKEN secret is not configured"
+            exit 1
+          fi
+          
+          echo "✅ All required environment variables are configured"
+
+      - run: pnpm install --frozen-lockfile
+
+      # Pre-deployment code quality checks
+      - name: Run Linter
+        run: pnpm run lint
+        continue-on-error: false
+
+      - name: Check Code Formatting
+        run: pnpm run format:check
+        continue-on-error: false
+
+      - name: Check Astro Type Safety
+        run: pnpm astro check
+        continue-on-error: false
+
+      - name: Run Unit Tests
+        run: pnpm run test:run
+        continue-on-error: false
+
+      - name: Run E2E Tests
+        run: pnpm test:e2e
+        continue-on-error: false
+
   Deploy-Production:
+    needs: pre-deployment-checks
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -34,5 +99,47 @@ jobs:
         env:
           SITE_WEBSITE: https://nika-natsvlishvili.dev
 
+      # Analyze Production Build Size
+      - name: Analyze Production Build Size
+        run: |
+          echo "=== Production Build Size Analysis ===" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Get total build size
+          BUILD_SIZE=$(du -sh .vercel/output | cut -f1)
+          echo "**Total Build Size:** $BUILD_SIZE" >> $GITHUB_STEP_SUMMARY
+          
+          # Check asset sizes
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Build Directory Sizes:**" >> $GITHUB_STEP_SUMMARY
+          
+          if [ -d ".vercel/output/static" ]; then
+            STATIC_SIZE=$(du -sh .vercel/output/static | cut -f1)
+            echo "- Static Assets: $STATIC_SIZE" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          if [ -d ".vercel/output/functions" ]; then
+            FUNCTIONS_SIZE=$(du -sh .vercel/output/functions | cut -f1)
+            echo "- Functions: $FUNCTIONS_SIZE" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          # Warn if build is significantly large
+          BUILD_SIZE_KB=$(du -sk .vercel/output | cut -f1)
+          THRESHOLD_KB=5120  # 5MB threshold for production
+          
+          if [ $BUILD_SIZE_KB -gt $THRESHOLD_KB ]; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "⚠️ **Build Size Alert:** Build size ($BUILD_SIZE) exceeds recommended threshold ($(( THRESHOLD_KB / 1024 ))MB)" >> $GITHUB_STEP_SUMMARY
+          fi
+
       - name: Deploy to Vercel
         run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Deployment Summary
+        run: |
+          echo "✅ Production deployment completed successfully" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Deployment Details:**" >> $GITHUB_STEP_SUMMARY
+          echo "- Branch: master" >> $GITHUB_STEP_SUMMARY
+          echo "- Commit: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Timestamp: $(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_STEP_SUMMARY

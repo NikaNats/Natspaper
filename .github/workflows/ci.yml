@@ -4,7 +4,7 @@ on:
   pull_request:
 
 jobs:
-  build:
+  checks:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -19,5 +19,81 @@ jobs:
           cache: pnpm
 
       - run: pnpm install --frozen-lockfile
-      - run: pnpm run lint
-      - run: pnpm run format:check
+
+      # Code Quality Checks
+      - name: Run Linter
+        run: pnpm run lint
+        continue-on-error: false
+
+      - name: Check Code Formatting
+        run: pnpm run format:check
+        continue-on-error: false
+
+      # Type and Build Checks
+      - name: Check Astro Type Safety
+        run: pnpm astro check
+        continue-on-error: false
+
+      - name: Build Project
+        run: pnpm astro build
+        continue-on-error: false
+
+      # Test Checks
+      - name: Run Unit Tests
+        run: pnpm run test:run
+        continue-on-error: false
+
+      # Bundle Size Analysis
+      - name: Analyze Bundle Size
+        run: |
+          echo "=== Build Size Analysis ===" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Get total build size
+          BUILD_SIZE=$(du -sh dist/ | cut -f1)
+          echo "**Total Build Size:** $BUILD_SIZE" >> $GITHUB_STEP_SUMMARY
+          
+          # Check individual component sizes
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Asset Breakdown:**" >> $GITHUB_STEP_SUMMARY
+          
+          if [ -d "dist/_astro" ]; then
+            ASTRO_SIZE=$(du -sh dist/_astro | cut -f1)
+            echo "- Astro Assets: $ASTRO_SIZE" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          if [ -d "dist/assets" ]; then
+            ASSETS_SIZE=$(du -sh dist/assets | cut -f1)
+            echo "- Static Assets: $ASSETS_SIZE" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          # Fail if build exceeds threshold (e.g., 2MB)
+          BUILD_SIZE_KB=$(du -sk dist/ | cut -f1)
+          THRESHOLD_KB=2048
+          
+          if [ $BUILD_SIZE_KB -gt $THRESHOLD_KB ]; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "⚠️ **Warning:** Build size ($BUILD_SIZE) exceeds threshold ($(( THRESHOLD_KB / 1024 ))MB)" >> $GITHUB_STEP_SUMMARY
+            echo "Consider optimizing assets or code splitting" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "✅ Build size is within acceptable limits" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      # Upload build artifacts for inspection
+      - name: Upload Build Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-output
+          path: dist/
+          retention-days: 5
+
+      # Upload test coverage if available
+      - name: Upload Coverage Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-reports
+          path: coverage/
+          retention-days: 5

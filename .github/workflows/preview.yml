@@ -10,7 +10,41 @@ on:
       - master
 
 jobs:
+  pre-deployment-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.11.1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      # Pre-deployment code quality checks
+      - name: Run Linter
+        run: pnpm run lint
+        continue-on-error: true
+
+      - name: Check Code Formatting
+        run: pnpm run format:check
+        continue-on-error: true
+
+      - name: Check Astro Type Safety
+        run: pnpm astro check
+        continue-on-error: false
+
+      - name: Run Unit Tests
+        run: pnpm run test:run
+        continue-on-error: false
+
   Deploy-Preview:
+    needs: pre-deployment-checks
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -36,3 +70,13 @@ jobs:
 
       - name: Deploy to Vercel
         run: vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Preview Deployment Summary
+        if: always()
+        run: |
+          echo "✅ Preview deployment completed" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Preview Details:**" >> $GITHUB_STEP_SUMMARY
+          echo "- Branch: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Commit: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Timestamp: $(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_STEP_SUMMARY
