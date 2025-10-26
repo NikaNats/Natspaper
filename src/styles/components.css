@@ -200,7 +200,8 @@ main > * + * {
  * Theme Toggle Button
  *
  * SVG-based icon for theme switching
- * Persistent state via localStorage
+ * Persistent state via storage with graceful fallback to in-memory
+ * Works in restricted contexts (artifacts, iframes) without localStorage
  */
 button#theme-toggle {
   display: inline-flex;
