@@ -12,6 +12,7 @@ import BackButton from "@/components/BackButton.astro";
 import BackToTopButton from "@/components/BackToTopButton.astro";
 import { getPath } from "@/utils/getPath";
 import { slugifyStr } from "@/utils/slugify";
+import { resolveOgImageUrl, getAdjacentPosts } from "@/utils/postHelpers";
 import IconChevronLeft from "@/assets/icons/IconChevronLeft.svg";
 import IconChevronRight from "@/assets/icons/IconChevronRight.svg";
 import { SITE } from "@/config";
@@ -42,24 +43,14 @@ const { Content } = await render(post);
 // The body contains the raw markdown content which is perfect for word counting
 const bodyContent = post.body || "";
 
-let ogImageUrl: string | undefined;
-
-// Determine OG image source
-if (typeof initOgImage === "string") {
-  ogImageUrl = initOgImage; // Remote OG image (absolute URL)
-} else if (initOgImage?.src) {
-  ogImageUrl = initOgImage.src; // Local asset
-}
-
-// Use dynamic OG image if enabled and no remote|local ogImage
-if (!ogImageUrl && SITE.dynamicOgImage) {
-  ogImageUrl = `${getPath(post.id, post.filePath)}/index.png`;
-}
-
-// Resolve OG image URL (or fallback to SITE.ogImage / default `og.png`)
-const ogImage = ogImageUrl
-  ? new URL(ogImageUrl, Astro.url.origin).href
-  : undefined;
+// Resolve OG image URL using centralized utility
+// Handles string URLs, asset objects, and dynamic OG images
+const ogImage = resolveOgImageUrl(
+  initOgImage,
+  post.id,
+  post.filePath,
+  Astro.url.origin
+);
 
 const layoutProps = {
   title: `${title} | ${SITE.title}`,
@@ -72,19 +63,11 @@ const layoutProps = {
   scrollSmooth: true,
 };
 
-/* ========== Prev/Next Posts ========== */
-
-const allPosts = posts.map(({ data: { title }, id, filePath }) => ({
-  id,
-  title,
-  filePath,
-}));
-
-const currentPostIndex = allPosts.findIndex(a => a.id === post.id);
-
-const prevPost = currentPostIndex !== 0 ? allPosts[currentPostIndex - 1] : null;
-const nextPost =
-  currentPostIndex !== allPosts.length ? allPosts[currentPostIndex + 1] : null;
+// Get adjacent posts for navigation using centralized utility
+const { previous: prevPost, next: nextPost } = getAdjacentPosts(
+  posts,
+  post.id
+);
 ---
 
 <Layout {...layoutProps}>
