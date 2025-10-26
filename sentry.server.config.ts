@@ -1,6 +1,11 @@
 import * as Sentry from "@sentry/astro";
 
+// Initialize Sentry with DSN from environment variable
+// Never hardcode secrets in source code - use .env.local instead
+// Server-side DSN should be different from client-side for better security
 Sentry.init({
-  dsn: "https://eb445a37ed3e2db8f83d8fd9e8f32a47@o4510255602663424.ingest.de.sentry.io/4510257115168848",
-  sendDefaultPii: true,
+  dsn: process.env.SENTRY_DSN || process.env.PUBLIC_SENTRY_DSN,
+  sendDefaultPii: false, // Set to false in production to protect user privacy
+  // Only enable if you've read and accepted the privacy implications
+  // sendDefaultPii: true,
 });
