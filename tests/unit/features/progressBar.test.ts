@@ -125,10 +125,18 @@ describe("Progress Bar Feature", () => {
     expect(containers.length).toBe(1);
   });
 
-  it("should attach scroll listener with passive flag", () => {
+  it("should attach scroll listener with passive flag", async () => {
+    // Reset the module state by reloading it
+    vi.resetModules();
+
     const addEventListenerSpy = vi.spyOn(document, "addEventListener");
 
-    initProgressBar();
+    // Import fresh instance after reset
+    const { initProgressBar: initProgressBarFresh } = await import(
+      "@/utils/features/progressBar"
+    );
+
+    initProgressBarFresh();
 
     // Check that addEventListener was called with scroll event
     const scrollCall = addEventListenerSpy.mock.calls.find(

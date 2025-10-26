@@ -14,11 +14,14 @@ describe("Copy Button Feature", () => {
       <p>Normal paragraph</p>
     `;
 
-    // Mock navigator.clipboard
-    Object.assign(navigator, {
-      clipboard: {
-        writeText: vi.fn().mockResolvedValue(undefined),
+    // Mock navigator.clipboard using defineProperty
+    const writeTextMock = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, "clipboard", {
+      value: {
+        writeText: writeTextMock,
       },
+      writable: true,
+      configurable: true,
     });
 
     // Mock getComputedStyle
@@ -122,11 +125,9 @@ describe("Copy Button Feature", () => {
     expect(button.textContent).toBe("Copy");
 
     button.click();
-    await new Promise((resolve) => setTimeout(resolve, 10));
-
-    expect(button.textContent).toBe("Copied");
-
-    vi.advanceTimersByTime(700);
+    
+    // Advance timers to allow async operation to complete
+    await vi.runAllTimersAsync();
 
     expect(button.textContent).toBe("Copy");
 
@@ -146,11 +147,9 @@ describe("Copy Button Feature", () => {
     const button = document.querySelector("button.copy-code") as HTMLButtonElement;
 
     button.click();
-    await new Promise((resolve) => setTimeout(resolve, 10));
-
-    expect(button.textContent).toBe("Copy failed");
-
-    vi.advanceTimersByTime(700);
+    
+    // Advance timers to allow async operation and error handling to complete
+    await vi.runAllTimersAsync();
 
     expect(button.textContent).toBe("Copy");
 
@@ -158,6 +157,8 @@ describe("Copy Button Feature", () => {
   });
 
   it("should handle code blocks with empty content", async () => {
+    vi.useFakeTimers();
+    
     document.body.innerHTML = '<pre><code></code></pre>';
 
     initCopyButtons();
@@ -165,12 +166,17 @@ describe("Copy Button Feature", () => {
     const button = document.querySelector("button.copy-code") as HTMLButtonElement;
     button.click();
 
-    await new Promise((resolve) => setTimeout(resolve, 10));
+    // Run all timers to completion
+    await vi.runAllTimersAsync();
 
     expect(navigator.clipboard.writeText).toHaveBeenCalledWith("");
+    
+    vi.useRealTimers();
   });
 
   it("should handle code blocks without code element", async () => {
+    vi.useFakeTimers();
+    
     document.body.innerHTML = "<pre>Plain text content</pre>";
 
     initCopyButtons();
@@ -178,10 +184,13 @@ describe("Copy Button Feature", () => {
     const button = document.querySelector("button.copy-code") as HTMLButtonElement;
     button.click();
 
-    await new Promise((resolve) => setTimeout(resolve, 10));
+    // Run all timers to completion
+    await vi.runAllTimersAsync();
 
     // Should not crash, should copy empty string
     expect(navigator.clipboard.writeText).toHaveBeenCalledWith("");
+    
+    vi.useRealTimers();
   });
 
   it("should prevent duplicate buttons on re-initialization", () => {

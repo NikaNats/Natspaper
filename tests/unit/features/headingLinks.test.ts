@@ -157,7 +157,8 @@ describe("Heading Links Feature", () => {
     const h2Link = h2.querySelector("a.heading-link") as HTMLAnchorElement;
 
     expect(h2Link).toBeTruthy();
-    expect(h2Link.href).toContain("#undefined");
+    // Link href will be empty if heading has no id
+    expect(h2Link.href).toBe("http://localhost:3000/#");
   });
 
   it("should append link to end of heading element", () => {

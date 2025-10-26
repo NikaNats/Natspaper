@@ -95,16 +95,22 @@ describe("getSortedPosts", () => {
   });
 
   it("should handle very old and very new dates", () => {
+    // Use dates in the past to avoid postFilter filtering them out
     const posts = [
       createMockPost("post1", new Date("2020-01-01")),
-      createMockPost("post2", new Date("2025-12-31")),
+      createMockPost("post2", new Date("2024-12-31")),
       createMockPost("post3", new Date("2023-06-15")),
     ];
 
     const sorted = getSortedPosts(posts);
 
-    expect(sorted[0].id).toBe("post2");
+    // Should have all 3 posts
+    expect(sorted).toHaveLength(3);
+    
+    // Verify oldest is last
     expect(sorted[2].id).toBe("post1");
+    // Verify newest is first
+    expect(sorted[0].id).toBe("post2");
   });
 
   it("should handle mixed draft and published posts", () => {
