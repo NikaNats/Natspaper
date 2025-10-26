@@ -3,7 +3,6 @@ import { ClientRouter } from "astro:transitions";
 import { PUBLIC_GOOGLE_SITE_VERIFICATION } from "astro:env/client";
 import { SITE } from "@/config";
 import "@/styles/global.css";
-import "@/utils/sentry-client";
 
 export interface Props {
   title?: string;
@@ -131,10 +130,38 @@ const structuredData = {
 
     <ClientRouter />
 
+    <!-- Critical path: Theme switching script to prevent flash -->
+    <!-- Inline and not deferred to block rendering only if necessary -->
     <script is:inline src="/toggle-theme.js"></script>
   </head>
   <body>
     <slot />
+
+    <!-- Non-critical path: Initialize error tracking and analytics after page renders -->
+    <!-- Defer these to not block initial page paint and content delivery -->
+    <script>
+      import { initDeferredSentry } from "@/utils/sentry-client-deferred";
+
+      /**
+       * Initialize non-critical features after page has fully loaded
+       * This ensures the critical rendering path is not blocked by:
+       * - Sentry error tracking initialization
+       * - Analytics scripts
+       * - Third-party integrations
+       *
+       * Benefits:
+       * - Faster First Contentful Paint (FCP)
+       * - Better Time to Interactive (TTI)
+       * - Improved Largest Contentful Paint (LCP)
+       */
+      window.addEventListener("load", () => {
+        // Initialize Sentry error tracking
+        initDeferredSentry();
+
+        // Additional non-critical initialization can be added here
+        // Example: initAnalytics(), initThirdPartyIntegrations()
+      });
+    </script>
   </body>
 </html>
 
