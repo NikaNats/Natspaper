@@ -1,24 +1,48 @@
-# CI/CD Setup
+# CI/CD Setup (Vercel Official)
 
 ## Workflows
 
-**2 simple workflows:**
+**3 simple workflows using Vercel's official best practices:**
 
-1. **CI** - Runs on pull requests
-   - Lint, format check, build
+1. **CI** - Runs on all PRs
+   - Lint & format check
    
-2. **Deploy** - Runs on push to `master`
-   - Build and deploy to Vercel
+2. **Preview** - Runs on push to any branch except `master`
+   - Build & deploy preview to Vercel
+   
+3. **Production** - Runs on push to `master`
+   - Build & deploy production to Vercel
+
+## How It Works
+
+- **Preview Deployments**: Every branch gets a preview URL
+- **Production**: Merge to `master` = automatic production deploy
+- **Build Output**: Uses `vercel build` to generate `.vercel/output` folder
+- **Prebuilt Deploy**: `vercel deploy --prebuilt` skips Vercel's build step
 
 ## Setup
 
-Add these GitHub Secrets:
+### 1. Link Your Project to Vercel
 
-- `VERCEL_TOKEN` - [Get from Vercel](https://vercel.com/account/tokens)
-- `VERCEL_ORG_ID` - [Get from Vercel settings](https://vercel.com/account/settings)
-- `VERCEL_PROJECT_ID` - [Get from Vercel project settings](https://vercel.com/login)
-- `SENTRY_AUTH_TOKEN` - [Get from Sentry](https://sentry.io/settings/account/api/auth-tokens/)
-- `SENTRY_DSN` - [Get from Sentry project settings]
-- `PUBLIC_SENTRY_DSN` - [Get from Sentry project settings]
+```bash
+vercel login
+vercel link
+```
 
-That's it! Push to `master` and it will deploy automatically.
+This creates `.vercel/project.json` with your `projectId` and `orgId`.
+
+### 2. Add GitHub Secrets
+
+Get these values and add them to your GitHub repo settings:
+
+- `VERCEL_TOKEN` - [Create token](https://vercel.com/account/tokens)
+- `VERCEL_ORG_ID` - From `.vercel/project.json` (orgId)
+- `VERCEL_PROJECT_ID` - From `.vercel/project.json` (projectId)
+
+### 3. Done!
+
+- **Push to any branch** → Preview deployment
+- **Merge to `master`** → Production deployment
+
+That's it! Following Vercel's official guide.
+
