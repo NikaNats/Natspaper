@@ -2,6 +2,7 @@ import type { APIRoute } from "astro";
 import { getCollection, type CollectionEntry } from "astro:content";
 import { getPath } from "@/utils/getPath";
 import { generateOgImageForPost } from "@/utils/generateOgImages";
+import { ogImageLimiter } from "@/utils/concurrencyLimiter";
 import { SITE } from "@/config";
 
 /**
@@ -30,6 +31,12 @@ export async function getStaticPaths() {
 /**
  * Serve dynamically generated OG image for a blog post.
  * Image is rendered from post metadata using Satori + Resvg.
+ * 
+ * Concurrency control: OG image generation is serialized (max 1 concurrent)
+ * to prevent memory bloat from concurrent Resvg instances. This prevents:
+ * - Out-of-memory errors during builds with many posts
+ * - Poor performance under concurrent load
+ * - Build failures in CI/CD pipelines
  */
 export const GET: APIRoute = async ({ props }) => {
   if (!SITE.dynamicOgImage) {
@@ -39,7 +46,11 @@ export const GET: APIRoute = async ({ props }) => {
     });
   }
 
-  const buffer = await generateOgImageForPost(props as CollectionEntry<"blog">);
+  // Run OG generation with concurrency control (serial processing)
+  const buffer = await ogImageLimiter.run(() =>
+    generateOgImageForPost(props as CollectionEntry<"blog">)
+  );
+
   return new Response(new Uint8Array(buffer), {
     headers: { "Content-Type": "image/png" },
   });
