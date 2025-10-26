@@ -5,5 +5,7 @@ declare module "remark-collapse" {
 }
 
 declare module "@pagefind/default-ui" {
-  export const PagefindUI: unknown;
+  export class PagefindUI {
+    constructor(options: Record<string, unknown>);
+  }
 }
