@@ -31,7 +31,7 @@ export async function getStaticPaths() {
 /**
  * Serve dynamically generated OG image for a blog post.
  * Image is rendered from post metadata using Satori + Resvg.
- * 
+ *
  * Concurrency control: OG image generation is serialized (max 1 concurrent)
  * to prevent memory bloat from concurrent Resvg instances. This prevents:
  * - Out-of-memory errors during builds with many posts

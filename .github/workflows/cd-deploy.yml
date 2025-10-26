@@ -32,23 +32,23 @@ jobs:
           TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: |
           echo "Validating required environment variables..."
-          
+
           # Check secrets are properly configured
           if [ -z "$ORG_ID" ]; then
             echo "❌ VERCEL_ORG_ID secret is not configured"
             exit 1
           fi
-          
+
           if [ -z "$PROJECT_ID" ]; then
             echo "❌ VERCEL_PROJECT_ID secret is not configured"
             exit 1
           fi
-          
+
           if [ -z "$TOKEN" ]; then
             echo "❌ VERCEL_TOKEN secret is not configured"
             exit 1
           fi
-          
+
           echo "✅ All required environment variables are configured"
 
       - run: pnpm install --frozen-lockfile
@@ -104,29 +104,29 @@ jobs:
         run: |
           echo "=== Production Build Size Analysis ===" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           # Get total build size
           BUILD_SIZE=$(du -sh .vercel/output | cut -f1)
           echo "**Total Build Size:** $BUILD_SIZE" >> $GITHUB_STEP_SUMMARY
-          
+
           # Check asset sizes
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Build Directory Sizes:**" >> $GITHUB_STEP_SUMMARY
-          
+
           if [ -d ".vercel/output/static" ]; then
             STATIC_SIZE=$(du -sh .vercel/output/static | cut -f1)
             echo "- Static Assets: $STATIC_SIZE" >> $GITHUB_STEP_SUMMARY
           fi
-          
+
           if [ -d ".vercel/output/functions" ]; then
             FUNCTIONS_SIZE=$(du -sh .vercel/output/functions | cut -f1)
             echo "- Functions: $FUNCTIONS_SIZE" >> $GITHUB_STEP_SUMMARY
           fi
-          
+
           # Warn if build is significantly large
           BUILD_SIZE_KB=$(du -sk .vercel/output | cut -f1)
           THRESHOLD_KB=5120  # 5MB threshold for production
-          
+
           if [ $BUILD_SIZE_KB -gt $THRESHOLD_KB ]; then
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "⚠️ **Build Size Alert:** Build size ($BUILD_SIZE) exceeds recommended threshold ($(( THRESHOLD_KB / 1024 ))MB)" >> $GITHUB_STEP_SUMMARY

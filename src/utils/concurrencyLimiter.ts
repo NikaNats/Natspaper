@@ -1,6 +1,6 @@
 /**
  * Concurrency Limiter - Controls the maximum number of concurrent async operations.
- * 
+ *
  * Purpose: Prevent memory bloat from concurrent Resvg instances during OG image generation.
  * When multiple OG image routes are accessed simultaneously during build or deployment,
  * uncontrolled concurrency can cause:
@@ -8,7 +8,7 @@
  * - Out-of-memory errors during builds with many posts
  * - Poor performance under concurrent load
  * - Build failures in CI/CD pipelines
- * 
+ *
  * Usage:
  * ```typescript
  * const limiter = new ConcurrencyLimiter(2); // Max 2 concurrent operations
@@ -33,11 +33,11 @@ export class ConcurrencyLimiter {
    * Run a function with concurrency control.
    * If the maximum concurrent operations are already running, the function
    * will be queued and run once a slot becomes available.
-   * 
+   *
    * @param fn - Async function to run
    * @returns Promise that resolves to the function's result
    * @throws Error if the function throws
-   * 
+   *
    * @example
    * ```typescript
    * const limiter = new ConcurrencyLimiter(1); // Serial processing
@@ -82,7 +82,7 @@ export class ConcurrencyLimiter {
   /**
    * Get current statistics about the limiter state.
    * Useful for monitoring and debugging.
-   * 
+   *
    * @returns Object with running and queued operation counts
    */
   getStats() {

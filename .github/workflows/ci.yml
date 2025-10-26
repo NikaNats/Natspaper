@@ -48,29 +48,29 @@ jobs:
         run: |
           echo "=== Build Size Analysis ===" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           # Get total build size
           BUILD_SIZE=$(du -sh dist/ | cut -f1)
           echo "**Total Build Size:** $BUILD_SIZE" >> $GITHUB_STEP_SUMMARY
-          
+
           # Check individual component sizes
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Asset Breakdown:**" >> $GITHUB_STEP_SUMMARY
-          
+
           if [ -d "dist/_astro" ]; then
             ASTRO_SIZE=$(du -sh dist/_astro | cut -f1)
             echo "- Astro Assets: $ASTRO_SIZE" >> $GITHUB_STEP_SUMMARY
           fi
-          
+
           if [ -d "dist/assets" ]; then
             ASSETS_SIZE=$(du -sh dist/assets | cut -f1)
             echo "- Static Assets: $ASSETS_SIZE" >> $GITHUB_STEP_SUMMARY
           fi
-          
+
           # Fail if build exceeds threshold (e.g., 2MB)
           BUILD_SIZE_KB=$(du -sk dist/ | cut -f1)
           THRESHOLD_KB=2048
-          
+
           if [ $BUILD_SIZE_KB -gt $THRESHOLD_KB ]; then
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "⚠️ **Warning:** Build size ($BUILD_SIZE) exceeds threshold ($(( THRESHOLD_KB / 1024 ))MB)" >> $GITHUB_STEP_SUMMARY

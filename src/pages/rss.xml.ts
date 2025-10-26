@@ -160,7 +160,8 @@ export async function GET() {
         });
       } catch (error) {
         // Track failed post for reporting
-        const errorMessage = error instanceof Error ? error.message : String(error);
+        const errorMessage =
+          error instanceof Error ? error.message : String(error);
         failedPosts.push({ id, error: errorMessage });
 
         // Always log failed posts to console for visibility

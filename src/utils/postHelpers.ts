@@ -109,7 +109,9 @@ export function getAdjacentPosts(
     })
   );
 
-  const currentIndex = navigationPosts.findIndex(post => post.id === currentPostId);
+  const currentIndex = navigationPosts.findIndex(
+    post => post.id === currentPostId
+  );
 
   // Current post not found
   if (currentIndex === -1) {
@@ -178,9 +180,7 @@ export function generatePostStructuredData(
     dateModified: modDatetime
       ? new Date(modDatetime).toISOString()
       : new Date(pubDatetime).toISOString(),
-    image: ogImageUrl
-      ? { "@type": "ImageObject", url: ogImageUrl }
-      : undefined,
+    image: ogImageUrl ? { "@type": "ImageObject", url: ogImageUrl } : undefined,
     keywords: tags?.join(", "),
     url: postUrl,
   };

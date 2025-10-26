@@ -63,7 +63,7 @@ function triggerGarbageCollection(): void {
  */
 function svgBufferToPngBuffer(svg: string): Uint8Array {
   let resvg: Resvg | null = null;
-  let pngDataRef: ReturnType<Resvg['render']> | null = null;
+  let pngDataRef: ReturnType<Resvg["render"]> | null = null;
 
   try {
     resvg = new Resvg(svg, { logLevel: "error" });

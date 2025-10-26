@@ -35,7 +35,7 @@ export function initDeferredSentry(): void {
   });
 
   // Global error handler for uncaught exceptions
-  globalThis.window.addEventListener("error", (event) => {
+  globalThis.window.addEventListener("error", event => {
     Sentry.captureException(event.error, {
       contexts: {
         browser: {
@@ -49,7 +49,7 @@ export function initDeferredSentry(): void {
   });
 
   // Global handler for unhandled promise rejections
-  globalThis.window.addEventListener("unhandledrejection", (event) => {
+  globalThis.window.addEventListener("unhandledrejection", event => {
     Sentry.captureException(event.reason, {
       contexts: {
         browser: {

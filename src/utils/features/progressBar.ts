@@ -87,4 +87,3 @@ export function initProgressBar(): void {
   createProgressBar();
   updateScrollProgress();
 }
-

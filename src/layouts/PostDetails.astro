@@ -64,10 +64,7 @@ const layoutProps = {
 };
 
 // Get adjacent posts for navigation using centralized utility
-const { previous: prevPost, next: nextPost } = getAdjacentPosts(
-  posts,
-  post.id
-);
+const { previous: prevPost, next: nextPost } = getAdjacentPosts(posts, post.id);
 ---
 
 <Layout {...layoutProps}>

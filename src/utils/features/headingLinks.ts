@@ -25,7 +25,9 @@ export function initHeadingLinks(): void {
   // Find all headings that don't already have a link
   // (prevents duplicate links during re-initialization)
   const headings = Array.from(
-    document.querySelectorAll("h2:not(.has-heading-link), h3:not(.has-heading-link), h4:not(.has-heading-link), h5:not(.has-heading-link), h6:not(.has-heading-link)")
+    document.querySelectorAll(
+      "h2:not(.has-heading-link), h3:not(.has-heading-link), h4:not(.has-heading-link), h5:not(.has-heading-link), h6:not(.has-heading-link)"
+    )
   );
 
   for (const heading of headings) {
@@ -44,4 +46,3 @@ export function initHeadingLinks(): void {
     heading.appendChild(link);
   }
 }
-

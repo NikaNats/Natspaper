@@ -11,8 +11,12 @@ describe("ConcurrencyLimiter", () => {
     });
 
     it("should throw error if maxConcurrent < 1", () => {
-      expect(() => new ConcurrencyLimiter(0)).toThrow("maxConcurrent must be at least 1");
-      expect(() => new ConcurrencyLimiter(-1)).toThrow("maxConcurrent must be at least 1");
+      expect(() => new ConcurrencyLimiter(0)).toThrow(
+        "maxConcurrent must be at least 1"
+      );
+      expect(() => new ConcurrencyLimiter(-1)).toThrow(
+        "maxConcurrent must be at least 1"
+      );
     });
   });
 
@@ -52,11 +56,7 @@ describe("ConcurrencyLimiter", () => {
         return "result3";
       });
 
-      const promises = [
-        limiter.run(fn1),
-        limiter.run(fn2),
-        limiter.run(fn3),
-      ];
+      const promises = [limiter.run(fn1), limiter.run(fn2), limiter.run(fn3)];
 
       const [result1, result2, result3] = await Promise.all(promises);
 
@@ -105,11 +105,7 @@ describe("ConcurrencyLimiter", () => {
         return "result3";
       });
 
-      const promises = [
-        limiter.run(fn1),
-        limiter.run(fn2),
-        limiter.run(fn3),
-      ];
+      const promises = [limiter.run(fn1), limiter.run(fn2), limiter.run(fn3)];
 
       const [result1, result2, result3] = await Promise.all(promises);
 
@@ -254,7 +250,10 @@ describe("ConcurrencyLimiter", () => {
   });
 });
 
-async function limitedDelay(limiter: ConcurrencyLimiter, value: number): Promise<number> {
+async function limitedDelay(
+  limiter: ConcurrencyLimiter,
+  value: number
+): Promise<number> {
   return limiter.run(async () => {
     await delay(5);
     return value;

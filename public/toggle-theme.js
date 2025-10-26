@@ -42,7 +42,9 @@ class ThemeStorageManager {
         return localStorage.getItem(key);
       } catch (e) {
         // eslint-disable-next-line no-console
-        console.debug(`Theme: Failed to get from localStorage, using memory: ${e}`);
+        console.debug(
+          `Theme: Failed to get from localStorage, using memory: ${e}`
+        );
         return this.memoryStorage[key] || null;
       }
     }
