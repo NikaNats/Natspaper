@@ -83,7 +83,7 @@ export default defineConfig({
   webServer: {
     command: 'pnpm run dev',
     url: 'http://localhost:4321',
-    reuseExistingServer: !process.env['CI'],
+    reuseExistingServer: false, // Always start fresh to avoid conflicts
     timeout: process.env['CI'] ? 300 * 1000 : 120 * 1000, // 5 min in CI, 2 min locally
     stdout: 'pipe',
     stderr: 'pipe',
