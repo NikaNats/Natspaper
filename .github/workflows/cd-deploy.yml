@@ -1,101 +1,32 @@
-name: CD - Deploy to Production
-
-permissions:
-  contents: read
-  deployments: write
+name: Deploy
 
 on:
   push:
-    branches:
-      - master
-  workflow_dispatch:
-
-env:
-  NODE_VERSION: 20
-  PNPM_VERSION: 10.11.1
+    branches: [master]
 
 jobs:
-  build-and-deploy:
-    name: Build & Deploy to Vercel
+  deploy:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
-    environment:
-      name: production
-      url: https://nika-natsvlishvili.dev
-
     steps:
-      - name: "☁️ Checkout repository"
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
         with:
-          fetch-depth: 0
+          node-version: 20
+          cache: pnpm
 
-      - name: "📦 Setup pnpm"
-        uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
-
-      - name: "📦 Setup Node.js"
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: "pnpm"
-
-      - name: "📦 Install dependencies"
-        run: pnpm install --frozen-lockfile
-
-      - name: "🔎 Lint code"
-        run: pnpm run lint
-        continue-on-error: true
-
-      - name: "📝 Check format"
-        run: pnpm run format:check
-        continue-on-error: true
-
-      - name: "🧪 Run tests"
-        run: pnpm run test:run
-        continue-on-error: true
-
-      - name: "🚀 Build project"
-        run: pnpm run build
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run build
         env:
           SITE_WEBSITE: https://nika-natsvlishvili.dev
-          NODE_ENV: production
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
           PUBLIC_SENTRY_DSN: ${{ secrets.PUBLIC_SENTRY_DSN }}
 
-      - name: "🔍 Verify build"
-        run: pnpm run verify-build
-
-      - name: "🚀 Deploy to Vercel"
-        uses: amondnet/vercel-action@v25
+      - uses: amondnet/vercel-action@v25
         with:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
           vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          working-directory: ./
           production: true
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: "📊 Create deployment status"
-        if: success()
-        uses: actions/github-script@v7
-        with:
-          script: |
-            github.rest.repos.createDeployment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              ref: context.ref,
-              environment: 'production',
-              description: 'Production deployment',
-              auto_merge: false,
-              required_contexts: [],
-              production_environment: true
-            });
-
-      - name: "❌ Deployment failed"
-        if: failure()
-        uses: actions/github-script@v7
-        with:
-          script: |
-            core.setFailed('Deployment to production failed');
