@@ -1,11 +1,9 @@
 # Deploy Setup - Step by Step
 
-## ✅ Done
+## ✅ Setup Instructions
 
-- Project linked to Vercel: `natspaper`
-- Project ID: `prj_FJaYQztX23uRhGXPxqjklX0W1LQC`
-- Org ID: `team_oIAa5AHZVDCUDA2bORL4unSv`
-- GitHub connected ✓
+- Link your project to Vercel first
+- GitHub should be connected
 
 ## 🔧 Next Step: Add GitHub Secrets
 
@@ -20,10 +18,16 @@ Add these 3 secrets:
 - Add as secret: `VERCEL_TOKEN`
 
 ### 2. VERCEL_ORG_ID
-- Value: `team_oIAa5AHZVDCUDA2bORL4unSv`
+- Go to: https://vercel.com/account/settings
+- Find your Team ID / Org ID in account settings
+- Copy the value
+- Add as secret: `VERCEL_ORG_ID`
 
 ### 3. VERCEL_PROJECT_ID
-- Value: `prj_FJaYQztX23uRhGXPxqjklX0W1LQC`
+- Go to: Your project on Vercel → Settings → General
+- Find "Project ID" in the project settings
+- Copy the value
+- Add as secret: `VERCEL_PROJECT_ID`
 
 ## 🚀 Deploy
 
