@@ -1,0 +1,96 @@
+name: ✅ PR Checks
+
+permissions:
+  contents: read
+  pull-requests: write
+  checks: write
+
+on:
+  pull_request:
+    types:
+      - opened
+      - edited
+      - synchronize
+      - reopened
+      - ready_for_review
+
+jobs:
+  validate-pr:
+    name: Validate PR
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: "☁️ Checkout repository"
+        uses: actions/checkout@v4
+
+      - name: "✅ Check PR title format"
+        uses: amannn/action-semantic-pull-request@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          types: |
+            feat
+            fix
+            docs
+            style
+            refactor
+            perf
+            test
+            chore
+            ci
+            revert
+          requireScope: false
+
+  build-check:
+    name: Build Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    if: ${{ !github.event.pull_request.draft }}
+
+    steps:
+      - name: "☁️ Checkout repository"
+        uses: actions/checkout@v4
+
+      - name: "📦 Setup pnpm"
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.11.1
+
+      - name: "📦 Setup Node.js"
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "pnpm"
+
+      - name: "📦 Install dependencies"
+        run: pnpm install --frozen-lockfile
+
+      - name: "🔎 Lint code"
+        run: pnpm run lint
+
+      - name: "📝 Check format"
+        run: pnpm run format:check
+
+      - name: "📊 Type check"
+        run: pnpm run astro check
+
+      - name: "🚀 Build project"
+        run: pnpm run build
+
+  comment-pr:
+    name: Add PR Comment
+    runs-on: ubuntu-latest
+    if: github.event.action == 'opened'
+
+    steps:
+      - name: "💬 Add welcome comment"
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '## 🎉 Thanks for the PR!\n\n**Automated checks running:**\n- ✅ Build verification\n- ✅ Lint & formatting\n- ✅ Type checking\n- ✅ Unit tests\n- ✅ Security scanning\n\n**Review checklist:**\n- [ ] Code follows project style\n- [ ] Tests added/updated\n- [ ] Documentation updated\n- [ ] No breaking changes\n- [ ] Commit messages clear\n\nNeed help? Check our CONTRIBUTING.md'
+            });
