@@ -73,6 +73,8 @@ jobs:
       - name: Run E2E Tests
         run: pnpm test:e2e
         continue-on-error: false
+        env:
+          SITE_WEBSITE: https://natspaper.vercel.app/
 
   Deploy-Production:
     needs: pre-deployment-checks
@@ -97,7 +99,7 @@ jobs:
       - name: Build Project
         run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
         env:
-          SITE_WEBSITE: https://nika-natsvlishvili.dev
+          SITE_WEBSITE: https://natspaper.vercel.app/
 
       # Analyze Production Build Size
       - name: Analyze Production Build Size
