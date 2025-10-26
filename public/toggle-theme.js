@@ -25,8 +25,9 @@ class ThemeStorageManager {
       localStorage.setItem(test, test);
       localStorage.removeItem(test);
       return true;
-    } catch (e) {
+    } catch {
       // localStorage is not available (restricted context, quota exceeded, etc.)
+      // eslint-disable-next-line no-console
       console.debug("Theme: localStorage unavailable, using in-memory storage");
       return false;
     }
@@ -40,6 +41,7 @@ class ThemeStorageManager {
       try {
         return localStorage.getItem(key);
       } catch (e) {
+        // eslint-disable-next-line no-console
         console.debug(`Theme: Failed to get from localStorage, using memory: ${e}`);
         return this.memoryStorage[key] || null;
       }
@@ -55,6 +57,7 @@ class ThemeStorageManager {
       try {
         localStorage.setItem(key, value);
       } catch (e) {
+        // eslint-disable-next-line no-console
         console.debug(`Theme: Failed to set localStorage, using memory: ${e}`);
         this.memoryStorage[key] = value;
       }
@@ -77,7 +80,7 @@ function getPreferTheme() {
   if (primaryColorScheme) return primaryColorScheme;
 
   // return user device's prefer color scheme
-  return window.matchMedia("(prefers-color-scheme: dark)").matches
+  return globalThis.matchMedia("(prefers-color-scheme: dark)").matches
     ? "dark"
     : "light";
 }
@@ -90,7 +93,7 @@ function setPreference() {
 }
 
 function reflectPreference() {
-  document.firstElementChild.setAttribute("data-theme", themeValue);
+  document.firstElementChild?.dataset.theme = themeValue;
 
   document.querySelector("#theme-btn")?.setAttribute("aria-label", themeValue);
 
@@ -100,7 +103,7 @@ function reflectPreference() {
   // Check if the body element exists before using getComputedStyle
   if (body) {
     // Get the computed styles for the body element
-    const computedStyles = window.getComputedStyle(body);
+    const computedStyles = globalThis.getComputedStyle(body);
 
     // Get the background color property
     const bgColor = computedStyles.backgroundColor;
@@ -146,7 +149,7 @@ document.addEventListener("astro:before-swap", event => {
 });
 
 // sync with system changes
-window
+globalThis
   .matchMedia("(prefers-color-scheme: dark)")
   .addEventListener("change", ({ matches: isDark }) => {
     themeValue = isDark ? "dark" : "light";

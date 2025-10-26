@@ -44,13 +44,6 @@ export interface Props {
     };
   };
 
-  interface SentryInterface {
-    captureException: (
-      error: unknown,
-      options?: Record<string, unknown>
-    ) => void;
-  }
-
   class ErrorBoundary extends HTMLElement {
     private errorContainer: HTMLDivElement | null = null;
 
