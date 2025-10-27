@@ -1,88 +1,27 @@
 ---
 /**
- * Analytics & Error Tracking Component
- * Initializes Sentry and other analytics services
+ * ⚠️ DEPRECATED - This component is no longer used
  *
- * Should be placed in the <head> of your main layout
+ * This component is DEPRECATED and should not be used in new code.
+ * Sentry client-side initialization has been consolidated in src/utils/sentry-client-init.ts
+ * and is now called directly from Layout.astro.
  *
- * Usage in Layout.astro:
- * <head>
- *   <Analytics />
- * </head>
+ * MIGRATION GUIDE:
+ * ═══════════════════════════════════════════════════════════════
+ * The initialization logic previously in this component has been moved to:
+ * - src/utils/sentry-client-init.ts (new consolidated utility)
+ * - src/layouts/Layout.astro (imports and calls initDeferred())
+ *
+ * REASON FOR REMOVAL:
+ * - Consolidation of scattered Sentry initialization logic
+ * - Better clarity on when and where error tracking is initialized
+ * - Improved maintainability with single source of truth
+ * - Clear performance strategy: deferred initialization after page load
+ *
+ * See src/utils/sentry-client-init.ts for the new implementation.
+ * See docs/SENTRY_SETUP.md for the complete setup guide.
  */
 ---
 
-<script>
-  /**
-   * Initialize client-side error tracking with Sentry
-   * Captures unhandled errors, promise rejections, and other events
-   */
+<!-- This component is deprecated and should not be used -->
 
-  const initializeSentryErrorTracking = () => {
-    // Only run in browser
-    if (!globalThis.window) {
-      return;
-    }
-
-    const sentryDsn = import.meta.env.PUBLIC_SENTRY_DSN;
-    if (!sentryDsn) {
-      return; // Sentry not configured
-    }
-
-    // Set up error event listener
-    globalThis.window.addEventListener("error", (event: ErrorEvent) => {
-      const sentry = (
-        globalThis as unknown as Record<
-          string,
-          {
-            captureException: (
-              error: unknown,
-              options?: Record<string, unknown>
-            ) => void;
-          }
-        >
-      ).__SENTRY__;
-      if (sentry?.captureException) {
-        sentry.captureException(event.error, {
-          contexts: {
-            browser: {
-              url: globalThis.window?.location.href,
-              userAgent: globalThis.navigator?.userAgent,
-            },
-          },
-        });
-      }
-    });
-
-    // Set up unhandled promise rejection listener
-    globalThis.window.addEventListener(
-      "unhandledrejection",
-      (event: PromiseRejectionEvent) => {
-        const sentry = (
-          globalThis as unknown as Record<
-            string,
-            {
-              captureException: (
-                error: unknown,
-                options?: Record<string, unknown>
-              ) => void;
-            }
-          >
-        ).__SENTRY__;
-        if (sentry?.captureException) {
-          sentry.captureException(event.reason, {
-            contexts: {
-              browser: {
-                url: globalThis.window?.location.href,
-                userAgent: globalThis.navigator?.userAgent,
-              },
-            },
-          });
-        }
-      }
-    );
-  };
-
-  // Initialize when script loads
-  initializeSentryErrorTracking();
-</script>

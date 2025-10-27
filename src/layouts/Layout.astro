@@ -143,29 +143,12 @@ const structuredData = {
   <body>
     <slot />
 
-    <!-- Non-critical path: Initialize error tracking and analytics after page renders -->
-    <!-- Defer these to not block initial page paint and content delivery -->
+    <!-- Initialize error tracking after page load -->
     <script>
-      import { initDeferredSentry } from "@/utils/sentry-client-deferred";
+      import { initDeferred } from "@/utils/sentry-client-init";
 
-      /**
-       * Initialize non-critical features after page has fully loaded
-       * This ensures the critical rendering path is not blocked by:
-       * - Sentry error tracking initialization
-       * - Analytics scripts
-       * - Third-party integrations
-       *
-       * Benefits:
-       * - Faster First Contentful Paint (FCP)
-       * - Better Time to Interactive (TTI)
-       * - Improved Largest Contentful Paint (LCP)
-       */
       window.addEventListener("load", () => {
-        // Initialize Sentry error tracking
-        initDeferredSentry();
-
-        // Additional non-critical initialization can be added here
-        // Example: initAnalytics(), initThirdPartyIntegrations()
+        initDeferred();
       });
     </script>
   </body>

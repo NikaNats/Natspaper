@@ -1,51 +1,30 @@
-import * as Sentry from "@sentry/astro";
-
 /**
- * Global error handler script that captures client-side errors
- * This script should be loaded in the HTML head
+ * ⚠️ DEPRECATED - This file has been consolidated
+ *
+ * This file is DEPRECATED and should not be used in new code.
+ * All functionality has been moved to src/utils/sentry-client-init.ts
+ *
+ * MIGRATION GUIDE:
+ * ═══════════════════════════════════════════════════════════════
+ * If you were using this file for immediate initialization:
+ *
+ * OLD:
+ *   import { init } from "@/utils/sentry-client";
+ *   init();
+ *
+ * NEW:
+ *   import { init } from "@/utils/sentry-client-init";
+ *   init();
+ *
+ * REASON FOR CONSOLIDATION:
+ * - Unified client-side Sentry initialization in one location
+ * - Clear distinction between immediate and deferred initialization strategies
+ * - Improved maintainability and discoverability
+ * - Additional utility functions: captureException, captureMessage, setUser, addBreadcrumb
+ *
+ * See src/utils/sentry-client-init.ts for the new implementation.
+ * See docs/SENTRY_SETUP.md for the complete setup guide.
  */
 
-if (globalThis.window) {
-  // Initialize Sentry if DSN is provided
-  if (import.meta.env.PUBLIC_SENTRY_DSN) {
-    Sentry.init({
-      dsn: import.meta.env.PUBLIC_SENTRY_DSN,
-      environment: import.meta.env.MODE || "production",
-      tracesSampleRate: import.meta.env.MODE === "production" ? 0.1 : 1,
-      replaysSessionSampleRate: 0.1,
-      replaysOnErrorSampleRate: 1,
-    });
-  }
-
-  // Global error handler
-  globalThis.window?.addEventListener("error", event => {
-    if (import.meta.env.PUBLIC_SENTRY_DSN) {
-      Sentry.captureException(event.error, {
-        contexts: {
-          browser: {
-            url: globalThis.window?.location.href,
-            userAgent: globalThis.navigator?.userAgent,
-          },
-        },
-      });
-    }
-    // eslint-disable-next-line no-console
-    console.error("Error:", event.error);
-  });
-
-  // Unhandled promise rejection handler
-  globalThis.window?.addEventListener("unhandledrejection", event => {
-    if (import.meta.env.PUBLIC_SENTRY_DSN) {
-      Sentry.captureException(event.reason, {
-        contexts: {
-          browser: {
-            url: globalThis.window?.location.href,
-            userAgent: globalThis.navigator?.userAgent,
-          },
-        },
-      });
-    }
-    // eslint-disable-next-line no-console
-    console.error("Unhandled rejection:", event.reason);
-  });
-}
+// @deprecated Use src/utils/sentry-client-init.ts instead
+export { init } from "./sentry-client-init";
