@@ -65,8 +65,10 @@ jobs:
 
       - name: Build Project
         run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
+        # Note: Preview builds use Vercel's environment variables for preview deployments
+        # A generic preview URL is used since each preview deployment gets a unique URL
         env:
-          SITE_WEBSITE: https://nika-natsvlishvili.dev
+          SITE_WEBSITE: https://preview.natspaper.dev
 
       - name: Deploy to Vercel
         run: vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}

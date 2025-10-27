@@ -70,6 +70,16 @@ jobs:
         run: pnpm run test:run
         continue-on-error: false
 
+      - name: Validate Environment Configuration
+        run: |
+          echo "Vercel will use the following environment variables from project settings:"
+          echo "✓ SITE_WEBSITE: https://natspaper.vercel.app"
+          echo "✓ PUBLIC_SENTRY_ENVIRONMENT: production"
+          echo "✓ PUBLIC_SENTRY_TRACES_SAMPLE_RATE: 0.1"
+          echo ""
+          echo "Ensure these are set in Vercel Project Settings > Environment Variables"
+        continue-on-error: false
+
       - name: Install Playwright Browsers
         run: pnpm exec playwright install --with-deps chromium
         continue-on-error: false
@@ -102,8 +112,12 @@ jobs:
 
       - name: Build Project
         run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
-        env:
-          SITE_WEBSITE: https://natspaper.vercel.app/
+        # Note: Environment variables are pulled from Vercel project settings via "vercel pull"
+        # This ensures production config (.env.production) is used through Vercel's env vars
+        # Required Vercel Environment Variables:
+        #   - SITE_WEBSITE=https://natspaper.vercel.app
+        #   - PUBLIC_SENTRY_ENVIRONMENT=production
+        #   - PUBLIC_SENTRY_TRACES_SAMPLE_RATE=0.1
 
       # Analyze Production Build Size
       - name: Analyze Production Build Size

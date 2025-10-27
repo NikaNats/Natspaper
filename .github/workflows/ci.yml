@@ -34,9 +34,11 @@ jobs:
         run: pnpm astro check
         continue-on-error: false
 
-      - name: Build Project
-        run: pnpm astro build
+      - name: Build Project (Production Configuration)
+        run: pnpm run build:prod
         continue-on-error: false
+        env:
+          SITE_WEBSITE: https://natspaper.vercel.app
 
       # Test Checks
       - name: Run Unit Tests
