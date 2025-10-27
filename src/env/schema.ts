@@ -44,8 +44,7 @@ export const ENV_DEFINITIONS = {
     required: true,
     access: "secret" as const,
     context: "server" as const,
-    description:
-      "Production domain URL used for sitemaps and canonical URLs",
+    description: "Production domain URL used for sitemaps and canonical URLs",
     example: "https://natspaper.vercel.app",
     docs: "Must be a valid URL including protocol (https://)",
   },

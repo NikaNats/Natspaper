@@ -56,7 +56,10 @@ class EnvironmentManager {
     if (this.env.NODE_ENV) {
       const def = ENV_DEFINITIONS.NODE_ENV;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      if (def.type === "enum" && !def.values?.includes(this.env.NODE_ENV as any)) {
+      if (
+        def.type === "enum" &&
+        !def.values?.includes(this.env.NODE_ENV as any)
+      ) {
         this.errors.push({
           variable: "NODE_ENV",
           severity: "error",
@@ -200,9 +203,7 @@ export function getEnv<K extends keyof EnvSchema>(
 /**
  * Get environment variable or throw error
  */
-export function getEnvOrThrow<K extends keyof EnvSchema>(
-  key: K
-): EnvSchema[K] {
+export function getEnvOrThrow<K extends keyof EnvSchema>(key: K): EnvSchema[K] {
   return envManager.getOrThrow(key);
 }
 

@@ -46,8 +46,7 @@ export function getSentryConfig(context: "client" | "server"): SentryConfig {
 
   // Parse sampling rates
   const tracesSampleRate = parseFloat(
-    getEnv("PUBLIC_SENTRY_TRACES_SAMPLE_RATE") ||
-      (isDev ? "1" : "0.1")
+    getEnv("PUBLIC_SENTRY_TRACES_SAMPLE_RATE") || (isDev ? "1" : "0.1")
   );
 
   const replaysSessionSampleRate = parseFloat(
