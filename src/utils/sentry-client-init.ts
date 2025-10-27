@@ -17,11 +17,23 @@ interface SentryClientConfig {
  * Get Sentry configuration from environment variables
  */
 function getSentryConfig(): SentryClientConfig {
-  const environment = (import.meta.env.PUBLIC_SENTRY_ENVIRONMENT || import.meta.env.MODE || "production") as string;
+  const environment = (import.meta.env.PUBLIC_SENTRY_ENVIRONMENT ||
+    import.meta.env.MODE ||
+    "production") as string;
   const isProduction = environment === "production";
-  const tracesSampleRate = parseFloat(import.meta.env.PUBLIC_SENTRY_TRACES_SAMPLE_RATE || (isProduction ? "0.1" : "1"));
-  const replaysSessionSampleRate = parseFloat(import.meta.env.PUBLIC_SENTRY_REPLAYS_SESSION_SAMPLE_RATE || "0.1");
-  const replaysOnErrorSampleRate = parseFloat(import.meta.env.PUBLIC_SENTRY_REPLAYS_ON_ERROR_SAMPLE_RATE || "1");
+
+  const tracesSampleRate = parseFloat(
+    import.meta.env.PUBLIC_SENTRY_TRACES_SAMPLE_RATE ||
+      (isProduction ? "0.1" : "1")
+  );
+
+  const replaysSessionSampleRate = parseFloat(
+    import.meta.env.PUBLIC_SENTRY_REPLAYS_SESSION_SAMPLE_RATE || "0.1"
+  );
+
+  const replaysOnErrorSampleRate = parseFloat(
+    import.meta.env.PUBLIC_SENTRY_REPLAYS_ON_ERROR_SAMPLE_RATE || "1"
+  );
 
   return {
     dsn: import.meta.env.PUBLIC_SENTRY_DSN || "",
@@ -32,6 +44,9 @@ function getSentryConfig(): SentryClientConfig {
   };
 }
 
+/**
+ * Attach global error event listener
+ */
 function attachErrorHandler(): void {
   if (!globalThis.window) {
     return;
@@ -48,34 +63,43 @@ function attachErrorHandler(): void {
         },
       },
     });
+
     // eslint-disable-next-line no-console
     console.error("[Sentry] Error:", event.error);
   });
 }
 
+/**
+ * Attach unhandled promise rejection event listener
+ */
 function attachUnhandledRejectionHandler(): void {
   if (!globalThis.window) {
     return;
   }
 
-  globalThis.window.addEventListener("unhandledrejection", (event: PromiseRejectionEvent) => {
-    Sentry.captureException(event.reason, {
-      level: "error",
-      tags: { handler: "window.unhandledrejection" },
-      contexts: {
-        browser: {
-          url: globalThis.window?.location.href,
-          userAgent: globalThis.navigator?.userAgent,
+  globalThis.window.addEventListener(
+    "unhandledrejection",
+    (event: PromiseRejectionEvent) => {
+      Sentry.captureException(event.reason, {
+        level: "error",
+        tags: { handler: "window.unhandledrejection" },
+        contexts: {
+          browser: {
+            url: globalThis.window?.location.href,
+            userAgent: globalThis.navigator?.userAgent,
+          },
         },
-      },
-    });
-    // eslint-disable-next-line no-console
-    console.error("[Sentry] Unhandled rejection:", event.reason);
-  });
+      });
+
+      // eslint-disable-next-line no-console
+      console.error("[Sentry] Unhandled rejection:", event.reason);
+    }
+  );
 }
 
 /**
  * Initialize Sentry immediately (blocks rendering)
+ * Use this when error tracking must be active before page content renders
  */
 export function init(): void {
   if (!globalThis.window) {
@@ -115,6 +139,7 @@ export function init(): void {
 
 /**
  * Initialize Sentry after page load (recommended)
+ * This prevents blocking the critical rendering path
  */
 export function initDeferred(): void {
   if (!globalThis.window) {
@@ -155,14 +180,20 @@ export function initDeferred(): void {
 /**
  * Manually capture an exception
  */
-export function captureException(error: unknown, options?: Record<string, unknown>): void {
+export function captureException(
+  error: unknown,
+  options?: Record<string, unknown>
+): void {
   Sentry.captureException(error, options);
 }
 
 /**
  * Manually capture a message
  */
-export function captureMessage(message: string, level: "fatal" | "error" | "warning" | "info" | "debug" = "info"): void {
+export function captureMessage(
+  message: string,
+  level: "fatal" | "error" | "warning" | "info" | "debug" = "info"
+): void {
   Sentry.captureMessage(message, level);
 }
 

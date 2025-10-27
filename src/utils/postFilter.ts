@@ -15,7 +15,10 @@ dayjs.extend(timezone);
  * @param tz - IANA timezone string (e.g., "Asia/Bangkok", "America/New_York")
  * @returns UTC timestamp in milliseconds
  */
-function getUtcTimestampForTimezone(dateString: string | Date, tz: string): number {
+function getUtcTimestampForTimezone(
+  dateString: string | Date,
+  tz: string
+): number {
   try {
     const timestamp = dayjs(dateString).tz(tz).valueOf();
     return Number.isNaN(timestamp) ? Date.now() : timestamp;
