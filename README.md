@@ -1,8 +1,6 @@
-# Nika Natsvlishvili: The Natspaper Blog
+# Natspaper
 
-**Natspaper** is my personal, high-performance blog and portfolio platform built entirely with **Astro**. It is designed for maximum speed, maintainability, and security, using the **Static Site Generation (SSG)** paradigm to achieve unparalleled metrics in Core Web Vitals.
-
-The aesthetic follows a **Scholarly Minimalist** design philosophy, perfect for technical articles, complex architectural discussions, and academic content featuring **LaTeX** math rendering.
+A minimal, high-performance blog platform built with **Astro** and **TypeScript**. Designed for technical writing, academic content, and flawless LaTeX math rendering.
 
 [![Natspaper Version](https://img.shields.io/badge/Natspaper-5.5.0-blue)](https://github.com/NikaNats/Natspaper)
 [![Astro Version](https://img.shields.io/badge/Astro-5.15.1-E53512?logo=astro)](https://astro.build/)
@@ -10,298 +8,261 @@ The aesthetic follows a **Scholarly Minimalist** design philosophy, perfect for 
 [![Test Quality](https://img.shields.io/badge/QA%20Pipeline-Passing-2ECC71)](./tests)
 [![License](https://img.shields.io/badge/License-MIT-green)](./LICENSE)
 
----
+## Key Highlights
 
-## 💡 Core Architectural Principles
+- **Static-First Architecture:** Pre-rendered HTML with zero runtime server required.
+- **Minimal JavaScript:** Only interactive components (theme toggle, search) ship with JS.
+- **LaTeX Support:** Flawless rendering of inline (`$E=mc^2$`) and block math via KaTeX.
+- **Dynamic Open Graph Images:** Auto-generated social media preview cards for superior sharing.
+- **Dark/Light Theme:** Automatic preference detection with persistence and no FOUC (Flash of Unstyled Content).
+- **Full-Text Search:** Blazing-fast, client-side indexing and search with Pagefind.
+- **Comprehensive Testing:** Unit, integration, and E2E test coverage with Vitest & Playwright.
+- **Security Hardened:** Strict Content Security Policy (CSP) headers, Sentry monitoring, and type-safe content validation.
 
-This platform operates on a **Static-First** architectural model to ensure stability and top-tier performance.
+## 🚀 Quick Start
 
-| Principle                        | Description                                                                                                                                     | Nika's Benefit                                                                                            |
-| :------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------- |
-| **Compile-Time Rendering (SSG)** | All HTML is generated once during the `pnpm build` phase. There is no server-side rendering (SSR) at request time.                              | **Maximum Security** (no runtime server) and **Zero Hosting Costs** (served instantly from a Vercel CDN). |
-| **Astro Islands**                | Minimal client-side JavaScript is shipped. Only interactive UI elements (like the theme toggle or search bar) are "hydrated" (shipped with JS). | **Lightning Fast TTI** and minimal browser resource consumption.                                          |
-| **Content as Data**              | All blog content resides in type-safe Markdown files (`src/data`), validated by TypeScript schemas.                                             | Guarantees data integrity and predictability across the build pipeline.                                   |
-| **Concurrency Control**          | A custom `ConcurrencyLimiter` serializes resource-heavy tasks (e.g., dynamic OG image generation with Resvg/Satori) during the build.           | Prevents **Out-of-Memory (OOM) errors** and stabilizes the CI/CD pipeline under heavy load.               |
+### Prerequisites
 
-## 🌟 Key Features
-
-### Content & Academic Focus
-
-- **📝 Full LaTeX Support:** Flawless rendering of inline (`$E=mc^2$`) and block mathematical equations using **KaTeX**.
-- **🖼️ Dynamic OG Images:** Automated generation of visually consistent Open Graph images based on the post title for superior social media sharing.
-- **🏷️ Efficient Content Management:** Content organization by tags and publication dates, including timezone-aware scheduled post filtering (`Asia/Tbilisi`).
-
-### Performance & User Experience
-
-- **⚡ Zero-JS Default:** Achieves best-in-class Lighthouse scores by shipping only necessary code.
-- **🌓 Seamless Theming:** Automatic Dark/Light mode toggle with persistence, preventing FOUC (Flash of Unstyled Content).
-- **🔍 Static Search (Pagefind):** Fast, client-side, dependency-free search functionality indexed during build time.
-
-### Security & Maintainability
-
-- **🧪 Robust QA Pipeline:** Integration of **Vitest** (Unit/Integration) and **Playwright** (E2E) ensures platform stability and prevents regressions.
-- **🔒 Hardened Security:** Custom middleware applies strict **Content Security Policy (CSP)** headers to mitigate XSS and clickjacking risks.
-- **📊 Sentry Integration:** Integrated monitoring for client-side and server-side error tracking.
-
-## ⚙️ Tech Stack & Dependencies
-
-| Category          | Tool                                                                                     | Functionality                                    |
-| :---------------- | :--------------------------------------------------------------------------------------- | :----------------------------------------------- |
-| **Framework**     | [Astro](https://astro.build/) v5.15                                                      | Core SSG Engine                                  |
-| **Language**      | [TypeScript](https://www.typescriptlang.org/) v5.9                                       | Type Safety and Code Reliability                 |
-| **Styling**       | [Tailwind CSS](https://tailwindcss.com/) v4.1                                            | Utility-First Theming and Layout                 |
-| **Math**          | [KaTeX](https://katex.org/) v0.16                                                        | Fast Mathematical Typesetting                    |
-| **Testing**       | [Vitest](https://vitest.dev/) / [Playwright](https://playwright.dev/)                    | Comprehensive Unit, Integration, and E2E Testing |
-| **Monitoring**    | [Sentry](https://sentry.io/)                                                             | Performance and error tracking                   |
-| **OG Generation** | [Satori](https://github.com/vercel/satori) / [Resvg](https://github.com/yisibl/resvg-js) | Generates PNGs from HTML/CSS during build        |
-
-## 📋 Prerequisites
-
-- [Node.js](https://nodejs.org/) v18 or higher
-- [pnpm](https://pnpm.io/) (managed by Corepack)
+- Node.js v18 or higher
+- [pnpm](https://pnpm.io/) (or run `npm install -g pnpm`)
 - [Git](https://git-scm.com/)
 
-## 🛠️ Getting Started
-
-### 1. Installation
+### Setup (5 minutes)
 
 ```bash
-# Clone the repository
+# 1. Clone the repository
 git clone https://github.com/NikaNats/Natspaper.git
 cd natspaper
 
-# Install dependencies
+# 2. Install dependencies
 pnpm install
 
-# Note: This project uses pnpm for package management.
-# If you don't have pnpm installed, install it via:
-# npm install -g pnpm
-```
+# 3. Set up your local environment file (for secrets and local settings)
+# This command copies the template to a local file that is ignored by Git.
+cp .env.example .env.local
 
-### 2. Local Development
-
-```bash
-# Start the development server (uses .env.development)
+# 4. Start the development server
 pnpm dev
-# Access at http://localhost:4321
-
-# The development environment is pre-configured with:
-# - SITE_WEBSITE: http://localhost:4321
-# - Full error tracing enabled (100%)
-# - All development features active
 ```
 
-# - 100% error tracing for debugging
+Open `http://localhost:4321` in your browser. You can now start editing files in the `src/` directory.
 
-````
+## 📋 Common Commands
 
-### 3. Production Build
+| Command              | Purpose                                      |
+| :------------------- | :------------------------------------------- |
+| `pnpm dev`           | Start the development server with hot-reloading. |
+| `pnpm build`         | Create a production-ready build in the `/dist` directory. |
+| `pnpm preview`       | Preview the local production build before deploying. |
+| `pnpm test:run`      | Run all unit and integration tests. |
+| `pnpm test:e2e`      | Run all end-to-end browser tests. |
+| `pnpm lint`          | Check the codebase for linting errors. |
+| `pnpm format:check`  | Check for code formatting inconsistencies. |
 
-To generate the optimized static files (HTML, CSS, assets, and the Pagefind search index):
+## 📚 Tech Stack
 
-```bash
-# Production build (uses .env.production)
-pnpm build:prod
+| Component | Technology                                              | Version |
+| :-------- | :------------------------------------------------------ | :------ |
+| **Core**  | [Astro](https://astro.build/)                           | 5.15+   |
+| **Lang**  | [TypeScript](https://www.typescriptlang.org/)           | 5.9+    |
+| **Style** | [Tailwind CSS](https://tailwindcss.com/)                | 4.1+    |
+| **Math**  | [KaTeX](https://katex.org/)                             | 0.16+   |
+| **Test**  | [Vitest](https://vitest.dev/) & [Playwright](https://playwright.dev/) | Latest |
+| **Ops**   | [Sentry](https://sentry.io/), [Pagefind](https://pagefind.app/) | Latest |
 
-# Or use the shorthand alias
-pnpm build
+## ⚙️ Configuration
 
-# Output is saved to the /dist directory.
-````
+### Environment Variables
 
-### 4. Preview Production Build
+This project uses a **layered environment variable system**. Never commit secrets to Git.
 
-To preview the production build locally before deployment:
+#### 1. Base Configuration (Committed to Git)
 
-```bash
-# Build and preview with production configuration
-pnpm preview
-# Access at http://localhost:3000 (or shown in terminal)
-```
+These files contain non-sensitive defaults for different environments:
 
-## 📝 Configuration
+- `.env.development` – Defaults for `pnpm dev`
+- `.env.production` – Defaults for `pnpm build`
 
-### Environment Files
+#### 2. Local Overrides (Git Ignored)
 
-This project uses **environment-specific configuration files** following the "one codebase, many configurations" principle.
-
-#### Development Environment (`.env.development`)
+To add secrets or override defaults locally, create a `.env.local` file (as shown in the setup instructions). This file is listed in `.gitignore` and will **not** be committed.
 
 ```env
-# Used when running: pnpm dev or pnpm build:dev
-SITE_WEBSITE=http://localhost:4321
-PUBLIC_SENTRY_ENVIRONMENT=development
-PUBLIC_SENTRY_TRACES_SAMPLE_RATE=1.0
+# .env.local – This file is NOT committed to Git
+# Add your Sentry DSNs or other secrets here for local development.
+PUBLIC_SENTRY_DSN=your_public_dsn_here
+SENTRY_DSN=your_server_dsn_here
+SENTRY_AUTH_TOKEN=your_auth_token_here
 ```
 
-**Use this for:**
+### Site Settings
 
-- Local development (`pnpm dev`)
-- Testing builds locally (`pnpm build:dev`)
+Global site settings are managed in `src/config.ts`. Edit this file to customize:
 
-#### Production Environment (`.env.production`)
+- **Author name, profile URL, and bio**
+- **Blog title, description, and OG image**
+- **Timezone:** Crucial for accurately filtering scheduled posts. Must be a valid IANA Time Zone identifier (e.g., `America/New_York`, `Asia/Tbilisi`)
+- **Feature flags** (e.g., `dynamicOgImage`, `lightAndDarkMode`)
 
-```env
-# Used when running: pnpm build:prod or pnpm preview
-SITE_WEBSITE=https://natspaper.vercel.app
-PUBLIC_SENTRY_ENVIRONMENT=production
-PUBLIC_SENTRY_TRACES_SAMPLE_RATE=0.1
-```
-
-**Use this for:**
-
-- Production builds (`pnpm build:prod`)
-- Production preview (`pnpm preview`)
-
-#### Template File (`.env.example`)
-
-A template showing all available environment variables. Used by new developers to understand the configuration structure.
-
-### Available npm Scripts
-
-| Script            | Environment | Purpose                                |
-| ----------------- | ----------- | -------------------------------------- |
-| `pnpm dev`        | Development | Start dev server with localhost config |
-| `pnpm build:dev`  | Development | Build with development configuration   |
-| `pnpm build:prod` | Production  | Full production build with pagefind    |
-| `pnpm build`      | Production  | Alias for `build:prod`                 |
-| `pnpm preview`    | Production  | Preview production build locally       |
-
-### Environment Variables Reference
-
-**Core Configuration:**
-
-- `SITE_WEBSITE` (Required): Your public domain URL used for RSS, Sitemaps, and canonical URLs
-  - Development: `http://localhost:4321`
-  - Production: `https://natspaper.vercel.app`
-
-**Optional Sentry Monitoring:**
-
-- `PUBLIC_SENTRY_DSN`: Client-side Sentry DSN (safe to expose)
-- `SENTRY_DSN`: Server-side Sentry DSN (kept private)
-- `SENTRY_AUTH_TOKEN`: For uploading source maps
-- `PUBLIC_SENTRY_ENVIRONMENT`: Environment label for Sentry
-- `PUBLIC_SENTRY_TRACES_SAMPLE_RATE`: Percentage of requests to trace (0.0 to 1.0)
-
-**Analytics & SEO:**
-
-- `PUBLIC_GOOGLE_SITE_VERIFICATION`: Google Search Console verification token
-
-See `.env.example` for the complete list of available variables.
-
-### Site Customization (`src/config.ts`)
-
-This central file controls global settings, author information, and feature flags.
-
-```typescript
-export const SITE = {
-  website: "...",
-  author: "Nika Natsvlishvili",
-  title: "Nika Natsvlishvili",
-  timezone: "Asia/Tbilisi",
-  dynamicOgImage: true,
-  // ... other flags (showArchives, lightAndDarkMode)
-} as const;
-```
-
-## 🧪 Quality Assurance & Testing
-
-All tests are run via the `pnpm test` family of scripts, as defined in `package.json`.
-
-| Test Type              | Tool              | Purpose                                                                                                                               | Command                           |
-| :--------------------- | :---------------- | :------------------------------------------------------------------------------------------------------------------------------------ | :-------------------------------- |
-| **Unit / Integration** | Vitest            | Validate core utilities (sorting, reading time, content grouping) and complex logic (font caching, concurrency control).              | `pnpm test:run`                   |
-| **End-to-End (E2E)**   | Playwright        | Simulate real user navigation, check accessibility, verify asset loading, and ensure interactive features work across major browsers. | `pnpm test:e2e`                   |
-| **Code Quality**       | ESLint / Prettier | Enforce strict code standards and formatting consistency.                                                                             | `pnpm lint` & `pnpm format:check` |
-| **Type Check**         | Astro Check       | Compile-time validation of all Astro components and TypeScript files.                                                                 | `pnpm astro check`                |
-
-## 🏗️ Project Structure Deep Dive
+## 🏗️ Project Structure
 
 ```
-natspaper/
-├── src/
-│   ├── components/      # Reusable Astro, React, or Svelte Islands
-│   ├── content/         # Astro Content Collections setup (DB schema definition)
-│   ├── data/            # Your Markdown blog posts (The "Database")
-│   ├── env/             # Centralized environment management (schema & loader)
-│   ├── layouts/         # Master page templates (Layout, Main, PostDetails)
-│   ├── middleware/      # Server-side security headers and Sentry pipeline
-│   ├── pages/           # Route definitions (e.g., /posts, /tags, /search)
-│   ├── styles/          # Theming, typography, and utility CSS
-│   └── utils/           # Critical business logic (Post sorting, slugify, OG generation)
-├── tests/               # Dedicated directory for all unit, integration, and e2e tests
-├── scripts/             # Node.js scripts for pipeline tasks (e.g., verify-build.js)
-├── .github/workflows/   # Full CI/CD automation and quality gates
-├── .env.development     # Development environment configuration
-├── .env.production      # Production environment configuration
-├── .env.example         # Template for environment variables
-└── astro.config.ts      # Main configuration hub
+src/
+├── components/        # Reusable Astro components (+ Islands)
+├── data/              # Blog posts (Markdown files)
+├── env/               # Environment variable validation schema
+├── layouts/           # Page templates (Layout, Main, PostDetails)
+├── middleware/        # Security headers, Sentry integration
+├── pages/             # Routes (/posts, /tags, /search, etc.)
+├── styles/            # Theming, typography, and utility CSS
+└── utils/             # Core business logic (sorting, slugs, OG generation)
+
+tests/
+├── unit/              # Vitest tests for individual utilities
+├── integration/       # Vitest tests for component workflows
+├── e2e-browser/       # Playwright tests for user interactions
+└── workflows/         # High-level automated test suites
+
+scripts/               # Node.js utilities for the build pipeline
 ```
+
+**Key directories to know:**
+
+- `src/data/blog/` – Add new posts here as Markdown files
+- `src/config.ts` – Site metadata and feature toggles
+- `src/styles/` – Global CSS and Tailwind overrides
+- `tests/` – All test files (unit, integration, E2E)
+
+## 🧪 Testing
+
+```bash
+# Run unit & integration tests (fast)
+pnpm test:run
+
+# Run end-to-end tests in a real browser (slower)
+pnpm test:e2e
+
+# Run all code quality checks
+pnpm lint && pnpm format:check
+
+# Validate all TypeScript and Astro types
+pnpm astro check
+```
+
+Test configurations are located in `vitest.config.ts` and `playwright.config.ts`.
 
 ## 🚀 Deployment
 
-The recommended deployment platform is **Vercel** due to its superior performance for static sites and functions-as-a-service architecture, directly supporting the project's build process.
+### Vercel (Recommended)
 
-### Vercel Setup
+1. Push your repository to GitHub, GitLab, or Bitbucket.
+2. Import the repository in your Vercel dashboard.
+3. Configure the environment variables in **Project Settings → Environment Variables**.
 
-1. **Connect Your Repository:** Push this project to GitHub and connect it to Vercel.
+**Required Variables:**
 
-2. **Configure Environment Variables in Vercel Dashboard:**
+```env
+SITE_WEBSITE = https://natspaper.vercel.app
+```
 
-   Go to **Project Settings → Environment Variables** and add:
+**Optional Sentry Monitoring** (add these to enable error tracking):
 
-   **Production Variables:**
+```env
+SENTRY_AUTH_TOKEN = your_sentry_auth_token
+SENTRY_DSN = your_sentry_server_dsn
+PUBLIC_SENTRY_DSN = your_sentry_public_dsn
+PUBLIC_SENTRY_ENVIRONMENT = production
+PUBLIC_SENTRY_TRACES_SAMPLE_RATE = 0.1
+```
 
-   ```
-   SITE_WEBSITE = https://natspaper.vercel.app
-   PUBLIC_SENTRY_ENVIRONMENT = production
-   PUBLIC_SENTRY_TRACES_SAMPLE_RATE = 0.1
-   ```
+The CI/CD pipelines in `.github/workflows/` will handle automated deployments on push.
 
-   **Optional Sentry Variables (if using error tracking):**
+### Docker
 
-   ```
-   SENTRY_AUTH_TOKEN = your_sentry_auth_token
-   SENTRY_DSN = your_sentry_server_dsn
-   PUBLIC_SENTRY_DSN = your_sentry_public_dsn
-   ```
-
-3. **Automatic Deployments:**
-   - The GitHub workflows (`.github/workflows/cd-deploy.yml` for production and `preview.yml` for preview) handle automated deployments on push
-   - Each push runs pre-deployment QA checks (linting, type checking, testing)
-   - Production builds use `pnpm run build:prod` which applies production environment configuration
-
-### Local Deployment Testing
-
-Before deploying to production, test the production build locally:
+A multi-stage `Dockerfile` is provided for standard container deployments using Nginx.
 
 ```bash
-# Build with production configuration
-pnpm build:prod
+docker build -t natspaper .
+docker run -p 8080:80 natspaper
+```
 
-# Preview the production build
+### Test Before Deploying
+
+```bash
+pnpm build
 pnpm preview
 ```
 
-If the build succeeds locally with `pnpm build:prod`, it will succeed on Vercel.
+If this works locally, it will work on Vercel.
 
-### Docker Fallback
+## 📖 Writing Blog Posts
 
-A multi-stage `Dockerfile` is provided for standard container deployments (Nginx serving static `/dist`).
+1. Create a new Markdown file in `src/data/blog/`.
+2. Add the frontmatter metadata at the top of the file. The `pubDatetime` is required and must be a full ISO 8601 timestamp.
 
-## 📄 License
+```yaml
+---
+title: "My First Post with LaTeX"
+author: "Your Name"
+# The 'Z' at the end indicates UTC. This is critical for timezone-aware scheduling.
+pubDatetime: 2025-10-28T10:00:00Z
+modDatetime: 2025-10-29T15:30:00Z # Optional: for updated posts
+description: "A brief and compelling description for SEO and social media previews."
+tags:
+  - "Astro"
+  - "Web Development"
+  - "LaTeX"
+---
 
-This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) file for details.
+# Your content starts here
 
-## 🙏 Acknowledgments
+This post demonstrates how to use inline LaTeX, like $E=mc^2$, and block equations:
 
-This project builds upon the robust ecosystem provided by Astro and the open-source community. Special thanks to the creators of KaTeX and Pagefind for their high-quality libraries.
+$$
+\int_0^{\infty} e^{-x^2} dx = \frac{\sqrt{\pi}}{2}
+$$
+```
 
-### 🎨 Inspiration & Background
+### Frontmatter Fields
+
+| Key | Required | Description |
+| :-- | :------- | :---------- |
+| `title` | Yes | The title of the post. |
+| `pubDatetime` | Yes | The publication date and time in ISO 8601 format (e.g., `2025-10-28T10:00:00Z`). The `Z` suffix indicates UTC. |
+| `description` | Yes | A short summary for SEO and social cards. |
+| `author` | No | The author's name (defaults to site author in `src/config.ts`). |
+| `modDatetime` | No | The date the post was last modified. |
+| `tags` | No | An array of tags for categorization. |
+| `draft` | No | Set to `true` to prevent the post from being published. |
+
+## 🏛️ Architecture Overview
+
+**Static-first design:**
+- All HTML pre-rendered at build time → zero runtime server needed
+- Content stored in Markdown files → version controlled and simple
+- Astro Islands → only interactive UI gets JavaScript
+- Pagefind indexing → fast, client-side search
+
+**Why this matters:**
+- ⚡ Instant page loads (no server latency)
+- 🔒 No server vulnerabilities to exploit
+- 💰 Free hosting (GitHub Pages, Vercel, Netlify)
+- 📈 Better SEO (pre-rendered HTML, instant rendering)
+
+**Build pipeline includes:**
+- Dynamic OG image generation (Satori + Resvg)
+- LaTeX math rendering (KaTeX)
+- Pagefind search indexing
+- Concurrency control (prevents OOM during heavy builds)
+
+## 🎨 Inspiration & Background
 
 Natspaper draws inspiration from several excellent open-source projects in the static site generation space:
 
 - **[Hugo PaperMod](https://github.com/adityatelange/hugo-PaperMod)**: A clean, fast Hugo theme that provided the foundational design philosophy for Natspaper's academic-inspired aesthetic and performance-first approach.
 - **[Astro Paper](https://github.com/satnaing/astro-paper)**: An Astro-based blog theme that demonstrated best practices for Astro SSG implementation, content management, and modern web development patterns.
 
-These projects served as valuable references during Natspaper's development, helping shape its architecture, design decisions, and feature set while building upon Astro's unique capabilities.
+## 📄 License
+
+This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) file for details.
+
