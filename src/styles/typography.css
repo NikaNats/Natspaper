@@ -121,6 +121,7 @@ Emphasis on readability and clean design inspired by arduin.io:
  */
     code {
       @apply rounded bg-muted px-1.5 py-0.5 wrap-break-word text-foreground before:content-none after:content-none;
+      font-family: "JetBrains Mono", monospace;
       font-size: 0.95em;
       color: var(--foreground);
     }
@@ -181,6 +182,7 @@ Optimized for academic and technical content
 */
   .astro-code {
     @apply my-6 flex overflow-x-auto rounded border bg-(--shiki-light-bg) text-(--shiki-light) outline-border [&_span]:text-(--shiki-light);
+    font-family: "JetBrains Mono", monospace;
     padding: 1em;
     line-height: 1.6;
   }
