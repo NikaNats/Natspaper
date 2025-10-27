@@ -95,7 +95,9 @@ function setPreference() {
 }
 
 function reflectPreference() {
-  document.firstElementChild?.dataset.theme = themeValue;
+  if (document.firstElementChild) {
+    document.firstElementChild.dataset.theme = themeValue;
+  }
 
   document.querySelector("#theme-btn")?.setAttribute("aria-label", themeValue);
 
