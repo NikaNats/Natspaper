@@ -72,38 +72,122 @@ cd natspaper
 
 # Install dependencies
 pnpm install
+
+# Note: This project uses pnpm for package management.
+# If you don't have pnpm installed, install it via:
+# npm install -g pnpm
 ```
 
 ### 2. Local Development
 
 ```bash
-# Start the development server
+# Start the development server (uses .env.development)
 pnpm dev
 # Access at http://localhost:4321
+
+# The development environment is pre-configured with:
+# - SITE_WEBSITE: http://localhost:4321
+# - Full error tracing enabled (100%)
+# - All development features active
 ```
+
+# - 100% error tracing for debugging
+
+````
 
 ### 3. Production Build
 
 To generate the optimized static files (HTML, CSS, assets, and the Pagefind search index):
 
 ```bash
+# Production build (uses .env.production)
+pnpm build:prod
+
+# Or use the shorthand alias
 pnpm build
+
 # Output is saved to the /dist directory.
+````
+
+### 4. Preview Production Build
+
+To preview the production build locally before deployment:
+
+```bash
+# Build and preview with production configuration
+pnpm preview
+# Access at http://localhost:3000 (or shown in terminal)
 ```
 
 ## 📝 Configuration
 
-### Environment Variables (`.env.local`)
+### Environment Files
 
-Configuration ensures proper SEO and optional monitoring are active.
+This project uses **environment-specific configuration files** following the "one codebase, many configurations" principle.
+
+#### Development Environment (`.env.development`)
 
 ```env
-# CRITICAL: Your public production domain. Used for RSS, Sitemap, and canonical URLs.
-SITE_WEBSITE="https://natspaper.vercel.app/"
-
-# OPTIONAL: Sentry DSN for client-side error tracking
-# PUBLIC_SENTRY_DSN=your_public_sentry_dsn
+# Used when running: pnpm dev or pnpm build:dev
+SITE_WEBSITE=http://localhost:4321
+PUBLIC_SENTRY_ENVIRONMENT=development
+PUBLIC_SENTRY_TRACES_SAMPLE_RATE=1.0
 ```
+
+**Use this for:**
+
+- Local development (`pnpm dev`)
+- Testing builds locally (`pnpm build:dev`)
+
+#### Production Environment (`.env.production`)
+
+```env
+# Used when running: pnpm build:prod or pnpm preview
+SITE_WEBSITE=https://natspaper.vercel.app
+PUBLIC_SENTRY_ENVIRONMENT=production
+PUBLIC_SENTRY_TRACES_SAMPLE_RATE=0.1
+```
+
+**Use this for:**
+
+- Production builds (`pnpm build:prod`)
+- Production preview (`pnpm preview`)
+
+#### Template File (`.env.example`)
+
+A template showing all available environment variables. Used by new developers to understand the configuration structure.
+
+### Available npm Scripts
+
+| Script            | Environment | Purpose                                |
+| ----------------- | ----------- | -------------------------------------- |
+| `pnpm dev`        | Development | Start dev server with localhost config |
+| `pnpm build:dev`  | Development | Build with development configuration   |
+| `pnpm build:prod` | Production  | Full production build with pagefind    |
+| `pnpm build`      | Production  | Alias for `build:prod`                 |
+| `pnpm preview`    | Production  | Preview production build locally       |
+
+### Environment Variables Reference
+
+**Core Configuration:**
+
+- `SITE_WEBSITE` (Required): Your public domain URL used for RSS, Sitemaps, and canonical URLs
+  - Development: `http://localhost:4321`
+  - Production: `https://natspaper.vercel.app`
+
+**Optional Sentry Monitoring:**
+
+- `PUBLIC_SENTRY_DSN`: Client-side Sentry DSN (safe to expose)
+- `SENTRY_DSN`: Server-side Sentry DSN (kept private)
+- `SENTRY_AUTH_TOKEN`: For uploading source maps
+- `PUBLIC_SENTRY_ENVIRONMENT`: Environment label for Sentry
+- `PUBLIC_SENTRY_TRACES_SAMPLE_RATE`: Percentage of requests to trace (0.0 to 1.0)
+
+**Analytics & SEO:**
+
+- `PUBLIC_GOOGLE_SITE_VERIFICATION`: Google Search Console verification token
+
+See `.env.example` for the complete list of available variables.
 
 ### Site Customization (`src/config.ts`)
 
@@ -139,6 +223,7 @@ natspaper/
 │   ├── components/      # Reusable Astro, React, or Svelte Islands
 │   ├── content/         # Astro Content Collections setup (DB schema definition)
 │   ├── data/            # Your Markdown blog posts (The "Database")
+│   ├── env/             # Centralized environment management (schema & loader)
 │   ├── layouts/         # Master page templates (Layout, Main, PostDetails)
 │   ├── middleware/      # Server-side security headers and Sentry pipeline
 │   ├── pages/           # Route definitions (e.g., /posts, /tags, /search)
@@ -147,6 +232,9 @@ natspaper/
 ├── tests/               # Dedicated directory for all unit, integration, and e2e tests
 ├── scripts/             # Node.js scripts for pipeline tasks (e.g., verify-build.js)
 ├── .github/workflows/   # Full CI/CD automation and quality gates
+├── .env.development     # Development environment configuration
+├── .env.production      # Production environment configuration
+├── .env.example         # Template for environment variables
 └── astro.config.ts      # Main configuration hub
 ```
 
@@ -154,8 +242,52 @@ natspaper/
 
 The recommended deployment platform is **Vercel** due to its superior performance for static sites and functions-as-a-service architecture, directly supporting the project's build process.
 
-- **Vercel Integration:** The GitHub workflows (`.github/workflows/cd-deploy.yml` and `preview.yml`) handle automated deployment on push, including pre-deployment QA checks (testing, linting, formatting).
-- **Docker Fallback:** A multi-stage `Dockerfile` is provided for standard container deployments (Nginx serving static `/dist`).
+### Vercel Setup
+
+1. **Connect Your Repository:** Push this project to GitHub and connect it to Vercel.
+
+2. **Configure Environment Variables in Vercel Dashboard:**
+
+   Go to **Project Settings → Environment Variables** and add:
+
+   **Production Variables:**
+
+   ```
+   SITE_WEBSITE = https://natspaper.vercel.app
+   PUBLIC_SENTRY_ENVIRONMENT = production
+   PUBLIC_SENTRY_TRACES_SAMPLE_RATE = 0.1
+   ```
+
+   **Optional Sentry Variables (if using error tracking):**
+
+   ```
+   SENTRY_AUTH_TOKEN = your_sentry_auth_token
+   SENTRY_DSN = your_sentry_server_dsn
+   PUBLIC_SENTRY_DSN = your_sentry_public_dsn
+   ```
+
+3. **Automatic Deployments:**
+   - The GitHub workflows (`.github/workflows/cd-deploy.yml` for production and `preview.yml` for preview) handle automated deployments on push
+   - Each push runs pre-deployment QA checks (linting, type checking, testing)
+   - Production builds use `pnpm run build:prod` which applies production environment configuration
+
+### Local Deployment Testing
+
+Before deploying to production, test the production build locally:
+
+```bash
+# Build with production configuration
+pnpm build:prod
+
+# Preview the production build
+pnpm preview
+```
+
+If the build succeeds locally with `pnpm build:prod`, it will succeed on Vercel.
+
+### Docker Fallback
+
+A multi-stage `Dockerfile` is provided for standard container deployments (Nginx serving static `/dist`).
 
 ## 📄 License
 
