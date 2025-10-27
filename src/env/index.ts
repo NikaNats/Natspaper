@@ -55,9 +55,9 @@ class EnvironmentManager {
     // Type validation for enum values
     if (this.env.NODE_ENV) {
       const def = ENV_DEFINITIONS.NODE_ENV;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       if (
         def.type === "enum" &&
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         !def.values?.includes(this.env.NODE_ENV as any)
       ) {
         this.errors.push({
