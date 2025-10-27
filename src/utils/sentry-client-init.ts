@@ -1,48 +1,12 @@
 /**
  * Client-side Sentry initialization utility
  * Provides both immediate and deferred initialization strategies
+ *
+ * Updated to use unified Sentry configuration from src/utils/sentry/config.ts
  */
 
 import * as Sentry from "@sentry/astro";
-
-interface SentryClientConfig {
-  dsn: string;
-  environment: string;
-  tracesSampleRate: number;
-  replaysSessionSampleRate: number;
-  replaysOnErrorSampleRate: number;
-}
-
-/**
- * Get Sentry configuration from environment variables
- */
-function getSentryConfig(): SentryClientConfig {
-  const environment = (import.meta.env.PUBLIC_SENTRY_ENVIRONMENT ||
-    import.meta.env.MODE ||
-    "production") as string;
-  const isProduction = environment === "production";
-
-  const tracesSampleRate = parseFloat(
-    import.meta.env.PUBLIC_SENTRY_TRACES_SAMPLE_RATE ||
-      (isProduction ? "0.1" : "1")
-  );
-
-  const replaysSessionSampleRate = parseFloat(
-    import.meta.env.PUBLIC_SENTRY_REPLAYS_SESSION_SAMPLE_RATE || "0.1"
-  );
-
-  const replaysOnErrorSampleRate = parseFloat(
-    import.meta.env.PUBLIC_SENTRY_REPLAYS_ON_ERROR_SAMPLE_RATE || "1"
-  );
-
-  return {
-    dsn: import.meta.env.PUBLIC_SENTRY_DSN || "",
-    environment,
-    tracesSampleRate,
-    replaysSessionSampleRate,
-    replaysOnErrorSampleRate,
-  };
-}
+import { getSentryConfig, getClientSentryInit } from "./sentry/config";
 
 /**
  * Attach global error event listener
@@ -56,12 +20,6 @@ function attachErrorHandler(): void {
     Sentry.captureException(event.error, {
       level: "error",
       tags: { handler: "window.error" },
-      contexts: {
-        browser: {
-          url: globalThis.window?.location.href,
-          userAgent: globalThis.navigator?.userAgent,
-        },
-      },
     });
 
     // eslint-disable-next-line no-console
@@ -82,13 +40,7 @@ function attachUnhandledRejectionHandler(): void {
     (event: PromiseRejectionEvent) => {
       Sentry.captureException(event.reason, {
         level: "error",
-        tags: { handler: "window.unhandledrejection" },
-        contexts: {
-          browser: {
-            url: globalThis.window?.location.href,
-            userAgent: globalThis.navigator?.userAgent,
-          },
-        },
+        tags: { handler: "unhandledrejection" },
       });
 
       // eslint-disable-next-line no-console
@@ -106,30 +58,20 @@ export function init(): void {
     return;
   }
 
-  const config = getSentryConfig();
-
-  if (!config.dsn) {
+  const config = getSentryConfig("client");
+  if (!config.enabled) {
     // eslint-disable-next-line no-console
-    console.debug("[Sentry] DSN not configured");
+    console.debug("[Sentry] Not configured (DSN missing)");
     return;
   }
 
-  Sentry.init({
-    dsn: config.dsn,
-    environment: config.environment,
-    tracesSampleRate: config.tracesSampleRate,
-    replaysSessionSampleRate: config.replaysSessionSampleRate,
-    replaysOnErrorSampleRate: config.replaysOnErrorSampleRate,
-    attachStacktrace: true,
-    beforeSend(event) {
-      const exception = event.exception?.values?.[0];
-      if (exception?.value?.includes("top.GLOBALS")) {
-        return null;
-      }
-      return event;
-    },
-  });
+  const sentryInit = getClientSentryInit();
+  if (!sentryInit) {
+    return;
+  }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  Sentry.init(sentryInit as any);
   attachErrorHandler();
   attachUnhandledRejectionHandler();
 
@@ -146,35 +88,25 @@ export function initDeferred(): void {
     return;
   }
 
-  const config = getSentryConfig();
-
-  if (!config.dsn) {
+  const config = getSentryConfig("client");
+  if (!config.enabled) {
     // eslint-disable-next-line no-console
-    console.debug("[Sentry] DSN not configured");
+    console.debug("[Sentry] Not configured (DSN missing)");
     return;
   }
 
-  Sentry.init({
-    dsn: config.dsn,
-    environment: config.environment,
-    tracesSampleRate: config.tracesSampleRate,
-    replaysSessionSampleRate: config.replaysSessionSampleRate,
-    replaysOnErrorSampleRate: config.replaysOnErrorSampleRate,
-    attachStacktrace: true,
-    beforeSend(event) {
-      const exception = event.exception?.values?.[0];
-      if (exception?.value?.includes("top.GLOBALS")) {
-        return null;
-      }
-      return event;
-    },
-  });
+  const sentryInit = getClientSentryInit();
+  if (!sentryInit) {
+    return;
+  }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  Sentry.init(sentryInit as any);
   attachErrorHandler();
   attachUnhandledRejectionHandler();
 
   // eslint-disable-next-line no-console
-  console.debug(`[Sentry] Initialized in ${config.environment}`);
+  console.debug(`[Sentry] Initialized (deferred) in ${config.environment}`);
 }
 
 /**
