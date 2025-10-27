@@ -157,8 +157,21 @@ KaTeX text color
 
 Ensures LaTeX equations display in the correct text color
 */
-  .prose .katex-display {
+  .app-prose .katex {
     @apply text-foreground;
+  }
+
+  .app-prose .katex-display {
+    @apply text-foreground;
+  }
+
+  /* Ensure KaTeX math elements inherit proper colors */
+  .app-prose .katex .base {
+    color: inherit;
+  }
+
+  .app-prose .katex-display .base {
+    color: inherit;
   }
 
   /**

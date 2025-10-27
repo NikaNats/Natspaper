@@ -74,7 +74,7 @@ In this section, you will find instructions on how to add support for LaTeX in y
    <!-- [!code highlight:4] -->
    <link
      rel="stylesheet"
-     href="https://cdn.jsdelivr.net/npm/katex@0.15.2/dist/katex.min.css"
+     href="https://cdn.jsdelivr.net/npm/katex@0.16.25/dist/katex.min.css"
    />
 
    <body>
@@ -109,9 +109,9 @@ And _voilà_, this setup allows you to write LaTeX equations in your Markdown fi
 
 Inline equations are written between single dollar signs `$...$`. Here are some examples:
 
-1. The famous mass-energy equivalence formula: `$E = mc^2$`
-2. The quadratic formula: `$x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}$`
-3. Euler's identity: `$e^{i\pi} + 1 = 0$`
+1. The famous mass-energy equivalence formula: $E = mc^2$
+2. The quadratic formula: $x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}$
+3. Euler's identity: $e^{i\pi} + 1 = 0$
 
 ---
 
@@ -150,7 +150,7 @@ $$
 
 LaTeX provides a wide range of mathematical symbols:
 
-- Greek letters: `$\alpha$`, `$\beta$`, `$\gamma$`, `$\delta$`, `$\epsilon$`, `$\pi$`
-- Operators: `$\sum$`, `$\prod$`, `$\int$`, `$\partial$`, `$\nabla$`
-- Relations: `$\leq$`, `$\geq$`, `$\approx$`, `$\sim$`, `$\propto$`
-- Logical symbols: `$\forall$`, `$\exists$`, `$\neg$`, `$\wedge$`, `$\vee$`
+- Greek letters: $\alpha$, $\beta$, $\gamma$, $\delta$, $\epsilon$, $\pi$
+- Operators: $\sum$, $\prod$, $\int$, $\partial$, $\nabla$
+- Relations: $\leq$, $\geq$, $\approx$, $\sim$, $\propto$
+- Logical symbols: $\forall$, $\exists$, $\neg$, $\wedge$, $\vee$
