@@ -26,7 +26,7 @@ export interface SentryConfig {
  * @returns SentryConfig object ready to pass to Sentry.init()
  */
 export function getSentryConfig(context: "client" | "server"): SentryConfig {
-  const isDev = process.env.NODE_ENV === "development";
+  const isDev = import.meta.env.MODE === "development";
 
   // Determine DSN based on context
   let dsn: string | undefined;

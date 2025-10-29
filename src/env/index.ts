@@ -185,7 +185,8 @@ class EnvironmentManager {
 }
 
 // Singleton instance
-export const envManager = new EnvironmentManager();
+// Only instantiate on server-side environments where process.env is available
+export const envManager = typeof process !== "undefined" && process.env ? new EnvironmentManager() : null;
 
 // ============================================================
 // PUBLIC API - Type-safe environment variable access
@@ -197,6 +198,7 @@ export const envManager = new EnvironmentManager();
 export function getEnv<K extends keyof EnvSchema>(
   key: K
 ): EnvSchema[K] | undefined {
+  if (!envManager) return undefined;
   return envManager.get(key);
 }
 
@@ -204,6 +206,12 @@ export function getEnv<K extends keyof EnvSchema>(
  * Get environment variable or throw error
  */
 export function getEnvOrThrow<K extends keyof EnvSchema>(key: K): EnvSchema[K] {
+  if (!envManager) {
+    throw new Error(
+      "Environment manager is not available in this context. " +
+      "This function can only be called on the server side."
+    );
+  }
   return envManager.getOrThrow(key);
 }
 
@@ -214,6 +222,7 @@ export function getEnvOrDefault<K extends keyof EnvSchema>(
   key: K,
   defaultValue: EnvSchema[K]
 ): EnvSchema[K] {
+  if (!envManager) return defaultValue;
   return envManager.getOrDefault(key, defaultValue);
 }
 
@@ -221,6 +230,7 @@ export function getEnvOrDefault<K extends keyof EnvSchema>(
  * Check if environment variable is set
  */
 export function hasEnv<K extends keyof EnvSchema>(key: K): boolean {
+  if (!envManager) return false;
   return envManager.has(key);
 }
 
