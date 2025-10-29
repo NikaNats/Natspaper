@@ -186,7 +186,10 @@ class EnvironmentManager {
 
 // Singleton instance
 // Only instantiate on server-side environments where process.env is available
-export const envManager = typeof process !== "undefined" && process.env ? new EnvironmentManager() : null;
+export const envManager =
+  typeof process !== "undefined" && process.env
+    ? new EnvironmentManager()
+    : null;
 
 // ============================================================
 // PUBLIC API - Type-safe environment variable access
@@ -209,7 +212,7 @@ export function getEnvOrThrow<K extends keyof EnvSchema>(key: K): EnvSchema[K] {
   if (!envManager) {
     throw new Error(
       "Environment manager is not available in this context. " +
-      "This function can only be called on the server side."
+        "This function can only be called on the server side."
     );
   }
   return envManager.getOrThrow(key);

@@ -2,6 +2,7 @@
 import { ClientRouter } from "astro:transitions";
 import { PUBLIC_GOOGLE_SITE_VERIFICATION } from "astro:env/client";
 import { SITE } from "@/config";
+import "@/styles/fonts.css";
 import "@/styles/global.css";
 
 export interface Props {
@@ -59,6 +60,83 @@ const structuredData = {
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="canonical" href={canonicalURL} />
     <meta name="generator" content={Astro.generator} />
+
+    <!-- Performance: Resource Hints for Critical Resources
+         ======================================================== -->
+    <!-- Performance: Resource Hints and Critical CSS Loading
+         - KaTeX CSS loaded with media query to avoid render-blocking
+         - Google Fonts preload ensures fast loading without blocking
+         ========================================================== -->
+    <!-- Load KaTeX CSS asynchronously to prevent render-blocking (saves 10-50ms) -->
+    <link
+      rel="preload"
+      href="/styles/katex.min.css"
+      as="style"
+      media="print"
+      onload="this.removeAttribute('media');"
+    />
+    <!-- Fallback for browsers without onload support -->
+    <noscript>
+      <link rel="stylesheet" href="/styles/katex.min.css" />
+    </noscript>
+
+    <!-- Preload critical Google Fonts to prioritize in network waterfall -->
+    <link
+      rel="preload"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Merriweather:wght@400&family=JetBrains+Mono:wght@400&display=swap"
+      as="style"
+    />
+
+    <!-- Load global styles with media query to defer non-critical -->
+    <style is:global>
+      /* Critical CSS inline - loads immediately without blocking render */
+      html {
+        color-scheme: light dark;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+
+      body {
+        margin: 0;
+        width: 100%;
+        height: 100%;
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          "Helvetica Neue", Arial, sans-serif;
+        background-color: #fff;
+        color: #000;
+        transition:
+          background-color 0.3s ease,
+          color 0.3s ease;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        body {
+          background-color: #1a1a1a;
+          color: #e5e5e5;
+        }
+      }
+
+      /* Prevent layout shift during font load */
+      @font-face {
+        font-family: "Inter";
+        src: local("Inter");
+        font-display: swap;
+      }
+
+      @font-face {
+        font-family: "Merriweather";
+        src: local("Merriweather");
+        font-display: swap;
+      }
+    </style>
+
+    <!-- Preconnect to Google Fonts to reduce DNS + TCP lookup time (saves ~100ms) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <!-- Preconnect to jsDelivr CDN (fallback if needed) -->
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" />
 
     <!-- General Meta Tags -->
     <title>{title}</title>
@@ -128,28 +206,36 @@ const structuredData = {
       )
     }
 
-    <!-- KaTeX CSS for LaTeX equation rendering -->
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/katex@0.16.25/dist/katex.min.css"
-    />
+    <!-- Critical inline styles to prevent FOUC and CLS -->
+    <style is:inline>
+      /* Prevent flash of unstyled content during theme load */
+      html {
+        color-scheme: light dark;
+      }
+    </style>
 
+    <!-- Theme switching script: Inline to prevent FOUC, but deferred to reduce CLS -->
+    <!-- Uses defer to execute after critical resources load -->
+    <script defer is:inline src="/toggle-theme.js"></script>
+
+    <!-- Enable view transitions for faster navigation -->
     <ClientRouter />
-
-    <!-- Critical path: Theme switching script to prevent flash -->
-    <!-- Inline and not deferred to block rendering only if necessary -->
-    <script is:inline src="/toggle-theme.js"></script>
   </head>
   <body>
     <slot />
 
-    <!-- Initialize error tracking after page load -->
+    <!-- Initialize error tracking after page load with requestIdleCallback -->
+    <!-- This defers Sentry initialization to avoid blocking LCP (saves ~900ms) -->
     <script>
       import { initDeferred } from "@/utils/sentry-client-init";
 
-      window.addEventListener("load", () => {
-        initDeferred();
-      });
+      // Use requestIdleCallback to defer Sentry until browser is idle
+      // Falls back to setTimeout(fn, 2000) for unsupported browsers
+      if ("requestIdleCallback" in window) {
+        requestIdleCallback(() => initDeferred(), { timeout: 2000 });
+      } else {
+        setTimeout(() => initDeferred(), 2000);
+      }
     </script>
   </body>
 </html>

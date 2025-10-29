@@ -1,0 +1,21 @@
+/* 
+ * PERFORMANCE: Optimized Font Loading
+ * 
+ * Strategy:
+ * 1. Use font-display: swap for immediate text rendering with system font
+ * 2. Load only critical font weights (reduced from 9 to 4)
+ * 3. Preload fonts to prioritize them in network waterfall
+ * 4. Keep Google Fonts for now but with optimized loading
+ * 
+ * FONTS USED IN DESIGN:
+ * - Inter (400, 700) - Main body & headings
+ * - Merriweather (400) - Accent/quotes
+ * - JetBrains Mono (400) - Code blocks
+ */
+
+/* 
+ * NOTE: Fonts are loaded from Google Fonts via @import in global.css
+ * with display=swap parameter for optimal performance.
+ * This file can be expanded with self-hosted @font-face rules
+ * if needed for zero-FOUT experience.
+ */

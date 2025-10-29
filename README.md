@@ -49,26 +49,26 @@ Open `http://localhost:4321` in your browser. You can now start editing files in
 
 ## 📋 Common Commands
 
-| Command              | Purpose                                      |
-| :------------------- | :------------------------------------------- |
-| `pnpm dev`           | Start the development server with hot-reloading. |
-| `pnpm build`         | Create a production-ready build in the `/dist` directory. |
-| `pnpm preview`       | Preview the local production build before deploying. |
-| `pnpm test:run`      | Run all unit and integration tests. |
-| `pnpm test:e2e`      | Run all end-to-end browser tests. |
-| `pnpm lint`          | Check the codebase for linting errors. |
-| `pnpm format:check`  | Check for code formatting inconsistencies. |
+| Command             | Purpose                                                   |
+| :------------------ | :-------------------------------------------------------- |
+| `pnpm dev`          | Start the development server with hot-reloading.          |
+| `pnpm build`        | Create a production-ready build in the `/dist` directory. |
+| `pnpm preview`      | Preview the local production build before deploying.      |
+| `pnpm test:run`     | Run all unit and integration tests.                       |
+| `pnpm test:e2e`     | Run all end-to-end browser tests.                         |
+| `pnpm lint`         | Check the codebase for linting errors.                    |
+| `pnpm format:check` | Check for code formatting inconsistencies.                |
 
 ## 📚 Tech Stack
 
-| Component | Technology                                              | Version |
-| :-------- | :------------------------------------------------------ | :------ |
-| **Core**  | [Astro](https://astro.build/)                           | 5.15+   |
-| **Lang**  | [TypeScript](https://www.typescriptlang.org/)           | 5.9+    |
-| **Style** | [Tailwind CSS](https://tailwindcss.com/)                | 4.1+    |
-| **Math**  | [KaTeX](https://katex.org/)                             | 0.16+   |
-| **Test**  | [Vitest](https://vitest.dev/) & [Playwright](https://playwright.dev/) | Latest |
-| **Ops**   | [Sentry](https://sentry.io/), [Pagefind](https://pagefind.app/) | Latest |
+| Component | Technology                                                            | Version |
+| :-------- | :-------------------------------------------------------------------- | :------ |
+| **Core**  | [Astro](https://astro.build/)                                         | 5.15+   |
+| **Lang**  | [TypeScript](https://www.typescriptlang.org/)                         | 5.9+    |
+| **Style** | [Tailwind CSS](https://tailwindcss.com/)                              | 4.1+    |
+| **Math**  | [KaTeX](https://katex.org/)                                           | 0.16+   |
+| **Test**  | [Vitest](https://vitest.dev/) & [Playwright](https://playwright.dev/) | Latest  |
+| **Ops**   | [Sentry](https://sentry.io/), [Pagefind](https://pagefind.app/)       | Latest  |
 
 ## ⚙️ Configuration
 
@@ -225,31 +225,34 @@ $$
 
 ### Frontmatter Fields
 
-| Key | Required | Description |
-| :-- | :------- | :---------- |
-| `title` | Yes | The title of the post. |
-| `pubDatetime` | Yes | The publication date and time in ISO 8601 format (e.g., `2025-10-28T10:00:00Z`). The `Z` suffix indicates UTC. |
-| `description` | Yes | A short summary for SEO and social cards. |
-| `author` | No | The author's name (defaults to site author in `src/config.ts`). |
-| `modDatetime` | No | The date the post was last modified. |
-| `tags` | No | An array of tags for categorization. |
-| `draft` | No | Set to `true` to prevent the post from being published. |
+| Key           | Required | Description                                                                                                    |
+| :------------ | :------- | :------------------------------------------------------------------------------------------------------------- |
+| `title`       | Yes      | The title of the post.                                                                                         |
+| `pubDatetime` | Yes      | The publication date and time in ISO 8601 format (e.g., `2025-10-28T10:00:00Z`). The `Z` suffix indicates UTC. |
+| `description` | Yes      | A short summary for SEO and social cards.                                                                      |
+| `author`      | No       | The author's name (defaults to site author in `src/config.ts`).                                                |
+| `modDatetime` | No       | The date the post was last modified.                                                                           |
+| `tags`        | No       | An array of tags for categorization.                                                                           |
+| `draft`       | No       | Set to `true` to prevent the post from being published.                                                        |
 
 ## 🏛️ Architecture Overview
 
 **Static-first design:**
+
 - All HTML pre-rendered at build time → zero runtime server needed
 - Content stored in Markdown files → version controlled and simple
 - Astro Islands → only interactive UI gets JavaScript
 - Pagefind indexing → fast, client-side search
 
 **Why this matters:**
+
 - ⚡ Instant page loads (no server latency)
 - 🔒 No server vulnerabilities to exploit
 - 💰 Free hosting (GitHub Pages, Vercel, Netlify)
 - 📈 Better SEO (pre-rendered HTML, instant rendering)
 
 **Build pipeline includes:**
+
 - Dynamic OG image generation (Satori + Resvg)
 - LaTeX math rendering (KaTeX)
 - Pagefind search indexing
@@ -265,4 +268,3 @@ Natspaper draws inspiration from several excellent open-source projects in the s
 ## 📄 License
 
 This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) file for details.
-

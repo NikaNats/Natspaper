@@ -12,6 +12,10 @@ import { envManager } from "../env";
  * Format validation errors for console output
  */
 function formatValidationOutput(): string {
+  if (!envManager) {
+    return ""; // Environment manager not available in this context
+  }
+
   const errors = envManager.getErrors();
   const warnings = envManager.getWarnings();
 
@@ -60,6 +64,10 @@ export const envValidationIntegration = (): AstroIntegration => {
     name: "env-validation",
     hooks: {
       "astro:build:start": async () => {
+        if (!envManager) {
+          return; // Environment manager not available
+        }
+
         const isValid = envManager.validate();
         const output = formatValidationOutput();
 
