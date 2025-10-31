@@ -203,21 +203,25 @@ const structuredData = {
          This ensures user's choice always persists across page navigations.
     ================================================================================== -->
     <script is:inline>
-      (function() {
+      (function () {
         // First, check if user has a saved theme preference
         let theme;
         if (typeof localStorage !== "undefined") {
           const savedTheme = localStorage.getItem("theme");
           if (savedTheme) {
             theme = savedTheme;
-          } else if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+          } else if (
+            window.matchMedia("(prefers-color-scheme: dark)").matches
+          ) {
             theme = "dark";
           } else {
             theme = "light";
           }
         } else {
           // Fallback if localStorage is unavailable
-          theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+          theme = window.matchMedia("(prefers-color-scheme: dark)").matches
+            ? "dark"
+            : "light";
         }
 
         // Apply theme immediately to prevent flash

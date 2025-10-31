@@ -30,7 +30,7 @@ const setPreference = theme => {
 const applyTheme = theme => {
   // Force synchronous application to prevent FOUC
   document.documentElement.dataset.theme = theme;
-  
+
   // Update button aria-label
   const themeBtn = document.querySelector("#theme-btn");
   if (themeBtn) {
