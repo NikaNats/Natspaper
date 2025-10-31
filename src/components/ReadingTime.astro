@@ -12,7 +12,6 @@
  * - Accessible metadata markup
  */
 
-import IconSunHigh from "@/assets/icons/IconSunHigh.svg";
 import { getReadingTimeDisplay } from "@/utils/readingTime";
 
 export interface Props {
@@ -33,9 +32,6 @@ const readingTimeText = getReadingTimeDisplay(content, includeWordCount);
 ---
 
 <div class:list={["reading-time metadata", className]}>
-  <IconSunHigh
-    class:list={["inline-block size-5 min-w-5", { "scale-90": size === "sm" }]}
-  />
   <span class:list={["text-sm", { "sm:text-base": size === "lg" }]}>
     {readingTimeText}
   </span>
