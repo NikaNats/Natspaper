@@ -47,13 +47,15 @@
  * - Primary navigation links
  * - Theme toggle
  * - Responsive mobile menu
+ *
+ * The header is fully transparent, allowing the body's background color to show through.
+ * This creates a seamless, unified appearance where header and body are one surface.
  */
 header {
   position: sticky;
   top: 0;
   z-index: 100;
-  background-color: var(--background);
-  border-bottom: 1px solid var(--border);
+  background-color: transparent;
 }
 
 /**

@@ -113,6 +113,8 @@ html[data-theme="dark"] {
     line-height: 1.55;
     /* Minimize letter-spacing on body text; Inter is already well-spaced */
     letter-spacing: 0.2px;
+    /* Smooth theme transition when data-theme attribute changes */
+    transition: background-color 0.3s ease, color 0.3s ease;
   }
 
   a,
@@ -124,6 +126,17 @@ html[data-theme="dark"] {
   button:not(:disabled),
   [role="button"]:not(:disabled) {
     cursor: pointer;
+  }
+
+  /* Visually hide an element but keep it accessible to screen readers */
+  .visually-hidden:not(:focus):not(:active) {
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    height: 1px;
+    overflow: hidden;
+    position: absolute;
+    white-space: nowrap;
+    width: 1px;
   }
 
   /**

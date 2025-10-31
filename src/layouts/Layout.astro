@@ -96,27 +96,6 @@ const structuredData = {
         -moz-osx-font-smoothing: grayscale;
       }
 
-      body {
-        margin: 0;
-        width: 100%;
-        height: 100%;
-        font-family:
-          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-          "Helvetica Neue", Arial, sans-serif;
-        background-color: #fff;
-        color: #000;
-        transition:
-          background-color 0.3s ease,
-          color 0.3s ease;
-      }
-
-      @media (prefers-color-scheme: dark) {
-        body {
-          background-color: #1a1a1a;
-          color: #e5e5e5;
-        }
-      }
-
       /* Prevent layout shift during font load */
       @font-face {
         font-family: "Inter";
@@ -214,8 +193,37 @@ const structuredData = {
       }
     </style>
 
-    <!-- Theme switching script: Inline to prevent FOUC, but deferred to reduce CLS -->
-    <!-- Uses defer to execute after critical resources load -->
+    <!-- =================================================================================
+         INSTANT THEME-SETTING SCRIPT
+         This inline script runs before any content is rendered to prevent FOUC.
+         It's small, has no dependencies, and executes instantly.
+         It must come BEFORE any CSS that depends on the data-theme attribute.
+    ================================================================================== -->
+    <script is:inline>
+      const theme = (() => {
+        if (typeof localStorage !== "undefined" && localStorage.getItem("theme")) {
+          return localStorage.getItem("theme");
+        }
+        if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+          return "dark";
+        }
+        return "light";
+      })();
+
+      if (theme === "light") {
+        document.documentElement.dataset.theme = "light";
+      } else {
+        document.documentElement.dataset.theme = "dark";
+      }
+      
+      // This is used by the deferred script to ensure the theme-color meta tag is correct
+      window.initialTheme = theme;
+    </script>
+    <!-- END: INSTANT THEME-SETTING SCRIPT -->
+
+    <!-- DEFERRED INTERACTIVE SCRIPT
+         This script loads after the page is parsed and handles the button click.
+    ================================================================================== -->
     <script defer is:inline src="/toggle-theme.js"></script>
 
     <!-- Enable view transitions for faster navigation -->
