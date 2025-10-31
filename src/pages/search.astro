@@ -82,7 +82,9 @@ const backUrl = SITE.showBackButton ? `${Astro.url.pathname}` : "/";
         }
 
         // Add id and name attributes for accessibility and autofill
-        const accessibilityInput = document.querySelector(".pagefind-ui__search-input");
+        const accessibilityInput = document.querySelector(
+          ".pagefind-ui__search-input"
+        );
         if (accessibilityInput) {
           accessibilityInput.id = "pagefind-search-input";
           accessibilityInput.setAttribute("name", "q"); // "q" is a standard name for search queries
