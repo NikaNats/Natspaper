@@ -22,6 +22,7 @@ const katexFontsSource = path.join(
 const katexDistDir = path.join(__dirname, '../dist/styles');
 const katexPublicDir = path.join(__dirname, '../public/styles');
 const katexCssDest = path.join(katexDistDir, 'katex.min.css');
+const katexCssPublicDest = path.join(katexPublicDir, 'katex.min.css'); // Destination for dev server
 const katexFontsDistDest = path.join(katexDistDir, 'fonts');
 const katexFontsPublicDest = path.join(katexPublicDir, 'fonts');
 
@@ -64,6 +65,10 @@ function copyKaTeX() {
     // Copy the CSS file to dist
     fs.copyFileSync(katexCssSource, katexCssDest);
     console.log(`✓ Successfully copied KaTeX CSS to: ${katexCssDest}`);
+
+    // Copy the CSS file to public for the dev server
+    fs.copyFileSync(katexCssSource, katexCssPublicDest);
+    console.log(`✓ Successfully copied KaTeX CSS to: ${katexCssPublicDest} (for dev server)`);
 
     // Verify the CSS copy
     const cssStats = fs.statSync(katexCssDest);
