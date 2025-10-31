@@ -9,18 +9,26 @@ const themeStorageKey = "theme";
 
 // Helper functions
 const getThemePreference = () => {
-  if (typeof localStorage !== "undefined" && localStorage.getItem(themeStorageKey)) {
+  if (
+    typeof localStorage !== "undefined" &&
+    localStorage.getItem(themeStorageKey)
+  ) {
     return localStorage.getItem(themeStorageKey);
   }
-  return window.initialTheme || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+  return (
+    window.initialTheme ||
+    (window.matchMedia("(prefers-color-scheme: dark)").matches
+      ? "dark"
+      : "light")
+  );
 };
 
-const setPreference = (theme) => {
+const setPreference = theme => {
   localStorage.setItem(themeStorageKey, theme);
   reflectPreference(theme);
 };
 
-const reflectPreference = (theme) => {
+const reflectPreference = theme => {
   document.documentElement.dataset.theme = theme;
   const themeBtn = document.querySelector("#theme-btn");
   themeBtn?.setAttribute("aria-label", theme);
@@ -37,7 +45,7 @@ const reflectPreference = (theme) => {
 // --- ONE-TIME SETUP: System Theme Listener ---
 // This listener is not tied to a DOM element and should only be attached once.
 const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-mediaQuery.addEventListener("change", (e) => {
+mediaQuery.addEventListener("change", e => {
   const newTheme = e.matches ? "dark" : "light";
   setPreference(newTheme);
 });
