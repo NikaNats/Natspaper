@@ -86,7 +86,7 @@ const { previous: prevPost, next: nextPost } = getAdjacentPosts(posts, post.id);
     </h1>
     <div class="my-2 flex flex-wrap items-center gap-2">
       <Datetime {pubDatetime} {modDatetime} {timezone} size="lg" />
-      <ReadingTime content={bodyContent} size="lg" />
+      <ReadingTime content={bodyContent} size="lg" class="ml-auto" />
       <span
         aria-hidden="true"
         class:list={[
