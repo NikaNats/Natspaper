@@ -12,13 +12,38 @@ import type { Page } from '@playwright/test';
  * - Visual elements and layout
  */
 
+/**
+ * Navigate to URL with retry logic for connection issues
+ * Handles Firefox NS_ERROR_CONNECTION_REFUSED by retrying
+ */
+async function navigateWithRetry(page: Page, url: string, maxRetries = 3) {
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      await page.goto(url);
+      return; // Success
+    } catch (error) {
+      if (i === maxRetries - 1) throw error; // Last attempt, throw error
+      
+      // Check if it's a connection error that we should retry
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      if (errorMessage.includes('NS_ERROR_CONNECTION_REFUSED') || 
+          errorMessage.includes('Connection refused')) {
+        // Wait before retrying
+        await new Promise(resolve => setTimeout(resolve, 500 * (i + 1)));
+        continue;
+      }
+      throw error; // Other errors, throw immediately
+    }
+  }
+}
+
 test.describe('Home Page - E2E Tests', () => {
   let page: Page;
 
   test.beforeEach(async ({ page: testPage }) => {
     page = testPage;
     // Navigate to home page
-    await page.goto('/');
+    await navigateWithRetry(page, '/');
     // Wait for page to fully load
     await page.waitForLoadState('networkidle');
   });
@@ -46,7 +71,7 @@ test.describe('Home Page - E2E Tests', () => {
 
     if (count === 0) {
       // No posts on home, try /posts/
-      await page.goto('/posts/');
+      await navigateWithRetry(page, '/posts/');
       await page.waitForLoadState('networkidle');
       postCards = page.locator('[data-post-id], article, .post-card, [role="article"]');
       count = await postCards.count();

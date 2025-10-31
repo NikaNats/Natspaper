@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import type { Page } from '@playwright/test';
 
 /**
  * True E2E Tests: Blog Posts
@@ -10,10 +11,35 @@ import { test, expect } from '@playwright/test';
  * - Related posts/tags are clickable and functional
  */
 
+/**
+ * Navigate to URL with retry logic for connection issues
+ * Handles Firefox NS_ERROR_CONNECTION_REFUSED by retrying
+ */
+async function navigateWithRetry(page: Page, url: string, maxRetries = 3) {
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      await page.goto(url);
+      return; // Success
+    } catch (error) {
+      if (i === maxRetries - 1) throw error; // Last attempt, throw error
+      
+      // Check if it's a connection error that we should retry
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      if (errorMessage.includes('NS_ERROR_CONNECTION_REFUSED') || 
+          errorMessage.includes('Connection refused')) {
+        // Wait before retrying
+        await new Promise(resolve => setTimeout(resolve, 500 * (i + 1)));
+        continue;
+      }
+      throw error; // Other errors, throw immediately
+    }
+  }
+}
+
 test.describe('Blog Posts - E2E Tests', () => {
   test('should navigate to and display a blog post', async ({ page }) => {
     // Go to home page
-    await page.goto('/');
+    await navigateWithRetry(page, '/');
     await page.waitForLoadState('networkidle');
 
     // Try to find post by various selectors
@@ -21,7 +47,7 @@ test.describe('Blog Posts - E2E Tests', () => {
     
     // Fallback to other selectors if data-post-id doesn't exist
     if (await postLink.count() === 0) {
-      await page.goto('/posts/');
+      await navigateWithRetry(page, '/posts/');
       await page.waitForLoadState('networkidle');
       postLink = page.locator('article a, .post-card a, [role="article"] a').first();
     }
@@ -56,7 +82,7 @@ test.describe('Blog Posts - E2E Tests', () => {
 
   test('should display post metadata correctly', async ({ page }) => {
     // Navigate to a post (assuming it exists)
-    await page.goto('/posts/');
+    await navigateWithRetry(page, '/posts/');
     await page.waitForLoadState('networkidle');
 
     // Try to find and click a post
@@ -76,7 +102,7 @@ test.describe('Blog Posts - E2E Tests', () => {
   });
 
   test('should display reading time', async ({ page }) => {
-    await page.goto('/posts/');
+    await navigateWithRetry(page, '/posts/');
     await page.waitForLoadState('networkidle');
 
     const postCard = page.locator('[data-post-id]').first();
@@ -92,7 +118,7 @@ test.describe('Blog Posts - E2E Tests', () => {
   });
 
   test('should display post tags and make them clickable', async ({ page }) => {
-    await page.goto('/posts/');
+    await navigateWithRetry(page, '/posts/');
     await page.waitForLoadState('networkidle');
 
     const postCard = page.locator('[data-post-id]').first();
@@ -111,7 +137,7 @@ test.describe('Blog Posts - E2E Tests', () => {
   });
 
   test('should navigate between posts via tag links', async ({ page }) => {
-    await page.goto('/posts/');
+    await navigateWithRetry(page, '/posts/');
     await page.waitForLoadState('networkidle');
 
     // Find a post with tags
@@ -138,7 +164,7 @@ test.describe('Blog Posts - E2E Tests', () => {
   });
 
   test('should have proper post page accessibility', async ({ page }) => {
-    await page.goto('/posts/');
+    await navigateWithRetry(page, '/posts/');
     await page.waitForLoadState('networkidle');
 
     const postCard = page.locator('[data-post-id]').first();
@@ -157,7 +183,7 @@ test.describe('Blog Posts - E2E Tests', () => {
   });
 
   test('should load post images with alt text', async ({ page }) => {
-    await page.goto('/posts/');
+    await navigateWithRetry(page, '/posts/');
     await page.waitForLoadState('networkidle');
 
     const postCard = page.locator('[data-post-id]').first();

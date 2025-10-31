@@ -24,7 +24,12 @@ describe("postHelpers", () => {
     it("should return remote URL when ogImage is a string", () => {
       const remoteUrl = "https://example.com/og.jpg";
       const result = resolveOgImageUrl(
-        remoteUrl,
+        remoteUrl as unknown as {
+          src: string;
+          width: number;
+          height: number;
+          format: "png" | "jpg";
+        },
         "test-post",
         "src/content/blog/test-post.md",
         "https://mysite.com"
@@ -64,7 +69,12 @@ describe("postHelpers", () => {
 
     it("should resolve relative URLs to absolute paths", () => {
       const result = resolveOgImageUrl(
-        "/og-images/post.jpg",
+        "/og-images/post.jpg" as unknown as {
+          src: string;
+          width: number;
+          height: number;
+          format: "png" | "jpg";
+        },
         "test-post",
         "src/content/blog/test-post.md",
         "https://mysite.com"
@@ -75,7 +85,12 @@ describe("postHelpers", () => {
 
     it("should prioritize direct string URL over asset object", () => {
       const result = resolveOgImageUrl(
-        "https://remote.com/og.jpg", // Direct URL takes priority
+        "https://remote.com/og.jpg" as unknown as {
+          src: string;
+          width: number;
+          height: number;
+          format: "png" | "jpg";
+        }, // Direct URL takes priority
         "test-post",
         "src/content/blog/test-post.md",
         "https://mysite.com"
@@ -180,6 +195,7 @@ describe("postHelpers", () => {
     beforeEach(() => {
       mockPost = {
         id: "test-post",
+        collection: "blog",
         data: {
           title: "Test Post",
           description: "This is a test post",
@@ -190,7 +206,7 @@ describe("postHelpers", () => {
           ogImage: "https://example.com/og.jpg",
         },
         filePath: "src/content/blog/test-post.md",
-      } as CollectionEntry<"blog">;
+      } as unknown as CollectionEntry<"blog">;
     });
 
     it("should create valid schema.org BlogPosting format", () => {

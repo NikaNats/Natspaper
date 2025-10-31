@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import type { Page } from '@playwright/test';
 
 /**
  * True E2E Tests: Search and Navigation
@@ -10,9 +11,34 @@ import { test, expect } from '@playwright/test';
  * - Navigation between pages works
  */
 
+/**
+ * Navigate to URL with retry logic for connection issues
+ * Handles Firefox NS_ERROR_CONNECTION_REFUSED by retrying
+ */
+async function navigateWithRetry(page: Page, url: string, maxRetries = 3) {
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      await page.goto(url);
+      return; // Success
+    } catch (error) {
+      if (i === maxRetries - 1) throw error; // Last attempt, throw error
+      
+      // Check if it's a connection error that we should retry
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      if (errorMessage.includes('NS_ERROR_CONNECTION_REFUSED') || 
+          errorMessage.includes('Connection refused')) {
+        // Wait before retrying
+        await new Promise(resolve => setTimeout(resolve, 500 * (i + 1)));
+        continue;
+      }
+      throw error; // Other errors, throw immediately
+    }
+  }
+}
+
 test.describe('Search and Navigation - E2E Tests', () => {
   test('should navigate to search page', async ({ page }) => {
-    await page.goto('/');
+    await navigateWithRetry(page, '/');
     await page.waitForLoadState('networkidle');
 
     // Look for search link or button
@@ -40,7 +66,7 @@ test.describe('Search and Navigation - E2E Tests', () => {
   });
 
   test('should display tags page with all available tags', async ({ page }) => {
-    await page.goto('/tags');
+    await navigateWithRetry(page, '/tags');
     await page.waitForLoadState('networkidle');
 
     // Verify tags page title
@@ -55,7 +81,7 @@ test.describe('Search and Navigation - E2E Tests', () => {
   });
 
   test('should filter posts by tag', async ({ page }) => {
-    await page.goto('/tags');
+    await navigateWithRetry(page, '/tags');
     await page.waitForLoadState('networkidle');
 
     // Find first tag link
@@ -87,7 +113,7 @@ test.describe('Search and Navigation - E2E Tests', () => {
 
   test('should navigate using breadcrumb', async ({ page }) => {
     // Go to a tag page
-    await page.goto('/tags');
+    await navigateWithRetry(page, '/tags');
     await page.waitForLoadState('networkidle');
 
     // Find and click a tag
@@ -115,7 +141,7 @@ test.describe('Search and Navigation - E2E Tests', () => {
   });
 
   test('should navigate using back button', async ({ page }) => {
-    await page.goto('/');
+    await navigateWithRetry(page, '/');
     await page.waitForLoadState('networkidle');
 
     // Find back button if available
@@ -140,7 +166,7 @@ test.describe('Search and Navigation - E2E Tests', () => {
   });
 
   test('should use browser back button', async ({ page }) => {
-    await page.goto('/');
+    await navigateWithRetry(page, '/');
     await page.waitForLoadState('networkidle');
 
     // Navigate to a post
@@ -164,7 +190,7 @@ test.describe('Search and Navigation - E2E Tests', () => {
   });
 
   test('should have working pagination', async ({ page }) => {
-    await page.goto('/');
+    await navigateWithRetry(page, '/');
     await page.waitForLoadState('networkidle');
 
     // Find pagination next button
@@ -195,7 +221,7 @@ test.describe('Search and Navigation - E2E Tests', () => {
   });
 
   test('should have accessible navigation menu', async ({ page }) => {
-    await page.goto('/');
+    await navigateWithRetry(page, '/');
     await page.waitForLoadState('networkidle');
 
     // Find navigation menu
@@ -215,7 +241,7 @@ test.describe('Search and Navigation - E2E Tests', () => {
   });
 
   test('should highlight current page in navigation', async ({ page }) => {
-    await page.goto('/');
+    await navigateWithRetry(page, '/');
     await page.waitForLoadState('networkidle');
 
     // Verify navigation links exist and navigation reflects current page

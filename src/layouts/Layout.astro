@@ -201,7 +201,10 @@ const structuredData = {
     ================================================================================== -->
     <script is:inline>
       const theme = (() => {
-        if (typeof localStorage !== "undefined" && localStorage.getItem("theme")) {
+        if (
+          typeof localStorage !== "undefined" &&
+          localStorage.getItem("theme")
+        ) {
           return localStorage.getItem("theme");
         }
         if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
@@ -215,7 +218,7 @@ const structuredData = {
       } else {
         document.documentElement.dataset.theme = "dark";
       }
-      
+
       // This is used by the deferred script to ensure the theme-color meta tag is correct
       window.initialTheme = theme;
     </script>

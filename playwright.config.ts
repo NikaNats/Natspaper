@@ -22,14 +22,17 @@ export default defineConfig({
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env['CI'],
 
-  /* Retry on CI only */
-  retries: process.env['CI'] ? 2 : 0,
+  /* Retry on CI and for connection issues */
+  retries: process.env['CI'] ? 3 : 1,
 
   /* Opt out of parallel tests on CI. */
   workers: process.env['CI'] ? 1 : undefined,
 
-  /* Increase timeout for slower tests */
-  timeout: 60 * 1000, // 60 seconds per test
+  /* Increase timeout for slower tests and connection setup */
+  timeout: 90 * 1000, // 90 seconds per test (increased for Firefox)
+  
+  /* Increase global timeout for setup/teardown */
+  globalTimeout: 30 * 60 * 1000, // 30 minutes total
 
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: [
@@ -61,6 +64,7 @@ export default defineConfig({
     {
       name: 'firefox',
       use: { ...devices['Desktop Firefox'] },
+      retries: 3, // Retry Firefox tests more aggressively
     },
 
     {
@@ -87,5 +91,9 @@ export default defineConfig({
     timeout: process.env['CI'] ? 300 * 1000 : 120 * 1000, // 5 min in CI, 2 min locally
     stdout: 'pipe',
     stderr: 'pipe',
+    // Increase readiness check retries for Firefox
+    env: { 
+      NODE_ENV: 'development' 
+    },
   },
 });
