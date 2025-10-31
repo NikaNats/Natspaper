@@ -198,29 +198,32 @@ const structuredData = {
          This inline script runs before any content is rendered to prevent FOUC.
          It's small, has no dependencies, and executes instantly.
          It must come BEFORE any CSS that depends on the data-theme attribute.
+         
+         IMPORTANT: Priority order is: saved theme > system preference > default (light)
+         This ensures user's choice always persists across page navigations.
     ================================================================================== -->
     <script is:inline>
-      const theme = (() => {
-        if (
-          typeof localStorage !== "undefined" &&
-          localStorage.getItem("theme")
-        ) {
-          return localStorage.getItem("theme");
+      (function() {
+        // First, check if user has a saved theme preference
+        let theme;
+        if (typeof localStorage !== "undefined") {
+          const savedTheme = localStorage.getItem("theme");
+          if (savedTheme) {
+            theme = savedTheme;
+          } else if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+            theme = "dark";
+          } else {
+            theme = "light";
+          }
+        } else {
+          // Fallback if localStorage is unavailable
+          theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
         }
-        if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
-          return "dark";
-        }
-        return "light";
+
+        // Apply theme immediately to prevent flash
+        document.documentElement.dataset.theme = theme;
+        window.initialTheme = theme;
       })();
-
-      if (theme === "light") {
-        document.documentElement.dataset.theme = "light";
-      } else {
-        document.documentElement.dataset.theme = "dark";
-      }
-
-      // This is used by the deferred script to ensure the theme-color meta tag is correct
-      window.initialTheme = theme;
     </script>
     <!-- END: INSTANT THEME-SETTING SCRIPT -->
 
@@ -228,7 +231,7 @@ const structuredData = {
          This script loads after the page is parsed and handles the button click.
          Loaded as standard src to allow browser caching independently.
     ================================================================================== -->
-    <script defer src="/toggle-theme.js"></script>
+    <script is:inline defer src="/toggle-theme.js"></script>
 
     <!-- Enable view transitions for faster navigation -->
     <ClientRouter />
