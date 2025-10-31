@@ -17,9 +17,6 @@ const posts = await getCollection("blog");
 
 const sortedPosts = getSortedPosts(posts);
 const featuredPosts = sortedPosts.filter(({ data }) => data.featured);
-const recentPosts = sortedPosts
-  .filter(({ data }) => !data.featured)
-  .slice(0, 4);
 ---
 
 <Layout>
@@ -27,7 +24,7 @@ const recentPosts = sortedPosts
   <main
     id="main-content"
     data-layout="index"
-    class="mx-auto w-full max-w-app px-4 pb-12"
+    class="mx-auto flex w-full max-w-app flex-col items-center justify-center px-4 pb-12"
   >
     <section id="hero" class="py-8">
       <div class="flex flex-col items-center justify-center gap-4 text-center">
@@ -100,19 +97,6 @@ const recentPosts = sortedPosts
     </section>
 
     <Hr />
-
-    {
-      recentPosts.length > 0 && (
-        <section id="recent-posts" class="py-8">
-          <h2 class="mb-6 text-2xl font-bold">Recent Posts</h2>
-          <ul class="grid gap-4 sm:grid-cols-2">
-            {recentPosts.map(({ data, id }) => (
-              <PostCard href={`/posts/${id}`} frontmatter={data} />
-            ))}
-          </ul>
-        </section>
-      )
-    }
 
     {
       featuredPosts.length > 0 && (
