@@ -162,6 +162,23 @@ html[data-theme="dark"] {
   @apply underline decoration-wavy decoration-2 underline-offset-4;
 }
 
+header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+
+  z-index: 1000;
+
+  background-color: var(--background);
+
+  border-bottom: 1px solid var(--border);
+}
+
+main {
+  padding-top: calc(var(--header-height) + 2rem);
+}
+
 /* Source: https://piccalil.li/blog/a-more-modern-css-reset/ */
 /* Anything that has been anchored to should have extra scroll margin */
 :target {
