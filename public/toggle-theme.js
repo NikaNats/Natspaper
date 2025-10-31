@@ -1,16 +1,8 @@
 // ============================================================
 // FOUC-Free Theme Toggle Script
 // ============================================================
-// Handles user interactions and theme synchronization.
-// The instant theme-setting is handled by the inline script
-// in Layout.astro, so this script only needs to handle:
-// 1. Button clicks for manual theme switching
-// 2. System theme change detection
-// 3. Meta theme-color tag updates
-// ============================================================
 
 const themeStorageKey = "theme";
-const themeBtn = document.querySelector("#theme-btn");
 
 const getThemePreference = () => {
   if (typeof localStorage !== 'undefined' && localStorage.getItem(themeStorageKey)) {
@@ -19,50 +11,53 @@ const getThemePreference = () => {
   return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
 };
 
-let currentTheme = getThemePreference();
+const reflectPreference = (theme) => {
+  document.documentElement.dataset.theme = theme;
+  
+  const themeBtn = document.querySelector("#theme-btn");
+  if (themeBtn) {
+    themeBtn.setAttribute("aria-label", theme);
+  }
+  
+  const metaThemeColor = document.querySelector("meta[name='theme-color']");
+  if (metaThemeColor) {
+    requestAnimationFrame(() => {
+      const bodyBgColor = getComputedStyle(document.body).backgroundColor;
+      metaThemeColor.setAttribute("content", bodyBgColor);
+    });
+  }
+};
 
 const setPreference = (theme) => {
   localStorage.setItem(themeStorageKey, theme);
   reflectPreference(theme);
 };
 
-const reflectPreference = (theme) => {
-  document.documentElement.dataset.theme = theme;
-  themeBtn?.setAttribute("aria-label", theme);
-  
-  // Update the theme-color meta tag
-  const metaThemeColor = document.querySelector("meta[name='theme-color']");
-  if (metaThemeColor) {
-      // requestAnimationFrame ensures this runs after the browser has repainted
-      requestAnimationFrame(() => {
-        const bodyBgColor = getComputedStyle(document.body).backgroundColor;
-        metaThemeColor.setAttribute("content", bodyBgColor);
-      });
+const toggleTheme = () => {
+  const current = document.documentElement.dataset.theme || getThemePreference();
+  const next = current === "light" ? "dark" : "light";
+  setPreference(next);
+};
+
+const syncSystemTheme = (e) => {
+  const newTheme = e.matches ? "dark" : "light";
+  setPreference(newTheme);
+};
+
+// Initialize listeners
+const init = () => {
+  const themeBtn = document.querySelector("#theme-btn");
+  if (themeBtn) {
+    themeBtn.addEventListener("click", toggleTheme);
   }
+  
+  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", syncSystemTheme);
 };
 
-// Set initial preference
-reflectPreference(currentTheme);
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", init);
+} else {
+  init();
+}
 
-// Attach event listeners
-const setupThemeListeners = () => {
-  // Sync with system changes
-  const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-  mediaQuery.addEventListener("change", (e) => {
-    const newTheme = e.matches ? "dark" : "light";
-    currentTheme = newTheme;
-    setPreference(newTheme);
-  });
-
-  // Handle button click
-  themeBtn?.addEventListener("click", () => {
-    currentTheme = currentTheme === "light" ? "dark" : "light";
-    setPreference(currentTheme);
-  });
-};
-
-// Run on initial page load
-document.addEventListener("DOMContentLoaded", setupThemeListeners);
-
-// Run on Astro view transitions
-document.addEventListener("astro:after-swap", setupThemeListeners);
+document.addEventListener("astro:after-swap", init);

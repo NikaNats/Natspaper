@@ -122,5 +122,24 @@ export default defineConfig({
   },
   experimental: {
     preserveScriptOrder: true,
+    // Enable and configure Content Security Policy
+    csp: {
+      directives: [
+        `default-src 'self'`,
+        `img-src 'self' data: https:`,
+        `font-src 'self' data: https://fonts.gstatic.com`,
+        `form-action 'self'`,
+        `frame-ancestors 'none'`,
+        `base-uri 'self'`,
+      ],
+      styleDirective: {
+        hashes: [],
+        resources: ["'unsafe-inline'", "https://fonts.googleapis.com"],
+      },
+      scriptDirective: {
+        hashes: ["sha256-L5GgGE6aIhQPlCTwRw6J36goQOqBFHguo+1e5OG1+YI="],
+        resources: ["'self'"],
+      },
+    },
   },
 });
