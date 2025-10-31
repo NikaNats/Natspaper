@@ -6,8 +6,8 @@
  */
 
 export interface EnvSchema {
-  // ===== REQUIRED: Build/Server Variables =====
-  SITE_WEBSITE: string;
+  // ===== OPTIONAL: Build/Server Variables =====
+  SITE_WEBSITE?: string;
 
   // ===== OPTIONAL: Environment Control =====
   NODE_ENV?: "development" | "production" | "staging";
@@ -41,12 +41,13 @@ export const ENV_DEFINITIONS = {
 
   SITE_WEBSITE: {
     type: "string" as const,
-    required: true,
+    required: false,
     access: "secret" as const,
     context: "server" as const,
+    default: "https://natspaper.vercel.app",
     description: "Production domain URL used for sitemaps and canonical URLs",
     example: "https://natspaper.vercel.app",
-    docs: "Must be a valid URL including protocol (https://)",
+    docs: "Falls back to SITE.website from config.ts if not provided",
   },
 
   // ================================================

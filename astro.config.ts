@@ -72,7 +72,8 @@ export default defineConfig({
       SITE_WEBSITE: envField.string({
         access: "secret",
         context: "server",
-        optional: false, // Required for deployment
+        optional: true, // Optional: falls back to SITE.website from config.ts
+        default: SITE.website,
       }),
       SENTRY_AUTH_TOKEN: envField.string({
         access: "secret",
@@ -129,12 +130,19 @@ export default defineConfig({
         `img-src 'self' data: https:`,
         `font-src 'self' data: https://fonts.gstatic.com`,
         `form-action 'self'`,
-        `frame-ancestors 'none'`,
+        // frame-ancestors removed - can only be set via HTTP headers (vercel.json)
         `base-uri 'self'`,
+        // Allow connections to Sentry
+        `connect-src 'self' https://o4510255602663424.ingest.de.sentry.io`,
       ],
       styleDirective: {
         hashes: [],
-        resources: ["'unsafe-inline'", "https://fonts.googleapis.com"],
+        // Allow inline styles and external stylesheets
+        resources: [
+          "'unsafe-inline'",
+          "'self'",
+          "https://fonts.googleapis.com",
+        ],
       },
       scriptDirective: {
         hashes: ["sha256-L5GgGE6aIhQPlCTwRw6J36goQOqBFHguo+1e5OG1+YI="],
