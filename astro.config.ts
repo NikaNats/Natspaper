@@ -123,31 +123,8 @@ export default defineConfig({
   },
   experimental: {
     preserveScriptOrder: true,
-    // Enable and configure Content Security Policy
-    csp: {
-      directives: [
-        `default-src 'self'`,
-        `img-src 'self' data: https:`,
-        `font-src 'self' data: https://fonts.gstatic.com`,
-        `form-action 'self'`,
-        // frame-ancestors removed - can only be set via HTTP headers (vercel.json)
-        `base-uri 'self'`,
-        // Allow connections to Sentry
-        `connect-src 'self' https://o4510255602663424.ingest.de.sentry.io`,
-      ],
-      styleDirective: {
-        hashes: [],
-        // Allow inline styles and external stylesheets
-        resources: [
-          "'unsafe-inline'",
-          "'self'",
-          "https://fonts.googleapis.com",
-        ],
-      },
-      scriptDirective: {
-        hashes: ["sha256-L5GgGE6aIhQPlCTwRw6J36goQOqBFHguo+1e5OG1+YI="],
-        resources: ["'self'"],
-      },
-    },
+    // CSP is configured via Vercel HTTP headers (vercel.json)
+    // Not using Astro's CSP meta tag generation to avoid conflicts with dynamic styles
+    // from ClientRouter which can't be pre-hashed
   },
 });
