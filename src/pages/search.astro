@@ -81,6 +81,14 @@ const backUrl = SITE.showBackButton ? `${Astro.url.pathname}` : "/";
           search.triggerSearch(query);
         }
 
+        // Add id and name attributes for accessibility and autofill
+        const accessibilityInput = document.querySelector(".pagefind-ui__search-input");
+        if (accessibilityInput) {
+          accessibilityInput.id = "pagefind-search-input";
+          accessibilityInput.setAttribute("name", "q"); // "q" is a standard name for search queries
+          accessibilityInput.setAttribute("aria-label", "Search articles"); // Add an ARIA label for screen readers
+        }
+
         // Reset search param if search input is cleared
         const searchInput = document.querySelector(
           ".pagefind-ui__search-input"
