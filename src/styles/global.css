@@ -113,7 +113,11 @@ html[data-theme="dark"] {
     line-height: 1.55;
     /* Minimize letter-spacing on body text; Inter is already well-spaced */
     letter-spacing: 0.2px;
-    /* Smooth theme transition when data-theme attribute changes */
+  }
+
+  /* Smooth theme transition for all color properties */
+  body,
+  header {
     transition:
       background-color 0.3s ease,
       color 0.3s ease;
@@ -171,8 +175,6 @@ header {
   z-index: 1000;
 
   background-color: var(--background);
-
-  border-bottom: 1px solid var(--border);
 }
 
 main {
