@@ -226,8 +226,9 @@ const structuredData = {
 
     <!-- DEFERRED INTERACTIVE SCRIPT
          This script loads after the page is parsed and handles the button click.
+         Loaded as standard src to allow browser caching independently.
     ================================================================================== -->
-    <script defer is:inline src="/toggle-theme.js"></script>
+    <script defer src="/toggle-theme.js"></script>
 
     <!-- Enable view transitions for faster navigation -->
     <ClientRouter />

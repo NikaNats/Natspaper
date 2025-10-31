@@ -1,28 +1,29 @@
 // ============================================================
-// FOUC-Free Theme Toggle Script
+// Robust, View-Transition-Aware Theme Toggle Script
+// ============================================================
+// This script handles user interactions and system theme changes,
+// ensuring functionality persists across Astro View Transitions.
 // ============================================================
 
 const themeStorageKey = "theme";
 
+// Helper functions
 const getThemePreference = () => {
-  if (
-    typeof localStorage !== "undefined" &&
-    localStorage.getItem(themeStorageKey)
-  ) {
+  if (typeof localStorage !== "undefined" && localStorage.getItem(themeStorageKey)) {
     return localStorage.getItem(themeStorageKey);
   }
-  return window.matchMedia("(prefers-color-scheme: dark)").matches
-    ? "dark"
-    : "light";
+  return window.initialTheme || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
 };
 
-const reflectPreference = theme => {
-  document.documentElement.dataset.theme = theme;
+const setPreference = (theme) => {
+  localStorage.setItem(themeStorageKey, theme);
+  reflectPreference(theme);
+};
 
+const reflectPreference = (theme) => {
+  document.documentElement.dataset.theme = theme;
   const themeBtn = document.querySelector("#theme-btn");
-  if (themeBtn) {
-    themeBtn.setAttribute("aria-label", theme);
-  }
+  themeBtn?.setAttribute("aria-label", theme);
 
   const metaThemeColor = document.querySelector("meta[name='theme-color']");
   if (metaThemeColor) {
@@ -33,39 +34,31 @@ const reflectPreference = theme => {
   }
 };
 
-const setPreference = theme => {
-  localStorage.setItem(themeStorageKey, theme);
-  reflectPreference(theme);
-};
-
-const toggleTheme = () => {
-  const current =
-    document.documentElement.dataset.theme || getThemePreference();
-  const next = current === "light" ? "dark" : "light";
-  setPreference(next);
-};
-
-const syncSystemTheme = e => {
+// --- ONE-TIME SETUP: System Theme Listener ---
+// This listener is not tied to a DOM element and should only be attached once.
+const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+mediaQuery.addEventListener("change", (e) => {
   const newTheme = e.matches ? "dark" : "light";
   setPreference(newTheme);
-};
+});
 
-// Initialize listeners
-const init = () => {
+// --- REPEATED SETUP: Button Click Listener ---
+// This function finds the button and attaches the click listener.
+// It needs to run on initial load and after every page transition.
+const attachToggleListener = () => {
   const themeBtn = document.querySelector("#theme-btn");
-  if (themeBtn) {
-    themeBtn.addEventListener("click", toggleTheme);
-  }
+  if (!themeBtn) return; // Exit if the button isn't on the page
 
-  window
-    .matchMedia("(prefers-color-scheme: dark)")
-    .addEventListener("change", syncSystemTheme);
+  themeBtn.addEventListener("click", () => {
+    const currentTheme = getThemePreference();
+    const newTheme = currentTheme === "light" ? "dark" : "light";
+    setPreference(newTheme);
+  });
 };
 
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", init);
-} else {
-  init();
-}
+// --- EXECUTION ---
+// 1. Run on initial page load
+attachToggleListener();
 
-document.addEventListener("astro:after-swap", init);
+// 2. Re-run after every Astro View Transition
+document.addEventListener("astro:after-swap", attachToggleListener);
