@@ -1,8 +1,8 @@
 name: CI - Pull Request Validation
 
 env:
-  NODE_VERSION: '20'
-  PNPM_VERSION: '10.11.1'
+  NODE_VERSION: "24"
+  PNPM_VERSION: "10.20.0"
 
 on:
   pull_request:
@@ -37,21 +37,21 @@ jobs:
         run: |
           # Detect what type of files changed
           git diff --name-only origin/${{ github.base_ref }}...HEAD > changed_files.txt
-          
+
           # Check for code changes
           if grep -qE '\.(ts|tsx|js|jsx|astro|vue)$' changed_files.txt; then
             echo "code=true" >> $GITHUB_OUTPUT
           else
             echo "code=false" >> $GITHUB_OUTPUT
           fi
-          
+
           # Check for test changes
           if grep -qE '\.test\.|\.spec\.|test/|tests/' changed_files.txt; then
             echo "tests=true" >> $GITHUB_OUTPUT
           else
             echo "tests=false" >> $GITHUB_OUTPUT
           fi
-          
+
           # Skip E2E if only docs/config changed
           if grep -qvE '\.(md|json|yaml|yml|txt)$' changed_files.txt; then
             echo "skip-e2e=false" >> $GITHUB_OUTPUT
@@ -59,7 +59,7 @@ jobs:
             echo "skip-e2e=true" >> $GITHUB_OUTPUT
             echo "::notice::Skipping E2E tests - only documentation/config changed"
           fi
-          
+
           cat changed_files.txt
 
   # Code quality - matches CD exactly
@@ -78,7 +78,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile --prefer-offline
@@ -108,7 +108,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile --prefer-offline
@@ -141,7 +141,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile --prefer-offline
@@ -160,13 +160,13 @@ jobs:
             echo "::error::Build output directory not found"
             exit 1
           fi
-          
+
           BUILD_SIZE_KB=$(du -sk dist/ | cut -f1)
           BUILD_SIZE_MB=$(awk "BEGIN {printf \"%.2f\", $BUILD_SIZE_KB / 1024}")
-          
+
           echo "size_mb=$BUILD_SIZE_MB" >> $GITHUB_OUTPUT
           echo "size_kb=$BUILD_SIZE_KB" >> $GITHUB_OUTPUT
-          
+
           {
             echo "### 📦 Bundle Size Analysis"
             echo ""
@@ -236,7 +236,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile --prefer-offline
@@ -297,7 +297,7 @@ jobs:
           UNIT_TESTS="${{ needs.unit-tests.result }}"
           BUILD="${{ needs.build-verification.result }}"
           E2E="${{ needs.e2e-tests.result }}"
-          
+
           {
             echo "### 🔍 CI Validation Summary"
             echo ""
@@ -321,14 +321,14 @@ jobs:
             echo "- Commit: [\`${GITHUB_SHA:0:7}\`](https://github.com/${{ github.repository }}/commit/${{ github.sha }})"
             echo "- Author: @${{ github.actor }}"
           } >> $GITHUB_STEP_SUMMARY
-          
+
           # Fail if any required job failed
           if [ "$CODE_QUALITY" != "success" ] || [ "$UNIT_TESTS" != "success" ] || [ "$BUILD" != "success" ] || ([ "$E2E" != "success" ] && [ "$E2E" != "skipped" ]); then
             echo ""
             echo "::error::One or more CI checks failed"
             exit 1
           fi
-          
+
           echo ""
           echo "✅ All CI checks passed successfully"
 

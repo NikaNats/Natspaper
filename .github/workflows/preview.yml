@@ -3,8 +3,8 @@ name: Vercel Preview Deployment
 env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-  NODE_VERSION: '20'
-  PNPM_VERSION: '10.11.1'
+  NODE_VERSION: "24"
+  PNPM_VERSION: "10.20.0"
 
 on:
   push:
@@ -45,7 +45,7 @@ jobs:
         run: |
           # Skip deployment for branches that only change docs/config
           git diff --name-only HEAD~1 2>/dev/null > changed_files.txt || echo "No previous commit"
-          
+
           if [ -s changed_files.txt ]; then
             if grep -qvE '\.(md|txt|yaml|yml|gitignore)$|^\.github/(?!workflows)' changed_files.txt; then
               echo "should-deploy=true" >> $GITHUB_OUTPUT
@@ -68,7 +68,7 @@ jobs:
           [ -z "$ORG_ID" ] && missing_secrets+=("VERCEL_ORG_ID")
           [ -z "$PROJECT_ID" ] && missing_secrets+=("VERCEL_PROJECT_ID")
           [ -z "$TOKEN" ] && missing_secrets+=("VERCEL_TOKEN")
-          
+
           if [ ${#missing_secrets[@]} -ne 0 ]; then
             echo "::error::Missing required secrets: ${missing_secrets[*]}"
             exit 1
@@ -92,7 +92,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile --prefer-offline
@@ -127,7 +127,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile --prefer-offline
@@ -158,7 +158,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: Install Vercel CLI
         run: pnpm install --global vercel@latest
@@ -181,13 +181,13 @@ jobs:
             echo "::warning::Build output directory not found, skipping analysis"
             exit 0
           fi
-          
+
           BUILD_SIZE_KB=$(du -sk .vercel/output 2>/dev/null | cut -f1 || echo "0")
           BUILD_SIZE_MB=$(awk "BEGIN {printf \"%.2f\", $BUILD_SIZE_KB / 1024}")
-          
+
           echo "size_mb=$BUILD_SIZE_MB" >> $GITHUB_OUTPUT
           echo "size_kb=$BUILD_SIZE_KB" >> $GITHUB_OUTPUT
-          
+
           {
             echo "### 📦 Preview Build Analysis"
             echo ""
@@ -214,20 +214,20 @@ jobs:
         id: deploy
         run: |
           echo "Deploying preview..."
-          
+
           # Deploy and capture both stdout and URL
           DEPLOY_OUTPUT=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }} 2>&1)
           echo "$DEPLOY_OUTPUT"
-          
+
           # Extract the preview URL (last HTTPS URL in output)
           PREVIEW_URL=$(echo "$DEPLOY_OUTPUT" | grep -oP 'https://[^\s]+' | tail -1)
-          
+
           if [ -z "$PREVIEW_URL" ]; then
             echo "::error::Failed to extract preview URL from deployment"
             echo "$DEPLOY_OUTPUT"
             exit 1
           fi
-          
+
           echo "url=$PREVIEW_URL" >> $GITHUB_OUTPUT
           echo "✅ Preview deployed to: $PREVIEW_URL"
 
@@ -241,37 +241,37 @@ jobs:
             const branch = '${{ needs.validate-preview.outputs.branch-name }}';
             const buildSize = '${{ steps.build-analysis.outputs.size_mb }}';
             const commit = context.sha.substring(0, 7);
-            
+
             const body = `## 🚀 Preview Deployment Ready
-            
+
             **Preview URL:** ${previewUrl}
-            
+
             | Info | Value |
             |------|-------|
             | 🌿 Branch | \`${branch}\` |
             | 📝 Commit | \`${commit}\` |
             | 📦 Build Size | ${buildSize}MB |
             | ⏱️ Deployed | ${new Date().toUTCString()} |
-            
+
             ---
-            
+
             💡 **Tips:**
             - Preview deployments are temporary and will be cleaned up
             - Check the [workflow run](https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}) for details
             `;
-            
+
             // Find existing comment
             const { data: comments } = await github.rest.issues.listComments({
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: context.issue.number,
             });
-            
+
             const botComment = comments.find(comment => 
               comment.user.type === 'Bot' && 
               comment.body.includes('Preview Deployment Ready')
             );
-            
+
             // Update or create comment
             if (botComment) {
               await github.rest.issues.updateComment({
@@ -294,7 +294,7 @@ jobs:
         run: |
           PREVIEW_URL="${{ steps.deploy.outputs.url }}"
           BUILD_SIZE="${{ steps.build-analysis.outputs.size_mb }}"
-          
+
           {
             echo "### ✅ Preview Deployment Complete"
             echo ""
@@ -327,14 +327,14 @@ jobs:
       - name: Test Preview Deployment
         run: |
           PREVIEW_URL="${{ needs.deploy-preview.outputs.preview-url }}"
-          
+
           if [ -z "$PREVIEW_URL" ]; then
             echo "::warning::No preview URL available for testing"
             exit 0
           fi
-          
+
           echo "Testing preview at: $PREVIEW_URL"
-          
+
           MAX_RETRIES=3
           for i in $(seq 1 $MAX_RETRIES); do
             STATUS=$(curl -sSL -o /dev/null -w '%{http_code}' --max-time 10 "$PREVIEW_URL" || echo "000")
@@ -356,7 +356,7 @@ jobs:
             echo "⚠️ Attempt $i/$MAX_RETRIES - HTTP $STATUS, retrying in 5s..."
             sleep 5
           done
-          
+
           echo "::warning::Preview may need additional time to warm up (HTTP $STATUS)"
           exit 0  # Don't fail - preview might just be slow
 
