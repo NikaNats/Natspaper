@@ -36,13 +36,13 @@ jobs:
           [ -z "$ORG_ID" ] && missing_secrets+=("VERCEL_ORG_ID")
           [ -z "$PROJECT_ID" ] && missing_secrets+=("VERCEL_PROJECT_ID")
           [ -z "$TOKEN" ] && missing_secrets+=("VERCEL_TOKEN")
-          
+
           if [ ${#missing_secrets[@]} -ne 0 ]; then
             echo "::error::Missing required secrets: ${missing_secrets[*]}"
             exit 1
           fi
           echo "✅ All required secrets configured"
-      
+
       - name: Set Deployment URL
         id: set-url
         run: echo "url=https://natspaper.vercel.app" >> $GITHUB_OUTPUT
@@ -63,7 +63,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
+          cache: "pnpm"
 
       # Cache node_modules for faster installs
       - name: Cache node_modules
@@ -92,13 +92,13 @@ jobs:
           LINT_PID=$!
           pnpm run format:check &
           FORMAT_PID=$!
-          
+
           # Wait for both and capture exit codes
           LINT_EXIT=0
           FORMAT_EXIT=0
           wait $LINT_PID || LINT_EXIT=$?
           wait $FORMAT_PID || FORMAT_EXIT=$?
-          
+
           # Check results
           if [ $LINT_EXIT -ne 0 ]; then
             echo "::error::Linting failed with exit code $LINT_EXIT"
@@ -108,7 +108,7 @@ jobs:
             echo "::error::Format check failed with exit code $FORMAT_EXIT"
             exit $FORMAT_EXIT
           fi
-          
+
           echo "✅ Lint and format checks passed"
 
       # Cache TypeScript build info for faster type checking
@@ -143,7 +143,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
+          cache: "pnpm"
 
       # Cache node_modules
       - name: Cache node_modules
@@ -182,7 +182,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
+          cache: "pnpm"
 
       # Cache node_modules
       - name: Cache node_modules
@@ -258,7 +258,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Need history for build size comparison
+          fetch-depth: 0 # Need history for build size comparison
 
       - uses: pnpm/action-setup@v4
         with:
@@ -267,7 +267,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: Install Vercel CLI
         run: pnpm install --global vercel@latest
@@ -296,40 +296,40 @@ jobs:
             echo "::error::Build output directory not found"
             exit 1
           fi
-          
+
           # Calculate current build size
           BUILD_SIZE_KB=$(du -sk .vercel/output | cut -f1)
           BUILD_SIZE_MB=$(awk "BEGIN {printf \"%.2f\", $BUILD_SIZE_KB / 1024}")
-          
+
           echo "size_mb=$BUILD_SIZE_MB" >> $GITHUB_OUTPUT
           echo "size_kb=$BUILD_SIZE_KB" >> $GITHUB_OUTPUT
-          
+
           # Create build stats directory
           mkdir -p .github/build-stats
-          
+
           # Read previous build size if exists
           PREV_SIZE_KB=0
           if [ -f ".github/build-stats/last-build.txt" ]; then
             PREV_SIZE_KB=$(cat .github/build-stats/last-build.txt)
           fi
-          
+
           # Save current size
           echo "$BUILD_SIZE_KB" > .github/build-stats/last-build.txt
-          
+
           # Calculate size change
           SIZE_DIFF_KB=$((BUILD_SIZE_KB - PREV_SIZE_KB))
           SIZE_DIFF_MB=$(awk "BEGIN {printf \"%.2f\", $SIZE_DIFF_KB / 1024}")
-          
+
           # Calculate percentage change
           if [ "$PREV_SIZE_KB" -gt 0 ]; then
             SIZE_CHANGE_PCT=$(awk "BEGIN {printf \"%.1f\", ($SIZE_DIFF_KB / $PREV_SIZE_KB) * 100}")
           else
             SIZE_CHANGE_PCT="0.0"
           fi
-          
+
           echo "size_change_pct=$SIZE_CHANGE_PCT" >> $GITHUB_OUTPUT
           echo "size_diff_mb=$SIZE_DIFF_MB" >> $GITHUB_OUTPUT
-          
+
           # Generate detailed breakdown
           {
             echo "### 📦 Production Build Analysis"
@@ -420,12 +420,12 @@ jobs:
         run: |
           echo "Deploying to Vercel production..."
           DEPLOYMENT_URL=$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }} 2>&1 | tee /dev/stderr | grep -oP 'https://[^\s]+' | tail -1)
-          
+
           if [ -z "$DEPLOYMENT_URL" ]; then
             echo "::error::Failed to extract deployment URL"
             exit 1
           fi
-          
+
           echo "url=$DEPLOYMENT_URL" >> $GITHUB_OUTPUT
           echo "✅ Deployed to: $DEPLOYMENT_URL"
 
@@ -465,9 +465,9 @@ jobs:
           URL="https://natspaper.vercel.app"
           MAX_RETRIES=3
           RETRY_DELAY=5
-          
+
           echo "Verifying deployment at $URL..."
-          
+
           for i in $(seq 1 $MAX_RETRIES); do
             echo "Attempt $i of $MAX_RETRIES..."
             
@@ -490,21 +490,21 @@ jobs:
             echo "⚠️  Received HTTP $STATUS, retrying in ${RETRY_DELAY}s..."
             sleep $RETRY_DELAY
           done
-          
+
           echo "::error::Deployment verification failed after $MAX_RETRIES attempts (HTTP $STATUS)"
           exit 1
 
       - name: Check Critical Pages
         run: |
           URL="https://natspaper.vercel.app"
-          
+
           # Critical pages that MUST be accessible
           PAGES=("/" "/posts" "/tags" "/archives" "/search")
-          
+
           echo "Checking critical pages..."
           FAILED_PAGES=()
           SUCCESS_COUNT=0
-          
+
           for PAGE in "${PAGES[@]}"; do
             FULL_URL="${URL}${PAGE}"
             STATUS=$(curl -sSL -o /dev/null -w '%{http_code}' --max-time 10 "$FULL_URL" || echo "000")
@@ -517,7 +517,7 @@ jobs:
               FAILED_PAGES+=("$PAGE (HTTP $STATUS)")
             fi
           done
-          
+
           # Report to summary
           {
             echo ""
@@ -526,7 +526,7 @@ jobs:
             echo "- Successful: $SUCCESS_COUNT"
             echo "- Failed: ${#FAILED_PAGES[@]}"
           } >> $GITHUB_STEP_SUMMARY
-          
+
           # Fail if any critical page is down
           if [ ${#FAILED_PAGES[@]} -gt 0 ]; then
             echo ""
@@ -540,7 +540,7 @@ jobs:
             } >> $GITHUB_STEP_SUMMARY
             exit 1
           fi
-          
+
           echo "✅ All critical pages verified successfully"
           {
             echo ""
@@ -550,23 +550,23 @@ jobs:
       - name: Check Response Times
         run: |
           URL="https://natspaper.vercel.app"
-          
+
           echo "Checking site performance..."
-          
+
           # Check response time for homepage
           RESPONSE_TIME=$(curl -o /dev/null -s -w '%{time_total}' "$URL" || echo "0")
-          
+
           echo "Homepage response time: ${RESPONSE_TIME}s"
-          
+
           # Convert to milliseconds for easier reading
           RESPONSE_MS=$(awk "BEGIN {printf \"%.0f\", $RESPONSE_TIME * 1000}")
-          
+
           {
             echo ""
             echo "**Performance Metrics:**"
             echo "- Homepage Response Time: ${RESPONSE_MS}ms"
           } >> $GITHUB_STEP_SUMMARY
-          
+
           # Warn if response is slow (>3 seconds)
           SLOW_CHECK=$(awk "BEGIN {print ($RESPONSE_TIME > 3.0) ? 1 : 0}")
           if [ "$SLOW_CHECK" -eq 1 ]; then
