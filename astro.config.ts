@@ -28,9 +28,19 @@ export default defineConfig({
       filter: page => SITE.showArchives || !page.endsWith("/archives"),
     }),
     sentry({
-      project: "natspaper",
-      org: "nika-1u",
-      authToken: process.env.SENTRY_AUTH_TOKEN,
+      // Configuration for source map uploads during build
+      // Enables readable stack traces in production by uploading source maps
+      sourceMapsUploadOptions: {
+        project: "natspaper",
+        org: "nika-1u",
+        authToken: process.env.SENTRY_AUTH_TOKEN,
+      },
+
+      // Auto instrumentation for request handling (Astro 3.5.2+)
+      // Automatically adds middleware for request tracking and distributed tracing
+      autoInstrumentation: {
+        requestHandler: true,
+      },
     }),
   ],
   markdown: {

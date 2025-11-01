@@ -24,11 +24,27 @@
 
 import * as Sentry from "@sentry/astro";
 
-// Initialize Sentry with DSN from environment variable
-// Never hardcode secrets in source code - use .env.local instead
+/**
+ * Client-side Sentry initialization
+ *
+ * This file is processed by the Astro/Sentry integration during build.
+ * However, the actual initialization happens in src/utils/sentry-client-init.ts
+ * which is called from src/layouts/Layout.astro after page load.
+ *
+ * Configuration is loaded from environment variables:
+ * - PUBLIC_SENTRY_DSN: Browser-safe DSN (no secrets)
+ * - PUBLIC_SENTRY_ENVIRONMENT: Environment label for organizing errors
+ * - PUBLIC_SENTRY_TRACES_SAMPLE_RATE: % of transactions to sample (0-1)
+ */
+
 Sentry.init({
   dsn: import.meta.env.PUBLIC_SENTRY_DSN,
-  sendDefaultPii: false, // Set to false in production to protect user privacy
-  // Only enable if you've read and accepted the privacy implications
-  // sendDefaultPii: true,
+
+  // Collects request headers and user IP address
+  // Set to false to protect user privacy (default: false)
+  // Only enable if you've explicitly decided to collect this data
+  sendDefaultPii: false,
+
+  // Attach stack traces to message events
+  attachStacktrace: true,
 });
