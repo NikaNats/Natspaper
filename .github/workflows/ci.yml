@@ -1,101 +1,352 @@
-name: CI
+name: CI - Pull Request Validation
+
+env:
+  NODE_VERSION: '20'
+  PNPM_VERSION: '10.11.1'
 
 on:
   pull_request:
+    types: [opened, synchronize, reopened]
+    branches:
+      - master
+      - main
+      - develop
+
+# Cancel previous runs for same PR
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  checks:
+  # Fast-fail job - runs first
+  validate-changes:
+    name: Validate Changes
     runs-on: ubuntu-latest
+    timeout-minutes: 2
+    outputs:
+      has-code-changes: ${{ steps.changes.outputs.code }}
+      has-test-changes: ${{ steps.changes.outputs.tests }}
+      skip-e2e: ${{ steps.changes.outputs.skip-e2e }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect Changed Files
+        id: changes
+        run: |
+          # Detect what type of files changed
+          git diff --name-only origin/${{ github.base_ref }}...HEAD > changed_files.txt
+          
+          # Check for code changes
+          if grep -qE '\.(ts|tsx|js|jsx|astro|vue)$' changed_files.txt; then
+            echo "code=true" >> $GITHUB_OUTPUT
+          else
+            echo "code=false" >> $GITHUB_OUTPUT
+          fi
+          
+          # Check for test changes
+          if grep -qE '\.test\.|\.spec\.|test/|tests/' changed_files.txt; then
+            echo "tests=true" >> $GITHUB_OUTPUT
+          else
+            echo "tests=false" >> $GITHUB_OUTPUT
+          fi
+          
+          # Skip E2E if only docs/config changed
+          if grep -qvE '\.(md|json|yaml|yml|txt)$' changed_files.txt; then
+            echo "skip-e2e=false" >> $GITHUB_OUTPUT
+          else
+            echo "skip-e2e=true" >> $GITHUB_OUTPUT
+            echo "::notice::Skipping E2E tests - only documentation/config changed"
+          fi
+          
+          cat changed_files.txt
+
+  # Code quality - matches CD exactly
+  code-quality:
+    name: Code Quality & Type Safety
+    needs: validate-changes
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
 
       - uses: pnpm/action-setup@v4
         with:
-          version: 10.11.1
+          version: ${{ env.PNPM_VERSION }}
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: pnpm
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
 
-      - run: pnpm install --frozen-lockfile
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile --prefer-offline
 
-      # Code Quality Checks
       - name: Run Linter
         run: pnpm run lint
-        continue-on-error: false
 
       - name: Check Code Formatting
         run: pnpm run format:check
-        continue-on-error: false
 
-      # Type and Build Checks
       - name: Check Astro Type Safety
         run: pnpm astro check
-        continue-on-error: false
 
-      - name: Build Project (Production Configuration)
-        run: pnpm run build:prod
-        continue-on-error: false
-        env:
-          SITE_WEBSITE: https://natspaper.vercel.app
+  # Unit tests - matches CD exactly
+  unit-tests:
+    name: Unit Tests
+    needs: validate-changes
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
 
-      # Test Checks
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile --prefer-offline
+
       - name: Run Unit Tests
         run: pnpm run test:run
-        continue-on-error: false
 
-      # Bundle Size Analysis
-      - name: Analyze Bundle Size
-        run: |
-          echo "=== Build Size Analysis ===" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-
-          # Get total build size
-          BUILD_SIZE=$(du -sh dist/ | cut -f1)
-          echo "**Total Build Size:** $BUILD_SIZE" >> $GITHUB_STEP_SUMMARY
-
-          # Check individual component sizes
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Asset Breakdown:**" >> $GITHUB_STEP_SUMMARY
-
-          if [ -d "dist/_astro" ]; then
-            ASTRO_SIZE=$(du -sh dist/_astro | cut -f1)
-            echo "- Astro Assets: $ASTRO_SIZE" >> $GITHUB_STEP_SUMMARY
-          fi
-
-          if [ -d "dist/assets" ]; then
-            ASSETS_SIZE=$(du -sh dist/assets | cut -f1)
-            echo "- Static Assets: $ASSETS_SIZE" >> $GITHUB_STEP_SUMMARY
-          fi
-
-          # Fail if build exceeds threshold (e.g., 2MB)
-          BUILD_SIZE_KB=$(du -sk dist/ | cut -f1)
-          THRESHOLD_KB=2048
-
-          if [ $BUILD_SIZE_KB -gt $THRESHOLD_KB ]; then
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "⚠️ **Warning:** Build size ($BUILD_SIZE) exceeds threshold ($(( THRESHOLD_KB / 1024 ))MB)" >> $GITHUB_STEP_SUMMARY
-            echo "Consider optimizing assets or code splitting" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "✅ Build size is within acceptable limits" >> $GITHUB_STEP_SUMMARY
-          fi
-
-      # Upload build artifacts for inspection
-      - name: Upload Build Artifacts
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-output
-          path: dist/
-          retention-days: 5
-
-      # Upload test coverage if available
       - name: Upload Coverage Reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: coverage-reports
+          name: coverage-reports-${{ github.run_id }}
           path: coverage/
-          retention-days: 5
+          retention-days: 7
+          if-no-files-found: ignore
+
+  # Build verification - uses same approach as CD
+  build-verification:
+    name: Build Verification
+    needs: validate-changes
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile --prefer-offline
+
+      - name: Build Project (Production Mode)
+        run: pnpm run build:prod
+        env:
+          SITE_WEBSITE: https://natspaper.vercel.app
+          PUBLIC_SENTRY_ENVIRONMENT: preview
+          PUBLIC_SENTRY_TRACES_SAMPLE_RATE: 0.1
+
+      - name: Analyze Bundle Size
+        id: bundle-analysis
+        run: |
+          if [ ! -d "dist" ]; then
+            echo "::error::Build output directory not found"
+            exit 1
+          fi
+          
+          BUILD_SIZE_KB=$(du -sk dist/ | cut -f1)
+          BUILD_SIZE_MB=$(awk "BEGIN {printf \"%.2f\", $BUILD_SIZE_KB / 1024}")
+          
+          echo "size_mb=$BUILD_SIZE_MB" >> $GITHUB_OUTPUT
+          echo "size_kb=$BUILD_SIZE_KB" >> $GITHUB_OUTPUT
+          
+          {
+            echo "### 📦 Bundle Size Analysis"
+            echo ""
+            echo "**Total Build Size:** ${BUILD_SIZE_MB}MB (${BUILD_SIZE_KB}KB)"
+            echo ""
+            echo "**Asset Breakdown:**"
+            
+            if [ -d "dist/_astro" ]; then
+              ASTRO_SIZE=$(du -sh dist/_astro | cut -f1)
+              ASTRO_COUNT=$(find dist/_astro -type f | wc -l)
+              echo "- Astro Assets: $ASTRO_SIZE ($ASTRO_COUNT files)"
+            fi
+            
+            if [ -d "dist/assets" ]; then
+              ASSETS_SIZE=$(du -sh dist/assets | cut -f1)
+              ASSETS_COUNT=$(find dist/assets -type f | wc -l)
+              echo "- Static Assets: $ASSETS_SIZE ($ASSETS_COUNT files)"
+            fi
+            
+            # Find largest files
+            echo ""
+            echo "**Largest Files:**"
+            find dist -type f -exec du -h {} + | sort -rh | head -5 | while read size file; do
+              echo "- $size - \`${file#dist/}\`"
+            done
+            
+            echo ""
+            
+            # Check against threshold (2MB for PR builds)
+            THRESHOLD_KB=2048
+            if [ "$BUILD_SIZE_KB" -gt "$THRESHOLD_KB" ]; then
+              echo "⚠️ **Warning:** Build size exceeds recommended threshold of $((THRESHOLD_KB / 1024))MB"
+              echo ""
+              echo "**Optimization Suggestions:**"
+              echo "- Use dynamic imports for large components"
+              echo "- Optimize images and compress assets"
+              echo "- Review bundle composition with \`pnpm run build --analyze\`"
+              echo "::warning::Build size ($BUILD_SIZE_MB MB) exceeds $((THRESHOLD_KB / 1024))MB threshold"
+            else
+              echo "✅ Build size is within acceptable limits"
+            fi
+          } >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload Build Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-output-${{ github.run_id }}
+          path: dist/
+          retention-days: 7
+          if-no-files-found: error
+
+  # E2E tests - matches CD exactly with caching
+  e2e-tests:
+    name: E2E Tests (Chromium)
+    needs: [validate-changes, build-verification]
+    if: needs.validate-changes.outputs.skip-e2e != 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile --prefer-offline
+
+      # Matches CD caching strategy
+      - name: Get Playwright Version
+        id: playwright-version
+        run: |
+          PLAYWRIGHT_VERSION=$(pnpm list @playwright/test --depth=0 --json | jq -r '.[0].devDependencies["@playwright/test"].version // empty')
+          if [ -z "$PLAYWRIGHT_VERSION" ]; then
+            echo "::error::Failed to detect Playwright version"
+            exit 1
+          fi
+          echo "version=$PLAYWRIGHT_VERSION" >> $GITHUB_OUTPUT
+          echo "Playwright version: $PLAYWRIGHT_VERSION"
+
+      - name: Cache Playwright Browsers
+        uses: actions/cache@v4
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-browsers-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}
+
+      - name: Install Playwright Browsers
+        run: pnpm exec playwright install --with-deps chromium
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+
+      - name: Install System Dependencies (Cache Hit)
+        run: pnpm exec playwright install-deps chromium
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+
+      - name: Run E2E Tests
+        run: pnpm exec playwright test --project chromium
+        env:
+          SITE_WEBSITE: https://natspaper.vercel.app
+
+      - name: Upload Test Results
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-${{ github.run_id }}
+          path: playwright-report/
+          retention-days: 7
+          if-no-files-found: ignore
+
+  # Summary job - provides quick overview
+  ci-summary:
+    name: CI Summary
+    needs: [code-quality, unit-tests, build-verification, e2e-tests]
+    # Run even if E2E was skipped, but not if any required job failed
+    if: always() && !cancelled()
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Check Job Status
+        run: |
+          CODE_QUALITY="${{ needs.code-quality.result }}"
+          UNIT_TESTS="${{ needs.unit-tests.result }}"
+          BUILD="${{ needs.build-verification.result }}"
+          E2E="${{ needs.e2e-tests.result }}"
+          
+          {
+            echo "### 🔍 CI Validation Summary"
+            echo ""
+            echo "**Job Results:**"
+            echo "- Code Quality: $([ "$CODE_QUALITY" = "success" ] && echo "✅ Passed" || echo "❌ Failed")"
+            echo "- Unit Tests: $([ "$UNIT_TESTS" = "success" ] && echo "✅ Passed" || echo "❌ Failed")"
+            echo "- Build Verification: $([ "$BUILD" = "success" ] && echo "✅ Passed" || echo "❌ Failed")"
+            
+            if [ "$E2E" = "skipped" ]; then
+              echo "- E2E Tests: ⏭️ Skipped (documentation/config changes only)"
+            elif [ "$E2E" = "success" ]; then
+              echo "- E2E Tests: ✅ Passed"
+            else
+              echo "- E2E Tests: ❌ Failed"
+            fi
+            
+            echo ""
+            echo "**PR Information:**"
+            echo "- Branch: \`${{ github.head_ref }}\`"
+            echo "- Target: \`${{ github.base_ref }}\`"
+            echo "- Commit: [\`${GITHUB_SHA:0:7}\`](https://github.com/${{ github.repository }}/commit/${{ github.sha }})"
+            echo "- Author: @${{ github.actor }}"
+          } >> $GITHUB_STEP_SUMMARY
+          
+          # Fail if any required job failed
+          if [ "$CODE_QUALITY" != "success" ] || [ "$UNIT_TESTS" != "success" ] || [ "$BUILD" != "success" ] || ([ "$E2E" != "success" ] && [ "$E2E" != "skipped" ]); then
+            echo ""
+            echo "::error::One or more CI checks failed"
+            exit 1
+          fi
+          
+          echo ""
+          echo "✅ All CI checks passed successfully"
+
+  # Optional: Prevent merge if checks fail (for branch protection)
+  all-checks-passed:
+    name: All Checks Passed
+    needs: [code-quality, unit-tests, build-verification, e2e-tests]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 1
+    steps:
+      - name: Verify All Jobs Succeeded
+        run: |
+          if [ "${{ needs.code-quality.result }}" != "success" ] || \
+             [ "${{ needs.unit-tests.result }}" != "success" ] || \
+             [ "${{ needs.build-verification.result }}" != "success" ] || \
+             ([ "${{ needs.e2e-tests.result }}" != "success" ] && [ "${{ needs.e2e-tests.result }}" != "skipped" ]); then
+            echo "::error::One or more required checks failed"
+            exit 1
+          fi
+          echo "✅ All required checks passed"
