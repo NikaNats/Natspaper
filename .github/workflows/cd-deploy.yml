@@ -3,8 +3,8 @@ name: Vercel Production Deployment
 env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-  NODE_VERSION: '20'
-  PNPM_VERSION: '10.11.1'
+  NODE_VERSION: "24"
+  PNPM_VERSION: "10.20.0"
 
 on:
   push:
@@ -36,13 +36,13 @@ jobs:
           [ -z "$ORG_ID" ] && missing_secrets+=("VERCEL_ORG_ID")
           [ -z "$PROJECT_ID" ] && missing_secrets+=("VERCEL_PROJECT_ID")
           [ -z "$TOKEN" ] && missing_secrets+=("VERCEL_TOKEN")
-          
+
           if [ ${#missing_secrets[@]} -ne 0 ]; then
             echo "::error::Missing required secrets: ${missing_secrets[*]}"
             exit 1
           fi
           echo "✅ All required secrets configured"
-      
+
       - name: Set Deployment URL
         id: set-url
         run: echo "url=https://natspaper.vercel.app" >> $GITHUB_OUTPUT
@@ -63,7 +63,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile --prefer-offline
@@ -93,7 +93,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile --prefer-offline
@@ -117,7 +117,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile --prefer-offline
@@ -185,7 +185,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: Install Vercel CLI
         run: pnpm install --global vercel@latest
@@ -203,13 +203,13 @@ jobs:
             echo "::error::Build output directory not found"
             exit 1
           fi
-          
+
           BUILD_SIZE_KB=$(du -sk .vercel/output | cut -f1)
           BUILD_SIZE_MB=$(awk "BEGIN {printf \"%.2f\", $BUILD_SIZE_KB / 1024}")
-          
+
           echo "size_mb=$BUILD_SIZE_MB" >> $GITHUB_OUTPUT
           echo "size_kb=$BUILD_SIZE_KB" >> $GITHUB_OUTPUT
-          
+
           {
             echo "### 📦 Production Build Analysis"
             echo ""
@@ -242,12 +242,12 @@ jobs:
         run: |
           echo "Deploying to Vercel production..."
           DEPLOYMENT_URL=$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }} 2>&1 | tee /dev/stderr | grep -oP 'https://[^\s]+' | tail -1)
-          
+
           if [ -z "$DEPLOYMENT_URL" ]; then
             echo "::error::Failed to extract deployment URL"
             exit 1
           fi
-          
+
           echo "url=$DEPLOYMENT_URL" >> $GITHUB_OUTPUT
           echo "✅ Deployed to: $DEPLOYMENT_URL"
 
@@ -281,9 +281,9 @@ jobs:
           URL="https://natspaper.vercel.app"
           MAX_RETRIES=3
           RETRY_DELAY=5
-          
+
           echo "Verifying deployment at $URL..."
-          
+
           for i in $(seq 1 $MAX_RETRIES); do
             echo "Attempt $i of $MAX_RETRIES..."
             
@@ -306,20 +306,20 @@ jobs:
             echo "⚠️  Received HTTP $STATUS, retrying in ${RETRY_DELAY}s..."
             sleep $RETRY_DELAY
           done
-          
+
           echo "::error::Deployment verification failed after $MAX_RETRIES attempts (HTTP $STATUS)"
           exit 1
 
       - name: Check Critical Pages
         run: |
           URL="https://natspaper.vercel.app"
-          
+
           # Add any critical pages that must be accessible
           PAGES=("/" "/about" "/contact")
-          
+
           echo "Checking critical pages..."
           FAILED_PAGES=()
-          
+
           for PAGE in "${PAGES[@]}"; do
             FULL_URL="${URL}${PAGE}"
             STATUS=$(curl -sSL -o /dev/null -w '%{http_code}' --max-time 10 "$FULL_URL" || echo "000")
@@ -331,7 +331,7 @@ jobs:
               FAILED_PAGES+=("$PAGE (HTTP $STATUS)")
             fi
           done
-          
+
           if [ ${#FAILED_PAGES[@]} -gt 0 ]; then
             echo "::warning::Some pages failed verification: ${FAILED_PAGES[*]}"
             # Don't fail the job, just warn
