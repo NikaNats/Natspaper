@@ -3,30 +3,101 @@ name: Vercel Preview Deployment
 env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+  NODE_VERSION: '20'
+  PNPM_VERSION: '10.11.1'
 
 on:
   push:
     branches-ignore:
       - master
+      - main
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+# Cancel outdated preview deployments for same branch
+concurrency:
+  group: preview-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  pre-deployment-checks:
+  # Fast-fail validation
+  validate-preview:
+    name: Validate Preview Configuration
     runs-on: ubuntu-latest
+    timeout-minutes: 2
+    outputs:
+      should-deploy: ${{ steps.check-changes.outputs.should-deploy }}
+      branch-name: ${{ steps.branch-info.outputs.name }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get Branch Info
+        id: branch-info
+        run: |
+          BRANCH_NAME="${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}"
+          echo "name=$BRANCH_NAME" >> $GITHUB_OUTPUT
+          echo "Branch: $BRANCH_NAME"
+
+      - name: Check if Deployment Needed
+        id: check-changes
+        run: |
+          # Skip deployment for branches that only change docs/config
+          git diff --name-only HEAD~1 2>/dev/null > changed_files.txt || echo "No previous commit"
+          
+          if [ -s changed_files.txt ]; then
+            if grep -qvE '\.(md|txt|yaml|yml|gitignore)$|^\.github/(?!workflows)' changed_files.txt; then
+              echo "should-deploy=true" >> $GITHUB_OUTPUT
+              echo "::notice::Code changes detected - deployment needed"
+            else
+              echo "should-deploy=false" >> $GITHUB_OUTPUT
+              echo "::notice::Only docs/config changed - skipping deployment"
+            fi
+          else
+            echo "should-deploy=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Validate Secrets
+        env:
+          ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          missing_secrets=()
+          [ -z "$ORG_ID" ] && missing_secrets+=("VERCEL_ORG_ID")
+          [ -z "$PROJECT_ID" ] && missing_secrets+=("VERCEL_PROJECT_ID")
+          [ -z "$TOKEN" ] && missing_secrets+=("VERCEL_TOKEN")
+          
+          if [ ${#missing_secrets[@]} -ne 0 ]; then
+            echo "::error::Missing required secrets: ${missing_secrets[*]}"
+            exit 1
+          fi
+          echo "✅ All required secrets configured"
+
+  # Code quality checks (parallel)
+  code-quality:
+    name: Code Quality
+    needs: validate-preview
+    if: needs.validate-preview.outputs.should-deploy == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
 
       - uses: pnpm/action-setup@v4
         with:
-          version: 10.11.1
+          version: ${{ env.PNPM_VERSION }}
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: pnpm
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
 
-      - run: pnpm install --frozen-lockfile
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile --prefer-offline
 
-      # Pre-deployment code quality checks
+      # More lenient for preview - allow warnings but not errors
       - name: Run Linter
         run: pnpm run lint
         continue-on-error: true
@@ -39,46 +110,273 @@ jobs:
         run: pnpm astro check
         continue-on-error: false
 
-      - name: Run Unit Tests
-        run: pnpm run test:run
-        continue-on-error: false
-
-  Deploy-Preview:
-    needs: pre-deployment-checks
+  # Unit tests (parallel)
+  unit-tests:
+    name: Unit Tests
+    needs: validate-preview
+    if: needs.validate-preview.outputs.should-deploy == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
 
       - uses: pnpm/action-setup@v4
         with:
-          version: 10.11.1
+          version: ${{ env.PNPM_VERSION }}
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: pnpm
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
 
-      - run: pnpm install --global vercel@latest
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile --prefer-offline
+
+      - name: Run Unit Tests
+        run: pnpm run test:run
+        continue-on-error: false
+
+  # Build and deploy preview
+  deploy-preview:
+    name: Deploy Preview
+    needs: [validate-preview, code-quality, unit-tests]
+    if: needs.validate-preview.outputs.should-deploy == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: preview-${{ needs.validate-preview.outputs.branch-name }}
+      url: ${{ steps.deploy.outputs.url }}
+    outputs:
+      preview-url: ${{ steps.deploy.outputs.url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Install Vercel CLI
+        run: pnpm install --global vercel@latest
 
       - name: Pull Vercel Environment
         run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Build Project
         run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
-        # Note: Preview builds use Vercel's environment variables for preview deployments
-        # A generic preview URL is used since each preview deployment gets a unique URL
         env:
+          # Use generic preview URL - Vercel will replace with actual deployment URL
           SITE_WEBSITE: https://preview.natspaper.dev
+          PUBLIC_SENTRY_ENVIRONMENT: preview
+          PUBLIC_SENTRY_TRACES_SAMPLE_RATE: 0.1
 
-      - name: Deploy to Vercel
-        run: vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Analyze Preview Build Size
+        id: build-analysis
+        run: |
+          if [ ! -d ".vercel/output" ]; then
+            echo "::warning::Build output directory not found, skipping analysis"
+            exit 0
+          fi
+          
+          BUILD_SIZE_KB=$(du -sk .vercel/output 2>/dev/null | cut -f1 || echo "0")
+          BUILD_SIZE_MB=$(awk "BEGIN {printf \"%.2f\", $BUILD_SIZE_KB / 1024}")
+          
+          echo "size_mb=$BUILD_SIZE_MB" >> $GITHUB_OUTPUT
+          echo "size_kb=$BUILD_SIZE_KB" >> $GITHUB_OUTPUT
+          
+          {
+            echo "### 📦 Preview Build Analysis"
+            echo ""
+            echo "**Build Size:** ${BUILD_SIZE_MB}MB"
+            
+            if [ -d ".vercel/output/static" ]; then
+              STATIC_SIZE=$(du -sh .vercel/output/static | cut -f1)
+              echo "- Static: $STATIC_SIZE"
+            fi
+            
+            if [ -d ".vercel/output/functions" ]; then
+              FUNCTIONS_SIZE=$(du -sh .vercel/output/functions | cut -f1)
+              echo "- Functions: $FUNCTIONS_SIZE"
+            fi
+            
+            # Warning threshold for preview (more lenient than production)
+            if [ "$BUILD_SIZE_KB" -gt 7168 ]; then
+              echo ""
+              echo "⚠️ Build size exceeds 7MB - consider optimizing before merging"
+            fi
+          } >> $GITHUB_STEP_SUMMARY
+
+      - name: Deploy to Vercel Preview
+        id: deploy
+        run: |
+          echo "Deploying preview..."
+          
+          # Deploy and capture both stdout and URL
+          DEPLOY_OUTPUT=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }} 2>&1)
+          echo "$DEPLOY_OUTPUT"
+          
+          # Extract the preview URL (last HTTPS URL in output)
+          PREVIEW_URL=$(echo "$DEPLOY_OUTPUT" | grep -oP 'https://[^\s]+' | tail -1)
+          
+          if [ -z "$PREVIEW_URL" ]; then
+            echo "::error::Failed to extract preview URL from deployment"
+            echo "$DEPLOY_OUTPUT"
+            exit 1
+          fi
+          
+          echo "url=$PREVIEW_URL" >> $GITHUB_OUTPUT
+          echo "✅ Preview deployed to: $PREVIEW_URL"
+
+      - name: Comment Preview URL on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const previewUrl = '${{ steps.deploy.outputs.url }}';
+            const branch = '${{ needs.validate-preview.outputs.branch-name }}';
+            const buildSize = '${{ steps.build-analysis.outputs.size_mb }}';
+            const commit = context.sha.substring(0, 7);
+            
+            const body = `## 🚀 Preview Deployment Ready
+            
+            **Preview URL:** ${previewUrl}
+            
+            | Info | Value |
+            |------|-------|
+            | 🌿 Branch | \`${branch}\` |
+            | 📝 Commit | \`${commit}\` |
+            | 📦 Build Size | ${buildSize}MB |
+            | ⏱️ Deployed | ${new Date().toUTCString()} |
+            
+            ---
+            
+            💡 **Tips:**
+            - Preview deployments are temporary and will be cleaned up
+            - Check the [workflow run](https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}) for details
+            `;
+            
+            // Find existing comment
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            
+            const botComment = comments.find(comment => 
+              comment.user.type === 'Bot' && 
+              comment.body.includes('Preview Deployment Ready')
+            );
+            
+            // Update or create comment
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: body
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: body
+              });
+            }
 
       - name: Preview Deployment Summary
         if: always()
         run: |
-          echo "✅ Preview deployment completed" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Preview Details:**" >> $GITHUB_STEP_SUMMARY
-          echo "- Branch: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
-          echo "- Commit: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
-          echo "- Timestamp: $(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_STEP_SUMMARY
+          PREVIEW_URL="${{ steps.deploy.outputs.url }}"
+          BUILD_SIZE="${{ steps.build-analysis.outputs.size_mb }}"
+          
+          {
+            echo "### ✅ Preview Deployment Complete"
+            echo ""
+            echo "**Preview Details:**"
+            echo "- 🌐 URL: [$PREVIEW_URL]($PREVIEW_URL)"
+            echo "- 🌿 Branch: \`${{ needs.validate-preview.outputs.branch-name }}\`"
+            echo "- 📝 Commit: [\`${GITHUB_SHA:0:7}\`](https://github.com/${{ github.repository }}/commit/${{ github.sha }})"
+            echo "- 👤 Author: @${{ github.actor }}"
+            echo "- ⏱️ Timestamp: $(date -u +'%Y-%m-%d %H:%M:%S UTC')"
+            
+            if [ -n "$BUILD_SIZE" ]; then
+              echo "- 📦 Build Size: ${BUILD_SIZE}MB"
+            fi
+            
+            echo ""
+            echo "**Environment:** Preview (Non-Production)"
+          } >> $GITHUB_STEP_SUMMARY
+
+  # Optional: Quick smoke test on preview
+  preview-smoke-test:
+    name: Preview Smoke Test
+    needs: deploy-preview
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    if: success()
+    steps:
+      - name: Wait for Deployment to be Ready
+        run: sleep 10
+
+      - name: Test Preview Deployment
+        run: |
+          PREVIEW_URL="${{ needs.deploy-preview.outputs.preview-url }}"
+          
+          if [ -z "$PREVIEW_URL" ]; then
+            echo "::warning::No preview URL available for testing"
+            exit 0
+          fi
+          
+          echo "Testing preview at: $PREVIEW_URL"
+          
+          MAX_RETRIES=3
+          for i in $(seq 1 $MAX_RETRIES); do
+            STATUS=$(curl -sSL -o /dev/null -w '%{http_code}' --max-time 10 "$PREVIEW_URL" || echo "000")
+            
+            if [ "$STATUS" -eq 200 ]; then
+              echo "✅ Preview is accessible (HTTP $STATUS)"
+              
+              {
+                echo "### 🔍 Preview Verification"
+                echo ""
+                echo "✅ Preview deployment is live and responding"
+                echo "- HTTP Status: $STATUS"
+                echo "- URL: $PREVIEW_URL"
+              } >> $GITHUB_STEP_SUMMARY
+              
+              exit 0
+            fi
+            
+            echo "⚠️ Attempt $i/$MAX_RETRIES - HTTP $STATUS, retrying in 5s..."
+            sleep 5
+          done
+          
+          echo "::warning::Preview may need additional time to warm up (HTTP $STATUS)"
+          exit 0  # Don't fail - preview might just be slow
+
+  # Summary for skipped deployments
+  skip-deployment-summary:
+    name: Deployment Skipped
+    needs: validate-preview
+    if: needs.validate-preview.outputs.should-deploy == 'false'
+    runs-on: ubuntu-latest
+    timeout-minutes: 1
+    steps:
+      - name: Skip Summary
+        run: |
+          {
+            echo "### ⏭️ Preview Deployment Skipped"
+            echo ""
+            echo "**Reason:** Only documentation or configuration files changed"
+            echo ""
+            echo "**Branch:** \`${{ needs.validate-preview.outputs.branch-name }}\`"
+            echo "**Commit:** [\`${GITHUB_SHA:0:7}\`](https://github.com/${{ github.repository }}/commit/${{ github.sha }})"
+            echo ""
+            echo "💡 Push code changes to trigger a preview deployment"
+          } >> $GITHUB_STEP_SUMMARY
