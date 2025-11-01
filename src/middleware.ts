@@ -32,7 +32,7 @@ import { sequence } from "astro:middleware";
  */
 export const onRequest = sequence(
   Sentry.handleRequest({
-    trackClientIp: false,  // Set to true to include client IP (privacy impact)
-  }),
+    trackClientIp: false, // Set to true to include client IP (privacy impact)
+  })
   // Add other middleware handlers here if needed
 );
