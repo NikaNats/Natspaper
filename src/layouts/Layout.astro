@@ -238,14 +238,12 @@ const structuredData = {
     ================================================================================== -->
     <script is:inline defer src="/toggle-theme.js"></script>
 
-    <!-- Vercel Analytics with "beforeSend" for privacy and cost control -->
+    <!-- Vercel Web Analytics with beforeSend for privacy and cost control
+         Filters out localhost, test pages, and other unwanted traffic to stay
+         within the free 50,000 event/month limit and maintain data quality.
+         See: https://vercel.com/docs/analytics/redacting-sensitive-data
+    ================================================================================== -->
     <script is:inline>
-      window.va =
-        window.va ||
-        function (...args) {
-          (window.va.q = window.va.q || []).push(...args);
-        };
-
       window.webAnalyticsBeforeSend = function (event) {
         // Ignore all events from localhost
         if (window.location.hostname === "localhost") {
