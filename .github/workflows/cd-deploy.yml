@@ -1,581 +1,149 @@
-name: Vercel Production Deployment
+name: Production Deployment
 
 env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-  NODE_VERSION: "24"
-  PNPM_VERSION: "10.20.0"
 
 on:
   push:
-    branches:
-      - master
+    branches: [master]
   workflow_dispatch:
 
-# Prevent concurrent deployments to production
 concurrency:
-  group: production-deployment
+  group: production
   cancel-in-progress: false
 
 jobs:
-  # Fast-fail validation job
-  validate-secrets:
-    name: Validate Configuration
+  quality:
+    name: Quality Checks
     runs-on: ubuntu-latest
-    timeout-minutes: 2
-    outputs:
-      deployment-url: ${{ steps.set-url.outputs.url }}
-    steps:
-      - name: Validate Required Secrets
-        env:
-          ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-          TOKEN: ${{ secrets.VERCEL_TOKEN }}
-        run: |
-          missing_secrets=()
-          [ -z "$ORG_ID" ] && missing_secrets+=("VERCEL_ORG_ID")
-          [ -z "$PROJECT_ID" ] && missing_secrets+=("VERCEL_PROJECT_ID")
-          [ -z "$TOKEN" ] && missing_secrets+=("VERCEL_TOKEN")
-
-          if [ ${#missing_secrets[@]} -ne 0 ]; then
-            echo "::error::Missing required secrets: ${missing_secrets[*]}"
-            exit 1
-          fi
-          echo "✅ All required secrets configured"
-
-      - name: Set Deployment URL
-        id: set-url
-        run: echo "url=https://natspaper.vercel.app" >> $GITHUB_OUTPUT
-
-  # Code quality checks with optimizations
-  code-quality:
-    name: Code Quality & Type Safety
-    needs: validate-secrets
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
-
       - uses: pnpm/action-setup@v4
         with:
-          version: ${{ env.PNPM_VERSION }}
-
+          version: 10
       - uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: "pnpm"
+          node-version: 20
+          cache: pnpm
+      
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run lint
+      - run: pnpm run format:check
+      - run: pnpm astro check
 
-      # Cache node_modules for faster installs
-      - name: Cache node_modules
-        uses: actions/cache@v4
-        id: node-modules-cache
-        with:
-          path: node_modules
-          key: node-modules-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            node-modules-${{ runner.os }}-
-
-      - name: Install Dependencies
-        if: steps.node-modules-cache.outputs.cache-hit != 'true'
-        run: pnpm install --frozen-lockfile --prefer-offline
-
-      # Verify node_modules on cache hit
-      - name: Verify Dependencies
-        if: steps.node-modules-cache.outputs.cache-hit == 'true'
-        run: pnpm install --frozen-lockfile --prefer-offline --offline
-
-      # Parallel execution of lint and format checks (saves ~3s)
-      - name: Run Lint & Format Checks (Parallel)
-        run: |
-          # Run lint and format in background
-          pnpm run lint &
-          LINT_PID=$!
-          pnpm run format:check &
-          FORMAT_PID=$!
-
-          # Wait for both and capture exit codes
-          LINT_EXIT=0
-          FORMAT_EXIT=0
-          wait $LINT_PID || LINT_EXIT=$?
-          wait $FORMAT_PID || FORMAT_EXIT=$?
-
-          # Check results
-          if [ $LINT_EXIT -ne 0 ]; then
-            echo "::error::Linting failed with exit code $LINT_EXIT"
-            exit $LINT_EXIT
-          fi
-          if [ $FORMAT_EXIT -ne 0 ]; then
-            echo "::error::Format check failed with exit code $FORMAT_EXIT"
-            exit $FORMAT_EXIT
-          fi
-
-          echo "✅ Lint and format checks passed"
-
-      # Cache TypeScript build info for faster type checking
-      - name: Cache TypeScript Build Info
-        uses: actions/cache@v4
-        with:
-          path: |
-            .astro
-            node_modules/.cache
-            **/.tsbuildinfo
-          key: typescript-${{ runner.os }}-${{ hashFiles('**/tsconfig.json', 'src/**/*.ts', 'src/**/*.tsx', 'src/**/*.astro') }}
-          restore-keys: |
-            typescript-${{ runner.os }}-
-
-      - name: Check Astro Type Safety
-        run: pnpm astro check
-        timeout-minutes: 2
-
-  # Unit tests with caching
-  unit-tests:
-    name: Unit Tests
-    needs: validate-secrets
+  test:
+    name: Tests
     runs-on: ubuntu-latest
-    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
-
       - uses: pnpm/action-setup@v4
         with:
-          version: ${{ env.PNPM_VERSION }}
-
+          version: 10
       - uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: "pnpm"
+          node-version: 20
+          cache: pnpm
+      
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test:run
 
-      # Cache node_modules
-      - name: Cache node_modules
-        uses: actions/cache@v4
-        id: node-modules-cache
-        with:
-          path: node_modules
-          key: node-modules-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            node-modules-${{ runner.os }}-
-
-      - name: Install Dependencies
-        if: steps.node-modules-cache.outputs.cache-hit != 'true'
-        run: pnpm install --frozen-lockfile --prefer-offline
-
-      - name: Verify Dependencies
-        if: steps.node-modules-cache.outputs.cache-hit == 'true'
-        run: pnpm install --frozen-lockfile --prefer-offline --offline
-
-      - name: Run Unit Tests
-        run: pnpm run test:run
-
-  # E2E tests with optimized Playwright caching
-  e2e-tests:
-    name: E2E Tests (Chromium)
-    needs: validate-secrets
+  e2e:
+    name: E2E Tests
     runs-on: ubuntu-latest
-    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-
       - uses: pnpm/action-setup@v4
         with:
-          version: ${{ env.PNPM_VERSION }}
-
+          version: 10
       - uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: "pnpm"
-
-      # Cache node_modules
-      - name: Cache node_modules
-        uses: actions/cache@v4
-        id: node-modules-cache
-        with:
-          path: node_modules
-          key: node-modules-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            node-modules-${{ runner.os }}-
-
-      - name: Install Dependencies
-        if: steps.node-modules-cache.outputs.cache-hit != 'true'
-        run: pnpm install --frozen-lockfile --prefer-offline
-
-      - name: Verify Dependencies
-        if: steps.node-modules-cache.outputs.cache-hit == 'true'
-        run: pnpm install --frozen-lockfile --prefer-offline --offline
-
-      # Get exact Playwright version for cache key
-      - name: Get Playwright Version
-        id: playwright-version
-        run: |
-          PLAYWRIGHT_VERSION=$(pnpm list @playwright/test --depth=0 --json | jq -r '.[0].devDependencies["@playwright/test"].version // empty')
-          if [ -z "$PLAYWRIGHT_VERSION" ]; then
-            echo "::error::Failed to detect Playwright version"
-            exit 1
-          fi
-          echo "version=$PLAYWRIGHT_VERSION" >> $GITHUB_OUTPUT
-          echo "Playwright version: $PLAYWRIGHT_VERSION"
-
-      # Cache Playwright browsers - saves ~90 seconds per run
-      - name: Cache Playwright Browsers
-        uses: actions/cache@v4
-        id: playwright-cache
+          node-version: 20
+          cache: pnpm
+      
+      - run: pnpm install --frozen-lockfile
+      
+      - name: Get Playwright version
+        id: pw-version
+        run: echo "version=$(pnpm list @playwright/test --json | jq -r '.[0].devDependencies["@playwright/test"].version')" >> $GITHUB_OUTPUT
+      
+      - uses: actions/cache@v4
+        id: pw-cache
         with:
           path: ~/.cache/ms-playwright
-          key: playwright-browsers-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}
-
-      # Install browsers and system dependencies
-      - name: Install Playwright Browsers
-        run: pnpm exec playwright install --with-deps chromium
-        if: steps.playwright-cache.outputs.cache-hit != 'true'
-
-      # When cache hits, still need system dependencies but browsers are cached
-      - name: Install System Dependencies (Cache Hit)
-        run: pnpm exec playwright install-deps chromium
-        if: steps.playwright-cache.outputs.cache-hit == 'true'
-
-      - name: Run E2E Tests
-        run: pnpm exec playwright test --project chromium
+          key: playwright-${{ runner.os }}-${{ steps.pw-version.outputs.version }}
+      
+      - run: pnpm exec playwright install --with-deps chromium
+        if: steps.pw-cache.outputs.cache-hit != 'true'
+      
+      - run: pnpm exec playwright install-deps chromium
+        if: steps.pw-cache.outputs.cache-hit == 'true'
+      
+      - run: pnpm exec playwright test --project chromium
         env:
-          SITE_WEBSITE: ${{ needs.validate-secrets.outputs.deployment-url }}
+          SITE_WEBSITE: https://natspaper.vercel.app
 
-      - name: Upload Test Results
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-report-${{ github.run_id }}
-          path: playwright-report/
-          retention-days: 7
-          if-no-files-found: ignore
-
-  # Build and deploy job with performance monitoring
-  build-and-deploy:
-    name: Build & Deploy to Production
-    needs: [code-quality, unit-tests, e2e-tests]
+  deploy:
+    name: Deploy
+    needs: [quality, test, e2e]
     runs-on: ubuntu-latest
-    timeout-minutes: 10
     environment:
       name: production
       url: https://natspaper.vercel.app
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0 # Need history for build size comparison
-
       - uses: pnpm/action-setup@v4
         with:
-          version: ${{ env.PNPM_VERSION }}
-
+          version: 10
       - uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: "pnpm"
-
-      - name: Install Vercel CLI
-        run: pnpm install --global vercel@latest
-
-      - name: Pull Vercel Environment
-        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
-
-      - name: Build Project
-        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
-
-      # Download previous build size for comparison
-      - name: Download Previous Build Stats
-        id: prev-stats
-        uses: actions/cache@v4
-        with:
-          path: .github/build-stats/
-          key: build-stats-${{ github.ref }}-${{ github.run_id }}
-          restore-keys: |
-            build-stats-${{ github.ref }}-
-            build-stats-
-
-      - name: Analyze Build Size & Track Trends
-        id: build-analysis
+          node-version: 20
+          cache: pnpm
+      
+      - run: pnpm add -g vercel
+      - run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+      - run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+      
+      - name: Get build size
+        id: size
         run: |
-          if [ ! -d ".vercel/output" ]; then
-            echo "::error::Build output directory not found"
-            exit 1
-          fi
-
-          # Calculate current build size
-          BUILD_SIZE_KB=$(du -sk .vercel/output | cut -f1)
-          BUILD_SIZE_MB=$(awk "BEGIN {printf \"%.2f\", $BUILD_SIZE_KB / 1024}")
-
-          echo "size_mb=$BUILD_SIZE_MB" >> $GITHUB_OUTPUT
-          echo "size_kb=$BUILD_SIZE_KB" >> $GITHUB_OUTPUT
-
-          # Create build stats directory
-          mkdir -p .github/build-stats
-
-          # Read previous build size if exists
-          PREV_SIZE_KB=0
-          if [ -f ".github/build-stats/last-build.txt" ]; then
-            PREV_SIZE_KB=$(cat .github/build-stats/last-build.txt)
-          fi
-
-          # Save current size
-          echo "$BUILD_SIZE_KB" > .github/build-stats/last-build.txt
-
-          # Calculate size change
-          SIZE_DIFF_KB=$((BUILD_SIZE_KB - PREV_SIZE_KB))
-          SIZE_DIFF_MB=$(awk "BEGIN {printf \"%.2f\", $SIZE_DIFF_KB / 1024}")
-
-          # Calculate percentage change
-          if [ "$PREV_SIZE_KB" -gt 0 ]; then
-            SIZE_CHANGE_PCT=$(awk "BEGIN {printf \"%.1f\", ($SIZE_DIFF_KB / $PREV_SIZE_KB) * 100}")
-          else
-            SIZE_CHANGE_PCT="0.0"
-          fi
-
-          echo "size_change_pct=$SIZE_CHANGE_PCT" >> $GITHUB_OUTPUT
-          echo "size_diff_mb=$SIZE_DIFF_MB" >> $GITHUB_OUTPUT
-
-          # Generate detailed breakdown
-          {
-            echo "### 📦 Production Build Analysis"
-            echo ""
-            echo "**Total Build Size:** ${BUILD_SIZE_MB}MB (${BUILD_SIZE_KB}KB)"
-            echo ""
-            
-            # Size comparison
-            if [ "$PREV_SIZE_KB" -gt 0 ]; then
-              if [ "$SIZE_DIFF_KB" -gt 0 ]; then
-                echo "📈 **Size Change:** +${SIZE_DIFF_MB}MB (+${SIZE_CHANGE_PCT}%)"
-              elif [ "$SIZE_DIFF_KB" -lt 0 ]; then
-                echo "📉 **Size Change:** ${SIZE_DIFF_MB}MB (${SIZE_CHANGE_PCT}%)"
-              else
-                echo "➡️ **Size Change:** No change"
-              fi
-              echo ""
-            fi
-            
-            # Component breakdown
-            echo "**Build Component Sizes:**"
-            if [ -d ".vercel/output/static" ]; then
-              STATIC_SIZE=$(du -sh .vercel/output/static | cut -f1)
-              STATIC_COUNT=$(find .vercel/output/static -type f | wc -l)
-              echo "- Static Assets: $STATIC_SIZE ($STATIC_COUNT files)"
-            fi
-            
-            if [ -d ".vercel/output/functions" ]; then
-              FUNCTIONS_SIZE=$(du -sh .vercel/output/functions | cut -f1)
-              FUNCTIONS_COUNT=$(find .vercel/output/functions -type f | wc -l)
-              echo "- Functions: $FUNCTIONS_SIZE ($FUNCTIONS_COUNT files)"
-            fi
-            
-            # Find largest files
-            echo ""
-            echo "**Largest Files:**"
-            find .vercel/output -type f -exec du -h {} + 2>/dev/null | sort -rh | head -5 | while read size file; do
-              filename=$(basename "$file")
-              echo "- $size - \`$filename\`"
-            done
-            
-            echo ""
-            
-            # Threshold checks
-            THRESHOLD_KB=5120  # 5MB
-            INCREASE_THRESHOLD=10  # 10% increase warning
-            
-            # Check absolute size
-            if [ "$BUILD_SIZE_KB" -gt "$THRESHOLD_KB" ]; then
-              echo "⚠️ **Warning:** Build size exceeds 5MB threshold"
-              echo "::warning::Build size ($BUILD_SIZE_MB MB) exceeds recommended 5MB threshold"
-            fi
-            
-            # Check size increase
-            if [ "$PREV_SIZE_KB" -gt 0 ]; then
-              INCREASE_CHECK=$(awk "BEGIN {print ($SIZE_CHANGE_PCT > $INCREASE_THRESHOLD) ? 1 : 0}")
-              if [ "$INCREASE_CHECK" -eq 1 ]; then
-                echo ""
-                echo "🚨 **Alert:** Build size increased by ${SIZE_CHANGE_PCT}% (threshold: ${INCREASE_THRESHOLD}%)"
-                echo ""
-                echo "**Recommended Actions:**"
-                echo "- Review recent changes for large dependencies"
-                echo "- Check for unoptimized images or assets"
-                echo "- Consider code splitting for large components"
-                echo "- Run \`pnpm run build --analyze\` locally"
-                echo "::warning::Build size increased by ${SIZE_CHANGE_PCT}% - exceeds ${INCREASE_THRESHOLD}% threshold"
-              else
-                echo ""
-                echo "✅ Build size within acceptable limits and change threshold"
-              fi
-            else
-              if [ "$BUILD_SIZE_KB" -le "$THRESHOLD_KB" ]; then
-                echo "✅ Build size within acceptable limits"
-              fi
-            fi
-          } >> $GITHUB_STEP_SUMMARY
-
-      # Save build stats for next comparison
-      - name: Save Build Stats
-        uses: actions/cache/save@v4
-        if: always()
-        with:
-          path: .github/build-stats/
-          key: build-stats-${{ github.ref }}-${{ github.run_id }}
-
-      - name: Deploy to Vercel
-        id: deploy
+          size_kb=$(du -sk .vercel/output | cut -f1)
+          size_mb=$(awk "BEGIN {printf \"%.1f\", $size_kb/1024}")
+          echo "mb=$size_mb" >> $GITHUB_OUTPUT
+          
+          # Find largest files
+          echo "### 📦 Build: ${size_mb}MB" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          find .vercel/output -type f -exec du -h {} + 2>/dev/null | 
+            sort -rh | head -5 | 
+            awk '{printf "- %s - `%s`\n", $1, $2}' >> $GITHUB_STEP_SUMMARY
+      
+      - run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+      
+      - name: Summary
         run: |
-          echo "Deploying to Vercel production..."
-          DEPLOYMENT_URL=$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }} 2>&1 | tee /dev/stderr | grep -oP 'https://[^\s]+' | tail -1)
+          echo "### ✅ Deployed to Production" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- Build: ${{ steps.size.outputs.mb }}MB" >> $GITHUB_STEP_SUMMARY
+          echo "- Commit: \`${GITHUB_SHA:0:7}\`" >> $GITHUB_STEP_SUMMARY
 
-          if [ -z "$DEPLOYMENT_URL" ]; then
-            echo "::error::Failed to extract deployment URL"
-            exit 1
-          fi
-
-          echo "url=$DEPLOYMENT_URL" >> $GITHUB_OUTPUT
-          echo "✅ Deployed to: $DEPLOYMENT_URL"
-
-      - name: Deployment Summary
-        if: success()
-        run: |
-          {
-            echo "### ✅ Production Deployment Complete"
-            echo ""
-            echo "**Deployment Details:**"
-            echo "- 🌐 URL: [${{ steps.deploy.outputs.url }}](${{ steps.deploy.outputs.url }})"
-            echo "- 🌿 Branch: \`${{ github.ref_name }}\`"
-            echo "- 📝 Commit: [\`${GITHUB_SHA:0:7}\`](https://github.com/${{ github.repository }}/commit/${{ github.sha }})"
-            echo "- 👤 Author: @${{ github.actor }}"
-            echo "- ⏱️  Timestamp: $(date -u +'%Y-%m-%d %H:%M:%S UTC')"
-            echo "- 📦 Build Size: ${{ steps.build-analysis.outputs.size_mb }}MB"
-            
-            SIZE_CHANGE="${{ steps.build-analysis.outputs.size_diff_mb }}"
-            if [ -n "$SIZE_CHANGE" ] && [ "$SIZE_CHANGE" != "0.00" ]; then
-              echo "- 📊 Size Change: $SIZE_CHANGE MB (${{ steps.build-analysis.outputs.size_change_pct }}%)"
-            fi
-            
-            echo ""
-            echo "**Workflow Run:** [#${{ github.run_number }}](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})"
-          } >> $GITHUB_STEP_SUMMARY
-
-  # Post-deployment smoke tests with actual endpoints
-  smoke-tests:
-    name: Post-Deployment Verification
-    needs: build-and-deploy
+  verify:
+    name: Verify
+    needs: deploy
     runs-on: ubuntu-latest
-    timeout-minutes: 3
-    if: success()
     steps:
-      - name: Verify Deployment Health
+      - name: Check deployment
         run: |
-          URL="https://natspaper.vercel.app"
-          MAX_RETRIES=3
-          RETRY_DELAY=5
-
-          echo "Verifying deployment at $URL..."
-
-          for i in $(seq 1 $MAX_RETRIES); do
-            echo "Attempt $i of $MAX_RETRIES..."
-            
-            STATUS=$(curl -sSL -o /dev/null -w '%{http_code}' --max-time 10 "$URL" || echo "000")
-            
-            if [ "$STATUS" -eq 200 ]; then
-              echo "✅ Deployment verified successfully (HTTP $STATUS)"
-              
-              {
-                echo "### 🔍 Post-Deployment Verification"
-                echo ""
-                echo "✅ Production site is live and healthy"
-                echo "- HTTP Status: $STATUS"
-                echo "- Verified: $(date -u +'%Y-%m-%d %H:%M:%S UTC')"
-              } >> $GITHUB_STEP_SUMMARY
-              
-              exit 0
-            fi
-            
-            echo "⚠️  Received HTTP $STATUS, retrying in ${RETRY_DELAY}s..."
-            sleep $RETRY_DELAY
-          done
-
-          echo "::error::Deployment verification failed after $MAX_RETRIES attempts (HTTP $STATUS)"
-          exit 1
-
-      - name: Check Critical Pages
-        run: |
-          URL="https://natspaper.vercel.app"
-
-          # Critical pages that MUST be accessible
-          PAGES=("/" "/posts" "/tags" "/archives" "/search")
-
-          echo "Checking critical pages..."
-          FAILED_PAGES=()
-          SUCCESS_COUNT=0
-
-          for PAGE in "${PAGES[@]}"; do
-            FULL_URL="${URL}${PAGE}"
-            STATUS=$(curl -sSL -o /dev/null -w '%{http_code}' --max-time 10 "$FULL_URL" || echo "000")
-            
-            if [ "$STATUS" -eq 200 ]; then
-              echo "✅ $FULL_URL - OK"
-              SUCCESS_COUNT=$((SUCCESS_COUNT + 1))
+          url="https://natspaper.vercel.app"
+          
+          for page in "/" "/posts" "/tags" "/archives" "/search"; do
+            status=$(curl -sL -w "%{http_code}" -o /dev/null "$url$page")
+            if [ "$status" = "200" ]; then
+              echo "✅ $page"
             else
-              echo "::error::Critical page $FULL_URL returned HTTP $STATUS"
-              FAILED_PAGES+=("$PAGE (HTTP $STATUS)")
+              echo "❌ $page returned $status"
+              exit 1
             fi
           done
-
-          # Report to summary
-          {
-            echo ""
-            echo "**Critical Pages Verification:**"
-            echo "- Total Pages: ${#PAGES[@]}"
-            echo "- Successful: $SUCCESS_COUNT"
-            echo "- Failed: ${#FAILED_PAGES[@]}"
-          } >> $GITHUB_STEP_SUMMARY
-
-          # Fail if any critical page is down
-          if [ ${#FAILED_PAGES[@]} -gt 0 ]; then
-            echo ""
-            echo "::error::Critical pages failed: ${FAILED_PAGES[*]}"
-            {
-              echo ""
-              echo "❌ **Failed Pages:**"
-              for page in "${FAILED_PAGES[@]}"; do
-                echo "- $page"
-              done
-            } >> $GITHUB_STEP_SUMMARY
-            exit 1
-          fi
-
-          echo "✅ All critical pages verified successfully"
-          {
-            echo ""
-            echo "✅ All ${#PAGES[@]} critical pages are accessible"
-          } >> $GITHUB_STEP_SUMMARY
-
-      - name: Check Response Times
-        run: |
-          URL="https://natspaper.vercel.app"
-
-          echo "Checking site performance..."
-
-          # Check response time for homepage
-          RESPONSE_TIME=$(curl -o /dev/null -s -w '%{time_total}' "$URL" || echo "0")
-
-          echo "Homepage response time: ${RESPONSE_TIME}s"
-
-          # Convert to milliseconds for easier reading
-          RESPONSE_MS=$(awk "BEGIN {printf \"%.0f\", $RESPONSE_TIME * 1000}")
-
-          {
-            echo ""
-            echo "**Performance Metrics:**"
-            echo "- Homepage Response Time: ${RESPONSE_MS}ms"
-          } >> $GITHUB_STEP_SUMMARY
-
-          # Warn if response is slow (>3 seconds)
-          SLOW_CHECK=$(awk "BEGIN {print ($RESPONSE_TIME > 3.0) ? 1 : 0}")
-          if [ "$SLOW_CHECK" -eq 1 ]; then
-            echo "::warning::Site response time is slow (${RESPONSE_MS}ms)"
-            {
-              echo "- ⚠️ Response time exceeds 3s threshold"
-            } >> $GITHUB_STEP_SUMMARY
-          else
-            {
-              echo "- ✅ Response time is healthy"
-            } >> $GITHUB_STEP_SUMMARY
-          fi
+          
+          echo "### ✅ All pages verified" >> $GITHUB_STEP_SUMMARY
