@@ -2,7 +2,6 @@
 import { ClientRouter } from "astro:transitions";
 import { PUBLIC_GOOGLE_SITE_VERIFICATION } from "astro:env/client";
 import { SITE } from "@/config";
-import SpeedInsights from "@vercel/speed-insights/astro";
 import "@/styles/fonts.css";
 import "@/styles/global.css";
 
@@ -295,10 +294,26 @@ const structuredData = {
 
         document.head.appendChild(script);
       })();
-    </script>
 
-    <!-- Vercel Speed Insights for real user performance monitoring -->
-    <SpeedInsights />
+      // Load Vercel Speed Insights script inline to prevent double-loading during
+      // client-side navigation transitions. Same issue: custom element registry collision.
+      (function loadSpeedInsights() {
+        // Prevent loading if already loaded in this session
+        if (
+          window.__VERCEL_SPEED_INSIGHTS_ENABLED ||
+          document.querySelector('script[src*="speed-insights"]')
+        ) {
+          return;
+        }
+
+        const script = document.createElement("script");
+        script.src = "/_vercel/insights/script.js";
+        script.async = true;
+        script.defer = true;
+
+        document.head.appendChild(script);
+      })();
+    </script>
 
     <!-- Enable view transitions for faster navigation -->
     <ClientRouter />
