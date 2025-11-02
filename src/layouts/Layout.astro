@@ -2,7 +2,6 @@
 import { ClientRouter } from "astro:transitions";
 import { PUBLIC_GOOGLE_SITE_VERIFICATION } from "astro:env/client";
 import { SITE } from "@/config";
-import Analytics from "@vercel/analytics/astro";
 import SpeedInsights from "@vercel/speed-insights/astro";
 import "@/styles/fonts.css";
 import "@/styles/global.css";
@@ -240,6 +239,8 @@ const structuredData = {
     <script is:inline defer src="/toggle-theme.js"></script>
 
     <!-- Vercel Web Analytics with beforeSend for privacy and cost control
+         IMPORTANT: This is inline and runs once at page load to prevent double-loading
+         during client-side navigation (which would cause CustomElementRegistry collision).
          Filters out localhost, test pages, and other unwanted traffic to stay
          within the free 50,000 event/month limit and maintain data quality.
          See: https://vercel.com/docs/analytics/redacting-sensitive-data
@@ -264,8 +265,37 @@ const structuredData = {
         // If no rules match, send the event
         return event;
       };
+
+      // Load Vercel Analytics script inline to prevent double-loading during
+      // client-side navigation transitions. This ensures the custom element
+      // is only registered once per browsing session.
+      // See: https://github.com/vercel/analytics-js/issues (CustomElementRegistry collision)
+      (function loadAnalytics() {
+        // Prevent loading if already loaded in this session
+        if (
+          window.__VERCEL_ANALYTICS_ID ||
+          document.querySelector('script[src*="vercel"]')
+        ) {
+          return;
+        }
+
+        const script = document.createElement("script");
+        script.src = "https://cdn.vercel-analytics.com/v1/script.js";
+        script.async = true;
+        script.defer = true;
+        script.setAttribute("data-prevent-global-addclasses", "true");
+
+        // Set analytics ID if needed
+        if (window.__ENV_VERCEL_ANALYTICS_ID) {
+          script.setAttribute(
+            "data-analytics-id",
+            window.__ENV_VERCEL_ANALYTICS_ID
+          );
+        }
+
+        document.head.appendChild(script);
+      })();
     </script>
-    <Analytics />
 
     <!-- Vercel Speed Insights for real user performance monitoring -->
     <SpeedInsights />
