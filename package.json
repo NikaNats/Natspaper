@@ -35,6 +35,7 @@
     "@sentry/astro": "^10.22.0",
     "@sentry/tracing": "^7.120.4",
     "@tailwindcss/vite": "^4.1.16",
+    "@vercel/analytics": "^1.5.0",
     "astro": "^5.15.1",
     "dayjs": "^1.11.18",
     "katex": "^0.16.25",

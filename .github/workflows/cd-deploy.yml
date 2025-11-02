@@ -26,7 +26,7 @@ jobs:
         with:
           node-version: 20
           cache: pnpm
-      
+
       - run: pnpm install --frozen-lockfile
       - run: pnpm run lint
       - run: pnpm run format:check
@@ -44,7 +44,7 @@ jobs:
         with:
           node-version: 20
           cache: pnpm
-      
+
       - run: pnpm install --frozen-lockfile
       - run: pnpm test:run
 
@@ -60,9 +60,9 @@ jobs:
         with:
           node-version: 20
           cache: pnpm
-      
+
       - run: pnpm install --frozen-lockfile
-      
+
       # Cache Playwright browsers before install
       - name: Cache Playwright
         id: cache-pw
@@ -70,12 +70,12 @@ jobs:
         with:
           path: ~/.cache/ms-playwright
           key: ${{ runner.os }}-playwright-${{ hashFiles('pnpm-lock.yaml') }}
-      
+
       # Only install if cache miss
       - name: Install Playwright
         if: steps.cache-pw.outputs.cache-hit != 'true'
         run: pnpm exec playwright install --with-deps chromium
-      
+
       - run: pnpm exec playwright test --project chromium
         env:
           SITE_WEBSITE: https://natspaper.vercel.app
@@ -96,27 +96,27 @@ jobs:
         with:
           node-version: 20
           cache: pnpm
-      
+
       - run: pnpm add -g vercel
       - run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
       - run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
-      
+
       - name: Get build size
         id: size
         run: |
           size_kb=$(du -sk .vercel/output | cut -f1)
           size_mb=$(awk "BEGIN {printf \"%.1f\", $size_kb/1024}")
           echo "mb=$size_mb" >> $GITHUB_OUTPUT
-          
+
           # Find largest files
           echo "### 📦 Build: ${size_mb}MB" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           find .vercel/output -type f -exec du -h {} + 2>/dev/null | 
             sort -rh | head -5 | 
             awk '{printf "- %s - `%s`\n", $1, $2}' >> $GITHUB_STEP_SUMMARY
-      
+
       - run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
-      
+
       - name: Summary
         run: |
           echo "### ✅ Deployed to Production" >> $GITHUB_STEP_SUMMARY
@@ -132,7 +132,7 @@ jobs:
       - name: Check deployment
         run: |
           url="https://natspaper.vercel.app"
-          
+
           for page in "/" "/posts" "/tags" "/archives" "/search"; do
             status=$(curl -sL -w "%{http_code}" -o /dev/null "$url$page")
             if [ "$status" = "200" ]; then
@@ -142,5 +142,5 @@ jobs:
               exit 1
             fi
           done
-          
+
           echo "### ✅ All pages verified" >> $GITHUB_STEP_SUMMARY

@@ -2,6 +2,7 @@
 import { ClientRouter } from "astro:transitions";
 import { PUBLIC_GOOGLE_SITE_VERIFICATION } from "astro:env/client";
 import { SITE } from "@/config";
+import Analytics from "@vercel/analytics/astro";
 import "@/styles/fonts.css";
 import "@/styles/global.css";
 
@@ -236,6 +237,36 @@ const structuredData = {
          Loaded as standard src to allow browser caching independently.
     ================================================================================== -->
     <script is:inline defer src="/toggle-theme.js"></script>
+
+    <!-- Vercel Analytics with "beforeSend" for privacy and cost control -->
+    <script is:inline>
+      window.va =
+        window.va ||
+        function (...args) {
+          (window.va.q = window.va.q || []).push(...args);
+        };
+
+      window.webAnalyticsBeforeSend = function (event) {
+        // Ignore all events from localhost
+        if (window.location.hostname === "localhost") {
+          return null; // Returning null cancels the event
+        }
+
+        // Ignore tracking for the Sentry test page
+        if (event.url.includes("/sentry-test")) {
+          return null;
+        }
+
+        // Add any other paths you want to ignore in the future, e.g., /admin/*
+        // if (event.url.includes('/admin')) {
+        //   return null;
+        // }
+
+        // If no rules match, send the event
+        return event;
+      };
+    </script>
+    <Analytics />
 
     <!-- Enable view transitions for faster navigation -->
     <ClientRouter />
