@@ -1,27 +1,9 @@
 import { describe, it, expect } from "vitest";
-import type { CollectionEntry } from "astro:content";
 import getSortedPosts from "@/utils/getSortedPosts";
+import { createMockBlogPost } from "@tests/helpers/mockBlogPost";
 
-// Helper to create mock blog posts
-const createMockPost = (
-  id: string,
-  pubDate: Date,
-  modDate?: Date,
-  published: boolean = true
-): CollectionEntry<"blog"> => ({
-  id,
-  collection: "blog",
-  data: {
-    title: `Post ${id}`,
-    author: "Test Author",
-    pubDatetime: pubDate,
-    modDatetime: modDate || null,
-    description: "Test post",
-    tags: ["test"],
-    ...(published ? {} : { draft: true }),
-  },
-  body: "Test content",
-});
+// Use the shared typed helper
+const createMockPost = createMockBlogPost;
 
 describe("getSortedPosts", () => {
   it("should sort posts by newest first (pubDatetime)", () => {

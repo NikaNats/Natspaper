@@ -14,11 +14,6 @@ vi.mock("@/config", () => ({
   },
 }));
 
-// Mock getPath utility
-vi.mock("@/utils/getPath", () => ({
-  getPath: (id: string) => `/posts/${id}`,
-}));
-
 describe("postHelpers", () => {
   describe("resolveOgImageUrl()", () => {
     it("should return remote URL when ogImage is a string", () => {
@@ -31,7 +26,6 @@ describe("postHelpers", () => {
           format: "png" | "jpg";
         },
         "test-post",
-        "src/content/blog/test-post.md",
         "https://mysite.com"
       );
 
@@ -48,7 +42,6 @@ describe("postHelpers", () => {
       const result = resolveOgImageUrl(
         assetImage,
         "test-post",
-        "src/content/blog/test-post.md",
         "https://mysite.com"
       );
 
@@ -59,7 +52,6 @@ describe("postHelpers", () => {
       const result = resolveOgImageUrl(
         undefined,
         "my-post",
-        "src/content/blog/my-post.md",
         "https://mysite.com"
       );
 
@@ -76,7 +68,6 @@ describe("postHelpers", () => {
           format: "png" | "jpg";
         },
         "test-post",
-        "src/content/blog/test-post.md",
         "https://mysite.com"
       );
 
@@ -92,7 +83,6 @@ describe("postHelpers", () => {
           format: "png" | "jpg";
         }, // Direct URL takes priority
         "test-post",
-        "src/content/blog/test-post.md",
         "https://mysite.com"
       );
 
@@ -195,7 +185,9 @@ describe("postHelpers", () => {
     beforeEach(() => {
       mockPost = {
         id: "test-post",
+        slug: "test-post",
         collection: "blog",
+        body: "Test content",
         data: {
           title: "Test Post",
           description: "This is a test post",
@@ -206,6 +198,7 @@ describe("postHelpers", () => {
           ogImage: "https://example.com/og.jpg",
         },
         filePath: "src/content/blog/test-post.md",
+        render: async () => ({ html: "Test content" }),
       } as unknown as CollectionEntry<"blog">;
     });
 

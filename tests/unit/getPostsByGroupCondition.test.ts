@@ -1,27 +1,23 @@
 import { describe, it, expect } from "vitest";
 import type { CollectionEntry } from "astro:content";
 import getPostsByGroupCondition from "@/utils/getPostsByGroupCondition";
+import { createMockBlogPost } from "@tests/helpers/mockBlogPost";
 
-// Helper to create mock blog posts
+// Helper to create mock blog posts with custom tags
 const createMockPost = (
   id: string,
   pubDate: Date = new Date("2024-01-01"),
   tags: string[] = [],
   published: boolean = true
-): CollectionEntry<"blog"> => ({
-  id,
-  collection: "blog",
-  data: {
-    title: `Post ${id}`,
-    author: "Test Author",
-    pubDatetime: pubDate,
-    modDatetime: null,
-    description: "Test post",
-    tags,
-    ...(published ? {} : { draft: true }),
-  },
-  body: "Test content",
-});
+): CollectionEntry<"blog"> =>
+  createMockBlogPost(id, pubDate, null, published, {
+    data: {
+      tags,
+      title: `Post ${id}`,
+      author: "Test Author",
+      description: "Test post",
+    },
+  });
 
 // Helper to extract year from post
 const getPostYear = (post: CollectionEntry<"blog">): string => {

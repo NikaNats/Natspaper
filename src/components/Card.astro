@@ -1,14 +1,14 @@
 ---
 import { slugifyStr } from "@/utils/slugify";
 import type { CollectionEntry } from "astro:content";
-import { getPath } from "@/utils/getPath";
 import Datetime from "./Datetime.astro";
 
 export interface Props extends CollectionEntry<"blog"> {
   variant?: "h2" | "h3";
 }
 
-const { variant = "h2", data, id, filePath } = Astro.props;
+const { variant = "h2", data, id } = Astro.props;
+const slug = String(id).split("/").slice(-1)[0];
 
 const { title, description, pubDatetime, modDatetime, timezone } = data;
 
@@ -21,7 +21,7 @@ const headerProps = {
 
 <li class="my-8">
   <a
-    href={getPath(id, filePath)}
+    href={`/posts/${slug}`}
     class="group block no-underline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-accent focus-visible:outline-dashed"
   >
     <!-- Post Entry Card: Full clickable area for better UX -->

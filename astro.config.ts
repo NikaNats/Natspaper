@@ -69,6 +69,11 @@ export default defineConfig({
     optimizeDeps: {
       exclude: ["@resvg/resvg-js"],
     },
+    resolve: {
+      alias: {
+        "@tests": "/tests",
+      },
+    },
   },
   image: {
     responsiveStyles: true,

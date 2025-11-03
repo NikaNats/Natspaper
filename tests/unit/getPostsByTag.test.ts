@@ -1,26 +1,16 @@
 import { describe, it, expect } from "vitest";
-import type { CollectionEntry } from "astro:content";
 import getPostsByTag from "@/utils/getPostsByTag";
+import { createMockBlogPost } from "@tests/helpers/mockBlogPost";
 
-// Helper to create mock blog posts
+// Helper to create mock blog posts with specific tags
 const createMockPost = (
   id: string,
   tags: string[] = [],
   published: boolean = true
-): CollectionEntry<"blog"> => ({
-  id,
-  collection: "blog",
-  data: {
-    title: `Post ${id}`,
-    author: "Test Author",
-    pubDatetime: new Date("2024-01-01"),
-    modDatetime: null,
-    description: "Test post",
-    tags,
-    ...(published ? {} : { draft: true }),
-  },
-  body: "Test content",
-});
+) =>
+  createMockBlogPost(id, new Date("2024-01-01"), null, published, {
+    data: { tags },
+  });
 
 describe("getPostsByTag", () => {
   it("should filter posts by exact tag", () => {

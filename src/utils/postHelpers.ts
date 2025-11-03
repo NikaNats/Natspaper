@@ -1,6 +1,5 @@
 import type { CollectionEntry } from "astro:content";
 import { SITE } from "@/config";
-import { getPath } from "./getPath";
 
 /**
  * Resolve the final OG image URL for a blog post.
@@ -10,30 +9,28 @@ import { getPath } from "./getPath";
  * 3. Dynamic OG image if enabled
  *
  * @param ogImage - OG image from post frontmatter (can be string, object with src, or undefined)
- * @param postId - Post ID/slug for dynamic OG image path construction
- * @param postFilePath - Post file path for path resolution
+ * @param slug - Post slug for dynamic OG image path construction
  * @param siteUrl - Base site URL for resolving relative URLs (typically Astro.url.origin)
  * @returns Absolute URL to OG image or undefined if no image is available
  *
  * @example
  * // Remote OG image
- * resolveOgImageUrl("https://example.com/og.jpg", "my-post", "src/content/blog/my-post.md", "https://example.com")
+ * resolveOgImageUrl("https://example.com/og.jpg", "my-post", "https://example.com")
  * // Returns: "https://example.com/og.jpg"
  *
  * @example
  * // Local asset
- * resolveOgImageUrl({ src: "@/images/og.png" }, "my-post", "src/content/blog/my-post.md", "https://example.com")
+ * resolveOgImageUrl({ src: "@/images/og.png" }, "my-post", "https://example.com")
  * // Returns: "https://example.com/images/og.png"
  *
  * @example
  * // Dynamic OG image (if SITE.dynamicOgImage is true)
- * resolveOgImageUrl(undefined, "my-post", "src/content/blog/my-post.md", "https://example.com")
+ * resolveOgImageUrl(undefined, "my-post", "https://example.com")
  * // Returns: "https://example.com/posts/my-post/index.png"
  */
 export function resolveOgImageUrl(
-  ogImage: CollectionEntry<"blog">["data"]["ogImage"],
-  postId: string,
-  postFilePath: string | undefined,
+  ogImage: string | { src: string } | undefined,
+  slug: string,
   siteUrl: string
 ): string | undefined {
   let ogImageUrl: string | undefined;
@@ -44,12 +41,13 @@ export function resolveOgImageUrl(
   }
   // Priority 2: Local asset (object with src property)
   else if (ogImage && typeof ogImage === "object" && "src" in ogImage) {
-    ogImageUrl = ogImage.src;
+    // TypeScript knows ogImage may be { src: string }
+    ogImageUrl = (ogImage as { src: string }).src;
   }
 
   // Priority 3: Dynamic OG image (if enabled and no explicit image provided)
   if (!ogImageUrl && SITE.dynamicOgImage) {
-    ogImageUrl = `${getPath(postId, postFilePath)}/index.png`;
+    ogImageUrl = `/posts/${slug}/index.png`;
   }
 
   // Convert relative/dynamic paths to absolute URLs
@@ -160,12 +158,7 @@ export function generatePostStructuredData(
     ogImage: ogImageData,
   } = post.data;
 
-  const ogImageUrl = resolveOgImageUrl(
-    ogImageData,
-    post.id,
-    post.filePath,
-    siteUrl
-  );
+  const ogImageUrl = resolveOgImageUrl(ogImageData, post.slug, siteUrl);
 
   return {
     "@context": "https://schema.org",

@@ -1,6 +1,5 @@
 import rss from "@astrojs/rss";
 import { getCollection } from "astro:content";
-import { getPath } from "@/utils/getPath";
 import getSortedPosts from "@/utils/getSortedPosts";
 import { SITE } from "@/config";
 import { sanitizeMarkdownUrls } from "@/utils/sanitizeMarkdownUrls";
@@ -141,9 +140,10 @@ export async function GET() {
     // Track failed posts for production alerting
     const failedPosts: Array<{ id: string; error: string }> = [];
 
-    for (const { data, id, filePath } of recentPosts) {
+    for (const { data, id } of recentPosts) {
       try {
-        const postUrl = getPath(id, filePath);
+        const slug = String(id).split("/").slice(-1)[0];
+        const postUrl = `/posts/${slug}`;
         const guid = `${SITE.website.replace(/\/$/, "")}${postUrl}`;
 
         feedItems.push({

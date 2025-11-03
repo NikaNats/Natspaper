@@ -10,7 +10,6 @@ import EditPost from "@/components/EditPost.astro";
 import ShareLinks from "@/components/ShareLinks.astro";
 import BackButton from "@/components/BackButton.astro";
 import BackToTopButton from "@/components/BackToTopButton.astro";
-import { getPath } from "@/utils/getPath";
 import { slugifyStr } from "@/utils/slugify";
 import { resolveOgImageUrl, getAdjacentPosts } from "@/utils/postHelpers";
 import IconChevronLeft from "@/assets/icons/IconChevronLeft.svg";
@@ -45,12 +44,7 @@ const bodyContent = post.body || "";
 
 // Resolve OG image URL using centralized utility
 // Handles string URLs, asset objects, and dynamic OG images
-const ogImage = resolveOgImageUrl(
-  initOgImage,
-  post.id,
-  post.filePath,
-  Astro.url.origin
-);
+const ogImage = resolveOgImageUrl(initOgImage, post.slug, Astro.url.origin);
 
 const layoutProps = {
   title: `${title} | ${SITE.title}`,
@@ -122,7 +116,7 @@ const { previous: prevPost, next: nextPost } = getAdjacentPosts(posts, post.id);
       {
         prevPost && (
           <a
-            href={getPath(prevPost.id, prevPost.filePath)}
+            href={`/posts/${String(prevPost.id).split("/").slice(-1)[0]}`}
             class="flex w-full gap-1 hover:opacity-75"
           >
             <IconChevronLeft class="inline-block flex-none rtl:rotate-180" />
@@ -136,7 +130,7 @@ const { previous: prevPost, next: nextPost } = getAdjacentPosts(posts, post.id);
       {
         nextPost && (
           <a
-            href={getPath(nextPost.id, nextPost.filePath)}
+            href={`/posts/${String(nextPost.id).split("/").slice(-1)[0]}`}
             class="flex w-full justify-end gap-1 text-end hover:opacity-75 sm:col-start-2"
           >
             <div>
