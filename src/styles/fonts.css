@@ -1,21 +1,17 @@
 /* 
  * PERFORMANCE: Optimized Font Loading
  * 
- * Strategy:
- * 1. Use font-display: swap for immediate text rendering with system font
- * 2. Load only critical font weights (reduced from 9 to 4)
- * 3. Preload fonts to prioritize them in network waterfall
- * 4. Keep Google Fonts for now but with optimized loading
+ * Strategy (Astro Docs Best Practices):
+ * 1. Use Fontsource npm packages for self-hosted fonts (improved control & performance)
+ * 2. font-display: swap for immediate text rendering with system font fallback
+ * 3. Load only critical font weights (4 total: Inter 400/700, Merriweather 400, JetBrains Mono 400)
+ * 4. Preload fonts in Layout.astro to prioritize them in network waterfall
  * 
  * FONTS USED IN DESIGN:
  * - Inter (400, 700) - Main body & headings
  * - Merriweather (400) - Accent/quotes
  * - JetBrains Mono (400) - Code blocks
- */
-
-/* 
- * NOTE: Fonts are loaded from Google Fonts via @import in global.css
- * with display=swap parameter for optimal performance.
- * This file can be expanded with self-hosted @font-face rules
- * if needed for zero-FOUT experience.
+ * 
+ * Fonts are imported via npm packages (@fontsource/*)
+ * and registered in BaseLayout.astro for global availability
  */

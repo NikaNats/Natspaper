@@ -31,6 +31,9 @@
   "dependencies": {
     "@astrojs/rss": "^4.0.13",
     "@astrojs/sitemap": "^3.6.0",
+    "@fontsource/inter": "^5.2.8",
+    "@fontsource/jetbrains-mono": "^5.2.8",
+    "@fontsource/merriweather": "^5.2.11",
     "@resvg/resvg-js": "^2.6.2",
     "@sentry/astro": "^10.22.0",
     "@tailwindcss/vite": "^4.1.16",

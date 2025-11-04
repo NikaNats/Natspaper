@@ -1,9 +1,8 @@
-/* PERFORMANCE: Optimized Font Loading
-   - Uses display=swap to render text immediately with system fonts
-   - Preload in Layout.astro prioritizes fonts in network waterfall
-   - Reduced font weights from 9 to 4 (removed 500 weight)
-   - Removes Merriweather 700 (rarely used) */
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Merriweather:wght@400&family=JetBrains+Mono:wght@400&display=swap");
+/* PERFORMANCE: Optimized Font Loading with Fontsource
+   - Uses Fontsource npm packages for self-hosted fonts (better control & performance)
+   - Fonts imported in Layout.astro with display=swap for zero-FOUT
+   - Reduced font weights (4 total: Inter 400/700, Merriweather 400, JetBrains Mono 400)
+   - Fonts preloaded in network waterfall */
 @import "tailwindcss";
 @import "./typography.css";
 @import "./components.css";

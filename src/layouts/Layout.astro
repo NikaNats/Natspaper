@@ -87,6 +87,14 @@ const structuredData = {
       as="style"
     />
 
+    <!-- Import Fontsource fonts with font-display: swap for optimal performance -->
+    <style is:global>
+      @import "@fontsource/inter/400.css";
+      @import "@fontsource/inter/700.css";
+      @import "@fontsource/merriweather/400.css";
+      @import "@fontsource/jetbrains-mono/400.css";
+    </style>
+
     <!-- Load global styles with media query to defer non-critical -->
     <style is:global>
       /* Critical CSS inline - loads immediately without blocking render */
@@ -95,24 +103,7 @@ const structuredData = {
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
       }
-
-      /* Prevent layout shift during font load */
-      @font-face {
-        font-family: "Inter";
-        src: local("Inter");
-        font-display: swap;
-      }
-
-      @font-face {
-        font-family: "Merriweather";
-        src: local("Merriweather");
-        font-display: swap;
-      }
     </style>
-
-    <!-- Preconnect to Google Fonts to reduce DNS + TCP lookup time (saves ~100ms) -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
     <!-- Preconnect to jsDelivr CDN (fallback if needed) -->
     <link rel="preconnect" href="https://cdn.jsdelivr.net" />
