@@ -8,7 +8,6 @@ import Socials from "@/components/Socials.astro";
 import Hr from "@/components/Hr.astro";
 import PostCard from "@/components/PostCard.astro";
 import getSortedPosts from "@/utils/getSortedPosts";
-import IconRss from "@/assets/icons/IconRss.svg";
 import { SOCIALS } from "@/constants";
 import { SITE } from "@/config";
 import profilePic from "@/assets/images/me.jpeg";
@@ -80,16 +79,6 @@ const featuredPosts = sortedPosts.filter(({ data }) => data.featured);
           SOCIALS.length > 0 && (
             <div class="mt-4 flex flex-col justify-center gap-4 sm:flex-row sm:items-center">
               <Socials />
-              <a
-                target="_blank"
-                href="/rss.xml"
-                class="inline-block transition-transform hover:rotate-6"
-                aria-label="rss feed"
-                title="RSS Feed"
-              >
-                <IconRss class="size-6 scale-125 fill-transparent stroke-current stroke-2 opacity-90 sm:scale-110" />
-                <span class="sr-only">RSS Feed</span>
-              </a>
             </div>
           )
         }
