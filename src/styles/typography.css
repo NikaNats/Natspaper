@@ -231,17 +231,51 @@
    * Code Blocks & Syntax Highlighting
    * Optimized for academic and technical content readability
    * Line-height matches body for visual consistency
+   * 
+   * Follows Astro documentation standard for Shiki syntax highlighting
+   * with support for light and dark mode themes via CSS variables
    */
+  .astro-code,
+  .astro-code span {
+    color: var(--shiki-light) !important;
+    background-color: var(--shiki-light-bg) !important;
+    /* Optional: apply font styles if provided by theme */
+    font-style: var(--shiki-light-font-style, normal) !important;
+    font-weight: var(--shiki-light-font-weight, normal) !important;
+    text-decoration: var(--shiki-light-text-decoration, none) !important;
+  }
+
   .astro-code {
-    @apply my-6 flex overflow-x-auto rounded border bg-(--shiki-light-bg) text-(--shiki-light) outline-border [&_span]:text-(--shiki-light);
+    @apply my-6 flex overflow-x-auto rounded border outline-border;
     font-family: "JetBrains Mono", monospace;
     padding: 1em;
     line-height: 1.6;
-    /* Ensure good contrast in code blocks */
   }
 
-  html[data-theme="dark"] .astro-code {
-    @apply bg-(--shiki-dark-bg) text-(--shiki-dark) [&_span]:text-(--shiki-dark);
+  /* Light mode: applied via data attribute (your custom theme system) */
+  html[data-theme="light"] .astro-code,
+  html[data-theme="light"] .astro-code span {
+    color: var(--shiki-light) !important;
+    background-color: var(--shiki-light-bg) !important;
+  }
+
+  /* Dark mode: follows Astro documentation pattern with media query fallback */
+  @media (prefers-color-scheme: dark) {
+    .astro-code,
+    .astro-code span {
+      color: var(--shiki-dark) !important;
+      background-color: var(--shiki-dark-bg) !important;
+      /* Optional: apply font styles if provided by theme */
+      font-style: var(--shiki-dark-font-style, normal) !important;
+      font-weight: var(--shiki-dark-font-weight, normal) !important;
+      text-decoration: var(--shiki-dark-text-decoration, none) !important;
+    }
+  }
+
+  html[data-theme="dark"] .astro-code,
+  html[data-theme="dark"] .astro-code span {
+    color: var(--shiki-dark) !important;
+    background-color: var(--shiki-dark-bg) !important;
   }
 
   /**
