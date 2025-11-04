@@ -38,7 +38,7 @@ export const SITE = {
   author: "Nika Natsvlishvili",
   profile: "https://www.linkedin.com/in/nika-natsvlishvili/",
   desc: ".NET Developer | Software Engineer specializing in microservices architecture and enterprise solutions",
-  title: "Nika Natsvlishvili",
+  title: "NatsPaper",
   ogImage: "astropaper-og.jpg",
   lightAndDarkMode: true,
   postPerIndex: 4,
