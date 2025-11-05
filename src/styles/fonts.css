@@ -12,6 +12,46 @@
  * - Merriweather (400) - Accent/quotes
  * - JetBrains Mono (400) - Code blocks
  * 
- * Fonts are imported via npm packages (@fontsource/*)
- * and registered in BaseLayout.astro for global availability
+ * Fonts are copied from @fontsource/* packages to /public/files/ directory
+ * This ensures they're accessible at absolute paths (/files/...) on all routes,
+ * including language-prefixed routes like /en/posts/... and /ka/posts/...
  */
+
+/* Inter Font */
+@font-face {
+  font-family: 'Inter';
+  src: url('/files/inter-latin-400-normal.woff2') format('woff2'),
+       url('/files/inter-latin-400-normal.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Inter';
+  src: url('/files/inter-latin-700-normal.woff2') format('woff2'),
+       url('/files/inter-latin-700-normal.woff') format('woff');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Merriweather Font */
+@font-face {
+  font-family: 'Merriweather';
+  src: url('/files/merriweather-latin-400-normal.woff2') format('woff2'),
+       url('/files/merriweather-latin-400-normal.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* JetBrains Mono Font */
+@font-face {
+  font-family: 'JetBrains Mono';
+  src: url('/files/jetbrains-mono-latin-400-normal.woff2') format('woff2'),
+       url('/files/jetbrains-mono-latin-400-normal.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}

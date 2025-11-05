@@ -1,0 +1,79 @@
+---
+/**
+ * LanguagePicker Component
+ *
+ * This component allows users to switch between available languages.
+ * It detects the current page's language, extracts the path without the language prefix,
+ * and generates links to the same page in other languages.
+ *
+ * The component uses Astro's i18n routing helpers to generate correct URLs.
+ */
+
+import { getRelativeLocaleUrl } from "astro:i18n";
+
+// Get the current page URL
+const currentUrl = Astro.url.pathname;
+
+// Remove leading slash for processing
+let pathWithoutSlash = currentUrl.slice(1);
+
+// Extract language code and remaining path
+// The path format is: /en/some/path or /ka/some/path
+const parts = pathWithoutSlash.split("/");
+const currentLocale = parts[0]; // First part is the language code
+const restOfPath = parts.slice(1).join("/"); // Everything after the language code
+
+// Supported languages
+const languages = [
+  { code: "en", name: "English" },
+  { code: "ka", name: "ქართული" },
+] as const;
+
+// Filter to show only non-current languages
+const otherLanguages = languages.filter(lang => lang.code !== currentLocale);
+---
+
+<div class="language-picker flex gap-2">
+  {
+    otherLanguages.map(({ code, name }) => {
+      // Generate URL for the other language
+      const url = getRelativeLocaleUrl(code, `/${restOfPath}`);
+
+      return (
+        <a
+          href={url}
+          class="text-sm font-medium transition-colors hover:text-accent"
+          title={`Switch to ${name}`}
+          aria-label={`Switch to ${name}`}
+        >
+          {code.toUpperCase()}
+        </a>
+      );
+    })
+  }
+</div>
+
+<style>
+  .language-picker {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+  }
+
+  .language-picker a {
+    color: var(--foreground);
+    text-decoration: none;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    transition: color 0.2s ease;
+  }
+
+  .language-picker a:hover {
+    color: var(--accent);
+  }
+
+  .language-picker a:focus-visible {
+    outline: 2px dashed var(--accent);
+    outline-offset: 2px;
+  }
+</style>

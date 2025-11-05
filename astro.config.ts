@@ -22,6 +22,20 @@ const siteUrl = process.env.SITE_WEBSITE || SITE.website;
 export default defineConfig({
   site: siteUrl,
   output: "static", // Fully static build - no server-side rendering
+
+  // Internationalization (i18n) Configuration
+  // - defaultLocale: 'en' sets English as the default language
+  // - locales: ['en', 'ka'] defines supported languages (English and Georgian)
+  // - prefixDefaultLocale: true ensures all URLs, including English, have a language prefix (e.g., /en/about)
+  //   This creates a consistent URL structure across all languages and is highly recommended for SEO
+  i18n: {
+    defaultLocale: "en",
+    locales: ["en", "ka"],
+    routing: {
+      prefixDefaultLocale: true,
+    },
+  },
+
   integrations: [
     envValidationIntegration(),
     sitemap({

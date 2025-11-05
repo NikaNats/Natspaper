@@ -1,0 +1,59 @@
+---
+/**
+ * Analytics Initializer Component
+ * 
+ * Initializes Google Analytics 4 tracking with language support
+ * Call this component once in your main layout to initialize analytics
+ *
+ * Usage in Layout.astro:
+ * ```astro
+ * import AnalyticsInit from '@/components/Analytics/AnalyticsInit.astro';
+ *
+ * <AnalyticsInit locale={currentLocale} />
+ * ```
+ */
+
+import { getCurrentLocale } from '@/i18n/utils';
+
+export interface Props {
+  locale?: string;
+}
+
+const { locale = getCurrentLocale(Astro.url.pathname) || 'en' } = Astro.props;
+---
+
+<script define:vars={{ locale }} is:inline>
+  // Initialize analytics with language support
+  (async () => {
+    try {
+      const {
+        initializeAnalytics,
+        setUserLanguageProperty,
+        trackPageView,
+        trackTimeOnPage,
+      } = await import('/src/utils/analytics.ts');
+
+      // Initialize analytics
+      initializeAnalytics(locale);
+
+      // Set user language property for all events
+      setUserLanguageProperty(locale);
+
+      // Track initial page view
+      trackPageView(window.location.pathname, document.title, locale);
+
+      // Track time on page before leaving
+      const pageLoadTime = Date.now();
+      window.addEventListener('beforeunload', () => {
+        const timeOnPage = Math.round((Date.now() - pageLoadTime) / 1000);
+        if (timeOnPage > 1) {
+          // Only track if spent at least 1 second
+          trackTimeOnPage(window.location.pathname, timeOnPage, locale);
+        }
+      });
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('Failed to initialize analytics:', error);
+    }
+  })();
+</script>

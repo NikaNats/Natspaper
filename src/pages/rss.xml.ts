@@ -121,7 +121,10 @@ function sanitizeDescription(description: string): string {
  */
 export async function GET() {
   try {
-    const posts = await getCollection("blog");
+    const allPosts = await getCollection("blog");
+    // By default, the RSS feed at /rss.xml contains English posts
+    // Translated pages can create their own language-specific feeds if needed
+    const posts = allPosts.filter(post => post.slug.startsWith('en/'));
     const sortedPosts = getSortedPosts(posts);
 
     // Limit to 50 most recent posts for reasonable RSS feed size
@@ -143,7 +146,7 @@ export async function GET() {
     for (const { data, id } of recentPosts) {
       try {
         const slug = String(id).split("/").slice(-1)[0];
-        const postUrl = `/posts/${slug}`;
+        const postUrl = `/en/posts/${slug}`;
         const guid = `${SITE.website.replace(/\/$/, "")}${postUrl}`;
 
         feedItems.push({

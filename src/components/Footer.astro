@@ -1,4 +1,7 @@
 ---
+import { useTranslations } from "@/i18n/utils";
+
+const t = useTranslations(Astro.currentLocale as "en" | "ka");
 const currentYear = new Date().getFullYear();
 
 export interface Props {
@@ -10,6 +13,6 @@ const { noMarginTop = false } = Astro.props;
 
 <footer class:list={["w-full", { "mt-auto": !noMarginTop }]}>
   <div class="flex flex-col items-center gap-1 text-sm text-text-secondary">
-    <p>Copyright &#169; {currentYear} • All rights reserved.</p>
+    <p>Copyright &#169; {currentYear} • {t("footer.copyright")}</p>
   </div>
 </footer>

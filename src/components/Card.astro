@@ -8,7 +8,7 @@ export interface Props extends CollectionEntry<"blog"> {
 }
 
 const { variant = "h2", data, id } = Astro.props;
-const slug = String(id).split("/").slice(-1)[0];
+const slug = String(id).split("/").slice(-1)[0].replace(/\.md$/, "");
 
 const { title, description, pubDatetime, modDatetime, timezone } = data;
 
@@ -21,7 +21,7 @@ const headerProps = {
 
 <li class="my-8">
   <a
-    href={`/posts/${slug}`}
+    href={`/${Astro.currentLocale}/posts/${slug}`}
     class="group block no-underline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-accent focus-visible:outline-dashed"
   >
     <!-- Post Entry Card: Full clickable area for better UX -->

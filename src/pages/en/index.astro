@@ -1,0 +1,119 @@
+---
+import { getCollection } from "astro:content";
+import { Picture } from "astro:assets";
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+import Footer from "@/components/Footer.astro";
+import Socials from "@/components/Socials.astro";
+import Hr from "@/components/Hr.astro";
+import PostCard from "@/components/PostCard.astro";
+import getSortedPosts from "@/utils/getSortedPosts";
+import { SOCIALS } from "@/constants";
+import { SITE } from "@/config";
+import profilePic from "@/assets/images/me.jpeg";
+
+// Get posts only for the English language
+const allPosts = await getCollection("blog");
+const posts = allPosts.filter(post => post.slug.startsWith('en/'));
+
+const sortedPosts = getSortedPosts(posts);
+const featuredPosts = sortedPosts.filter(({ data }) => data.featured);
+---
+
+<Layout>
+  <Header />
+  <main
+    id="main-content"
+    data-layout="index"
+    class="mx-auto flex w-full max-w-app flex-col items-center justify-center px-4 pb-12"
+  >
+    <section id="hero" class="py-8">
+      <div class="flex flex-col items-center justify-center gap-4 text-center">
+        <!-- PERFORMANCE: Image optimization
+             - Use Astro's Picture component for multiple format support (AVIF, WebP)
+             - Automatically serves best format for each browser for superior compression
+             - Set both width/height to prevent layout shift
+             - Use eager loading for above-fold image
+             - Inline placeholder to prevent FOUC
+        -->
+        <Picture
+          src={profilePic}
+          formats={["avif", "webp"]}
+          alt="Profile"
+          title="Profile"
+          width={160}
+          height={160}
+          class="rounded-full"
+          loading="eager"
+          decoding="sync"
+        />
+        <h1 class="mb-4 inline-block text-4xl font-bold sm:mb-8 sm:text-5xl">
+          {SITE.author}
+        </h1>
+        <p class="text-lg font-semibold text-accent">
+          .NET Developer | Software Engineer
+        </p>
+        <p class="max-w-2xl">
+          {SITE.desc}
+        </p>
+        <p class="mt-2 max-w-2xl">
+          Recent highlights include leading the migration of a credit reporting
+          system from monolith to microservices (40% performance improvement),
+          architecting a Georgian-language AI assistant that won the Jury's
+          Favorite Award at GAIA Hackathon, and designing enterprise-grade
+          systems like <a
+            href="https://github.com/NikaNats"
+            class="underline decoration-dashed underline-offset-4 hover:text-accent"
+            >Blogify API</a
+          > and fintech microservices ecosystems.
+        </p>
+        <p class="mt-2 max-w-2xl">
+          Currently pursuing a Master's in Data Science at Georgian National
+          University while working as a .NET Software Engineer at Credo Bank.
+          Reach out by <a
+            href="mailto:nika.nacvlishvili1@gmail.com"
+            class="underline decoration-dashed underline-offset-4 hover:text-accent"
+            >sending an email</a
+          > to discuss .NET, microservices, or AI/ML integration.
+        </p>
+        {
+          // only display if at least one social link is enabled
+          SOCIALS.length > 0 && (
+            <div class="mt-4 flex flex-col justify-center gap-4 sm:flex-row sm:items-center">
+              <Socials />
+            </div>
+          )
+        }
+      </div>
+    </section>
+
+    <Hr />
+
+    {
+      featuredPosts.length > 0 && (
+        <>
+          <Hr />
+          <section id="featured-posts" class="py-8">
+            <h2 class="mb-6 text-2xl font-bold">Featured Posts</h2>
+            <ul class="grid gap-4 sm:grid-cols-2">
+              {featuredPosts.map(({ data, id }) => (
+                <PostCard href={`/en/posts/${id}`} frontmatter={data} />
+              ))}
+            </ul>
+          </section>
+        </>
+      )
+    }
+  </main>
+  <Footer />
+</Layout>
+
+<script>
+  document.addEventListener("astro:page-load", () => {
+    const indexLayout = (document.querySelector("#main-content") as HTMLElement)
+      ?.dataset?.layout;
+    if (indexLayout) {
+      sessionStorage.setItem("backUrl", "/en/");
+    }
+  });
+</script>

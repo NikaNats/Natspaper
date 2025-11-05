@@ -96,7 +96,7 @@ const structuredData = {
          ======================================================== -->
     <!-- Performance: Resource Hints and Critical CSS Loading
          - KaTeX CSS loaded with media query to avoid render-blocking
-         - Google Fonts preload ensures fast loading without blocking
+         - Fonts are self-hosted from /public/files/ directory
          ========================================================== -->
     <!-- Load KaTeX CSS asynchronously to prevent render-blocking (saves 10-50ms) -->
     <link
@@ -111,22 +111,8 @@ const structuredData = {
       <link rel="stylesheet" href="/styles/katex.min.css" />
     </noscript>
 
-    <!-- Preload critical Google Fonts to prioritize in network waterfall -->
-    <link
-      rel="preload"
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Merriweather:wght@400&family=JetBrains+Mono:wght@400&display=swap"
-      as="style"
-    />
-
     <!-- Import Fontsource fonts with font-display: swap for optimal performance -->
-    <style is:global>
-      @import "@fontsource/inter/400.css";
-      @import "@fontsource/inter/700.css";
-      @import "@fontsource/merriweather/400.css";
-      @import "@fontsource/jetbrains-mono/400.css";
-    </style>
-
-    <!-- Load global styles with media query to defer non-critical -->
+    <!-- Fonts are copied to /public/files/ and referenced with absolute paths in fonts.css -->
     <style is:global>
       /* Critical CSS inline - loads immediately without blocking render */
       html {
