@@ -2,14 +2,44 @@
 import Breadcrumb from "@/components/Breadcrumb.astro";
 import { SITE } from "@/config";
 
+/**
+ * Main Content Layout Component
+ *
+ * Provides a consistent page shell with:
+ * - Breadcrumb navigation
+ * - Dynamic title with optional transition animations
+ * - Optional page description
+ * - Main content area via <slot />
+ *
+ * This is a partial layout designed to be wrapped by the base Layout.astro
+ * for a complete page template.
+ *
+ * @example
+ * ```astro
+ * import Layout from '@/layouts/Layout.astro';
+ * import Main from '@/layouts/Main.astro';
+ *
+ * <Layout title="My Page">
+ *   <Main pageTitle="Welcome" pageDesc="Welcome to my page">
+ *     <p>Page content here</p>
+ *   </Main>
+ * </Layout>
+ * ```
+ */
+
 interface StringTitleProp {
+  /** Page title as a simple string */
   pageTitle: string;
+  /** Optional page description */
   pageDesc?: string;
 }
 
 interface ArrayTitleProp {
+  /** Page title split into two parts for transition animation */
   pageTitle: [string, string];
+  /** Transition name for View Transitions API */
   titleTransition: string;
+  /** Optional page description */
   pageDesc?: string;
 }
 

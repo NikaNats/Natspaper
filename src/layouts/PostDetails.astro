@@ -16,8 +16,34 @@ import IconChevronLeft from "@/assets/icons/IconChevronLeft.svg";
 import IconChevronRight from "@/assets/icons/IconChevronRight.svg";
 import { SITE } from "@/config";
 
+/**
+ * Post Details Layout Component
+ *
+ * Specialized layout for blog post pages that extends the base Layout.
+ * Provides:
+ * - Post header with title, date, and reading time
+ * - Article content rendering with proper styling
+ * - Tag list and sharing options
+ * - Previous/Next post navigation
+ * - Edit post link (if enabled)
+ * - Back to top button
+ *
+ * This layout nests the base Layout component following Astro's best practice
+ * pattern for composable, reusable layouts.
+ *
+ * @example
+ * ```astro
+ * import PostDetails from '@/layouts/PostDetails.astro';
+ * const { post, posts } = Astro.props;
+ *
+ * <PostDetails {post} {posts} />
+ * ```
+ */
+
 export interface Props {
+  /** Blog post entry from content collection */
   post: CollectionEntry<"blog">;
+  /** All blog posts for adjacent post navigation */
   posts: CollectionEntry<"blog">[];
 }
 

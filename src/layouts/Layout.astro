@@ -5,15 +5,46 @@ import { SITE } from "@/config";
 import "@/styles/fonts.css";
 import "@/styles/global.css";
 
+/**
+ * Base Layout Component
+ *
+ * Provides the complete page shell with:
+ * - HTML meta tags and SEO elements
+ * - Theme management and view transitions
+ * - Performance optimizations (analytics, Sentry)
+ * - Font loading and critical CSS
+ *
+ * Props are passed through to structured data and meta tags.
+ * Content is injected via <slot />
+ *
+ * @example
+ * ```astro
+ * import Layout from '@/layouts/Layout.astro';
+ *
+ * <Layout title="My Page" description="Page description">
+ *   <p>Page content here</p>
+ * </Layout>
+ * ```
+ */
+
 export interface Props {
+  /** Page title - defaults to site title */
   title?: string;
+  /** Author name - defaults to site author */
   author?: string;
+  /** Author profile URL - defaults to site profile */
   profile?: string;
+  /** Page description - defaults to site description */
   description?: string;
+  /** Open Graph image URL - defaults to site og image */
   ogImage?: string;
+  /** Canonical URL - defaults to current page URL */
   canonicalURL?: string;
+  /** Article publication datetime - used in structured data and meta tags */
   pubDatetime?: Date;
+  /** Article modification datetime - used in structured data and meta tags */
   modDatetime?: Date | null;
+  /** Enable smooth scroll behavior */
   scrollSmooth?: boolean;
 }
 
