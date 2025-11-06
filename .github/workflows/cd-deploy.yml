@@ -184,7 +184,7 @@ jobs:
         run: |
           echo "### 📊 Build Metrics" >> $GITHUB_STEP_SUMMARY
           echo "- Node modules: $(du -sh node_modules | cut -f1)" >> $GITHUB_STEP_SUMMARY
-          
+
           # Warn on size increases
           if [ "${{ steps.size.outputs.mb }}" -gt 50 ]; then
             echo "⚠️ Build size exceeds 50MB" >> $GITHUB_STEP_SUMMARY
