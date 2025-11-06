@@ -39,6 +39,8 @@ const featuredPosts = sortedPosts.filter(({ data }) => data.featured);
         <Picture
           src={profilePic}
           formats={["avif", "webp"]}
+          widths={[160, 320]}
+          sizes="160px"
           alt="Profile"
           title="Profile"
           width={160}
