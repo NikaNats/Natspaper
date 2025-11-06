@@ -69,3 +69,25 @@ export function getDefaultLanguage(): Lang {
 export function isValidLanguage(lang: unknown): lang is Lang {
   return lang === "en" || lang === "ka";
 }
+
+/**
+ * Get the current locale from a pathname
+ *
+ * @param pathname - The pathname to extract locale from (e.g., '/en/posts/123')
+ * @returns The locale if found, undefined otherwise
+ *
+ * @example
+ * getCurrentLocale('/en/posts/123'); // 'en'
+ * getCurrentLocale('/ka/blog'); // 'ka'
+ * getCurrentLocale('/posts/123'); // undefined
+ */
+export function getCurrentLocale(pathname: string): Lang | undefined {
+  const segments = pathname.split("/").filter(Boolean);
+  const firstSegment = segments[0];
+
+  if (isValidLanguage(firstSegment)) {
+    return firstSegment;
+  }
+
+  return undefined;
+}

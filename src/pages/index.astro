@@ -3,10 +3,8 @@
 // This page runs when someone visits https://yoursite.com/
 // It uses Astro's i18n capabilities to detect the user's browser language preference
 
-// Get the preferred locale from the browser or fall back to 'en' (English)
-const preferredLocale = Astro.preferredLocale || "en";
-
-// Redirect to the language-prefixed home page
+// Redirect to the preferred language-prefixed home page
+// Uses the browser's preferred locale or falls back to 'en' (English)
 // 307 is a temporary redirect that preserves the HTTP method
-return Astro.redirect(`/${preferredLocale}/`, 307);
+return Astro.redirect(`/${Astro.preferredLocale || "en"}/`, 307);
 ---
