@@ -39,7 +39,31 @@ export default defineConfig({
   integrations: [
     envValidationIntegration(),
     sitemap({
+      // Filter configuration - excludes archive pages if showArchives is false
       filter: page => SITE.showArchives || !page.endsWith("/archives"),
+
+      // Internationalization support for multi-language sitemaps
+      // Automatically generates alternate language links (hreflang)
+      i18n: {
+        defaultLocale: "en",
+        locales: {
+          en: "en-US",
+          ka: "ka",
+        },
+      },
+
+      // Namespace optimization - exclude unused XML namespaces
+      // Reduces sitemap file size and improves parsing speed
+      namespaces: {
+        news: false, // Not using news content
+        image: false, // Not using image sitemap
+        video: false, // Not using video sitemap
+        xhtml: true, // Keep xhtml for language alternates (hreflang)
+      },
+
+      // Set reasonable entry limit (default is 45,000)
+      // At typical blog scale, a single sitemap-0.xml is sufficient
+      entryLimit: 45000,
     }),
     sentry({
       // Configuration for source map uploads during build
