@@ -26,8 +26,9 @@ jobs:
         with:
           node-version: 20
           cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
 
-      - run: pnpm install --frozen-lockfile
+      - run: pnpm install --frozen-lockfile --prefer-offline
       - run: pnpm run lint
       - run: pnpm run format:check
 
@@ -43,12 +44,14 @@ jobs:
         with:
           node-version: 20
           cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
 
-      - run: pnpm install --frozen-lockfile
+      - run: pnpm install --frozen-lockfile --prefer-offline
       - run: pnpm test:run
 
-  e2e:
-    name: E2E Tests
+  build:
+    name: Build
+    needs: [quality, test]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -59,8 +62,52 @@ jobs:
         with:
           node-version: 20
           cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
 
-      - run: pnpm install --frozen-lockfile
+      - run: npx vercel --cwd . pull --yes --environment=production --token="${VERCEL_TOKEN}"
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      - run: npx vercel --cwd . build --prod --token="${VERCEL_TOKEN}"
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+
+      - name: Get build size
+        id: size
+        run: |
+          size_kb=$(du -sk .vercel/output | cut -f1)
+          size_mb=$(awk "BEGIN {printf \"%.1f\", $size_kb/1024}")
+          echo "mb=$size_mb" >> $GITHUB_OUTPUT
+
+          # Find largest files
+          echo "### 📦 Build: ${size_mb}MB" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          find .vercel/output -type f -exec du -h {} + 2>/dev/null | 
+            sort -rh | head -5 | 
+            awk '{printf "- %s - `%s`\n", $1, $2}' >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: vercel-build
+          path: .vercel/output
+          retention-days: 1
+
+  e2e:
+    name: E2E Tests
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - run: pnpm install --frozen-lockfile --prefer-offline
 
       # Cache Playwright browsers before install
       - name: Cache Playwright
@@ -78,10 +125,12 @@ jobs:
       - name: Deploy Preview
         id: preview
         run: |
-          url=$(npx vercel --cwd . --token=${{ secrets.VERCEL_TOKEN }} --yes 2>&1 | grep -oP '(?<=https://)[^ ]+' | head -1)
+          url=$(npx vercel --cwd . --token="${VERCEL_TOKEN}" --yes 2>&1 | grep -oP '(?<=https://)[^ ]+' | head -1)
           url="https://$url"
           echo "url=$url" >> $GITHUB_OUTPUT
           echo "Preview deployment URL: $url"
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
 
       - run: pnpm exec playwright test --project chromium
         env:
@@ -89,23 +138,17 @@ jobs:
 
   deploy:
     name: Deploy
-    needs: [quality, test, e2e]
+    needs: [build, e2e]
     runs-on: ubuntu-latest
     environment:
       name: production
       url: https://natspaper.vercel.app
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+      - uses: actions/download-artifact@v4
         with:
-          version: 10
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: pnpm
-
-      - run: npx vercel --cwd . pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
-      - run: npx vercel --cwd . build --prod --token=${{ secrets.VERCEL_TOKEN }}
+          name: vercel-build
+          path: .vercel/output
 
       - name: Get build size
         id: size
@@ -124,8 +167,10 @@ jobs:
       - name: Deploy to Production
         id: deploy
         run: |
-          url=$(npx vercel --cwd . deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }})
+          url=$(npx vercel --cwd . deploy --prebuilt --prod --token="${VERCEL_TOKEN}")
           echo "url=$url" >> $GITHUB_OUTPUT
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
 
       - name: Summary
         run: |
@@ -134,6 +179,16 @@ jobs:
           echo "- URL: ${{ steps.deploy.outputs.url }}" >> $GITHUB_STEP_SUMMARY
           echo "- Build: ${{ steps.size.outputs.mb }}MB" >> $GITHUB_STEP_SUMMARY
           echo "- Commit: \`${GITHUB_SHA:0:7}\`" >> $GITHUB_STEP_SUMMARY
+
+      - name: Performance metrics
+        run: |
+          echo "### 📊 Build Metrics" >> $GITHUB_STEP_SUMMARY
+          echo "- Node modules: $(du -sh node_modules | cut -f1)" >> $GITHUB_STEP_SUMMARY
+          
+          # Warn on size increases
+          if [ "${{ steps.size.outputs.mb }}" -gt 50 ]; then
+            echo "⚠️ Build size exceeds 50MB" >> $GITHUB_STEP_SUMMARY
+          fi
 
   verify:
     name: Verify
