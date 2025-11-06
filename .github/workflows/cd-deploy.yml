@@ -131,7 +131,7 @@ jobs:
     steps:
       - name: Check deployment
         run: |
-          url="https://natspaper.vercel.app"
+          url="https://natspaper.vercel.app/en"
 
           for page in "/" "/posts" "/tags" "/archives" "/search"; do
             status=$(curl -sL -w "%{http_code}" -o /dev/null "$url$page")
