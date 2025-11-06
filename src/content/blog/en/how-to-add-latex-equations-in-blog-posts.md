@@ -154,7 +154,7 @@ $$
 
 LaTeX provides a wide range of mathematical symbols:
 
-- Greek letters: $\\alpha$, $\\beta$, $\\gamma$, $\\delta$, $\\epsilon$, $\\pi$
-- Operators: $\\sum$, $\\prod$, $\\int$, $\\partial$, $\\nabla$
-- Relations: $\\leq$, $\\geq$, $\\approx$, $\\sim$, $\\propto$
-- Logical symbols: $\\forall$, $\\exists$, $\\neg$, $\\wedge$, $\\vee$
+- Greek letters: $\alpha$, $\beta$, $\gamma$, $\delta$, $\epsilon$, $\pi$
+- Operators: $\sum$, $\prod$, $\int$, $\partial$, $\nabla$
+- Relations: $\leq$, $\geq$, $\approx$, $\sim$, $\propto$
+- Logical symbols: $\forall$, $\exists$, $\neg$, $\wedge$, $\vee$

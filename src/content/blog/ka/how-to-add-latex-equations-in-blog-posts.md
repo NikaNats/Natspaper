@@ -154,7 +154,7 @@ $$
 
 LaTeX უზრუნველყოფს უამრავ მათემატიკურ სიმბოლოს:
 
-- ბერძნული ასოები: $\\alpha$, $\\beta$, $\\gamma$, $\\delta$, $\\epsilon$, $\\pi$
-- ოპერატორები: $\\sum$, $\\prod$, $\\int$, $\\partial$, $\\nabla$
-- ურთიერთობები: $\\leq$, $\\geq$, $\\approx$, $\\sim$, $\\propto$
-- ლოგიკური სიმბოლოები: $\\forall$, $\\exists$, $\\neg$, $\\wedge$, $\\vee$
+- ბერძნული ასოები: $\alpha$, $\beta$, $\gamma$, $\delta$, $\epsilon$, $\pi$
+- ოპერატორები: $\sum$, $\prod$, $\int$, $\partial$, $\nabla$
+- ურთიერთობები: $\leq$, $\geq$, $\approx$, $\sim$, $\propto$
+- ლოგიკური სიმბოლოები: $\forall$, $\exists$, $\neg$, $\wedge$, $\vee$
