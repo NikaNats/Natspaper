@@ -96,8 +96,8 @@ jobs:
           node-version: 20
           cache: pnpm
 
-      - run: npx vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
-      - run: npx vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+      - run: npx vercel --cwd . pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+      - run: npx vercel --cwd . build --prod --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Get build size
         id: size
@@ -113,7 +113,7 @@ jobs:
             sort -rh | head -5 | 
             awk '{printf "- %s - `%s`\n", $1, $2}' >> $GITHUB_STEP_SUMMARY
 
-      - run: npx vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
+      - run: npx vercel --cwd . deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Summary
         run: |
