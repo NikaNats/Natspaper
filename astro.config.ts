@@ -2,6 +2,7 @@ import { defineConfig, envField, fontProviders } from "astro/config";
 import tailwindcss from "@tailwindcss/vite";
 import sitemap from "@astrojs/sitemap";
 import sentry from "@sentry/astro";
+import Sonda from "sonda/astro";
 import remarkToc from "remark-toc";
 import remarkCollapse from "remark-collapse";
 import remarkMath from "remark-math";
@@ -84,6 +85,9 @@ export default defineConfig({
       },
     }),
     expressiveCode(),
+    Sonda({
+      format: ['html', 'json'],
+    }),
   ],
   markdown: {
     remarkPlugins: [
@@ -109,6 +113,9 @@ export default defineConfig({
   vite: {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     plugins: [tailwindcss() as any],
+    build: {
+      sourcemap: true,
+    },
     optimizeDeps: {
       exclude: ["@resvg/resvg-js"],
     },
