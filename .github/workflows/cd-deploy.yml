@@ -75,9 +75,17 @@ jobs:
         if: steps.cache-pw.outputs.cache-hit != 'true'
         run: pnpm exec playwright install --with-deps chromium
 
+      - name: Deploy Preview
+        id: preview
+        run: |
+          url=$(npx vercel --cwd . --token=${{ secrets.VERCEL_TOKEN }} --yes 2>&1 | grep -oP '(?<=https://)[^ ]+' | head -1)
+          url="https://$url"
+          echo "url=$url" >> $GITHUB_OUTPUT
+          echo "Preview deployment URL: $url"
+
       - run: pnpm exec playwright test --project chromium
         env:
-          SITE_WEBSITE: https://natspaper.vercel.app
+          SITE_WEBSITE: ${{ steps.preview.outputs.url }}
 
   deploy:
     name: Deploy
@@ -113,12 +121,17 @@ jobs:
             sort -rh | head -5 | 
             awk '{printf "- %s - `%s`\n", $1, $2}' >> $GITHUB_STEP_SUMMARY
 
-      - run: npx vercel --cwd . deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Deploy to Production
+        id: deploy
+        run: |
+          url=$(npx vercel --cwd . deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }})
+          echo "url=$url" >> $GITHUB_OUTPUT
 
       - name: Summary
         run: |
           echo "### ✅ Deployed to Production" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- URL: ${{ steps.deploy.outputs.url }}" >> $GITHUB_STEP_SUMMARY
           echo "- Build: ${{ steps.size.outputs.mb }}MB" >> $GITHUB_STEP_SUMMARY
           echo "- Commit: \`${GITHUB_SHA:0:7}\`" >> $GITHUB_STEP_SUMMARY
 
