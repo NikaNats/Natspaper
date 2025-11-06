@@ -176,6 +176,7 @@ export default defineConfig({
   },
   experimental: {
     preserveScriptOrder: true,
+    contentIntellisense: true,
     fonts: [
       {
         // Body & UI Font
