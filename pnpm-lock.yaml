@@ -27,7 +27,7 @@ importers:
         specifier: ^2.6.2
         version: 2.6.2
       '@sentry/astro':
-        specifier: ^10.23.0
+        specifier: ^10.22.0
         version: 10.23.0(astro@5.15.4(@types/node@24.10.0)(jiti@2.6.1)(lightningcss@1.30.2)(rollup@4.52.5)(typescript@5.9.3)(yaml@2.8.1))
       '@tailwindcss/vite':
         specifier: ^4.1.16
@@ -39,7 +39,7 @@ importers:
         specifier: ^1.2.0
         version: 1.2.0
       astro:
-        specifier: ^5.15.4
+        specifier: ^5.15.3
         version: 5.15.4(@types/node@24.10.0)(jiti@2.6.1)(lightningcss@1.30.2)(rollup@4.52.5)(typescript@5.9.3)(yaml@2.8.1)
       dayjs:
         specifier: ^1.11.19
@@ -106,7 +106,7 @@ importers:
         specifier: ^9.39.0
         version: 9.39.0(jiti@2.6.1)
       eslint-plugin-astro:
-        specifier: ^1.5.0
+        specifier: ^1.4.0
         version: 1.5.0(eslint@9.39.0(jiti@2.6.1))
       globals:
         specifier: ^16.5.0
@@ -1411,9 +1411,6 @@ packages:
 
   '@types/node@24.10.0':
     resolution: {integrity: sha512-qzQZRBqkFsYyaSWXuEHc2WR9c0a0CXwiE5FWUvn7ZM+vdy1uZLfCunD38UzhuB7YN/J11ndbDBcTmOdxJo9Q7A==}
-
-  '@types/node@24.9.1':
-    resolution: {integrity: sha512-QoiaXANRkSXK6p0Duvt56W208du4P9Uye9hWLWgGMDTEoKPhuenzNcC4vGUmrNkiOKTlIrBoyNQYNpSwfEZXSg==}
 
   '@types/pg-pool@2.0.6':
     resolution: {integrity: sha512-TaAUE5rq2VQYxab5Ts7WZhKNmuN78Q6PiFonTDdpbx8a1H0M1vhy3rhiMjl+e2iHmogyMw7jZF4FrE6eJUy5HQ==}
@@ -4987,7 +4984,7 @@ snapshots:
 
   '@types/fontkit@2.0.8':
     dependencies:
-      '@types/node': 24.9.1
+      '@types/node': 24.10.0
 
   '@types/hast@3.0.4':
     dependencies:
@@ -5024,10 +5021,6 @@ snapshots:
       undici-types: 6.21.0
 
   '@types/node@24.10.0':
-    dependencies:
-      undici-types: 7.16.0
-
-  '@types/node@24.9.1':
     dependencies:
       undici-types: 7.16.0
 
