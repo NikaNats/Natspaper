@@ -15,7 +15,7 @@ if (!SITE.showArchives) {
 
 const allPosts = await getCollection("blog", ({ data }) => !data.draft);
 // Filter posts for Georgian language
-const posts = allPosts.filter(post => post.slug.startsWith('ka/'));
+const posts = allPosts.filter(post => post.slug.startsWith("ka/"));
 
 const months = [
   "იანვარი",

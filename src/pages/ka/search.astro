@@ -131,7 +131,9 @@ const backUrl = SITE.showBackButton ? `${Astro.url.pathname}` : "/ka/";
       if (oldForm) oldForm.remove();
       if (oldResults) oldResults.remove();
       // Clear any warning or error divs
-      const warningDivs = pagefindSearch.querySelectorAll(".bg-muted\\/75, .bg-red-50");
+      const warningDivs = pagefindSearch.querySelectorAll(
+        ".bg-muted\\/75, .bg-red-50"
+      );
       warningDivs.forEach(div => div.remove());
     }
 

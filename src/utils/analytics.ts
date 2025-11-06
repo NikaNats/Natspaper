@@ -32,7 +32,7 @@
 
 export const ANALYTICS_CONFIG = {
   MEASUREMENT_ID: import.meta.env.PUBLIC_GA_MEASUREMENT_ID,
-  ENABLE_DEBUG: import.meta.env.PUBLIC_GA_DEBUG === 'true',
+  ENABLE_DEBUG: import.meta.env.PUBLIC_GA_DEBUG === "true",
 } as const;
 
 /**
@@ -57,10 +57,10 @@ export interface AnalyticsEvent {
  * initializeAnalytics('en');
  * ```
  */
-export function initializeAnalytics(locale: string = 'en'): void {
+export function initializeAnalytics(locale: string = "en"): void {
   if (!ANALYTICS_CONFIG.MEASUREMENT_ID) {
     if (ANALYTICS_CONFIG.ENABLE_DEBUG) {
-      console.warn('⚠️ GA Measurement ID not configured');
+      console.warn("⚠️ GA Measurement ID not configured");
     }
     return;
   }
@@ -70,7 +70,7 @@ export function initializeAnalytics(locale: string = 'en'): void {
     loadGtagScript();
 
     // Set page-level configuration with language tracking
-    window.gtag?.('config', ANALYTICS_CONFIG.MEASUREMENT_ID, {
+    window.gtag?.("config", ANALYTICS_CONFIG.MEASUREMENT_ID, {
       page_path: window.location.pathname,
       custom_language: locale,
       debug_mode: ANALYTICS_CONFIG.ENABLE_DEBUG,
@@ -80,7 +80,7 @@ export function initializeAnalytics(locale: string = 'en'): void {
       console.log(`✅ Analytics initialized for locale: ${locale}`);
     }
   } catch (error) {
-    console.error('❌ Failed to initialize analytics:', error);
+    console.error("❌ Failed to initialize analytics:", error);
   }
 }
 
@@ -100,11 +100,11 @@ export function initializeAnalytics(locale: string = 'en'): void {
 export function trackPageView(
   pagePath: string,
   pageTitle: string,
-  locale: string = 'en'
+  locale: string = "en"
 ): void {
   if (!window.gtag) {
     if (ANALYTICS_CONFIG.ENABLE_DEBUG) {
-      console.warn('⚠️ gtag not available');
+      console.warn("⚠️ gtag not available");
     }
     return;
   }
@@ -112,7 +112,7 @@ export function trackPageView(
   try {
     const siteSection = getSiteSection(pagePath, locale);
 
-    window.gtag('event', 'page_view', {
+    window.gtag("event", "page_view", {
       page_path: pagePath,
       page_title: pageTitle,
       language: locale,
@@ -123,7 +123,7 @@ export function trackPageView(
       console.log(`📊 Page view tracked: ${pageTitle} (${locale})`);
     }
   } catch (error) {
-    console.error('❌ Failed to track page view:', error);
+    console.error("❌ Failed to track page view:", error);
   }
 }
 
@@ -142,20 +142,20 @@ export function trackPageView(
  */
 export function trackEvent(
   eventName: string,
-  locale: string = 'en',
+  locale: string = "en",
   eventData?: Record<string, string | number | boolean>
 ): void {
   if (!window.gtag) {
     if (ANALYTICS_CONFIG.ENABLE_DEBUG) {
-      console.warn('⚠️ gtag not available');
+      console.warn("⚠️ gtag not available");
     }
     return;
   }
 
   try {
-    window.gtag('event', eventName, {
+    window.gtag("event", eventName, {
       language: locale,
-      event_category: 'engagement',
+      event_category: "engagement",
       ...eventData,
     });
 
@@ -163,7 +163,7 @@ export function trackEvent(
       console.log(`📊 Event tracked: ${eventName}`, eventData);
     }
   } catch (error) {
-    console.error('❌ Failed to track event:', error);
+    console.error("❌ Failed to track event:", error);
   }
 }
 
@@ -183,28 +183,28 @@ export function trackEvent(
 export function trackGoal(
   goalName: string,
   goalValue: number = 1,
-  locale: string = 'en'
+  locale: string = "en"
 ): void {
   if (!window.gtag) {
     if (ANALYTICS_CONFIG.ENABLE_DEBUG) {
-      console.warn('⚠️ gtag not available');
+      console.warn("⚠️ gtag not available");
     }
     return;
   }
 
   try {
-    window.gtag('event', 'conversion', {
+    window.gtag("event", "conversion", {
       conversion_name: goalName,
       conversion_value: goalValue,
       language: locale,
-      conversion_currency: 'USD',
+      conversion_currency: "USD",
     });
 
     if (ANALYTICS_CONFIG.ENABLE_DEBUG) {
       console.log(`🎯 Goal tracked: ${goalName} (value: ${goalValue})`);
     }
   } catch (error) {
-    console.error('❌ Failed to track goal:', error);
+    console.error("❌ Failed to track goal:", error);
   }
 }
 
@@ -224,28 +224,28 @@ export function trackGoal(
 export function trackPostView(
   postSlug: string,
   postTitle: string,
-  locale: string = 'en'
+  locale: string = "en"
 ): void {
   if (!window.gtag) {
     if (ANALYTICS_CONFIG.ENABLE_DEBUG) {
-      console.warn('⚠️ gtag not available');
+      console.warn("⚠️ gtag not available");
     }
     return;
   }
 
   try {
-    window.gtag('event', 'post_view', {
+    window.gtag("event", "post_view", {
       post_id: postSlug,
       post_title: postTitle,
       language: locale,
-      content_type: 'blog_post',
+      content_type: "blog_post",
     });
 
     if (ANALYTICS_CONFIG.ENABLE_DEBUG) {
       console.log(`📝 Post view tracked: ${postTitle} (${locale})`);
     }
   } catch (error) {
-    console.error('❌ Failed to track post view:', error);
+    console.error("❌ Failed to track post view:", error);
   }
 }
 
@@ -265,17 +265,17 @@ export function trackPostView(
 export function trackTimeOnPage(
   pagePath: string,
   timeSeconds: number,
-  locale: string = 'en'
+  locale: string = "en"
 ): void {
   if (!window.gtag) {
     if (ANALYTICS_CONFIG.ENABLE_DEBUG) {
-      console.warn('⚠️ gtag not available');
+      console.warn("⚠️ gtag not available");
     }
     return;
   }
 
   try {
-    window.gtag('event', 'page_duration', {
+    window.gtag("event", "page_duration", {
       page_path: pagePath,
       duration_seconds: timeSeconds,
       language: locale,
@@ -285,7 +285,7 @@ export function trackTimeOnPage(
       console.log(`⏱️ Time on page tracked: ${timeSeconds}s (${pagePath})`);
     }
   } catch (error) {
-    console.error('❌ Failed to track time on page:', error);
+    console.error("❌ Failed to track time on page:", error);
   }
 }
 
@@ -307,16 +307,16 @@ export function trackLanguageSwitch(
 ): void {
   if (!window.gtag) {
     if (ANALYTICS_CONFIG.ENABLE_DEBUG) {
-      console.warn('⚠️ gtag not available');
+      console.warn("⚠️ gtag not available");
     }
     return;
   }
 
   try {
-    window.gtag('event', 'language_switch', {
+    window.gtag("event", "language_switch", {
       from_language: fromLanguage,
       to_language: toLanguage,
-      event_category: 'user_engagement',
+      event_category: "user_engagement",
     });
 
     if (ANALYTICS_CONFIG.ENABLE_DEBUG) {
@@ -325,7 +325,7 @@ export function trackLanguageSwitch(
       );
     }
   } catch (error) {
-    console.error('❌ Failed to track language switch:', error);
+    console.error("❌ Failed to track language switch:", error);
   }
 }
 
@@ -344,18 +344,18 @@ export function trackLanguageSwitch(
  */
 export function trackSearch(
   searchQuery: string,
-  locale: string = 'en',
+  locale: string = "en",
   resultCount?: number
 ): void {
   if (!window.gtag) {
     if (ANALYTICS_CONFIG.ENABLE_DEBUG) {
-      console.warn('⚠️ gtag not available');
+      console.warn("⚠️ gtag not available");
     }
     return;
   }
 
   try {
-    window.gtag('event', 'search', {
+    window.gtag("event", "search", {
       search_term: searchQuery,
       language: locale,
       ...(resultCount !== undefined && { result_count: resultCount }),
@@ -365,7 +365,7 @@ export function trackSearch(
       console.log(`🔍 Search tracked: "${searchQuery}" (${locale})`);
     }
   } catch (error) {
-    console.error('❌ Failed to track search:', error);
+    console.error("❌ Failed to track search:", error);
   }
 }
 
@@ -381,29 +381,26 @@ export function trackSearch(
  * trackTagView('astro', 'en');
  * ```
  */
-export function trackTagView(
-  tagName: string,
-  locale: string = 'en'
-): void {
+export function trackTagView(tagName: string, locale: string = "en"): void {
   if (!window.gtag) {
     if (ANALYTICS_CONFIG.ENABLE_DEBUG) {
-      console.warn('⚠️ gtag not available');
+      console.warn("⚠️ gtag not available");
     }
     return;
   }
 
   try {
-    window.gtag('event', 'tag_explored', {
+    window.gtag("event", "tag_explored", {
       tag_name: tagName,
       language: locale,
-      tag_type: 'blog_tag',
+      tag_type: "blog_tag",
     });
 
     if (ANALYTICS_CONFIG.ENABLE_DEBUG) {
       console.log(`🏷️ Tag view tracked: #${tagName} (${locale})`);
     }
   } catch (error) {
-    console.error('❌ Failed to track tag view:', error);
+    console.error("❌ Failed to track tag view:", error);
   }
 }
 
@@ -421,13 +418,13 @@ export function trackTagView(
 export function setUserLanguageProperty(locale: string): void {
   if (!window.gtag) {
     if (ANALYTICS_CONFIG.ENABLE_DEBUG) {
-      console.warn('⚠️ gtag not available');
+      console.warn("⚠️ gtag not available");
     }
     return;
   }
 
   try {
-    window.gtag('set', {
+    window.gtag("set", {
       user_locale: locale,
       user_language_preference: locale,
     });
@@ -436,7 +433,7 @@ export function setUserLanguageProperty(locale: string): void {
       console.log(`👤 User language property set: ${locale}`);
     }
   } catch (error) {
-    console.error('❌ Failed to set user language property:', error);
+    console.error("❌ Failed to set user language property:", error);
   }
 }
 
@@ -448,12 +445,12 @@ function loadGtagScript(): void {
   if (window.gtag) return; // Already loaded
 
   try {
-    const script = document.createElement('script');
+    const script = document.createElement("script");
     script.async = true;
     script.src = `https://www.googletagmanager.com/gtag/js?id=${ANALYTICS_CONFIG.MEASUREMENT_ID}`;
 
     script.onerror = () => {
-      console.error('❌ Failed to load Google Analytics script');
+      console.error("❌ Failed to load Google Analytics script");
     };
 
     document.head.appendChild(script);
@@ -473,13 +470,13 @@ function loadGtagScript(): void {
     };
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (window as any).gtag('js', new Date());
+    (window as any).gtag("js", new Date());
 
     if (ANALYTICS_CONFIG.ENABLE_DEBUG) {
-      console.log('✅ Google Analytics script loaded');
+      console.log("✅ Google Analytics script loaded");
     }
   } catch (error) {
-    console.error('❌ Failed to initialize gtag script:', error);
+    console.error("❌ Failed to initialize gtag script:", error);
   }
 }
 
@@ -487,18 +484,15 @@ function loadGtagScript(): void {
  * Determine site section from URL path
  * @internal
  */
-function getSiteSection(
-  pagePath: string,
-  locale: string
-): string {
+function getSiteSection(pagePath: string, locale: string): string {
   // Remove locale prefix for matching
-  const pathWithoutLocale = pagePath.replace(new RegExp(`^/${locale}`), '');
+  const pathWithoutLocale = pagePath.replace(new RegExp(`^/${locale}`), "");
 
-  if (pathWithoutLocale.includes('/posts/')) return 'blog';
-  if (pathWithoutLocale.includes('/tags/')) return 'tags';
-  if (pathWithoutLocale.includes('/archives/')) return 'archives';
-  if (pathWithoutLocale.includes('/search/')) return 'search';
-  return 'home';
+  if (pathWithoutLocale.includes("/posts/")) return "blog";
+  if (pathWithoutLocale.includes("/tags/")) return "tags";
+  if (pathWithoutLocale.includes("/archives/")) return "archives";
+  if (pathWithoutLocale.includes("/search/")) return "search";
+  return "home";
 }
 
 /**

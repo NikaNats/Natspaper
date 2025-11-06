@@ -14,7 +14,7 @@ import profilePic from "@/assets/images/me.jpeg";
 
 // Get posts only for the Georgian language
 const allPosts = await getCollection("blog");
-const posts = allPosts.filter(post => post.slug.startsWith('ka/'));
+const posts = allPosts.filter(post => post.slug.startsWith("ka/"));
 
 const sortedPosts = getSortedPosts(posts);
 const featuredPosts = sortedPosts.filter(({ data }) => data.featured);
@@ -54,10 +54,14 @@ const featuredPosts = sortedPosts.filter(({ data }) => data.featured);
           .NET დეველოპერი | პროგრამული ინჟინერი
         </p>
         <p class="max-w-2xl">
-          მიკროსერვისების არქიტექტურაში სპეციალიზირებული .NET დეველოპერი და პროგრამული ინჟინერი
+          მიკროსერვისების არქიტექტურაში სპეციალიზირებული .NET დეველოპერი და
+          პროგრამული ინჟინერი
         </p>
         <p class="mt-2 max-w-2xl">
-          ყოველდღიური მიღწევები მოიცავს საკრედიტო რეპორტირების სისტემის მიგრაციას მონოლიტიდან მიკროსერვისებზე (40% შესრულების გაუმჯობესება), ქართულენოვანი AI ასისტენტის არქიტექტურას, რომელმაც მოიპოვა ჟიური Prize Award-ი GAIA Hackathon-ზე, და საწარმო-კლასის სისტემებზე, როგორიცაა
+          ყოველდღიური მიღწევები მოიცავს საკრედიტო რეპორტირების სისტემის
+          მიგრაციას მონოლიტიდან მიკროსერვისებზე (40% შესრულების გაუმჯობესება),
+          ქართულენოვანი AI ასისტენტის არქიტექტურას, რომელმაც მოიპოვა ჟიური Prize
+          Award-ი GAIA Hackathon-ზე, და საწარმო-კლასის სისტემებზე, როგორიცაა
           <a
             href="https://github.com/NikaNats"
             class="underline decoration-dashed underline-offset-4 hover:text-accent"
@@ -65,12 +69,14 @@ const featuredPosts = sortedPosts.filter(({ data }) => data.featured);
           > და fintech მიკროსერვისების ეკოსისტემები.
         </p>
         <p class="mt-2 max-w-2xl">
-          მიზნად ისახავს მაგისტრის ხარისხის მიღებას მონაცემთა მეცნიერების ფაკულტეტზე საქართველოს ეროვნული უნივერსიტეტში, ხოლო პრაქტიკულად მუშაობს .NET პროგრამული ინჟინერად Credo Bank-ში.
-          მოგვწერეთ <a
+          მიზნად ისახავს მაგისტრის ხარისხის მიღებას მონაცემთა მეცნიერების
+          ფაკულტეტზე საქართველოს ეროვნული უნივერსიტეტში, ხოლო პრაქტიკულად
+          მუშაობს .NET პროგრამული ინჟინერად Credo Bank-ში. მოგვწერეთ <a
             href="mailto:nika.nacvlishvili1@gmail.com"
             class="underline decoration-dashed underline-offset-4 hover:text-accent"
             >ელ-ფოსტით</a
-          > .NET, მიკროსერვისებების ან AI/ML ინტეგრაციის შესახებ განსახილველი საკითხების შესაფერი.
+          > .NET, მიკროსერვისებების ან AI/ML ინტეგრაციის შესახებ განსახილველი საკითხების
+          შესაფერი.
         </p>
         {
           // only display if at least one social link is enabled

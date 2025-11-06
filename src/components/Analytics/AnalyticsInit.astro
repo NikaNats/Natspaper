@@ -1,7 +1,7 @@
 ---
 /**
  * Analytics Initializer Component
- * 
+ *
  * Initializes Google Analytics 4 tracking with language support
  * Call this component once in your main layout to initialize analytics
  *
@@ -13,13 +13,13 @@
  * ```
  */
 
-import { getCurrentLocale } from '@/i18n/utils';
+import { getCurrentLocale } from "@/i18n/utils";
 
 export interface Props {
   locale?: string;
 }
 
-const { locale = getCurrentLocale(Astro.url.pathname) || 'en' } = Astro.props;
+const { locale = getCurrentLocale(Astro.url.pathname) || "en" } = Astro.props;
 ---
 
 <script define:vars={{ locale }} is:inline>
@@ -31,7 +31,7 @@ const { locale = getCurrentLocale(Astro.url.pathname) || 'en' } = Astro.props;
         setUserLanguageProperty,
         trackPageView,
         trackTimeOnPage,
-      } = await import('/src/utils/analytics.ts');
+      } = await import("/src/utils/analytics.ts");
 
       // Initialize analytics
       initializeAnalytics(locale);
@@ -44,7 +44,7 @@ const { locale = getCurrentLocale(Astro.url.pathname) || 'en' } = Astro.props;
 
       // Track time on page before leaving
       const pageLoadTime = Date.now();
-      window.addEventListener('beforeunload', () => {
+      window.addEventListener("beforeunload", () => {
         const timeOnPage = Math.round((Date.now() - pageLoadTime) / 1000);
         if (timeOnPage > 1) {
           // Only track if spent at least 1 second
@@ -53,7 +53,7 @@ const { locale = getCurrentLocale(Astro.url.pathname) || 'en' } = Astro.props;
       });
     } catch (error) {
       // eslint-disable-next-line no-console
-      console.error('Failed to initialize analytics:', error);
+      console.error("Failed to initialize analytics:", error);
     }
   })();
 </script>

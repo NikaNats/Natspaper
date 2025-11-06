@@ -10,7 +10,7 @@ interface Tag {
 
 /**
  * Get unique tags from posts
- * 
+ *
  * @param posts - Array of blog posts
  * @param locale - Optional locale for tag name translation (e.g., "en", "ka")
  *                If provided, tag names will be translated to the specified language

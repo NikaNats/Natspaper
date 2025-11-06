@@ -14,7 +14,7 @@ import profilePic from "@/assets/images/me.jpeg";
 
 // Get posts only for the English language
 const allPosts = await getCollection("blog");
-const posts = allPosts.filter(post => post.slug.startsWith('en/'));
+const posts = allPosts.filter(post => post.slug.startsWith("en/"));
 
 const sortedPosts = getSortedPosts(posts);
 const featuredPosts = sortedPosts.filter(({ data }) => data.featured);

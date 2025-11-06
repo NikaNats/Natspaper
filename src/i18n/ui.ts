@@ -1,9 +1,9 @@
 /**
  * UI Strings Dictionary for Internationalization (i18n)
- * 
+ *
  * This file defines all hardcoded UI text that appears in components.
  * Each language should have complete translations for all keys.
- * 
+ *
  * Language codes:
  * - en: English
  * - ka: Georgian (ქართული)

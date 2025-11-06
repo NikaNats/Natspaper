@@ -24,7 +24,11 @@ const isActive = (path: string) => {
   const currentPagePath = currentPathArray.slice(1); // Remove language code
   const checkPagePath = pathArray.slice(0); // The path to check
 
-  if (currentPagePath.length === 0 && checkPagePath.length === 1 && checkPagePath[0] === "posts") {
+  if (
+    currentPagePath.length === 0 &&
+    checkPagePath.length === 1 &&
+    checkPagePath[0] === "posts"
+  ) {
     // Homepage (after language code) against /posts link
     return false;
   }

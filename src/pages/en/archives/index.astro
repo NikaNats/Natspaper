@@ -15,7 +15,7 @@ if (!SITE.showArchives) {
 
 const allPosts = await getCollection("blog", ({ data }) => !data.draft);
 // Filter posts for English language
-const posts = allPosts.filter(post => post.slug.startsWith('en/'));
+const posts = allPosts.filter(post => post.slug.startsWith("en/"));
 
 const months = [
   "January",

@@ -124,7 +124,7 @@ export async function GET() {
     const allPosts = await getCollection("blog");
     // By default, the RSS feed at /rss.xml contains English posts
     // Translated pages can create their own language-specific feeds if needed
-    const posts = allPosts.filter(post => post.slug.startsWith('en/'));
+    const posts = allPosts.filter(post => post.slug.startsWith("en/"));
     const sortedPosts = getSortedPosts(posts);
 
     // Limit to 50 most recent posts for reasonable RSS feed size

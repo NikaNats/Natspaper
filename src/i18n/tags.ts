@@ -39,11 +39,7 @@ export function getTranslatedTagName(tagSlug: string, locale: string): string {
   }
 
   // Return translated name or fallback to English translation or the slug itself
-  return (
-    translations[tagSlug] ||
-    tagTranslations.en[tagSlug] ||
-    tagSlug
-  );
+  return translations[tagSlug] || tagTranslations.en[tagSlug] || tagSlug;
 }
 
 /**
@@ -65,7 +61,7 @@ export function getTranslatedTags(
   locale: string,
   tags: string[]
 ): Array<{ slug: string; name: string }> {
-  return tags.map((tag) => ({
+  return tags.map(tag => ({
     slug: tag,
     name: getTranslatedTagName(tag, locale),
   }));

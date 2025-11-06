@@ -10,7 +10,7 @@ export interface Props {
 export async function getStaticPaths() {
   const allPosts = await getCollection("blog", ({ data }) => !data.draft);
   // Filter posts for Georgian language
-  const posts = allPosts.filter(post => post.slug.startsWith('ka/'));
+  const posts = allPosts.filter(post => post.slug.startsWith("ka/"));
   const postResult: Array<{
     params: { slug: string };
     props: { post: CollectionEntry<"blog"> };
@@ -31,7 +31,7 @@ const { post } = Astro.props;
 
 const allPosts = await getCollection("blog");
 // Filter posts for Georgian language
-const kaPosts = allPosts.filter(post => post.slug.startsWith('ka/'));
+const kaPosts = allPosts.filter(post => post.slug.startsWith("ka/"));
 const sortedPosts = getSortedPosts(kaPosts);
 ---
 

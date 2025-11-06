@@ -10,7 +10,7 @@ import { SITE } from "@/config";
 
 const allPosts = await getCollection("blog");
 // Filter posts for Georgian language
-const posts = allPosts.filter(post => post.slug.startsWith('ka/'));
+const posts = allPosts.filter(post => post.slug.startsWith("ka/"));
 
 // Get tags with Georgian translations
 let tags = getUniqueTags(posts, "ka");
@@ -18,7 +18,10 @@ let tags = getUniqueTags(posts, "ka");
 
 <Layout title={`თეგები | ${SITE.title}`}>
   <Header />
-  <Main pageTitle="თეგები" pageDesc="ყველა თეგი რომელიც გამოყენებული იქნა პოსტებში.">
+  <Main
+    pageTitle="თეგები"
+    pageDesc="ყველა თეგი რომელიც გამოყენებული იქნა პოსტებში."
+  >
     <ul>
       {tags.map(({ tag, tagName }) => <Tag {tag} {tagName} size="lg" />)}
     </ul>

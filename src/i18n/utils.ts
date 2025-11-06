@@ -1,6 +1,6 @@
 /**
  * i18n Utilities - Helper functions for translation
- * 
+ *
  * This module provides utility functions for working with translations
  * in Astro components and layouts.
  */
@@ -10,10 +10,10 @@ import type { Lang, UIKey } from "./ui";
 
 /**
  * Create a translation function for a specific language
- * 
+ *
  * @param lang - The language code (e.g., 'en', 'ka')
  * @returns A function that translates UI keys, falling back to the default language
- * 
+ *
  * @example
  * const t = useTranslations('en');
  * const greeting = t('nav.posts'); // "Posts"
@@ -37,9 +37,9 @@ export function useTranslations(lang: Lang = defaultLang) {
 
 /**
  * Get all available languages and their display names
- * 
+ *
  * @returns An object mapping language codes to their display names
- * 
+ *
  * @example
  * const langs = getLanguages();
  * // { en: 'English', ka: 'ქართული' }
@@ -53,7 +53,7 @@ export function getLanguages() {
 
 /**
  * Get the default language code
- * 
+ *
  * @returns The default language code
  */
 export function getDefaultLanguage(): Lang {
@@ -62,7 +62,7 @@ export function getDefaultLanguage(): Lang {
 
 /**
  * Check if a given language code is supported
- * 
+ *
  * @param lang - The language code to check
  * @returns True if the language is supported
  */
