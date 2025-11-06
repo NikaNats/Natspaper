@@ -86,7 +86,7 @@ export default defineConfig({
     }),
     expressiveCode(),
     Sonda({
-      format: ['html', 'json'],
+      format: ["html", "json"],
     }),
   ],
   markdown: {
