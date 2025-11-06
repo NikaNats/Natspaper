@@ -13,6 +13,7 @@ export function remarkModifiedTime() {
     } catch (e) {
       // Log an error if the Git command fails (e.g., in a CI environment with shallow clones)
       // but don't fail the build.
+      // eslint-disable-next-line no-console
       console.warn(
         `[remark-modified-time] Failed to get Git modification time for ${filepath}: ${e.message}`
       );
