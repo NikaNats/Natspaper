@@ -128,7 +128,7 @@ scripts/               # Node.js utilities for the build pipeline
 
 **Key directories to know:**
 
-- `src/data/blog/` – Add new posts here as Markdown files
+- `src/content/blog/` – Add new posts here as Markdown files
 - `src/config.ts` – Site metadata and feature toggles
 - `src/styles/` – Global CSS and Tailwind overrides
 - `tests/` – All test files (unit, integration, E2E)
@@ -197,7 +197,7 @@ If this works locally, it will work on Vercel.
 
 ## 📖 Writing Blog Posts
 
-1. Create a new Markdown file in `src/data/blog/`.
+1. Create a new Markdown file in `src/content/blog/`.
 2. Add the frontmatter metadata at the top of the file. The `pubDatetime` is required and must be a full ISO 8601 timestamp.
 
 ```yaml
