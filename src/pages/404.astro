@@ -1,0 +1,74 @@
+---
+/**
+ * Root 404 Error Page
+ *
+ * This page handles 404 errors for the root domain. This is required by most
+ * hosting providers (Vercel, Netlify, etc.) for proper error handling in production.
+ *
+ * In static builds, this page is generated at dist/404.html which is the
+ * standard location for custom error pages on static hosting.
+ *
+ * Note: We cannot use Astro.redirect() here in static build as it won't generate
+ * an HTML file. Instead, we render a meta redirect in the HTML.
+ */
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Page Not Found</title>
+    <meta http-equiv="refresh" content="0;url=/en/404/" />
+    <style>
+      body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+        font-family:
+          system-ui,
+          -apple-system,
+          sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      }
+      .container {
+        text-align: center;
+        background: white;
+        padding: 3rem;
+        border-radius: 0.5rem;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+      }
+      h1 {
+        font-size: 3rem;
+        margin: 0;
+        color: #333;
+      }
+      p {
+        margin: 1rem 0 0 0;
+        color: #666;
+      }
+      a {
+        display: inline-block;
+        margin-top: 1.5rem;
+        padding: 0.75rem 1.5rem;
+        background: #667eea;
+        color: white;
+        text-decoration: none;
+        border-radius: 0.25rem;
+        transition: background 0.2s;
+      }
+      a:hover {
+        background: #764ba2;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>404</h1>
+      <p>Page not found. Redirecting to the home page...</p>
+      <a href="/en/">Go to Home</a>
+    </div>
+  </body>
+</html>
