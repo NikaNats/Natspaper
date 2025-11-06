@@ -40,6 +40,7 @@
     "@vercel/analytics": "^1.5.0",
     "@vercel/speed-insights": "^1.2.0",
     "astro": "^5.15.3",
+    "astro-expressive-code": "^0.41.3",
     "dayjs": "^1.11.19",
     "katex": "^0.16.25",
     "lodash.kebabcase": "^4.1.1",

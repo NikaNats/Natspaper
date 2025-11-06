@@ -16,6 +16,8 @@ import { transformerFileName } from "./src/utils/transformers/fileName";
 import { envValidationIntegration } from "./src/integrations/envValidation";
 import { SITE } from "./src/config";
 
+import expressiveCode from "astro-expressive-code";
+
 // Get site URL from environment or use default from config
 const siteUrl = process.env.SITE_WEBSITE || SITE.website;
 
@@ -81,6 +83,7 @@ export default defineConfig({
         requestHandler: true,
       },
     }),
+    expressiveCode(),
   ],
   markdown: {
     remarkPlugins: [
