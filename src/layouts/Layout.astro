@@ -2,7 +2,7 @@
 import { ClientRouter } from "astro:transitions";
 import { PUBLIC_GOOGLE_SITE_VERIFICATION } from "astro:env/client";
 import { SITE } from "@/config";
-import "@/styles/fonts.css";
+import { Font } from "astro:assets";
 import "@/styles/global.css";
 
 /**
@@ -110,6 +110,12 @@ const structuredData = {
     <noscript>
       <link rel="stylesheet" href="/styles/katex.min.css" />
     </noscript>
+
+    <!-- Font Components: Generate CSS variables and preload links -->
+    {/* Preload the main body font for faster rendering */}
+    <Font cssVariable="--font-inter" preload />
+    <Font cssVariable="--font-merriweather" />
+    <Font cssVariable="--font-jetbrains-mono" />
 
     <!-- Import Fontsource fonts with font-display: swap for optimal performance -->
     <!-- Fonts are copied to /public/files/ and referenced with absolute paths in fonts.css -->

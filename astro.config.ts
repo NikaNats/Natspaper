@@ -1,4 +1,4 @@
-import { defineConfig, envField } from "astro/config";
+import { defineConfig, envField, fontProviders } from "astro/config";
 import tailwindcss from "@tailwindcss/vite";
 import sitemap from "@astrojs/sitemap";
 import sentry from "@sentry/astro";
@@ -176,6 +176,38 @@ export default defineConfig({
   },
   experimental: {
     preserveScriptOrder: true,
+    fonts: [
+      {
+        // Body & UI Font
+        name: "Inter",
+        provider: fontProviders.fontsource(),
+        weights: [400, 700], // The exact weights you use
+        styles: ["normal"],
+        cssVariable: "--font-inter", // We will use this in our CSS
+        fallbacks: ["sans-serif"],
+        display: "swap", // Same behavior as your old setup
+      },
+      {
+        // Headings & Editorial Font
+        name: "Merriweather",
+        provider: fontProviders.fontsource(),
+        weights: [400],
+        styles: ["normal"],
+        cssVariable: "--font-merriweather",
+        fallbacks: ["serif"],
+        display: "swap",
+      },
+      {
+        // Code Font
+        name: "JetBrains Mono",
+        provider: fontProviders.fontsource(),
+        weights: [400],
+        styles: ["normal"],
+        cssVariable: "--font-jetbrains-mono",
+        fallbacks: ["monospace"],
+        display: "swap",
+      },
+    ],
     // CSP is configured via Vercel HTTP headers (vercel.json)
     // Not using Astro's CSP meta tag generation to avoid conflicts with dynamic styles
     // from ClientRouter which can't be pre-hashed

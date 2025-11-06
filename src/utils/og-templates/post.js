@@ -1,7 +1,6 @@
 import satori from "satori";
 import { html } from "satori-html";
 import { SITE } from "@/config";
-import loadGoogleFonts from "../loadGoogleFont";
 
 export default async function generatePostOgImage(post) {
   const markup = html`<div
@@ -41,12 +40,24 @@ export default async function generatePostOgImage(post) {
     </div>
   </div>`;
 
+  // Load Inter 700 font from Fontsource CDN (same source that Astro's Fonts API uses)
+  // This provides the same font that's configured in astro.config.ts
+  const fontResponse = await fetch(
+    "https://cdn.jsdelivr.net/npm/@fontsource/inter@5.2.8/files/inter-latin-700-normal.woff2"
+  );
+  const fontBuffer = await fontResponse.arrayBuffer();
+
   return satori(markup, {
     width: 1200,
     height: 630,
     embedFont: true,
-    fonts: await loadGoogleFonts(
-      post.data.title + post.data.author + SITE.title + "by"
-    ),
+    fonts: [
+      {
+        name: "Inter",
+        data: fontBuffer,
+        weight: 700,
+        style: "normal",
+      },
+    ],
   });
 }

@@ -41,7 +41,7 @@
     h6,
     th {
       @apply mb-4 text-foreground;
-      font-family: "Merriweather", Georgia, serif;
+      font-family: var(--font-merriweather), serif;
       line-height: 1.25;
       letter-spacing: -0.3px;
       font-weight: 700;
@@ -152,7 +152,7 @@
 
       th {
         @apply bg-muted/30 py-2 font-semibold;
-        font-family: "Inter", sans-serif;
+        font-family: var(--font-inter), sans-serif;
         font-weight: 600;
       }
 
@@ -167,7 +167,7 @@
      */
     code {
       @apply rounded bg-muted px-1.5 py-0.5 wrap-break-word text-foreground before:content-none after:content-none;
-      font-family: "JetBrains Mono", monospace;
+      font-family: var(--font-jetbrains-mono), monospace;
       font-size: 0.95em;
       color: var(--foreground);
       /* Ensure code text is readable */
@@ -185,7 +185,7 @@
     blockquote {
       @apply my-6 border-s-4 border-s-accent/40 ps-4 wrap-break-word italic opacity-85;
       line-height: 1.6;
-      font-family: "Merriweather", Georgia, serif;
+      font-family: var(--font-merriweather), Georgia, serif;
       /* Slightly reduced opacity for quotations */
     }
 
@@ -247,7 +247,7 @@
 
   .astro-code {
     @apply my-6 flex overflow-x-auto rounded border outline-border;
-    font-family: "JetBrains Mono", monospace;
+    font-family: var(--font-jetbrains-mono), monospace;
     padding: 1em;
     line-height: 1.6;
   }
@@ -341,7 +341,7 @@
   font-size: 2.5rem;
   font-weight: 700;
   color: var(--foreground);
-  font-family: "Merriweather", Georgia, serif;
+  font-family: var(--font-merriweather), Georgia, serif;
   line-height: 1.25;
 }
 
@@ -350,7 +350,7 @@
   line-height: 1.6;
   color: var(--text-secondary);
   max-width: 100%;
-  font-family: "Inter", sans-serif;
+  font-family: var(--font-inter), sans-serif;
 }
 
 /**
