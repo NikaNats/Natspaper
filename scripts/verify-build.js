@@ -21,7 +21,8 @@ const REQUIRED_ARTIFACTS = [
   "dist/robots.txt", // SEO: robots.txt
   "dist/sitemap-index.xml", // SEO: sitemap
   "dist/rss.xml", // RSS feed
-  "dist/404.html", // Error page
+  "dist/en/404/index.html", // English error page
+  "dist/ka/404/index.html", // Georgian error page
   "public/pagefind", // Search index
   "public/pagefind/pagefind.js", // Search engine
 ];
