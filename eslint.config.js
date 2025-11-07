@@ -15,6 +15,17 @@ export default [
   },
   { rules: { "no-console": "error" } },
   {
+    files: ["**/*.astro"],
+    languageOptions: {
+      parserOptions: {
+        extraFileExtensions: [".astro"],
+      },
+    },
+    rules: {
+      "@typescript-eslint/no-explicit-any": "off",
+    },
+  },
+  {
     ignores: [
       "dist/**",
       ".astro",

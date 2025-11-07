@@ -15,7 +15,7 @@ const { pathname } = Astro.url;
 const currentPath =
   pathname.endsWith("/") && pathname !== "/" ? pathname.slice(0, -1) : pathname;
 
-const isActive = (path: string) => {
+function isActive(path) {
   const currentPathArray = currentPath.split("/").filter(p => p.trim());
   const pathArray = path.split("/").filter(p => p.trim());
 
@@ -38,7 +38,7 @@ const isActive = (path: string) => {
     currentPath === `/${Astro.currentLocale}${path}/` ||
     currentPagePath[0] === checkPagePath[0]
   );
-};
+}
 ---
 
 <header>
@@ -49,50 +49,62 @@ const isActive = (path: string) => {
   >
     Skip to content
   </a>
-  <div
-    id="nav-container"
-    class="mx-auto flex max-w-app flex-col items-center justify-between sm:flex-row"
-  >
-    <div
+  
+  <!-- Centered container wrapper -->
+  <div class="mx-auto flex max-w-app w-full items-center justify-between">
+    <!-- Main navigation wrapper with improved spacing and border styling -->
+    <nav
       id="top-nav-wrap"
-      class="relative flex w-full items-center justify-between px-4 py-5 sm:px-6"
+      class="relative flex w-full h-16 items-center justify-between border-b border-border bg-background px-4 transition-colors sm:px-6 gap-4"
     >
+      <!-- Logo/Brand: Positioned to the start (left) via flex justify-between parent -->
       <a
         href={`/${Astro.currentLocale}/`}
-        class="text-lg font-bold text-foreground no-underline transition-colors hover:text-accent"
+        class="shrink-0 font-sans text-lg font-bold text-foreground no-underline transition-colors hover:text-accent focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-background rounded-md"
         title="Home"
       >
         {SITE.title}
       </a>
-      <nav id="nav-menu" class="flex w-auto flex-row items-center gap-6">
+
+      <!-- Navigation menu wrapper: Positioned to the end (right) via justify-between -->
+      <div id="nav-menu" class="flex items-center gap-1 sm:gap-4">
+        <!-- Mobile Menu Button (Hamburger) - hidden on sm and larger screens -->
         <button
           id="menu-btn"
-          class="focus-outline hidden p-2 sm:hidden"
+          class="sm:hidden p-2 text-foreground transition-colors hover:text-accent rounded-md focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-background"
           aria-label="Open Menu"
           aria-expanded="false"
           aria-controls="menu-items"
         >
-          <IconX id="close-icon" class="hidden" />
-          <IconMenuDeep id="menu-icon" />
+          <IconMenuDeep id="menu-icon" class="size-6" />
+          <IconX id="close-icon" class="hidden size-6" />
         </button>
+
+        <!-- Navigation menu items - transforms into mobile overlay on small screens -->
         <ul
           id="menu-items"
-          class:list={["flex flex-row items-center gap-1 sm:gap-3"]}
+          class="absolute sm:relative top-16 left-0 right-0 sm:top-0 hidden sm:flex flex-col sm:flex-row items-center gap-3 bg-background sm:bg-transparent p-4 sm:p-0 border-b sm:border-none border-border shadow-md sm:shadow-none z-40"
         >
           <li>
+            <!-- MODIFIED FOR SYMMETRY: Added flex, items-center, h-8 and removed vertical padding -->
             <a
               href={`/${Astro.currentLocale}/posts`}
-              class:list={{ "active-nav": isActive("/posts") }}
-              class="text-sm font-medium transition-colors hover:text-accent"
+              class:list={{
+                "active-nav text-accent": isActive("/posts"),
+              }}
+              class="flex items-center h-8 px-2 font-sans text-sm font-medium transition-colors text-foreground hover:text-accent no-underline focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-background rounded"
             >
               Posts
             </a>
           </li>
           <li>
+            <!-- MODIFIED FOR SYMMETRY: Added flex, items-center, h-8 and removed vertical padding -->
             <a
               href={`/${Astro.currentLocale}/tags`}
-              class:list={{ "active-nav": isActive("/tags") }}
-              class="text-sm font-medium transition-colors hover:text-accent"
+              class:list={{
+                "active-nav text-accent": isActive("/tags"),
+              }}
+              class="flex items-center h-8 px-2 font-sans text-sm font-medium transition-colors text-foreground hover:text-accent no-underline focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-background rounded"
             >
               Tags
             </a>
@@ -103,15 +115,13 @@ const isActive = (path: string) => {
                 <LinkButton
                   href={`/${Astro.currentLocale}/archives`}
                   class:list={[
-                    "focus-outline flex justify-center p-2",
-                    {
-                      "active-nav [&>svg]:stroke-accent": isActive("/archives"),
-                    },
+                    "flex items-center justify-center p-1.5 text-foreground transition-colors hover:text-accent rounded-md focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-background",
+                    { "active-nav text-accent": isActive("/archives") },
                   ]}
                   ariaLabel="archives"
                   title="Archives"
                 >
-                  <IconArchive />
+                  <IconArchive class="size-5" />
                   <span class="sr-only">Archives</span>
                 </LinkButton>
               </li>
@@ -121,13 +131,13 @@ const isActive = (path: string) => {
             <LinkButton
               href={`/${Astro.currentLocale}/search`}
               class:list={[
-                "focus-outline flex p-2",
-                { "[&>svg]:stroke-accent": isActive("/search") },
+                "flex items-center justify-center p-1.5 text-foreground transition-colors hover:text-accent rounded-md focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-background",
+                { "active-nav text-accent": isActive("/search") },
               ]}
               ariaLabel="search"
               title="Search"
             >
-              <IconSearch />
+              <IconSearch class="size-5" />
               <span class="sr-only">Search</span>
             </LinkButton>
           </li>
@@ -136,13 +146,13 @@ const isActive = (path: string) => {
               <li>
                 <button
                   id="theme-btn"
-                  class="focus-outline relative size-9 p-1 hover:[&>svg]:stroke-accent"
-                  title="Toggles light & dark"
-                  aria-label="auto"
+                  class="inline-flex items-center justify-center p-1.5 text-foreground transition-colors hover:text-accent rounded-md focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-background"
+                  title="Toggle light & dark theme"
+                  aria-label="Toggle theme"
                   aria-live="polite"
                 >
-                  <IconMoon class="absolute top-[50%] left-[50%] size-5 -translate-[50%] scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90" />
-                  <IconSunHigh class="absolute top-[50%] left-[50%] size-5 -translate-[50%] scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0" />
+                  <IconMoon class="hidden size-5 dark:block" />
+                  <IconSunHigh class="size-5 dark:hidden" />
                 </button>
               </li>
             )
@@ -151,13 +161,13 @@ const isActive = (path: string) => {
             <LanguagePicker />
           </li>
         </ul>
-      </nav>
-    </div>
+      </div>
+    </nav>
   </div>
 </header>
 
-<script>
-  function toggleNav() {
+<script lang="ts" is:inline>
+  function setupNavigation() {
     const menuBtn = document.querySelector("#menu-btn");
     const menuItems = document.querySelector("#menu-items");
     const menuIcon = document.querySelector("#menu-icon");
@@ -165,20 +175,82 @@ const isActive = (path: string) => {
 
     if (!menuBtn || !menuItems || !menuIcon || !closeIcon) return;
 
-    menuBtn.addEventListener("click", () => {
-      const openMenu = menuBtn.getAttribute("aria-expanded") === "true";
+    const toggleMenu = () => {
+      const isOpen = menuBtn.getAttribute("aria-expanded") === "true";
+      const newState = !isOpen;
 
-      menuBtn.setAttribute("aria-expanded", openMenu ? "false" : "true");
-      menuBtn.setAttribute("aria-label", openMenu ? "Open Menu" : "Close Menu");
+      menuBtn.setAttribute("aria-expanded", String(newState));
+      menuBtn.setAttribute("aria-label", newState ? "Close Menu" : "Open Menu");
 
-      menuItems.classList.toggle("hidden");
-      menuIcon.classList.toggle("hidden");
-      closeIcon.classList.toggle("hidden");
+      menuItems.classList.toggle("hidden", !newState);
+      menuIcon.classList.toggle("hidden", newState);
+      closeIcon.classList.toggle("hidden", !newState);
+    };
+
+    menuBtn.addEventListener("click", toggleMenu);
+
+    // Close menu when a navigation item is clicked
+    const navLinks = menuItems.querySelectorAll("a");
+    navLinks.forEach((link) => {
+      link.addEventListener("click", () => {
+        if (menuBtn.getAttribute("aria-expanded") === "true") {
+          toggleMenu();
+        }
+      });
     });
   }
 
-  toggleNav();
+  // Initialize on page load
+  setupNavigation();
 
-  // Runs on view transitions navigation
-  document.addEventListener("astro:after-swap", toggleNav);
+  // Reinitialize on view transitions
+  document.addEventListener("astro:after-swap", setupNavigation);
+
+  // --- ENHANCED THEME TOGGLE ---
+  function setupThemeToggle() {
+    const themeBtn = document.querySelector("#theme-btn");
+    if (!themeBtn) return;
+
+    const applyTheme = (theme) => {
+      const isDark = theme === "dark";
+      if (isDark) {
+        document.documentElement.classList.add("dark");
+      } else {
+        document.documentElement.classList.remove("dark");
+      }
+      localStorage.setItem("theme", theme);
+    };
+
+    // Detect current theme preference
+    const getPreferredTheme = () => {
+      const stored = localStorage.getItem("theme");
+      if (stored) return stored;
+      return window.matchMedia("(prefers-color-scheme: dark)").matches
+        ? "dark"
+        : "light";
+    };
+
+    // Apply theme on load
+    const currentTheme = getPreferredTheme();
+    applyTheme(currentTheme);
+
+    // Toggle theme on button click
+    themeBtn.addEventListener("click", () => {
+      const isDarkNow = document.documentElement.classList.contains("dark");
+      const newTheme = isDarkNow ? "light" : "dark";
+      applyTheme(newTheme);
+    });
+
+    // Listen for system theme changes
+    window
+      .matchMedia("(prefers-color-scheme: dark)")
+      .addEventListener("change", (e) => {
+        if (!localStorage.getItem("theme")) {
+          applyTheme(e.matches ? "dark" : "light");
+        }
+      });
+  }
+
+  setupThemeToggle();
+  document.addEventListener("astro:after-swap", setupThemeToggle);
 </script>
