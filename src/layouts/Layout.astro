@@ -240,82 +240,28 @@ const structuredData = {
     ================================================================================== -->
     <script is:inline defer src="/toggle-theme.js"></script>
 
-    <!-- Vercel Web Analytics with beforeSend for privacy and cost control
-         IMPORTANT: This is inline and runs once at page load to prevent double-loading
-         during client-side navigation (which would cause CustomElementRegistry collision).
-         Filters out localhost, test pages, and other unwanted traffic to stay
-         within the free 50,000 event/month limit and maintain data quality.
-         See: https://vercel.com/docs/analytics/redacting-sensitive-data
+    <!-- Vercel Web Analytics & Speed Insights
+         Using official @vercel/analytics package via client script
+         The beforeSend callback filters sensitive data and localhost traffic
+         See: https://vercel.com/docs/analytics
     ================================================================================== -->
     <script is:inline>
+      // Set up beforeSend callback before analytics script loads
+      // This filters localhost traffic and sensitive pages
       window.webAnalyticsBeforeSend = function (event) {
-        // Ignore all events from localhost
+        // Ignore all events from localhost to avoid wasting quota during development
         if (window.location.hostname === "localhost") {
-          return null; // Returning null cancels the event
-        }
-
-        // Ignore tracking for the Sentry test page
-        if (event.url.includes("/sentry-test")) {
           return null;
         }
 
-        // Add any other paths you want to ignore in the future, e.g., /admin/*
-        // if (event.url.includes('/admin')) {
-        //   return null;
-        // }
+        // Ignore tracking for the Sentry test page
+        if (event.url && event.url.includes("/sentry-test")) {
+          return null;
+        }
 
-        // If no rules match, send the event
+        // Track the event normally
         return event;
       };
-
-      // Load Vercel Analytics script inline to prevent double-loading during
-      // client-side navigation transitions. This ensures the custom element
-      // is only registered once per browsing session.
-      // See: https://github.com/vercel/analytics-js/issues (CustomElementRegistry collision)
-      (function loadAnalytics() {
-        // Prevent loading if already loaded in this session
-        if (
-          window.__VERCEL_ANALYTICS_ID ||
-          document.querySelector('script[src*="vercel"]')
-        ) {
-          return;
-        }
-
-        const script = document.createElement("script");
-        script.src = "https://cdn.vercel-analytics.com/v1/script.js";
-        script.async = true;
-        script.defer = true;
-        script.setAttribute("data-prevent-global-addclasses", "true");
-
-        // Set analytics ID if needed
-        if (window.__ENV_VERCEL_ANALYTICS_ID) {
-          script.setAttribute(
-            "data-analytics-id",
-            window.__ENV_VERCEL_ANALYTICS_ID
-          );
-        }
-
-        document.head.appendChild(script);
-      })();
-
-      // Load Vercel Speed Insights script inline to prevent double-loading during
-      // client-side navigation transitions. Same issue: custom element registry collision.
-      (function loadSpeedInsights() {
-        // Prevent loading if already loaded in this session
-        if (
-          window.__VERCEL_SPEED_INSIGHTS_ENABLED ||
-          document.querySelector('script[src*="speed-insights"]')
-        ) {
-          return;
-        }
-
-        const script = document.createElement("script");
-        script.src = "/_vercel/insights/script.js";
-        script.async = true;
-        script.defer = true;
-
-        document.head.appendChild(script);
-      })();
     </script>
 
     <!-- Enable view transitions for faster navigation -->
