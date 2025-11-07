@@ -71,8 +71,15 @@ const months = [
                             new Date(a.data.pubDatetime).getTime() / 1000
                           )
                       )
-                      .map(data => (
-                        <Card {...data} />
+                      .map(({ data, slug }) => (
+                        <Card
+                          title={data.title}
+                          description={data.description}
+                          pubDatetime={data.pubDatetime}
+                          modDatetime={data.modDatetime}
+                          timezone={data.timezone}
+                          slug={slug.split("/").slice(-1)[0]}
+                        />
                       ))}
                   </ul>
                 </div>

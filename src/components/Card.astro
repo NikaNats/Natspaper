@@ -1,16 +1,26 @@
 ---
 import { slugifyStr } from "@/utils/slugify";
-import type { CollectionEntry } from "astro:content";
 import Datetime from "./Datetime.astro";
 
-export interface Props extends CollectionEntry<"blog"> {
+export interface Props {
+  title: string;
+  description: string;
+  pubDatetime: Date;
+  modDatetime?: Date | null;
+  timezone?: string;
+  slug: string;
   variant?: "h2" | "h3";
 }
 
-const { variant = "h2", data, id } = Astro.props;
-const slug = String(id).split("/").slice(-1)[0].replace(/\.md$/, "");
-
-const { title, description, pubDatetime, modDatetime, timezone } = data;
+const {
+  title,
+  description,
+  pubDatetime,
+  modDatetime,
+  timezone,
+  slug,
+  variant = "h2"
+} = Astro.props;
 
 const headerProps = {
   style: { viewTransitionName: slugifyStr(title) },
