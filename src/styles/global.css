@@ -225,8 +225,7 @@ html[data-theme="dark"] {
 }
 
 header {
-  position: fixed;
-  top: 0;
+  position: relative; /* Was fixed; changed so header scrolls away with content */
   left: 0;
   width: 100%;
 
@@ -235,9 +234,7 @@ header {
   background-color: var(--background);
 }
 
-main {
-  padding-top: calc(var(--header-height) + 2rem);
-}
+/* padding-top for main removed (previously used to offset a fixed/sticky header) */
 
 /* Source: https://piccalil.li/blog/a-more-modern-css-reset/ */
 /* Anything that has been anchored to should have extra scroll margin */

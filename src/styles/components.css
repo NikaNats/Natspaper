@@ -52,10 +52,9 @@
  * This ensures header and body always match the current theme.
  */
 header {
-  position: sticky;
-  top: 0;
+  position: relative; /* Changed from sticky so header scrolls with page */
   z-index: 100;
-  background-color: var(--background);
+  background-color: var(--background); /* Keep a solid background while scrolling */
   transition: background-color 0.3s ease;
 }
 
