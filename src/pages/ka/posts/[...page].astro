@@ -24,16 +24,18 @@ const { page } = Astro.props;
   <Header />
   <Main pageTitle="პოსტები" pageDesc="ყველა სტატია რომელიც მე დავპოსტე.">
     <ul>
-      {page.data.map(({ data, slug }) => (
-        <Card
-          title={data.title}
-          description={data.description}
-          pubDatetime={data.pubDatetime}
-          modDatetime={data.modDatetime}
-          timezone={data.timezone}
-          slug={slug.split("/").slice(-1)[0]}
-        />
-      ))}
+      {
+        page.data.map(({ data, slug }) => (
+          <Card
+            title={data.title}
+            description={data.description}
+            pubDatetime={data.pubDatetime}
+            modDatetime={data.modDatetime}
+            timezone={data.timezone}
+            slug={slug.split("/").slice(-1)[0]}
+          />
+        ))
+      }
     </ul>
   </Main>
 
