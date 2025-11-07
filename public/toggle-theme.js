@@ -21,14 +21,14 @@ const getThemePreference = () => {
 };
 
 // Save theme preference and apply it
-const setPreference = (theme) => {
+const setPreference = theme => {
   localStorage.setItem(themeStorageKey, theme);
   applyTheme(theme);
 };
 
 // Apply theme to the document SYNCHRONOUSLY
 // This ensures header, body, and all elements update at the same time
-const applyTheme = (theme) => {
+const applyTheme = theme => {
   // 1. Apply theme class to html element IMMEDIATELY (no async)
   document.documentElement.dataset.theme = theme;
   document.documentElement.classList.toggle("dark", theme === "dark");
@@ -40,7 +40,8 @@ const applyTheme = (theme) => {
   // 3. Update button aria-label
   const themeBtn = document.querySelector("#theme-btn");
   if (themeBtn) {
-    const label = theme === "dark" ? "Switch to light theme" : "Switch to dark theme";
+    const label =
+      theme === "dark" ? "Switch to light theme" : "Switch to dark theme";
     themeBtn.setAttribute("aria-label", label);
   }
 
@@ -97,7 +98,7 @@ const attachToggleListener = () => {
 
 // Listen for system theme changes
 const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-const handleSystemThemeChange = (e) => {
+const handleSystemThemeChange = e => {
   // Only apply if user hasn't set a preference
   if (!localStorage.getItem(themeStorageKey)) {
     const newTheme = e.matches ? "dark" : "light";

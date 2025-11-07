@@ -1,12 +1,10 @@
 ---
-import Breadcrumb from "@/components/Breadcrumb.astro";
 import { SITE } from "@/config";
 
 /**
  * Main Content Layout Component
  *
  * Provides a consistent page shell with:
- * - Breadcrumb navigation
  * - Dynamic title with optional transition animations
  * - Optional page description
  * - Main content area via <slot />
@@ -50,7 +48,6 @@ const { props } = Astro;
 const backUrl = SITE.showBackButton ? Astro.url.pathname : "/";
 ---
 
-<Breadcrumb />
 <main
   data-backUrl={backUrl}
   id="main-content"
