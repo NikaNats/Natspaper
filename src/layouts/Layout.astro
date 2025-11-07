@@ -94,31 +94,13 @@ const structuredData = {
 
     <!-- Performance: Resource Hints for Critical Resources
          ======================================================== -->
-    <!-- Performance: Resource Hints and Critical CSS Loading
-         - KaTeX CSS loaded with media query to avoid render-blocking
-         - Fonts are self-hosted from /public/files/ directory
-         ========================================================== -->
-    <!-- Load KaTeX CSS asynchronously to prevent render-blocking (saves 10-50ms) -->
-    <link
-      rel="preload"
-      href="/styles/katex.min.css"
-      as="style"
-      media="print"
-      onload="this.removeAttribute('media');"
-    />
-    <!-- Fallback for browsers without onload support -->
-    <noscript>
-      <link rel="stylesheet" href="/styles/katex.min.css" />
-    </noscript>
-
     <!-- Font Components: Generate CSS variables and preload links -->
     {/* Preload the main body font for faster rendering */}
     <Font cssVariable="--font-inter" preload />
     <Font cssVariable="--font-merriweather" />
     <Font cssVariable="--font-jetbrains-mono" />
 
-    <!-- Import Fontsource fonts with font-display: swap for optimal performance -->
-    <!-- Fonts are copied to /public/files/ and referenced with absolute paths in fonts.css -->
+    <!-- Astro's font optimization - fonts are self-hosted from /_astro/fonts/ -->
     <style is:global>
       /* Critical CSS inline - loads immediately without blocking render */
       html {

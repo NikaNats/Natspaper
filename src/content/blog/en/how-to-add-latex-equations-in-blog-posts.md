@@ -62,29 +62,29 @@ In this section, you will find instructions on how to add support for LaTeX in y
    });
    ```
 
-3. Import KaTeX CSS in the main layout file
+3. **Import KaTeX CSS in your post layout file**
 
-   ```astro file=src/layouts/Layout.astro
+   To ensure KaTeX styles are loaded efficiently only on pages that need them, import the CSS directly into your post layout (e.g., `src/layouts/PostDetails.astro`). This enables automatic code-splitting and bundling optimization by Astro's build tool.
+
+   ```astro file=src/layouts/PostDetails.astro
    ---
-   import { SITE } from "@config";
+   import { render, type CollectionEntry } from "astro:content";
+   import Layout from "@/layouts/Layout.astro";
+   // ... other imports
 
-   // astro code
+   import "katex/dist/katex.min.css"; // [!code highlight]
+
+   export interface Props {
+     // ...
+   }
    ---
-
-   <!doctype html>
-   <!-- others... -->
-   <script is:inline src="/toggle-theme.js"></script>
-
-   <!-- [!code highlight:4] -->
-   <link
-     rel="stylesheet"
-     href="https://cdn.jsdelivr.net/npm/katex@0.16.25/dist/katex.min.css"
-   />
-
-   <body>
-     <slot />
-   </body>
    ```
+
+   This approach is superior to linking external CDN stylesheets because:
+   - **No render-blocking**: The CSS is bundled with your page JavaScript, not fetched separately
+   - **Code-splitting**: CSS is only loaded on pages that actually use math equations
+   - **Automatic optimization**: Astro minifies and optimizes the CSS automatically
+   - **Offline support**: No external CDN dependency—everything is self-hosted
 
 4. As the last step, add a text-color for `katex` in `typography.css`.
 

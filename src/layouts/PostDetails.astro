@@ -16,6 +16,11 @@ import IconChevronLeft from "@/assets/icons/IconChevronLeft.svg";
 import IconChevronRight from "@/assets/icons/IconChevronRight.svg";
 import { SITE } from "@/config";
 
+// Import KaTeX CSS for math equations rendering
+// This CSS is only loaded on pages that use math, enabling code-splitting
+// Astro's bundler will minify and optimize this automatically
+import "katex/dist/katex.min.css";
+
 /**
  * Post Details Layout Component
  *
