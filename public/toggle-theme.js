@@ -33,7 +33,7 @@ const getThemePreference = () => {
 const applyTheme = theme => {
   // Apply to document element synchronously
   document.documentElement.dataset.theme = theme;
-  
+
   // Also apply dark class for Tailwind CSS support
   if (theme === "dark") {
     document.documentElement.classList.add("dark");
@@ -87,12 +87,14 @@ const attachToggleListener = () => {
  * Listen for system-level theme preference changes
  */
 const listenSystemChanges = () => {
-  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", e => {
-    // Only apply if no user preference is saved
-    if (!localStorage.getItem(THEME_KEY)) {
-      applyTheme(e.matches ? "dark" : "light");
-    }
-  });
+  window
+    .matchMedia("(prefers-color-scheme: dark)")
+    .addEventListener("change", e => {
+      // Only apply if no user preference is saved
+      if (!localStorage.getItem(THEME_KEY)) {
+        applyTheme(e.matches ? "dark" : "light");
+      }
+    });
 };
 
 // --- INITIALIZATION ---

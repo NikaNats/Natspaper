@@ -49,18 +49,18 @@ function isActive(path) {
   >
     Skip to content
   </a>
-  
+
   <!-- Centered container wrapper -->
-  <div class="mx-auto flex max-w-app w-full items-center justify-between">
+  <div class="mx-auto flex w-full max-w-app items-center justify-between">
     <!-- Main navigation wrapper with improved spacing and border styling -->
     <nav
       id="top-nav-wrap"
-      class="relative flex w-full h-16 items-center justify-between border-b border-border bg-background px-4 transition-colors sm:px-6 gap-4"
+      class="relative flex h-16 w-full items-center justify-between gap-4 border-b border-border bg-background px-4 transition-colors sm:px-6"
     >
       <!-- Logo/Brand: Positioned to the start (left) via flex justify-between parent -->
       <a
         href={`/${Astro.currentLocale}/`}
-        class="shrink-0 font-sans text-lg font-bold text-foreground no-underline transition-colors hover:text-accent focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-background rounded-md"
+        class="shrink-0 rounded-md font-sans text-lg font-bold text-foreground no-underline transition-colors hover:text-accent focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-background focus:outline-none"
         title="Home"
       >
         {SITE.title}
@@ -71,7 +71,7 @@ function isActive(path) {
         <!-- Mobile Menu Button (Hamburger) - hidden on sm and larger screens -->
         <button
           id="menu-btn"
-          class="sm:hidden p-2 text-foreground transition-colors hover:text-accent rounded-md focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-background"
+          class="rounded-md p-2 text-foreground transition-colors hover:text-accent focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-background focus:outline-none sm:hidden"
           aria-label="Open Menu"
           aria-expanded="false"
           aria-controls="menu-items"
@@ -83,7 +83,7 @@ function isActive(path) {
         <!-- Navigation menu items - transforms into mobile overlay on small screens -->
         <ul
           id="menu-items"
-          class="absolute sm:relative top-16 left-0 right-0 sm:top-0 hidden sm:flex flex-col sm:flex-row items-center gap-3 bg-background sm:bg-transparent p-4 sm:p-0 border-b sm:border-none border-border shadow-md sm:shadow-none z-40"
+          class="absolute top-16 right-0 left-0 z-40 hidden flex-col items-center gap-3 border-b border-border bg-background p-4 shadow-md sm:relative sm:top-0 sm:flex sm:flex-row sm:border-none sm:bg-transparent sm:p-0 sm:shadow-none"
         >
           <li>
             <!-- MODIFIED FOR SYMMETRY: Added flex, items-center, h-8 and removed vertical padding -->
@@ -92,7 +92,7 @@ function isActive(path) {
               class:list={{
                 "active-nav text-accent": isActive("/posts"),
               }}
-              class="flex items-center h-8 px-2 font-sans text-sm font-medium transition-colors text-foreground hover:text-accent no-underline focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-background rounded"
+              class="flex h-8 items-center rounded px-2 font-sans text-sm font-medium text-foreground no-underline transition-colors hover:text-accent focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-background focus:outline-none"
             >
               Posts
             </a>
@@ -104,7 +104,7 @@ function isActive(path) {
               class:list={{
                 "active-nav text-accent": isActive("/tags"),
               }}
-              class="flex items-center h-8 px-2 font-sans text-sm font-medium transition-colors text-foreground hover:text-accent no-underline focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-background rounded"
+              class="flex h-8 items-center rounded px-2 font-sans text-sm font-medium text-foreground no-underline transition-colors hover:text-accent focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-background focus:outline-none"
             >
               Tags
             </a>
@@ -115,7 +115,7 @@ function isActive(path) {
                 <LinkButton
                   href={`/${Astro.currentLocale}/archives`}
                   class:list={[
-                    "flex items-center justify-center p-1.5 text-foreground transition-colors hover:text-accent rounded-md focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-background",
+                    "flex items-center justify-center rounded-md p-1.5 text-foreground transition-colors hover:text-accent focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-background focus:outline-none",
                     { "active-nav text-accent": isActive("/archives") },
                   ]}
                   ariaLabel="archives"
@@ -131,7 +131,7 @@ function isActive(path) {
             <LinkButton
               href={`/${Astro.currentLocale}/search`}
               class:list={[
-                "flex items-center justify-center p-1.5 text-foreground transition-colors hover:text-accent rounded-md focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-background",
+                "flex items-center justify-center rounded-md p-1.5 text-foreground transition-colors hover:text-accent focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-background focus:outline-none",
                 { "active-nav text-accent": isActive("/search") },
               ]}
               ariaLabel="search"
@@ -146,7 +146,7 @@ function isActive(path) {
               <li>
                 <button
                   id="theme-btn"
-                  class="inline-flex items-center justify-center p-1.5 text-foreground transition-colors hover:text-accent rounded-md focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-background"
+                  class="inline-flex items-center justify-center rounded-md p-1.5 text-foreground transition-colors hover:text-accent focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-background focus:outline-none"
                   title="Toggle light & dark theme"
                   aria-label="Toggle theme"
                   aria-live="polite"
@@ -191,7 +191,7 @@ function isActive(path) {
 
     // Close menu when a navigation item is clicked
     const navLinks = menuItems.querySelectorAll("a");
-    navLinks.forEach((link) => {
+    navLinks.forEach(link => {
       link.addEventListener("click", () => {
         if (menuBtn.getAttribute("aria-expanded") === "true") {
           toggleMenu();
