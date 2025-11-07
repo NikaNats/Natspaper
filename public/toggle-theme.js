@@ -1,90 +1,113 @@
 // ============================================================
-// Robust, View-Transition-Aware Theme Toggle Script
+// Unified Theme Toggle Script
 // ============================================================
-// This script handles user interactions and system theme changes,
-// ensuring functionality persists across Astro View Transitions.
+// Single source of truth for theme management.
+// Uses data-theme attribute on html element for consistency.
+// Works synchronously to prevent header/body mismatch.
 // ============================================================
 
-const themeStorageKey = "theme";
+const THEME_KEY = "theme";
 
-// Get the current theme preference, checking localStorage first
+/**
+ * Get the current theme preference
+ * Priority: saved theme > system preference > light (default)
+ */
 const getThemePreference = () => {
   if (typeof localStorage !== "undefined") {
-    const savedTheme = localStorage.getItem(themeStorageKey);
-    if (savedTheme) {
-      return savedTheme;
-    }
+    const saved = localStorage.getItem(THEME_KEY);
+    if (saved) return saved;
   }
   return window.matchMedia("(prefers-color-scheme: dark)").matches
     ? "dark"
     : "light";
 };
 
-// Save theme preference and apply it
-const setPreference = theme => {
-  localStorage.setItem(themeStorageKey, theme);
-  applyTheme(theme);
-};
-
-// Apply theme to the document immediately
+/**
+ * Apply theme synchronously to prevent FOUC and header/body mismatch
+ * Updates:
+ * - data-theme attribute (for CSS theming)
+ * - dark class (for Tailwind compatibility)
+ * - button aria-label
+ * - meta theme-color
+ */
 const applyTheme = theme => {
-  // Force synchronous application to prevent FOUC
+  // Apply to document element synchronously
   document.documentElement.dataset.theme = theme;
+  
+  // Also apply dark class for Tailwind CSS support
+  if (theme === "dark") {
+    document.documentElement.classList.add("dark");
+  } else {
+    document.documentElement.classList.remove("dark");
+  }
 
-  // Update button aria-label
+  // Update theme button aria-label
   const themeBtn = document.querySelector("#theme-btn");
   if (themeBtn) {
     themeBtn.setAttribute("aria-label", theme);
   }
 
-  // Update meta theme-color
+  // Update meta theme-color for browser UI
   const metaThemeColor = document.querySelector("meta[name='theme-color']");
   if (metaThemeColor) {
     requestAnimationFrame(() => {
-      const bodyBgColor = getComputedStyle(document.body).backgroundColor;
-      metaThemeColor.setAttribute("content", bodyBgColor);
+      const bgColor = getComputedStyle(document.body).backgroundColor;
+      metaThemeColor.setAttribute("content", bgColor);
     });
   }
 };
 
-// Restore and apply saved theme
-const restoreTheme = () => {
-  const theme = getThemePreference();
+/**
+ * Save theme preference to localStorage and apply it
+ */
+const setTheme = theme => {
+  localStorage.setItem(THEME_KEY, theme);
   applyTheme(theme);
 };
 
-// Attach click listener to theme toggle button
+/**
+ * Attach click listener to theme toggle button
+ */
 const attachToggleListener = () => {
   const themeBtn = document.querySelector("#theme-btn");
   if (!themeBtn) return;
 
-  themeBtn.addEventListener("click", () => {
-    const currentTheme = getThemePreference();
-    const newTheme = currentTheme === "light" ? "dark" : "light";
-    setPreference(newTheme);
+  // Remove any existing listeners by replacing the element
+  const newBtn = themeBtn.cloneNode(true);
+  themeBtn.parentNode.replaceChild(newBtn, themeBtn);
+
+  newBtn.addEventListener("click", () => {
+    const current = getThemePreference();
+    const next = current === "light" ? "dark" : "light";
+    setTheme(next);
   });
 };
 
-// Listen for system theme changes
-const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-mediaQuery.addEventListener("change", e => {
-  const newTheme = e.matches ? "dark" : "light";
-  setPreference(newTheme);
-});
+/**
+ * Listen for system-level theme preference changes
+ */
+const listenSystemChanges = () => {
+  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", e => {
+    // Only apply if no user preference is saved
+    if (!localStorage.getItem(THEME_KEY)) {
+      applyTheme(e.matches ? "dark" : "light");
+    }
+  });
+};
 
-// --- EXECUTION ---
-// Restore theme immediately
-restoreTheme();
+// --- INITIALIZATION ---
+// Apply theme immediately on load
+applyTheme(getThemePreference());
 
-// Attach toggle listener on initial load
+// Attach toggle listener
 attachToggleListener();
 
-// Listen for Astro View Transition events to maintain theme across navigation
-// These events fire when navigating between pages
-document.addEventListener("astro:transition:start", restoreTheme);
-document.addEventListener("astro:before-swap", restoreTheme);
+// Listen for system changes
+listenSystemChanges();
+
+// --- VIEW TRANSITIONS SUPPORT ---
+// Ensure theme persists and button listener is reattached after navigation
 document.addEventListener("astro:after-swap", () => {
+  applyTheme(getThemePreference());
   attachToggleListener();
-  // Ensure theme is still applied after swap completes
-  restoreTheme();
 });

@@ -48,14 +48,15 @@
  * - Theme toggle
  * - Responsive mobile menu
  *
- * The header is fully transparent, allowing the body's background color to show through.
- * This creates a seamless, unified appearance where header and body are one surface.
+ * The header uses the same background color as the body for consistency.
+ * This ensures header and body always match the current theme.
  */
 header {
   position: sticky;
   top: 0;
   z-index: 100;
-  background-color: transparent;
+  background-color: var(--background);
+  transition: background-color 0.3s ease;
 }
 
 /**
