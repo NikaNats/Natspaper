@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 
 /**
  * E2E Tests for i18n Implementation
@@ -16,7 +16,7 @@ import { test, expect } from '@playwright/test';
  * Helper function to open mobile menu if on mobile device
  * Checks if menu button exists and menu is hidden, then opens it
  */
-async function openMobileMenuIfNeeded(page) {
+async function openMobileMenuIfNeeded(page: Page) {
   const menuBtn = page.locator('#menu-btn');
   const menuItems = page.locator('#menu-items');
   

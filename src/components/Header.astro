@@ -15,9 +15,11 @@ const { pathname } = Astro.url;
 const currentPath =
   pathname.endsWith("/") && pathname !== "/" ? pathname.slice(0, -1) : pathname;
 
-function isActive(path) {
-  const currentPathArray = currentPath.split("/").filter(p => p.trim());
-  const pathArray = path.split("/").filter(p => p.trim());
+function isActive(path: string) {
+  const currentPathArray = currentPath
+    .split("/")
+    .filter((p: string) => p.trim());
+  const pathArray = path.split("/").filter((p: string) => p.trim());
 
   // Compare paths, accounting for language prefix
   // For example: /en/posts should match /posts
