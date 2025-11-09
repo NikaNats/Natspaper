@@ -15,7 +15,14 @@ const backUrl = SITE.showBackButton ? `/${locale}/search` : `/${locale}/`;
 <link href="/pagefind/pagefind-ui.css" rel="stylesheet" />
 <script src="/pagefind/pagefind-ui.js" is:inline></script>
 
-<div id="search" transition:persist data-backurl={backUrl} data-locale={locale}>
+{/* CHANGE 1: Initially hide the container to prevent FOUC (Flash of Unstyled Content). */}
+<div
+  id="search"
+  transition:persist
+  data-backurl={backUrl}
+  data-locale={locale}
+  style="visibility: hidden;"
+>
 </div>
 
 <script is:inline>
@@ -25,13 +32,13 @@ const backUrl = SITE.showBackButton ? `/${locale}/search` : `/${locale}/`;
     const searchEl = document.querySelector("#search");
     if (!searchEl) return;
 
-    // Destroy previous instance if it exists
+    // Destroy previous instance if it exists (great for Astro View Transitions)
     if (searchInstance && typeof searchInstance.destroy === "function") {
       searchInstance.destroy();
       searchInstance = null;
     }
 
-    // Clear the search container
+    // Clear any previous UI remnants
     const existingUI = searchEl.querySelector(".pagefind-ui");
     if (existingUI) {
       existingUI.remove();
@@ -52,16 +59,19 @@ const backUrl = SITE.showBackButton ? `/${locale}/search` : `/${locale}/`;
           locale === "ka" ? "მოძებნე სტატიები..." : "Search articles...",
       },
     });
+
+    // CHANGE 2: Make the container visible only after Pagefind UI is initialized.
+    searchEl.style.visibility = "visible";
   }
 
-  // Initialize on DOMContentLoaded
+  // Initialize on DOMContentLoaded for the first page load
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", initSearch);
   } else {
-    initSearch();
+    initSearch(); // Also handles cases where the script loads after DOMContentLoaded
   }
 
-  // Reinitialize after view transitions
+  // Reinitialize after view transitions for client-side navigation
   document.addEventListener("astro:after-swap", initSearch);
 </script>
 
@@ -77,39 +87,39 @@ const backUrl = SITE.showBackButton ? `/${locale}/search` : `/${locale}/`;
     --pagefind-ui-border-width: 1px;
     --pagefind-ui-image-border-radius: 8px;
     --pagefind-ui-image-box-ratio: 3 / 2;
+  }
 
-    form::before {
-      background-color: var(--foreground);
-    }
+  #search form::before {
+    background-color: var(--foreground);
+  }
 
-    input {
-      font-weight: 400;
-      border: 1px solid var(--border);
-    }
+  #search input {
+    font-weight: 400;
+    border: 1px solid var(--border);
+  }
 
-    input:focus-visible {
-      outline: 1px solid var(--accent);
-    }
+  #search input:focus-visible {
+    outline: 1px solid var(--accent);
+  }
 
-    .pagefind-ui__result-title a {
-      color: var(--accent);
-      outline-offset: 1px;
-      outline-color: var(--accent);
-    }
+  #search .pagefind-ui__result-title a {
+    color: var(--accent);
+    outline-offset: 1px;
+    outline-color: var(--accent);
+  }
 
-    .pagefind-ui__result-title a:focus-visible,
-    .pagefind-ui__search-clear:focus-visible {
-      text-decoration-line: none;
-      outline-width: 2px;
-      outline-style: dashed;
-    }
+  #search .pagefind-ui__result-title a:focus-visible,
+  #search .pagefind-ui__search-clear:focus-visible {
+    text-decoration-line: none;
+    outline-width: 2px;
+    outline-style: dashed;
+  }
 
-    .pagefind-ui__result:last-of-type {
-      border-bottom: 0;
-    }
+  #search .pagefind-ui__result:last-of-type {
+    border-bottom: 0;
+  }
 
-    .pagefind-ui__result-nested .pagefind-ui__result-link:before {
-      font-family: system-ui;
-    }
+  #search .pagefind-ui__result-nested .pagefind-ui__result-link:before {
+    font-family: system-ui;
   }
 </style>
