@@ -8,3 +8,10 @@
 // 307 is a temporary redirect that preserves the HTTP method
 return Astro.redirect(`/${Astro.preferredLocale || "en"}/`, 307);
 ---
+
+<!--
+  This empty html tag with the 'data-pagefind-ignore' attribute serves two purposes:
+  1. It provides a root element to prevent the "no <html> element" warning.
+  2. The attribute explicitly tells Pagefind to skip indexing this file entirely.
+-->
+<html data-pagefind-ignore="all"></html>
