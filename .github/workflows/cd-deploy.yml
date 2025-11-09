@@ -92,49 +92,49 @@ jobs:
           path: .vercel/output
           retention-days: 1
 
-#  e2e:
-#    name: E2E Tests
-#    needs: build
-#    runs-on: ubuntu-latest
-#    steps:
-#      - uses: actions/checkout@v4
-#      - uses: pnpm/action-setup@v4
-#        with:
-#          version: 10
-#      - uses: actions/setup-node@v4
-#        with:
-#          node-version: 20
-#          cache: pnpm
-#          cache-dependency-path: pnpm-lock.yaml
-#
-#      - run: pnpm install --frozen-lockfile --prefer-offline
-#
-#      # Cache Playwright browsers before install
-#      - name: Cache Playwright
-#        id: cache-pw
-#        uses: actions/cache@v4
-#        with:
-#          path: ~/.cache/ms-playwright
-#          key: ${{ runner.os }}-playwright-${{ hashFiles('pnpm-lock.yaml') }}
-#
-#      # Only install if cache miss
-#      - name: Install Playwright
-#        if: steps.cache-pw.outputs.cache-hit != 'true'
-#        run: pnpm exec playwright install --with-deps chromium
-#
-#      - name: Deploy Preview
-#        id: preview
-#        run: |
-#          url=$(npx vercel --cwd . --token="${VERCEL_TOKEN}" --yes 2>&1 | grep -oP '(?<=https://)[^ ]+' | head -1)
-#          url="https://$url"
-#          echo "url=$url" >> $GITHUB_OUTPUT
-#          echo "Preview deployment URL: $url"
-#        env:
-#          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-#
-#      - run: pnpm exec playwright test --project chromium
-#        env:
-#          SITE_WEBSITE: ${{ steps.preview.outputs.url }}
+  #  e2e:
+  #    name: E2E Tests
+  #    needs: build
+  #    runs-on: ubuntu-latest
+  #    steps:
+  #      - uses: actions/checkout@v4
+  #      - uses: pnpm/action-setup@v4
+  #        with:
+  #          version: 10
+  #      - uses: actions/setup-node@v4
+  #        with:
+  #          node-version: 20
+  #          cache: pnpm
+  #          cache-dependency-path: pnpm-lock.yaml
+  #
+  #      - run: pnpm install --frozen-lockfile --prefer-offline
+  #
+  #      # Cache Playwright browsers before install
+  #      - name: Cache Playwright
+  #        id: cache-pw
+  #        uses: actions/cache@v4
+  #        with:
+  #          path: ~/.cache/ms-playwright
+  #          key: ${{ runner.os }}-playwright-${{ hashFiles('pnpm-lock.yaml') }}
+  #
+  #      # Only install if cache miss
+  #      - name: Install Playwright
+  #        if: steps.cache-pw.outputs.cache-hit != 'true'
+  #        run: pnpm exec playwright install --with-deps chromium
+  #
+  #      - name: Deploy Preview
+  #        id: preview
+  #        run: |
+  #          url=$(npx vercel --cwd . --token="${VERCEL_TOKEN}" --yes 2>&1 | grep -oP '(?<=https://)[^ ]+' | head -1)
+  #          url="https://$url"
+  #          echo "url=$url" >> $GITHUB_OUTPUT
+  #          echo "Preview deployment URL: $url"
+  #        env:
+  #          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+  #
+  #      - run: pnpm exec playwright test --project chromium
+  #        env:
+  #          SITE_WEBSITE: ${{ steps.preview.outputs.url }}
 
   deploy:
     name: Deploy
