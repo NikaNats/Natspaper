@@ -7,10 +7,10 @@ const supportedLocales = ["en", "ka"];
 const defaultLocale = "en";
 ---
 
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en" data-pagefind-ignore="all">
-<head>
-    <meta charset="UTF-8">
+  <head>
+    <meta charset="UTF-8" />
     <title>Redirecting...</title>
     <script is:inline define:vars={{ supportedLocales, defaultLocale }}>
       /**
@@ -20,7 +20,7 @@ const defaultLocale = "en";
       function getPreferredLocale() {
         // Check navigator.languages for the most specific user preference.
         for (const lang of navigator.languages) {
-          const locale = lang.split('-')[0]; // Use the primary language code (e.g., "en" from "en-US")
+          const locale = lang.split("-")[0]; // Use the primary language code (e.g., "en" from "en-US")
           if (supportedLocales.includes(locale)) {
             return locale;
           }
@@ -37,8 +37,12 @@ const defaultLocale = "en";
       <!-- Fallback for users with JavaScript disabled -->
       <meta http-equiv="refresh" content={`0;url=/${defaultLocale}/`} />
     </noscript>
-</head>
-<body>
-  <p>If you are not redirected automatically, <a href={`/${defaultLocale}/`}>click here</a>.</p>
-</body>
+  </head>
+  <body>
+    <p>
+      If you are not redirected automatically, <a href={`/${defaultLocale}/`}
+        >click here</a
+      >.
+    </p>
+  </body>
 </html>
