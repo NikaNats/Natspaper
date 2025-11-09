@@ -14,11 +14,7 @@ import { resolveOgImageUrl, getAdjacentPosts } from "@/utils/postHelpers";
 import IconChevronLeft from "@/assets/icons/IconChevronLeft.svg";
 import IconChevronRight from "@/assets/icons/IconChevronRight.svg";
 import { SITE } from "@/config";
-
-// Import KaTeX CSS for math equations rendering
-// This CSS is only loaded on pages that use math, enabling code-splitting
-// Astro's bundler will minify and optimize this automatically
-import "katex/dist/katex.min.css";
+import katexStyles from "katex/dist/katex.min.css?url";
 
 /**
  * Post Details Layout Component
@@ -92,6 +88,15 @@ const { previous: prevPost, next: nextPost } = getAdjacentPosts(posts, post.id);
 ---
 
 <Layout {...layoutProps}>
+  <!-- Defer KaTeX CSS to prevent render-blocking -->
+  <link
+    slot="head"
+    rel="stylesheet"
+    href={katexStyles}
+    media="print"
+    onload="this.media='all'"
+  />
+  <noscript slot="head"><link rel="stylesheet" href={katexStyles} /></noscript>
   <Header />
   <main
     id="main-content"

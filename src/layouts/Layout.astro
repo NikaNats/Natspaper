@@ -110,8 +110,8 @@ const structuredData = {
       }
     </style>
 
-    <!-- Preconnect to jsDelivr CDN (fallback if needed) -->
-    <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+    <!-- Head slot for child layouts to inject content -->
+    <slot name="head" />
 
     <!-- General Meta Tags -->
     <title>{title}</title>
