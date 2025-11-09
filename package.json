@@ -60,7 +60,7 @@
     "@tailwindcss/typography": "^0.5.19",
     "@types/lodash.kebabcase": "^4.1.9",
     "@typescript-eslint/parser": "^8.46.3",
-    "@vitest/ui": "^4.0.7",
+    "@vitest/ui": "^4.0.8",
     "cross-env": "^10.1.0",
     "eslint": "^9.39.1",
     "eslint-plugin-astro": "^1.5.0",
@@ -73,6 +73,6 @@
     "sonda": "^0.10.0",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.46.3",
-    "vitest": "^4.0.7"
+    "vitest": "^4.0.8"
   }
 }
