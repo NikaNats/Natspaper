@@ -197,10 +197,12 @@ jobs:
     steps:
       - name: Check deployment
         run: |
-          url="https://natspaper.vercel.app/en"
-
+          BASE_URL="https://natspaper.vercel.app/en"
+          
+          echo "🔍 Running health checks for $BASE_URL..."
+          
           for page in "/" "/posts" "/tags" "/archives" "/search"; do
-            status=$(curl -sL -w "%{http_code}" -o /dev/null "$url$page")
+            status=$(curl -s -L -w "%{http_code}" -o /dev/null "$BASE_URL$page")
             if [ "$status" = "200" ]; then
               echo "✅ $page"
             else
@@ -208,5 +210,6 @@ jobs:
               exit 1
             fi
           done
-
+          
+          echo ""
           echo "### ✅ All pages verified" >> $GITHUB_STEP_SUMMARY
