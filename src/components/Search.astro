@@ -8,14 +8,12 @@ export interface Props {
 
 const { locale } = Astro.props;
 
-// Use a language-specific back URL
 const backUrl = SITE.showBackButton ? `/${locale}/search` : `/${locale}/`;
 ---
 
 <link href="/pagefind/pagefind-ui.css" rel="stylesheet" />
 <script src="/pagefind/pagefind-ui.js" is:inline></script>
 
-{/* CHANGE 1: Initially hide the container to prevent FOUC (Flash of Unstyled Content). */}
 <div
   id="search"
   transition:persist
@@ -32,13 +30,11 @@ const backUrl = SITE.showBackButton ? `/${locale}/search` : `/${locale}/`;
     const searchEl = document.querySelector("#search");
     if (!searchEl) return;
 
-    // Destroy previous instance if it exists (great for Astro View Transitions)
+    // Your existing cleanup logic is perfect.
     if (searchInstance && typeof searchInstance.destroy === "function") {
       searchInstance.destroy();
       searchInstance = null;
     }
-
-    // Clear any previous UI remnants
     const existingUI = searchEl.querySelector(".pagefind-ui");
     if (existingUI) {
       existingUI.remove();
@@ -49,7 +45,7 @@ const backUrl = SITE.showBackButton ? `/${locale}/search` : `/${locale}/`;
       document.documentElement.lang ||
       "en";
 
-    // Create new instance and store reference
+    // Create the Pagefind UI instance
     searchInstance = new window.PagefindUI({
       element: "#search",
       showSubResults: true,
@@ -60,22 +56,17 @@ const backUrl = SITE.showBackButton ? `/${locale}/search` : `/${locale}/`;
       },
     });
 
-    // CHANGE 2: Make the container visible only after Pagefind UI is initialized.
+    // Make the initialized component visible
     searchEl.style.visibility = "visible";
   }
 
-  // Initialize on DOMContentLoaded for the first page load
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", initSearch);
-  } else {
-    initSearch(); // Also handles cases where the script loads after DOMContentLoaded
-  }
-
-  // Reinitialize after view transitions for client-side navigation
-  document.addEventListener("astro:after-swap", initSearch);
+  // THE FIX: Use 'astro:page-load' which runs on initial load AND after every navigation.
+  // This single event listener replaces the need for DOMContentLoaded and astro:after-swap.
+  document.addEventListener("astro:page-load", initSearch, { once: true });
 </script>
 
 <style is:global>
+  /* Your styles remain unchanged */
   #search {
     --pagefind-ui-font: var(--font-mono);
     --pagefind-ui-text: var(--foreground);
