@@ -1,0 +1,110 @@
+---
+// src/components/Search.astro
+import { SITE } from "@/config";
+
+export interface Props {
+  locale: "en" | "ka";
+}
+
+const { locale } = Astro.props;
+
+// Use a language-specific back URL
+const backUrl = SITE.showBackButton ? `/${locale}/search` : `/${locale}/`;
+---
+
+<link href="/pagefind/pagefind-ui.css" rel="stylesheet" />
+<script src="/pagefind/pagefind-ui.js" is:inline></script>
+
+<div id="search" transition:persist data-backurl={backUrl} data-locale={locale}></div>
+
+<script is:inline>
+  let searchInstance = null;
+
+  function initSearch() {
+    const searchEl = document.querySelector("#search");
+    if (!searchEl) return;
+
+    // Destroy previous instance if it exists
+    if (searchInstance && typeof searchInstance.destroy === "function") {
+      searchInstance.destroy();
+      searchInstance = null;
+    }
+
+    // Clear the search container
+    const existingUI = searchEl.querySelector(".pagefind-ui");
+    if (existingUI) {
+      existingUI.remove();
+    }
+
+    const locale = searchEl.getAttribute("data-locale") || document.documentElement.lang || "en";
+
+    // Create new instance and store reference
+    searchInstance = new window.PagefindUI({
+      element: "#search",
+      showSubResults: true,
+      showImages: false,
+      translations: {
+        placeholder: locale === "ka" ? "მოძებნე სტატიები..." : "Search articles...",
+      },
+    });
+  }
+
+  // Initialize on DOMContentLoaded
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initSearch);
+  } else {
+    initSearch();
+  }
+
+  // Reinitialize after view transitions
+  document.addEventListener("astro:after-swap", initSearch);
+</script>
+
+<style is:global>
+  #search {
+    --pagefind-ui-font: var(--font-mono);
+    --pagefind-ui-text: var(--foreground);
+    --pagefind-ui-background: var(--background);
+    --pagefind-ui-border: var(--border);
+    --pagefind-ui-primary: var(--accent);
+    --pagefind-ui-tag: var(--background);
+    --pagefind-ui-border-radius: 0.375rem;
+    --pagefind-ui-border-width: 1px;
+    --pagefind-ui-image-border-radius: 8px;
+    --pagefind-ui-image-box-ratio: 3 / 2;
+
+    form::before {
+      background-color: var(--foreground);
+    }
+
+    input {
+      font-weight: 400;
+      border: 1px solid var(--border);
+    }
+
+    input:focus-visible {
+      outline: 1px solid var(--accent);
+    }
+
+    .pagefind-ui__result-title a {
+      color: var(--accent);
+      outline-offset: 1px;
+      outline-color: var(--accent);
+    }
+
+    .pagefind-ui__result-title a:focus-visible,
+    .pagefind-ui__search-clear:focus-visible {
+      text-decoration-line: none;
+      outline-width: 2px;
+      outline-style: dashed;
+    }
+
+    .pagefind-ui__result:last-of-type {
+      border-bottom: 0;
+    }
+
+    .pagefind-ui__result-nested .pagefind-ui__result-link:before {
+      font-family: system-ui;
+    }
+  }
+</style>
