@@ -42,8 +42,11 @@ export default async function generatePostOgImage(post) {
 
   // Load Inter 700 font from Fontsource CDN (same source that Astro's Fonts API uses)
   // This provides the same font that's configured in astro.config.ts
+  // Using WOFF format instead of WOFF2 because Satori's font parser (opentype.js)
+  // can read WOFF (Web Open Font Format), which wraps TrueType data.
+  // WOFF2 is more compressed but incompatible with opentype.js.
   const fontResponse = await fetch(
-    "https://cdn.jsdelivr.net/npm/@fontsource/inter@5.2.8/files/inter-latin-700-normal.woff2"
+    "https://cdn.jsdelivr.net/npm/@fontsource/inter@5.2.8/files/inter-latin-700-normal.woff"
   );
   const fontBuffer = await fontResponse.arrayBuffer();
 
