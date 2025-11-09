@@ -12,6 +12,22 @@ import type { Page } from '@playwright/test';
  */
 
 /**
+ * Helper function to open mobile menu if on mobile device
+ * Checks if menu button exists and menu is hidden, then opens it
+ */
+async function openMobileMenuIfNeeded(page: Page) {
+  const menuBtn = page.locator('#menu-btn');
+  const menuItems = page.locator('#menu-items');
+  
+  // Check if we're on mobile (menu button exists and menu is hidden)
+  if (await menuBtn.isVisible() && await menuItems.isHidden()) {
+    await menuBtn.click();
+    // Wait for menu to open
+    await expect(menuItems).toBeVisible();
+  }
+}
+
+/**
  * Navigate to URL with retry logic for connection issues
  * Handles Firefox NS_ERROR_CONNECTION_REFUSED by retrying
  */
@@ -40,6 +56,9 @@ test.describe('Search and Navigation - E2E Tests', () => {
   test('should navigate to search page', async ({ page }) => {
     await navigateWithRetry(page, '/');
     await page.waitForLoadState('networkidle');
+
+    // Open mobile menu if needed
+    await openMobileMenuIfNeeded(page);
 
     // Look for search link or button
     const searchLink = page.locator('a[href*="/search"], button[aria-label*="search" i]');
@@ -223,6 +242,9 @@ test.describe('Search and Navigation - E2E Tests', () => {
   test('should have accessible navigation menu', async ({ page }) => {
     await navigateWithRetry(page, '/');
     await page.waitForLoadState('networkidle');
+
+    // Open mobile menu if needed
+    await openMobileMenuIfNeeded(page);
 
     // Find navigation menu
     const nav = page.locator('nav[role="navigation"], nav');

@@ -32,6 +32,8 @@ export default [
       "public/pagefind/**",
       "scripts/**",
       "node_modules/**",
+      "playwright-report/**",
+      "test-results/**",
     ],
   },
 ];

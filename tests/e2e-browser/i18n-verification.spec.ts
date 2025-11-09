@@ -12,6 +12,22 @@ import { test, expect } from '@playwright/test';
  * - Footer shows translated content
  */
 
+/**
+ * Helper function to open mobile menu if on mobile device
+ * Checks if menu button exists and menu is hidden, then opens it
+ */
+async function openMobileMenuIfNeeded(page) {
+  const menuBtn = page.locator('#menu-btn');
+  const menuItems = page.locator('#menu-items');
+  
+  // Check if we're on mobile (menu button exists and menu is hidden)
+  if (await menuBtn.isVisible() && await menuItems.isHidden()) {
+    await menuBtn.click();
+    // Wait for menu to open
+    await expect(menuItems).toBeVisible();
+  }
+}
+
 test.describe('i18n Implementation - Verification Tests', () => {
   test.beforeEach(async ({ page }) => {
     // Start with clean state
@@ -97,6 +113,9 @@ test.describe('i18n Implementation - Verification Tests', () => {
     test('should show language picker in header', async ({ page }) => {
       await page.goto('http://localhost:4321/en/', { waitUntil: 'networkidle' });
 
+      // Open mobile menu if needed
+      await openMobileMenuIfNeeded(page);
+
       // Find Georgian language link in header using href attribute
       const header = page.locator('header');
       const georgianLink = header.locator('a[href*="/ka/"]');
@@ -107,6 +126,9 @@ test.describe('i18n Implementation - Verification Tests', () => {
 
     test('should have language picker positioned in top right area', async ({ page }) => {
       await page.goto('http://localhost:4321/en/', { waitUntil: 'networkidle' });
+
+      // Open mobile menu if needed
+      await openMobileMenuIfNeeded(page);
 
       // Language picker should be in the header
       const header = page.locator('header');
@@ -158,6 +180,9 @@ test.describe('i18n Implementation - Verification Tests', () => {
     test('should have working navigation on English site', async ({ page }) => {
       await page.goto('http://localhost:4321/en/', { waitUntil: 'networkidle' });
 
+      // Open mobile menu if needed
+      await openMobileMenuIfNeeded(page);
+
       // Check navigation items exist using href attributes
       const postsLink = page.locator('#menu-items a[href*="/en/posts"]');
       await expect(postsLink).toBeVisible();
@@ -187,6 +212,9 @@ test.describe('i18n Implementation - Verification Tests', () => {
 
     test('should have working navigation on Georgian site', async ({ page }) => {
       await page.goto('http://localhost:4321/ka/', { waitUntil: 'networkidle' });
+
+      // Open mobile menu if needed
+      await openMobileMenuIfNeeded(page);
 
       // Check navigation items exist using href attributes
       const postsLink = page.locator('#menu-items a[href*="/ka/posts"]');

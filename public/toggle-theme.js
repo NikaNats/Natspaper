@@ -35,7 +35,7 @@ const applyTheme = theme => {
 
   // 2. Force a reflow to ensure CSS recalculation happens synchronously
   // This makes the theme apply to header and body at the same moment
-  document.documentElement.offsetHeight;
+  void document.documentElement.offsetHeight;
 
   // 3. Update button aria-label
   const themeBtn = document.querySelector("#theme-btn");
