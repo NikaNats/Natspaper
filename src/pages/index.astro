@@ -1,17 +1,44 @@
 ---
-// Root redirect page - directs users to their preferred language or the default (English)
-// This page runs when someone visits https://yoursite.com/
-// It uses Astro's i18n capabilities to detect the user's browser language preference
+// FILE: src/pages/index.astro
 
-// Redirect to the preferred language-prefixed home page
-// Uses the browser's preferred locale or falls back to 'en' (English)
-// 307 is a temporary redirect that preserves the HTTP method
-return Astro.redirect(`/${Astro.preferredLocale || "en"}/`, 307);
+// This page is now a static HTML shell with a client-side script for redirection.
+// It no longer uses any server-side Astro APIs.
+const supportedLocales = ["en", "ka"];
+const defaultLocale = "en";
 ---
 
-<!--
-  This empty html tag with the 'data-pagefind-ignore' attribute serves two purposes:
-  1. It provides a root element to prevent the "no <html> element" warning.
-  2. The attribute explicitly tells Pagefind to skip indexing this file entirely.
--->
-<html data-pagefind-ignore="all"></html>
+<!DOCTYPE html>
+<html lang="en" data-pagefind-ignore="all">
+<head>
+    <meta charset="UTF-8">
+    <title>Redirecting...</title>
+    <script is:inline define:vars={{ supportedLocales, defaultLocale }}>
+      /**
+       * Client-side redirect to the user's preferred language.
+       * This runs instantly in the browser, preserving the benefits of a static site.
+       */
+      function getPreferredLocale() {
+        // Check navigator.languages for the most specific user preference.
+        for (const lang of navigator.languages) {
+          const locale = lang.split('-')[0]; // Use the primary language code (e.g., "en" from "en-US")
+          if (supportedLocales.includes(locale)) {
+            return locale;
+          }
+        }
+        // Fallback to the default locale.
+        return defaultLocale;
+      }
+
+      // Perform the redirect.
+      const preferredLocale = getPreferredLocale();
+      window.location.pathname = `/${preferredLocale}/`;
+    </script>
+    <noscript>
+      <!-- Fallback for users with JavaScript disabled -->
+      <meta http-equiv="refresh" content={`0;url=/${defaultLocale}/`} />
+    </noscript>
+</head>
+<body>
+  <p>If you are not redirected automatically, <a href={`/${defaultLocale}/`}>click here</a>.</p>
+</body>
+</html>
