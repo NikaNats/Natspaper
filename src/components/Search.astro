@@ -15,7 +15,8 @@ const backUrl = SITE.showBackButton ? `/${locale}/search` : `/${locale}/`;
 <link href="/pagefind/pagefind-ui.css" rel="stylesheet" />
 <script src="/pagefind/pagefind-ui.js" is:inline></script>
 
-<div id="search" transition:persist data-backurl={backUrl} data-locale={locale}></div>
+<div id="search" transition:persist data-backurl={backUrl} data-locale={locale}>
+</div>
 
 <script is:inline>
   let searchInstance = null;
@@ -36,7 +37,10 @@ const backUrl = SITE.showBackButton ? `/${locale}/search` : `/${locale}/`;
       existingUI.remove();
     }
 
-    const locale = searchEl.getAttribute("data-locale") || document.documentElement.lang || "en";
+    const locale =
+      searchEl.getAttribute("data-locale") ||
+      document.documentElement.lang ||
+      "en";
 
     // Create new instance and store reference
     searchInstance = new window.PagefindUI({
@@ -44,7 +48,8 @@ const backUrl = SITE.showBackButton ? `/${locale}/search` : `/${locale}/`;
       showSubResults: true,
       showImages: false,
       translations: {
-        placeholder: locale === "ka" ? "მოძებნე სტატიები..." : "Search articles...",
+        placeholder:
+          locale === "ka" ? "მოძებნე სტატიები..." : "Search articles...",
       },
     });
   }
