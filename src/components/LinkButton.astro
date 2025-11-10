@@ -1,11 +1,12 @@
 ---
+// REFACTORED: The 'disabled' prop is removed in favor of a more semantic API.
+// The 'href' prop is now optional.
 export interface Props {
   id?: string;
-  href: string;
+  href?: string; // The presence of this prop now determines if it's a link.
   class?: string;
   ariaLabel?: string;
   title?: string;
-  disabled?: boolean;
 }
 
 const {
@@ -14,29 +15,38 @@ const {
   class: className = "",
   ariaLabel,
   title,
-  disabled = false,
 } = Astro.props;
+
+// REFACTORED: The component's state is inferred from the props.
+const isLink = !!href;
 ---
 
+{/*
+  REFACTORED: A single, dynamic tag renders either an <a> or a <span>.
+  All common attributes are defined only ONCE.
+*/}
 {
-  disabled ? (
-    <span
-      id={id}
-      class:list={["inline-flex", className]}
-      title={title}
-      aria-disabled={disabled}
-    >
-      <slot />
-    </span>
-  ) : (
+  isLink ? (
     <a
       id={id}
-      {href}
-      class:list={["inline-flex hover:text-accent", className]}
+      href={href}
+      class:list={[
+        "inline-flex hover:text-accent",
+        className,
+      ]}
       aria-label={ariaLabel}
       title={title}
     >
       <slot />
     </a>
+  ) : (
+    <span
+      id={id}
+      class:list={["inline-flex", className]}
+      title={title}
+      aria-disabled="true"
+    >
+      <slot />
+    </span>
   )
 }
