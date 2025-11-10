@@ -39,7 +39,10 @@ const otherLanguageLinks: LanguageLink[] = allLanguages
   </a>
 
   <div class="mx-auto flex w-full max-w-app items-center justify-between px-4">
-    <nav class="relative flex h-16 w-full items-center justify-between gap-4 bg-background transition-colors" style="background-color: transparent; border-color: transparent;">
+    <nav
+      class="relative flex h-16 w-full items-center justify-between gap-4 bg-background transition-colors"
+      style="background-color: transparent; border-color: transparent;"
+    >
       <a
         href={`/${Astro.currentLocale}/`}
         class="shrink-0 rounded-md font-sans text-lg font-bold text-foreground no-underline transition-colors hover:text-accent focus:outline-none"
@@ -50,7 +53,11 @@ const otherLanguageLinks: LanguageLink[] = allLanguages
 
       <div class="flex items-center gap-1 sm:gap-4">
         <!-- Mobile Menu Component -->
-        <MobileMenu currentPath={pathname} locale={Astro.currentLocale} otherLanguageLinks={otherLanguageLinks} />
+        <MobileMenu
+          currentPath={pathname}
+          locale={Astro.currentLocale}
+          otherLanguageLinks={otherLanguageLinks}
+        />
       </div>
     </nav>
   </div>

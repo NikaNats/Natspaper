@@ -9,31 +9,24 @@ export interface Props {
   title?: string;
 }
 
-const {
-  id,
-  href,
-  class: className = "",
-  ariaLabel,
-  title,
-} = Astro.props;
+const { id, href, class: className = "", ariaLabel, title } = Astro.props;
 
 // REFACTORED: The component's state is inferred from the props.
 const isLink = !!href;
 ---
 
-{/*
+{
+  /*
   REFACTORED: A single, dynamic tag renders either an <a> or a <span>.
   All common attributes are defined only ONCE.
-*/}
+*/
+}
 {
   isLink ? (
     <a
       id={id}
       href={href}
-      class:list={[
-        "inline-flex hover:text-accent",
-        className,
-      ]}
+      class:list={["inline-flex hover:text-accent", className]}
       aria-label={ariaLabel}
       title={title}
     >

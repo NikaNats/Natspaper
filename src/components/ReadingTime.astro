@@ -10,17 +10,15 @@ export interface Props {
   size?: "sm" | "lg";
 }
 
-const {
-  text,
-  size = "sm",
-  class: className = "",
-} = Astro.props;
+const { text, size = "sm", class: className = "" } = Astro.props;
 ---
 
-{/*
+{
+  /*
   REFACTORED: The parent div now handles the text sizing to avoid repetition (DRY).
   The component is now much cleaner and more declarative.
-*/}
+*/
+}
 <div
   class:list={[
     "reading-time metadata",

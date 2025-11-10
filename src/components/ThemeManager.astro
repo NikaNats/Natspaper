@@ -1,11 +1,14 @@
 ---
 // This component contains all theme-related scripts and tags.
 ---
+
 <meta name="theme-color" content="" />
 
 <!-- Critical inline styles to prevent FOUC -->
 <style is:inline>
-  html { color-scheme: light dark; }
+  html {
+    color-scheme: light dark;
+  }
 </style>
 
 <!-- Instant theme-setting script to prevent FOUC -->
@@ -17,9 +20,7 @@
       const savedTheme = localStorage.getItem("theme");
       if (savedTheme) {
         theme = savedTheme;
-      } else if (
-        window.matchMedia("(prefers-color-scheme: dark)").matches
-      ) {
+      } else if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
         theme = "dark";
       } else {
         theme = "light";

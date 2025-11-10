@@ -9,9 +9,16 @@ export const navLinks = [
 ];
 
 // 2. The isActive logic is now self-contained here.
-export function isActive(currentPath: string, linkPath: string, locale: string): boolean {
+export function isActive(
+  currentPath: string,
+  linkPath: string,
+  locale: string
+): boolean {
   // Remove trailing slash from current pathname if exists
-  const normalizedCurrentPath = currentPath.endsWith("/") && currentPath !== "/" ? currentPath.slice(0, -1) : currentPath;
+  const normalizedCurrentPath =
+    currentPath.endsWith("/") && currentPath !== "/"
+      ? currentPath.slice(0, -1)
+      : currentPath;
 
   const currentPathArray = normalizedCurrentPath
     .split("/")

@@ -25,7 +25,10 @@ const {
 {
   totalPages > 1 && (
     <nav
-      class:list={["mt-auto mb-8 flex items-center justify-center gap-4", className]}
+      class:list={[
+        "mt-auto mb-8 flex items-center justify-center gap-4",
+        className,
+      ]}
       aria-label="Pagination"
     >
       {/* REFACTORED: LinkButton now correctly handles an undefined href,
@@ -40,9 +43,9 @@ const {
       </LinkButton>
 
       {/* IMPROVED UX: The text is now more descriptive and accessible. */}
-      <span class="text-sm text-text-secondary"
-        >Page {currentPage} of {totalPages}</span
-      >
+      <span class="text-sm text-text-secondary">
+        Page {currentPage} of {totalPages}
+      </span>
 
       <LinkButton
         href={nextUrl}

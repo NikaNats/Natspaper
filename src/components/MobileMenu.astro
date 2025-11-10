@@ -36,7 +36,11 @@ const { currentPath, locale, otherLanguageLinks } = Astro.props;
   </button>
 
   <!-- Menu Items -->
-  <NavMenu currentPath={currentPath} locale={locale} otherLanguageLinks={otherLanguageLinks} />
+  <NavMenu
+    currentPath={currentPath}
+    locale={locale}
+    otherLanguageLinks={otherLanguageLinks}
+  />
 </div>
 
 <script lang="ts" is:inline>

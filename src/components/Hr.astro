@@ -9,10 +9,12 @@ export interface Props {
 const { class: className, decorative = false } = Astro.props;
 ---
 
-{/*
+{
+  /*
   REFACTORED: The root element is now a semantic <hr> tag.
   It has its own default styling but can be customized with the `class` prop.
-*/}
+*/
+}
 <hr
   class:list={[
     "border-t border-dashed border-border", // Sensible, theme-aware default styles

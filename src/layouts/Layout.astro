@@ -56,8 +56,13 @@ const structuredData = {
   ],
 };
 ---
+
 <!doctype html>
-<html dir={SITE.dir} lang={Astro.currentLocale ?? SITE.lang ?? "en"} class:list={[{ "scroll-smooth": scrollSmooth }]}>
+<html
+  dir={SITE.dir}
+  lang={Astro.currentLocale ?? SITE.lang ?? "en"}
+  class:list={[{ "scroll-smooth": scrollSmooth }]}
+>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -70,7 +75,14 @@ const structuredData = {
     <Font cssVariable="--font-jetbrains-mono" />
 
     <!-- REFACTORED: Delegate all SEO concerns to the Seo component -->
-    <Seo title={title} description={description} ogImage={ogImage} canonicalURL={canonicalURL.toString()} pubDatetime={pubDatetime} modDatetime={modDatetime} />
+    <Seo
+      title={title}
+      description={description}
+      ogImage={ogImage}
+      canonicalURL={canonicalURL.toString()}
+      pubDatetime={pubDatetime}
+      modDatetime={modDatetime}
+    />
 
     <!-- REFACTORED: Delegate structured data to its own component -->
     <StructuredData data={structuredData} />
@@ -80,7 +92,12 @@ const structuredData = {
 
     <!-- Other essential head tags -->
     <link rel="sitemap" href="/sitemap-index.xml" />
-    <link rel="alternate" type="application/rss+xml" title={SITE.title} href={new URL("rss.xml", Astro.site)} />
+    <link
+      rel="alternate"
+      type="application/rss+xml"
+      title={SITE.title}
+      href={new URL("rss.xml", Astro.site)}
+    />
 
     {
       PUBLIC_GOOGLE_SITE_VERIFICATION && (
