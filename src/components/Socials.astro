@@ -1,23 +1,35 @@
 ---
-import { SOCIALS } from "@/constants";
+// REFACTORED: Removed direct import of SOCIALS constant.
+// The component now accepts data via props (Dependency Inversion).
+import type { SvgComponent } from "astro/types";
 import LinkButton from "./LinkButton.astro";
 
+// REFACTORED: Define the shape of the data this component expects.
+// This is an "abstraction" that decouples the component from the global constant.
+export interface SocialLink {
+  href: string;
+  linkTitle: string;
+  icon: SvgComponent;
+}
+
+// REFACTORED: The component now accepts the links via props.
 export interface Props {
+  links: SocialLink[];
   centered?: boolean;
 }
 
-const { centered = false } = Astro.props;
+const { links, centered = false } = Astro.props;
 ---
 
 <div
   class:list={[
     "flex flex-wrap justify-center gap-2",
-    { "items-center": centered },
-    { "flex-row": centered },
+    // REFACTORED: Simplified conditional class logic
+    { "items-center flex-row": centered },
   ]}
 >
   {
-    SOCIALS.map(social => {
+    links.map(social => {
       const Icon = social.icon;
       return (
         <LinkButton
