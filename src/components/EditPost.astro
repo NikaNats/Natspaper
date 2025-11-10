@@ -1,34 +1,29 @@
 ---
-import type { CollectionEntry } from "astro:content";
+// REFACTORED: No longer depends on specific Astro types or global config.
 import IconEdit from "@/assets/icons/IconEdit.svg";
-import { SITE } from "@/config";
 
+// REFACTORED: Props are now simple, primitive types.
+// This component now knows nothing about "posts" or "SITE config".
 export interface Props {
-  hideEditPost?: CollectionEntry<"blog">["data"]["hideEditPost"];
+  href: string;
+  text: string;
   class?: string;
-  post: CollectionEntry<"blog">;
 }
 
-const { hideEditPost, post, class: className = "" } = Astro.props;
-
-const href = `${SITE.editPost.url}${post.filePath}`;
-const showEditPost =
-  SITE.editPost.enabled && !hideEditPost && href.trim() !== "";
+const { href, text, class: className = "" } = Astro.props;
 ---
 
-{
-  showEditPost && (
-    <a
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-      class:list={[
-        "flex justify-baseline gap-1.5 opacity-80 hover:text-accent",
-        className,
-      ]}
-    >
-      <IconEdit class="inline-block" />
-      <span>{SITE.editPost.text}</span>
-    </a>
-  )
-}
+{/* REFACTORED: The conditional logic is gone.
+// This component's only job is to render the link if it is told to. */}
+<a
+  href={href}
+  target="_blank"
+  rel="noopener noreferrer"
+  class:list={[
+    "flex items-baseline gap-1.5 opacity-80 hover:text-accent",
+    className,
+  ]}
+>
+  <IconEdit class="inline-block" />
+  <span>{text}</span>
+</a>
