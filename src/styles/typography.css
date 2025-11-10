@@ -155,14 +155,14 @@
      */
     ul,
     ol {
-      @apply my-6 overflow-x-clip;
+      @apply my-6 overflow-x-clip list-inside;
       /* Line-height matching body for consistency */
       line-height: 1.6;
     }
 
     li {
       @apply my-3 marker:text-accent;
-      margin-left: 1.5em;
+      /* No margin-left needed with list-inside */
       line-height: 1.6;
     }
 

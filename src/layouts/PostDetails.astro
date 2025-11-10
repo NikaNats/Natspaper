@@ -185,7 +185,7 @@ const { previous: prevPost, next: nextPost } = getAdjacentPosts(posts, post.id);
   import {
     initProgressBar,
     initHeadingLinks,
-    initCopyButtons,
+    // initCopyButtons, // No longer needed
   } from "@/utils/features";
 
   /**
@@ -195,12 +195,12 @@ const { previous: prevPost, next: nextPost } = getAdjacentPosts(posts, post.id);
    * Features initialized:
    * - Progress bar: Shows scroll position with visual indicator
    * - Heading links: Adds clickable anchors to headings
-   * - Copy buttons: Adds copy-to-clipboard buttons to code blocks
+   * - Copy buttons: Adds copy-to-clipboard buttons to code blocks (disabled)
    */
   function initializePostFeatures(): void {
     initProgressBar();
     initHeadingLinks();
-    initCopyButtons();
+    // initCopyButtons(); // This is now disabled
   }
 
   // Initialize features when page loads
