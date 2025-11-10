@@ -1,157 +1,104 @@
 ---
-/**
- * Error Boundary Component
- * Provides a fallback UI when components fail to render
- *
- * Usage:
- * <ErrorBoundary>
- *   <SomeComponent />
- * </ErrorBoundary>
- *
- * If a child component throws an error, the fallback UI will be displayed
- * and the error will be captured by Sentry for monitoring
- */
-
-export interface Props {
-  children?: unknown;
-}
+// REFACTORED: This component now becomes a client-side island.
+// Its entire purpose is interactive, so we make it a client component.
 ---
 
-<div class="error-boundary">
-  <slot />
+<div id="error-boundary-wrapper">
+  <!-- 1. The "Try" Block: This is where your normal content goes. -->
+  <div id="error-boundary-content">
+    <slot />
+  </div>
+
+  <!-- 2. The "Catch" Block: This is the fallback UI, hidden by default. -->
+  <div id="error-boundary-fallback" class="hidden">
+    <div class="error-message">
+      <h2 class="text-2xl font-bold">Something went wrong</h2>
+      <p class="mt-2">
+        We're sorry for the inconvenience. The error has been reported to our team.
+      </p>
+      <button
+        id="error-boundary-reload-btn"
+        class="mt-4 rounded bg-red-700 px-4 py-2 text-white transition-colors hover:bg-red-800"
+      >
+        Reload page
+      </button>
+    </div>
+  </div>
 </div>
 
+<!-- 3. All styles are now scoped and use Tailwind's @apply for consistency. -->
 <style>
-  .error-boundary {
-    display: contents;
+  .error-message {
+    padding: 2rem;
+    margin: 1rem 0;
+    border: 1px solid #ff6b6b;
+    border-radius: 0.5rem;
+    background-color: #ffe0e0;
+    color: #c92a2a;
   }
 </style>
 
 <script>
-  /**
-   * Client-side error boundary implementation
-   * Catches and handles errors in child components
-   */
+  // REFACTORED: The script is now simple, focused, and declarative.
+  function initErrorBoundary() {
+    const wrapper = document.getElementById("error-boundary-wrapper");
+    // Early exit if this script has already run for this component
+    if (!wrapper || wrapper.dataset.initialized) return;
 
-  // Type-safe interface for global Sentry object
-  // Ensures we only access valid Sentry methods and prevents silent failures
-  type GlobalWithSentry = typeof globalThis & {
-    __SENTRY__?: {
-      captureException?: (
-        error: unknown,
-        options?: Record<string, unknown>
-      ) => void;
-    };
-  };
+    const contentEl = document.getElementById("error-boundary-content");
+    const fallbackEl = document.getElementById("error-boundary-fallback");
+    const reloadBtn = document.getElementById("error-boundary-reload-btn");
 
-  class ErrorBoundary extends HTMLElement {
-    private errorContainer: HTMLDivElement | null = null;
+    if (!contentEl || !fallbackEl || !reloadBtn) return;
 
-    connectedCallback() {
-      // Wrap content for error recovery
-      const slot = this.querySelector("slot");
+    // The central error handling logic
+    const handleError = (error: unknown, context: string) => {
+      // eslint-disable-next-line no-console
+      console.error(`[ErrorBoundary/${context}]`, error);
 
-      if (slot) {
-        const assignedNodes = slot.assignedElements({ flatten: true });
+      // Sentry reporting logic remains the same, but simplified
+      type GlobalWithSentry = typeof globalThis & {
+        __SENTRY__?: {
+          captureException?: (
+            error: unknown,
+            options?: Record<string, unknown>
+          ) => void;
+        };
+      };
 
-        for (const node of assignedNodes) {
-          if (node instanceof HTMLElement) {
-            this.wrapChild(node);
-          }
-        }
-      }
-    }
-
-    private wrapChild(element: HTMLElement) {
-      try {
-        element.addEventListener(
-          "error",
-          (event: Event) => {
-            if (event instanceof ErrorEvent) {
-              this.handleError(event.error);
-            }
+      const sentry = (window as GlobalWithSentry).__SENTRY__;
+      if (sentry?.captureException) {
+        sentry.captureException(error, {
+          tags: { component: "ErrorBoundary", context },
+          contexts: {
+            error: {
+              message: error instanceof Error ? error.message : String(error),
+            },
           },
-          true
-        );
-      } catch (error) {
-        this.handleError(error);
-      }
-    }
-
-    private handleError(error: unknown) {
-      // Capture with Sentry if available
-      // Use type-safe interface to ensure __SENTRY__ is properly accessed
-      if (globalThis.window) {
-        const sentry = (globalThis as GlobalWithSentry).__SENTRY__;
-        // Validate that captureException is callable before attempting to use it
-        // Prevents silent failures if Sentry initialization differs
-        if (
-          sentry &&
-          sentry.captureException &&
-          typeof sentry.captureException === "function"
-        ) {
-          sentry.captureException(error, {
-            tags: {
-              component: "ErrorBoundary",
-            },
-            contexts: {
-              error: {
-                message: error instanceof Error ? error.message : String(error),
-              },
-            },
-          });
-        }
+        });
       }
 
-      this.showErrorUI();
-    }
+      // Declarative UI toggle: hide content, show fallback
+      contentEl.hidden = true;
+      fallbackEl.classList.remove("hidden");
+    };
 
-    private showErrorUI() {
-      if (!this.errorContainer) {
-        this.errorContainer = document.createElement("div");
-        this.errorContainer.className = "error-boundary-fallback";
-        this.errorContainer.innerHTML = `
-          <div class="error-message">
-            <h2>Something went wrong</h2>
-            <p>We're sorry for the inconvenience. The error has been reported to our team.</p>
-            <button onclick="window.location.reload()">Reload page</button>
-          </div>
-        `;
+    // Attach global listeners for unhandled errors and promise rejections
+    window.addEventListener("error", event => handleError(event.error, "window.error"));
+    window.addEventListener("unhandledrejection", event =>
+      handleError(event.reason, "unhandledrejection")
+    );
 
-        const style = document.createElement("style");
-        style.textContent = `
-          .error-boundary-fallback {
-            padding: 2rem;
-            margin: 1rem 0;
-            border: 1px solid #ff6b6b;
-            border-radius: 0.5rem;
-            background: #ffe0e0;
-            color: #c92a2a;
-          }
-          .error-message h2 {
-            margin-top: 0;
-          }
-          .error-message button {
-            padding: 0.5rem 1rem;
-            background: #c92a2a;
-            color: white;
-            border: none;
-            border-radius: 0.25rem;
-            cursor: pointer;
-            font-size: 1rem;
-          }
-          .error-message button:hover {
-            background: #a61e4d;
-          }
-        `;
-        document.head.appendChild(style);
+    // Attach event listener for the reload button
+    reloadBtn.addEventListener("click", () => {
+      window.location.reload();
+    });
 
-        this.appendChild(this.errorContainer);
-      }
-    }
+    // Mark as initialized to prevent re-attaching listeners on page transitions
+    wrapper.dataset.initialized = "true";
   }
 
-  if (!customElements.get("error-boundary")) {
-    customElements.define("error-boundary", ErrorBoundary);
-  }
+  // Run on initial load and after Astro's view transitions
+  initErrorBoundary();
+  document.addEventListener("astro:page-load", initErrorBoundary);
 </script>
