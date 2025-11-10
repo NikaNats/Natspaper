@@ -26,7 +26,8 @@ const {
 } = Astro.props;
 
 // REFACTORED: Use dayjs's own `isAfter` method. It's more readable and idiomatic.
-const isModified = modDatetime && dayjs(modDatetime).isAfter(dayjs(pubDatetime));
+const isModified =
+  modDatetime && dayjs(modDatetime).isAfter(dayjs(pubDatetime));
 
 // REFACTORED: Separate the logic for selecting the date from formatting it.
 const dateToShow = isModified ? modDatetime : pubDatetime;
@@ -41,7 +42,9 @@ const formattedDate = datetime.format("D MMM, YYYY");
     class:list={["inline-block size-5 min-w-5", { "scale-90": size === "sm" }]}
   />
 
-  {/* REFACTORED: Apply sizing classes to a single parent span to avoid repetition (DRY principle). */}
+  {
+    /* REFACTORED: Apply sizing classes to a single parent span to avoid repetition (DRY principle). */
+  }
   <span class:list={["text-sm", { "sm:text-base": size === "lg" }]}>
     {isModified && "Updated: "}
     <time datetime={datetime.toISOString()}>{formattedDate}</time>

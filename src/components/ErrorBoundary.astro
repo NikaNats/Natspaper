@@ -14,7 +14,8 @@
     <div class="error-message">
       <h2 class="text-2xl font-bold">Something went wrong</h2>
       <p class="mt-2">
-        We're sorry for the inconvenience. The error has been reported to our team.
+        We're sorry for the inconvenience. The error has been reported to our
+        team.
       </p>
       <button
         id="error-boundary-reload-btn"
@@ -84,7 +85,9 @@
     };
 
     // Attach global listeners for unhandled errors and promise rejections
-    window.addEventListener("error", event => handleError(event.error, "window.error"));
+    window.addEventListener("error", event =>
+      handleError(event.error, "window.error")
+    );
     window.addEventListener("unhandledrejection", event =>
       handleError(event.reason, "unhandledrejection")
     );

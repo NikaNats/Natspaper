@@ -1,18 +1,29 @@
 ---
+// REFACTORED: Pure presentational component that accepts copyrightText as prop
+// If not provided, calculates it internally for backward compatibility
+
 import { useTranslations } from "@/i18n/utils";
 
-const t = useTranslations(Astro.currentLocale as "en" | "ka");
-const currentYear = new Date().getFullYear();
-
 export interface Props {
+  copyrightText?: string;
   noMarginTop?: boolean;
 }
 
-const { noMarginTop = false } = Astro.props;
+const { copyrightText, noMarginTop = false } = Astro.props;
+
+// Calculate copyright text if not provided (backward compatibility)
+const finalCopyrightText =
+  copyrightText ??
+  (() => {
+    const t = useTranslations(Astro.currentLocale as "en" | "ka");
+    const currentYear = new Date().getFullYear();
+    return `Copyright © ${currentYear} • ${t("footer.copyright")}`;
+  })();
 ---
 
 <footer class:list={["w-full", { "mt-auto": !noMarginTop }]}>
   <div class="flex flex-col items-center gap-1 text-sm text-text-secondary">
-    <p>Copyright &#169; {currentYear} • {t("footer.copyright")}</p>
+    {/* REFACTORED: The component simply renders the text it's given. */}
+    <p>{finalCopyrightText}</p>
   </div>
 </footer>

@@ -36,7 +36,7 @@ const HeadingTag = variant === "h2" ? "h2" : "h3";
     >
       {/* REFACTORED: Render the dynamic tag. No more ternary operator. */}
       <HeadingTag
-        class="text-lg font-semibold text-foreground decoration-dashed hover:text-accent transition-colors"
+        class="text-lg font-semibold text-foreground decoration-dashed transition-colors hover:text-accent"
         style={{ viewTransitionName: slugifyStr(title) }}
       >
         {title}

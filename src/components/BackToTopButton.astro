@@ -7,7 +7,7 @@ import IconArrowNarrowUp from "@/assets/icons/IconArrowNarrowUp.svg";
   id="btt-btn-container"
   data-visible="false"
   class:list={[
-    "fixed end-4 bottom-8 z-50 transition-opacity-transform duration-500",
+    "transition-opacity-transform fixed end-4 bottom-8 z-50 duration-500",
     "md:sticky md:end-auto md:float-end md:me-1",
   ]}
 >
@@ -48,7 +48,7 @@ import IconArrowNarrowUp from "@/assets/icons/IconArrowNarrowUp.svg";
   function initBackToTop() {
     // REFACTORED: Use a constant for the visibility threshold
     const VISIBILITY_THRESHOLD = 0.3;
-    
+
     // REFACTORED: Scope all queries to this component instance
     const container = document.getElementById("btt-btn-container");
     if (!container || container.dataset.initialized) return; // Early exit if not found or already initialized
@@ -65,20 +65,21 @@ import IconArrowNarrowUp from "@/assets/icons/IconArrowNarrowUp.svg";
     });
 
     const handleScroll = () => {
-      const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
+      const { scrollTop, scrollHeight, clientHeight } =
+        document.documentElement;
       const scrollTotal = scrollHeight - clientHeight;
-      
+
       // Prevent division by zero on pages with no scroll
       if (scrollTotal <= 0) {
         container.dataset.visible = "false";
         return;
       }
-      
+
       const scrollPercent = (scrollTop / scrollTotal) * 100;
-      
+
       // REFACTORED: Simplified style update
       progressIndicator.style.backgroundImage = `conic-gradient(var(--accent) ${scrollPercent}%, transparent ${scrollPercent}%)`;
-      
+
       // REFACTORED: Declarative state change
       const isVisible = scrollTop / scrollTotal > VISIBILITY_THRESHOLD;
       container.dataset.visible = isVisible.toString();
@@ -99,7 +100,7 @@ import IconArrowNarrowUp from "@/assets/icons/IconArrowNarrowUp.svg";
     // Mark as initialized to prevent re-attaching listeners on page transitions
     container.dataset.initialized = "true";
   }
-  
+
   // Ensure script runs on initial load and after Astro's view transitions
   initBackToTop();
   document.addEventListener("astro:page-load", initBackToTop);

@@ -15,6 +15,7 @@ import IconChevronLeft from "@/assets/icons/IconChevronLeft.svg";
 import IconChevronRight from "@/assets/icons/IconChevronRight.svg";
 import { SITE } from "@/config";
 import katexStyles from "katex/dist/katex.min.css?url";
+import { useTranslations } from "@/i18n/utils";
 
 /**
  * Post Details Layout Component
@@ -90,6 +91,11 @@ const showEditPost =
   editPostConfig.enabled && !hideEditPost && editPostConfig.url;
 // V END
 
+// REFACTORED: Moved copyright logic from Footer to parent layout
+const t = useTranslations(Astro.currentLocale as "en" | "ka");
+const currentYear = new Date().getFullYear();
+const copyrightText = `Copyright © ${currentYear} • ${t("footer.copyright")}`;
+
 // Get adjacent posts for navigation using centralized utility
 const { previous: prevPost, next: nextPost } = getAdjacentPosts(posts, post.id);
 ---
@@ -130,13 +136,15 @@ const { previous: prevPost, next: nextPost } = getAdjacentPosts(posts, post.id);
       <div class="flex items-center gap-x-4">
         <ReadingTime content={bodyContent} size="lg" />
         {/* REFACTORED: The conditional is now here, in the parent */}
-        {showEditPost && (
-          <EditPost
-            href={editPostHref}
-            text={editPostConfig.text}
-            class="max-sm:hidden"
-          />
-        )}
+        {
+          showEditPost && (
+            <EditPost
+              href={editPostHref}
+              text={editPostConfig.text}
+              class="max-sm:hidden"
+            />
+          )
+        }
       </div>
     </div>
     <article
@@ -149,13 +157,15 @@ const { previous: prevPost, next: nextPost } = getAdjacentPosts(posts, post.id);
     <hr class="my-8 border-dashed" />
 
     {/* REFACTORED: Also update the mobile version of the component call */}
-    {showEditPost && (
-      <EditPost
-        href={editPostHref}
-        text={editPostConfig.text}
-        class="sm:hidden"
-      />
-    )}
+    {
+      showEditPost && (
+        <EditPost
+          href={editPostHref}
+          text={editPostConfig.text}
+          class="sm:hidden"
+        />
+      )
+    }
 
     <ul class="mt-4 mb-8 sm:my-8">
       {tags.map(tag => <Tag tag={slugifyStr(tag)} tagName={tag} />)}
@@ -199,7 +209,7 @@ const { previous: prevPost, next: nextPost } = getAdjacentPosts(posts, post.id);
       }
     </div>
   </main>
-  <Footer />
+  <Footer copyrightText={copyrightText} />
 </Layout>
 
 <script>
