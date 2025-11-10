@@ -126,7 +126,7 @@ html[data-theme="dark"] {
   */
 
   html {
-    @apply overflow-y-scroll scroll-smooth;
+    @apply scroll-smooth bg-background;
     /* Desktop: 18px for optimal longform readability per research */
     font-size: 18px;
     /* Body font: Roboto (high x-height, screen-optimized) */
@@ -141,7 +141,7 @@ html[data-theme="dark"] {
   }
 
   body {
-    @apply flex min-h-svh flex-col bg-background font-mono text-foreground selection:bg-accent/75 selection:text-background;
+    @apply flex min-h-svh flex-col font-mono text-foreground selection:bg-accent/75 selection:text-background;
     /**
      * Line-height Optimization for Reading Comfort
      * 
