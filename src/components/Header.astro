@@ -1,45 +1,10 @@
 ---
-import IconX from "@/assets/icons/IconX.svg";
-import IconMoon from "@/assets/icons/IconMoon.svg";
-import IconSunHigh from "@/assets/icons/IconSunHigh.svg";
-import IconArchive from "@/assets/icons/IconArchive.svg";
-import IconMenuDeep from "@/assets/icons/IconMenuDeep.svg";
-import LinkButton from "./LinkButton.astro";
-import LanguagePicker from "./LanguagePicker.astro";
+// REFACTORED: Header.astro is now a clean, high-level conductor.
+
 import { SITE } from "@/config";
+import MobileMenu from "./MobileMenu.astro";
 
 const { pathname } = Astro.url;
-
-// Remove trailing slash from current pathname if exists
-const currentPath =
-  pathname.endsWith("/") && pathname !== "/" ? pathname.slice(0, -1) : pathname;
-
-function isActive(path: string) {
-  const currentPathArray = currentPath
-    .split("/")
-    .filter((p: string) => p.trim());
-  const pathArray = path.split("/").filter((p: string) => p.trim());
-
-  // Compare paths, accounting for language prefix
-  // For example: /en/posts should match /posts
-  const currentPagePath = currentPathArray.slice(1); // Remove language code
-  const checkPagePath = pathArray.slice(0); // The path to check
-
-  if (
-    currentPagePath.length === 0 &&
-    checkPagePath.length === 1 &&
-    checkPagePath[0] === "posts"
-  ) {
-    // Homepage (after language code) against /posts link
-    return false;
-  }
-
-  return (
-    currentPath === `/${Astro.currentLocale}${path}` ||
-    currentPath === `/${Astro.currentLocale}${path}/` ||
-    currentPagePath[0] === checkPagePath[0]
-  );
-}
 ---
 
 <header>
@@ -51,15 +16,8 @@ function isActive(path: string) {
     Skip to content
   </a>
 
-  <!-- Centered container wrapper -->
   <div class="mx-auto flex w-full max-w-app items-center justify-between px-4">
-    <!-- Main navigation wrapper with improved spacing and border styling -->
-    <nav
-      id="top-nav-wrap"
-      class="relative flex h-16 w-full items-center justify-between gap-4 bg-background transition-colors"
-      style="background-color: transparent; border-color: transparent;"
-    >
-      <!-- Logo/Brand: Positioned to the start (left) via flex justify-between parent -->
+    <nav class="relative flex h-16 w-full items-center justify-between gap-4 bg-background transition-colors" style="background-color: transparent; border-color: transparent;">
       <a
         href={`/${Astro.currentLocale}/`}
         class="shrink-0 rounded-md font-sans text-lg font-bold text-foreground no-underline transition-colors hover:text-accent focus:outline-none"
@@ -68,164 +26,10 @@ function isActive(path: string) {
         {SITE.title}
       </a>
 
-      <!-- Navigation menu wrapper: Positioned to the end (right) via justify-between -->
-      <div id="nav-menu" class="flex items-center gap-1 sm:gap-4">
-        <!-- Mobile Menu Button (Hamburger) - hidden on sm and larger screens -->
-        <button
-          id="menu-btn"
-          class="rounded-md p-2 text-foreground transition-colors hover:text-accent focus:outline-none sm:hidden"
-          aria-label="Open Menu"
-          aria-expanded="false"
-          aria-controls="mobile-menu-overlay"
-        >
-          <IconMenuDeep id="menu-icon" class="size-6" />
-        </button>
-
-        <!-- V START: This is our new full-screen overlay -->
-        <div
-          id="mobile-menu-overlay"
-          class="fixed inset-0 z-50 hidden flex-col items-center justify-center gap-6 bg-background sm:relative sm:top-0 sm:z-auto sm:flex sm:flex-row sm:border-none sm:bg-transparent sm:p-0 sm:shadow-none"
-          role="dialog"
-          aria-modal="true"
-        >
-          {/* Dedicated Close Button */}
-          <button
-            id="menu-close-btn"
-            class="absolute top-4 right-4 rounded-md p-2 text-foreground transition-colors hover:text-accent focus:outline-none sm:hidden"
-            aria-label="Close Menu"
-          >
-            <IconX class="size-6" />
-          </button>
-
-          {/* The original list of menu items */}
-          <ul
-            id="menu-items"
-            class="flex flex-col items-center gap-6 sm:flex-row sm:gap-3"
-          >
-            <li>
-              <!-- MODIFIED FOR SYMMETRY: Added flex, items-center, h-8 and removed vertical padding -->
-              <a
-                href={`/${Astro.currentLocale}/posts`}
-                class:list={{
-                  "active-nav text-accent": isActive("/posts"),
-                }}
-                class="flex h-8 items-center rounded px-2 font-sans text-sm font-medium text-foreground no-underline transition-colors hover:text-accent focus:outline-none"
-              >
-                Posts
-              </a>
-            </li>
-            <li>
-              <!-- MODIFIED FOR SYMMETRY: Added flex, items-center, h-8 and removed vertical padding -->
-              <a
-                href={`/${Astro.currentLocale}/tags`}
-                class:list={{
-                  "active-nav text-accent": isActive("/tags"),
-                }}
-                class="flex h-8 items-center rounded px-2 font-sans text-sm font-medium text-foreground no-underline transition-colors hover:text-accent focus:outline-none"
-              >
-                Tags
-              </a>
-            </li>
-            {
-              SITE.showArchives && (
-                <li>
-                  <LinkButton
-                    href={`/${Astro.currentLocale}/archives`}
-                    class:list={[
-                      "flex items-center justify-center rounded-md p-2.5 text-foreground transition-colors hover:text-accent focus:outline-none",
-                      { "active-nav text-accent": isActive("/archives") },
-                    ]}
-                    ariaLabel="archives"
-                    title="Archives"
-                  >
-                    <IconArchive class="size-5" />
-                    <span class="sr-only">Archives</span>
-                  </LinkButton>
-                </li>
-              )
-            }
-            {
-              /* V START: Comment out this entire list item for the search button */
-            }
-            <!-- <li>
-              <LinkButton
-                href={`/${Astro.currentLocale}/search`}
-                class:list={[
-                  "flex items-center justify-center rounded-md p-1.5 text-foreground transition-colors hover:text-accent focus:outline-none",
-                  { "active-nav text-accent": isActive("/search") },
-                ]}
-                ariaLabel="search"
-                title="Search"
-              >
-                <IconSearch class="size-5" />
-                <span class="sr-only">Search</span>
-              </LinkButton>
-            </li> -->
-            {
-              /* V END: Comment out this entire list item for the search button */
-            }
-            {
-              SITE.lightAndDarkMode && (
-                <li>
-                  <button
-                    id="theme-btn"
-                    class="inline-flex items-center justify-center rounded-md p-2.5 text-foreground transition-colors hover:text-accent focus:outline-none"
-                    title="Toggle light & dark theme"
-                    aria-label="Toggle theme"
-                    aria-live="polite"
-                  >
-                    <IconMoon class="hidden size-5 dark:block" />
-                    <IconSunHigh class="size-5 dark:hidden" />
-                  </button>
-                </li>
-              )
-            }
-            <li>
-              <LanguagePicker />
-            </li>
-          </ul>
-        </div>
-        {/* V END: End of the overlay */}
+      <div class="flex items-center gap-1 sm:gap-4">
+        <!-- Mobile Menu Component -->
+        <MobileMenu currentPath={pathname} locale={Astro.currentLocale} />
       </div>
     </nav>
   </div>
 </header>
-
-<script lang="ts" is:inline>
-  function setupNavigation() {
-    const menuOpenBtn = document.querySelector("#menu-btn");
-    const menuCloseBtn = document.querySelector("#menu-close-btn");
-    const menuOverlay = document.querySelector("#mobile-menu-overlay");
-
-    if (!menuOpenBtn || !menuCloseBtn || !menuOverlay) return;
-
-    const openMenu = () => {
-      menuOverlay.classList.remove("hidden");
-      menuOverlay.classList.add("flex");
-      menuOpenBtn.setAttribute("aria-expanded", "true");
-      document.body.classList.add("menu-open"); // Prevent body scroll
-    };
-
-    const closeMenu = () => {
-      menuOverlay.classList.add("hidden");
-      menuOverlay.classList.remove("flex");
-      menuOpenBtn.setAttribute("aria-expanded", "false");
-      document.body.classList.remove("menu-open"); // Allow body scroll
-    };
-
-    menuOpenBtn.addEventListener("click", openMenu);
-    menuCloseBtn.addEventListener("click", closeMenu);
-
-    // Close menu when a navigation link is clicked (for single-page feel)
-    const navLinks = menuOverlay.querySelectorAll("a");
-    navLinks.forEach(link => {
-      link.addEventListener("click", closeMenu);
-    });
-  }
-
-  // Initialize on page load
-  setupNavigation();
-
-  // Reinitialize on view transitions
-  document.addEventListener("astro:after-swap", setupNavigation);
-</script>

@@ -1,0 +1,73 @@
+---
+import { isActive } from "./NavLinks.astro";
+import LinkButton from "./LinkButton.astro";
+import IconArchive from "@/assets/icons/IconArchive.svg";
+import { SITE } from "@/config";
+import LanguagePicker from "./LanguagePicker.astro";
+import IconMoon from "@/assets/icons/IconMoon.svg";
+import IconSunHigh from "@/assets/icons/IconSunHigh.svg";
+
+const { currentPath, locale } = Astro.props;
+---
+
+<ul class:list={[Astro.props.class, "flex flex-col items-center gap-6 sm:flex-row sm:gap-3"]}>
+  <li>
+    <a
+      href={`/${locale}/posts`}
+      class:list={{
+        "active-nav text-accent": isActive(currentPath, "/posts", locale),
+      }}
+      class="flex h-8 items-center rounded px-2 font-sans text-sm font-medium text-foreground no-underline transition-colors hover:text-accent focus:outline-none"
+    >
+      Posts
+    </a>
+  </li>
+  <li>
+    <a
+      href={`/${locale}/tags`}
+      class:list={{
+        "active-nav text-accent": isActive(currentPath, "/tags", locale),
+      }}
+      class="flex h-8 items-center rounded px-2 font-sans text-sm font-medium text-foreground no-underline transition-colors hover:text-accent focus:outline-none"
+    >
+      Tags
+    </a>
+  </li>
+  {
+    SITE.showArchives && (
+      <li>
+        <LinkButton
+          href={`/${locale}/archives`}
+          class:list={[
+            "flex items-center justify-center rounded-md p-2.5 text-foreground transition-colors hover:text-accent focus:outline-none",
+            { "active-nav text-accent": isActive(currentPath, "/archives", locale) },
+          ]}
+          ariaLabel="archives"
+          title="Archives"
+        >
+          <IconArchive class="size-5" />
+          <span class="sr-only">Archives</span>
+        </LinkButton>
+      </li>
+    )
+  }
+  {
+    SITE.lightAndDarkMode && (
+      <li>
+        <button
+          id="theme-btn"
+          class="inline-flex items-center justify-center rounded-md p-2.5 text-foreground transition-colors hover:text-accent focus:outline-none"
+          title="Toggle light & dark theme"
+          aria-label="Toggle theme"
+          aria-live="polite"
+        >
+          <IconMoon class="hidden size-5 dark:block" />
+          <IconSunHigh class="size-5 dark:hidden" />
+        </button>
+      </li>
+    )
+  }
+  <li>
+    <LanguagePicker />
+  </li>
+</ul>

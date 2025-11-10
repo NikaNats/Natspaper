@@ -1,0 +1,79 @@
+---
+// REFACTORED: MobileMenu.astro handles all mobile menu interactions and overlay.
+
+import IconX from "@/assets/icons/IconX.svg";
+import IconMenuDeep from "@/assets/icons/IconMenuDeep.svg";
+import NavMenu from "./NavMenu.astro";
+
+const { currentPath, locale } = Astro.props;
+---
+
+<!-- Mobile Menu Button (Hamburger) -->
+<button
+  id="menu-btn"
+  class="rounded-md p-2 text-foreground transition-colors hover:text-accent focus:outline-none sm:hidden"
+  aria-label="Open Menu"
+  aria-expanded="false"
+  aria-controls="mobile-menu-overlay"
+>
+  <IconMenuDeep id="menu-icon" class="size-6" />
+</button>
+
+<!-- Full-screen overlay -->
+<div
+  id="mobile-menu-overlay"
+  class="fixed inset-0 z-50 hidden flex-col items-center justify-center gap-6 bg-background sm:relative sm:top-0 sm:z-auto sm:flex sm:flex-row sm:border-none sm:bg-transparent sm:p-0 sm:shadow-none"
+  role="dialog"
+  aria-modal="true"
+>
+  <!-- Dedicated Close Button -->
+  <button
+    id="menu-close-btn"
+    class="absolute top-4 right-4 rounded-md p-2 text-foreground transition-colors hover:text-accent focus:outline-none sm:hidden"
+    aria-label="Close Menu"
+  >
+    <IconX class="size-6" />
+  </button>
+
+  <!-- Menu Items -->
+  <NavMenu currentPath={currentPath} locale={locale} />
+</div>
+
+<script lang="ts" is:inline>
+  function setupNavigation() {
+    const menuOpenBtn = document.querySelector("#menu-btn");
+    const menuCloseBtn = document.querySelector("#menu-close-btn");
+    const menuOverlay = document.querySelector("#mobile-menu-overlay");
+
+    if (!menuOpenBtn || !menuCloseBtn || !menuOverlay) return;
+
+    const openMenu = () => {
+      menuOverlay.classList.remove("hidden");
+      menuOverlay.classList.add("flex");
+      menuOpenBtn.setAttribute("aria-expanded", "true");
+      document.body.classList.add("menu-open"); // Prevent body scroll
+    };
+
+    const closeMenu = () => {
+      menuOverlay.classList.add("hidden");
+      menuOverlay.classList.remove("flex");
+      menuOpenBtn.setAttribute("aria-expanded", "false");
+      document.body.classList.remove("menu-open"); // Allow body scroll
+    };
+
+    menuOpenBtn.addEventListener("click", openMenu);
+    menuCloseBtn.addEventListener("click", closeMenu);
+
+    // Close menu when a navigation link is clicked (for single-page feel)
+    const navLinks = menuOverlay.querySelectorAll("a");
+    navLinks.forEach(link => {
+      link.addEventListener("click", closeMenu);
+    });
+  }
+
+  // Initialize on page load
+  setupNavigation();
+
+  // Reinitialize on view transitions
+  document.addEventListener("astro:after-swap", setupNavigation);
+</script>
