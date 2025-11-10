@@ -51,7 +51,7 @@
     h5,
     h6,
     th {
-      @apply mb-4 text-foreground;
+      @apply relative mb-4 text-foreground;
       font-family: var(--font-merriweather), serif;
       line-height: 1.2;
       letter-spacing: -0.3px;
@@ -230,6 +230,13 @@
       line-height: 1.6;
       font-family: var(--font-merriweather), Georgia, serif;
       /* Slightly reduced opacity for quotations */
+    }
+
+    /**
+     * Add this new block for captions
+     */
+    figcaption {
+      @apply text-center text-sm italic text-text-secondary mt-2;
     }
 
     /**
@@ -489,4 +496,26 @@
 
 .newsbox-line a:hover {
   text-decoration-style: solid;
+}
+
+/* Add this block at the end of the file */
+@media (max-width: 640px) {
+  .app-prose figure,
+  .app-prose .astro-code,
+  .app-prose pre {
+    /*
+      This is the magic part. 'calc(100% + 2rem)' assumes 1rem padding on each side.
+      We use max() to ensure it doesn't get smaller than the content width.
+      Then, we use a negative margin to pull it to the edges.
+      By setting width to 100%, we constrain it within the parent's padding.
+    */
+    width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+    border-radius: 0.5rem; /* Optional: adds a nice rounded corner */
+  }
+
+  .app-prose figure img {
+    border-radius: 0.5rem; /* Match the figure's border-radius */
+  }
 }

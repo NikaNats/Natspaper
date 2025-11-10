@@ -35,7 +35,7 @@ export function initHeadingLinks(): void {
 
     const link = document.createElement("a");
     link.className =
-      "heading-link ms-2 no-underline opacity-75 md:opacity-0 md:group-hover:opacity-100 md:focus:opacity-100";
+      "heading-link absolute left-[-1em] no-underline opacity-0 group-hover:opacity-75 focus:opacity-75";
     link.href = "#" + heading.id;
     link.title = "Link to this section";
 
