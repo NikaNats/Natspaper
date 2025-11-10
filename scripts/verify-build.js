@@ -23,14 +23,14 @@ const REQUIRED_ARTIFACTS = [
   "dist/rss.xml", // RSS feed
   "dist/en/404/index.html", // English error page
   "dist/ka/404/index.html", // Georgian error page
-  "public/pagefind", // Search index
-  "public/pagefind/pagefind.js", // Search engine
+  // "public/pagefind", // Search index
+  // "public/pagefind/pagefind.js", // Search engine
 ];
 
 // Optional but important files
 const IMPORTANT_ARTIFACTS = [
   "dist/rss.xml",
-  "public/pagefind/pagefind-modular-ui.js",
+  // "public/pagefind/pagefind-modular-ui.js",
 ];
 
 console.log("🔍 Verifying build artifacts...\n");

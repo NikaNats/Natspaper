@@ -130,7 +130,8 @@ function isActive(path: string) {
               </li>
             )
           }
-          <li>
+          {/* V START: Comment out this entire list item for the search button */}
+          <!-- <li>
             <LinkButton
               href={`/${Astro.currentLocale}/search`}
               class:list={[
@@ -143,7 +144,8 @@ function isActive(path: string) {
               <IconSearch class="size-5" />
               <span class="sr-only">Search</span>
             </LinkButton>
-          </li>
+          </li> -->
+          {/* V END: Comment out this entire list item for the search button */}
           {
             SITE.lightAndDarkMode && (
               <li>

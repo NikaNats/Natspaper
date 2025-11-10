@@ -4,9 +4,9 @@
   "version": "1.0.0",
   "scripts": {
     "dev": "cross-env NODE_ENV=development astro dev",
-    "build": "cross-env NODE_ENV=production astro check && astro build && pagefind --site dist --exclude-selectors \"[data-pagefind-ignore='all']\" && npm run copy-pagefind && npm run verify-build",
+    "build": "cross-env NODE_ENV=production astro check && astro build && npm run verify-build",
     "build:dev": "cross-env NODE_ENV=development astro check && astro build",
-    "build:prod": "cross-env NODE_ENV=production astro check && astro build && pagefind --site dist --exclude-selectors \"[data-pagefind-ignore='all']\" && npm run copy-pagefind && npm run verify-build",
+    "build:prod": "cross-env NODE_ENV=production astro check && astro build && npm run verify-build",
     "preview": "cross-env NODE_ENV=production astro preview",
     "verify-build": "node scripts/verify-build.js",
     "copy-pagefind": "node scripts/copy-pagefind.js",

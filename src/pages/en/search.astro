@@ -3,14 +3,15 @@ import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
 import Footer from "@/components/Footer.astro";
 import Main from "@/layouts/Main.astro";
-import SearchComponent from "@/components/Search.astro";
+// import SearchComponent from "@/components/Search.astro"; // Comment this out
 import { SITE } from "@/config";
 ---
 
 <Layout title={`Search | ${SITE.title}`}>
   <Header />
-  <Main pageTitle="Search" pageDesc="Search any article...">
-    <SearchComponent locale="en" />
+  <Main pageTitle="Search" pageDesc="Search is temporarily disabled.">
+    {/* <SearchComponent locale="en" /> */}
+    <p>This feature is currently under development and will be available soon.</p>
   </Main>
   <Footer />
 </Layout>

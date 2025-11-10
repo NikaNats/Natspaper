@@ -3,14 +3,15 @@ import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
 import Footer from "@/components/Footer.astro";
 import Main from "@/layouts/Main.astro";
-import SearchComponent from "@/components/Search.astro";
+// import SearchComponent from "@/components/Search.astro"; // Comment this out
 import { SITE } from "@/config";
 ---
 
 <Layout title={`ძებნა | ${SITE.title}`}>
   <Header />
-  <Main pageTitle="ძებნა" pageDesc="მოძებნე სტატია...">
-    <SearchComponent locale="ka" />
+  <Main pageTitle="ძებნა" pageDesc="ძებნა დროებით მიუწვდომელია.">
+    {/* <SearchComponent locale="ka" /> */}
+    <p>ეს ფუნქცია ამჟამად დამუშავების პროცესშია და მალე ხელმისაწვდომი იქნება.</p>
   </Main>
   <Footer />
 </Layout>
