@@ -93,9 +93,9 @@ describe("Heading Links Feature", () => {
 
     expect(link.className).toContain("heading-link");
     expect(link.className).toContain("no-underline");
-    expect(link.className).toContain("opacity-75");
-    expect(link.className).toContain("md:opacity-0");
-    expect(link.className).toContain("md:group-hover:opacity-100");
+    expect(link.className).toContain("opacity-0");
+    expect(link.className).toContain("group-hover:opacity-75");
+    expect(link.className).toContain("focus:opacity-75");
   });
 
   it("should set title attribute on links for accessibility", () => {
