@@ -155,7 +155,7 @@
      */
     ul,
     ol {
-      @apply my-6 overflow-x-clip list-inside;
+      @apply my-6 list-inside overflow-x-clip;
       /* Line-height matching body for consistency */
       line-height: 1.6;
     }
