@@ -3,8 +3,30 @@
 
 import { SITE } from "@/config";
 import MobileMenu from "./MobileMenu.astro";
+import type { LanguageLink } from "./LanguagePicker.astro";
+import { getRelativeLocaleUrl } from "astro:i18n";
 
 const { pathname } = Astro.url;
+
+// V START: Add the i18n logic here
+const allLanguages = [
+  { code: "en", name: "English" },
+  { code: "ka", name: "ქართული" },
+] as const;
+
+// Logic to generate the links for the other languages
+const otherLanguageLinks: LanguageLink[] = allLanguages
+  .filter(lang => lang.code !== Astro.currentLocale)
+  .map(lang => {
+    // We need the path without the locale prefix
+    const path = pathname.replace(`/${Astro.currentLocale}`, "");
+    return {
+      code: lang.code,
+      name: lang.name,
+      url: getRelativeLocaleUrl(lang.code, path),
+    };
+  });
+// V END
 ---
 
 <header>
@@ -28,7 +50,7 @@ const { pathname } = Astro.url;
 
       <div class="flex items-center gap-1 sm:gap-4">
         <!-- Mobile Menu Component -->
-        <MobileMenu currentPath={pathname} locale={Astro.currentLocale} />
+        <MobileMenu currentPath={pathname} locale={Astro.currentLocale} otherLanguageLinks={otherLanguageLinks} />
       </div>
     </nav>
   </div>

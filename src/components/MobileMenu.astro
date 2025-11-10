@@ -5,7 +5,7 @@ import IconX from "@/assets/icons/IconX.svg";
 import IconMenuDeep from "@/assets/icons/IconMenuDeep.svg";
 import NavMenu from "./NavMenu.astro";
 
-const { currentPath, locale } = Astro.props;
+const { currentPath, locale, otherLanguageLinks } = Astro.props;
 ---
 
 <!-- Mobile Menu Button (Hamburger) -->
@@ -36,7 +36,7 @@ const { currentPath, locale } = Astro.props;
   </button>
 
   <!-- Menu Items -->
-  <NavMenu currentPath={currentPath} locale={locale} />
+  <NavMenu currentPath={currentPath} locale={locale} otherLanguageLinks={otherLanguageLinks} />
 </div>
 
 <script lang="ts" is:inline>

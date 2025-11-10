@@ -7,7 +7,7 @@ import LanguagePicker from "./LanguagePicker.astro";
 import IconMoon from "@/assets/icons/IconMoon.svg";
 import IconSunHigh from "@/assets/icons/IconSunHigh.svg";
 
-const { currentPath, locale } = Astro.props;
+const { currentPath, locale, otherLanguageLinks } = Astro.props;
 ---
 
 <ul class:list={[Astro.props.class, "flex flex-col items-center gap-6 sm:flex-row sm:gap-3"]}>
@@ -68,6 +68,6 @@ const { currentPath, locale } = Astro.props;
     )
   }
   <li>
-    <LanguagePicker />
+    <LanguagePicker links={otherLanguageLinks} />
   </li>
 </ul>
