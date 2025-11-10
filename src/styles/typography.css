@@ -236,7 +236,7 @@
      * Add this new block for captions
      */
     figcaption {
-      @apply text-center text-sm italic text-text-secondary mt-2;
+      @apply mt-2 text-center text-sm text-text-secondary italic;
     }
 
     /**

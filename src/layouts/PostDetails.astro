@@ -113,7 +113,9 @@ const { previous: prevPost, next: nextPost } = getAdjacentPosts(posts, post.id);
     >
       {title}
     </h1>
-    <div class="my-4 flex flex-col items-start gap-y-2 text-sm text-text-secondary sm:flex-row sm:items-center sm:justify-between sm:text-base">
+    <div
+      class="my-4 flex flex-col items-start gap-y-2 text-sm text-text-secondary sm:flex-row sm:items-center sm:justify-between sm:text-base"
+    >
       {/* Left Side: This will stay on the left */}
       <Datetime {pubDatetime} {modDatetime} {timezone} size="lg" />
 
