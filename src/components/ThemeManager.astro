@@ -1,0 +1,41 @@
+---
+// This component contains all theme-related scripts and tags.
+---
+<meta name="theme-color" content="" />
+
+<!-- Critical inline styles to prevent FOUC -->
+<style is:inline>
+  html { color-scheme: light dark; }
+</style>
+
+<!-- Instant theme-setting script to prevent FOUC -->
+<script is:inline>
+  (function () {
+    // First, check if user has a saved theme preference
+    let theme;
+    if (typeof localStorage !== "undefined") {
+      const savedTheme = localStorage.getItem("theme");
+      if (savedTheme) {
+        theme = savedTheme;
+      } else if (
+        window.matchMedia("(prefers-color-scheme: dark)").matches
+      ) {
+        theme = "dark";
+      } else {
+        theme = "light";
+      }
+    } else {
+      // Fallback if localStorage is unavailable
+      theme = window.matchMedia("(prefers-color-scheme: dark)").matches
+        ? "dark"
+        : "light";
+    }
+
+    // Apply theme immediately to prevent flash
+    document.documentElement.dataset.theme = theme;
+    window.initialTheme = theme;
+  })();
+</script>
+
+<!-- Deferred script for the theme toggle button -->
+<script is:inline defer src="/toggle-theme.js"></script>

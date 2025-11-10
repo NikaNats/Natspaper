@@ -1,50 +1,27 @@
 ---
+// REFACTORED: The Layout component is now a clean, high-level conductor.
 import { ClientRouter } from "astro:transitions";
 import { PUBLIC_GOOGLE_SITE_VERIFICATION } from "astro:env/client";
 import { Font } from "astro:assets";
 import { SITE } from "@/config";
 import "@/styles/global.css";
 
-/**
- * Base Layout Component
- *
- * Provides the complete page shell with:
- * - HTML meta tags and SEO elements
- * - Theme management and view transitions
- * - Performance optimizations (analytics, Sentry)
- * - Font loading and critical CSS
- *
- * Props are passed through to structured data and meta tags.
- * Content is injected via <slot />
- *
- * @example
- * ```astro
- * import Layout from '@/layouts/Layout.astro';
- *
- * <Layout title="My Page" description="Page description">
- *   <p>Page content here</p>
- * </Layout>
- * ```
- */
+// Import our new, specialized components
+import Seo from "@/components/Seo.astro";
+import StructuredData from "@/components/StructuredData.astro";
+import ThemeManager from "@/components/ThemeManager.astro";
+import Analytics from "@/components/Analytics.astro";
 
+// The props interface remains the same, as it's the public API for the layout.
 export interface Props {
-  /** Page title - defaults to site title */
   title?: string;
-  /** Author name - defaults to site author */
   author?: string;
-  /** Author profile URL - defaults to site profile */
   profile?: string;
-  /** Page description - defaults to site description */
   description?: string;
-  /** Open Graph image URL - defaults to site og image */
   ogImage?: string;
-  /** Canonical URL - defaults to current page URL */
   canonicalURL?: string;
-  /** Article publication datetime - used in structured data and meta tags */
   pubDatetime?: Date;
-  /** Article modification datetime - used in structured data and meta tags */
   modDatetime?: Date | null;
-  /** Enable smooth scroll behavior */
   scrollSmooth?: boolean;
 }
 
@@ -60,6 +37,7 @@ const {
   scrollSmooth = false,
 } = Astro.props;
 
+// The logic to build the structured data remains here, in the "smart" component.
 const socialImageURL = new URL(ogImage, Astro.url);
 
 const structuredData = {
@@ -78,108 +56,33 @@ const structuredData = {
   ],
 };
 ---
-
 <!doctype html>
-<html
-  dir={SITE.dir}
-  lang={Astro.currentLocale ?? SITE.lang ?? "en"}
-  class={`${scrollSmooth && "scroll-smooth"}`}
->
+<html dir={SITE.dir} lang={Astro.currentLocale ?? SITE.lang ?? "en"} class:list={[{ "scroll-smooth": scrollSmooth }]}>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="canonical" href={canonicalURL} />
     <meta name="generator" content={Astro.generator} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 
-    <!-- Performance: Resource Hints for Critical Resources
-         ======================================================== -->
-    <!-- Font Components: Generate CSS variables and preload links -->
-    {/* Preload the main body font for faster rendering */}
+    <!-- Font loading remains a core layout concern -->
     <Font cssVariable="--font-inter" preload />
     <Font cssVariable="--font-merriweather" />
     <Font cssVariable="--font-jetbrains-mono" />
 
-    <!-- Astro's font optimization - fonts are self-hosted from /_astro/fonts/ -->
-    <style is:global>
-      /* Critical CSS inline - loads immediately without blocking render */
-      html {
-        color-scheme: light dark;
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
-      }
-    </style>
+    <!-- REFACTORED: Delegate all SEO concerns to the Seo component -->
+    <Seo title={title} description={description} ogImage={ogImage} canonicalURL={canonicalURL.toString()} pubDatetime={pubDatetime} modDatetime={modDatetime} />
 
-    <!-- Head slot for child layouts to inject content -->
-    <slot name="head" />
+    <!-- REFACTORED: Delegate structured data to its own component -->
+    <StructuredData data={structuredData} />
 
-    <!-- General Meta Tags -->
-    <title>{title}</title>
-    <meta name="title" content={title} />
-    <meta name="description" content={description} />
-    <meta name="author" content={author} />
+    <!-- REFACTORED: Delegate theme management to its own component -->
+    <ThemeManager />
 
-    <!-- Sitemap Discovery Link
-         Helps search engines discover the sitemap-index.xml file.
-         The index file contains references to all sitemaps (including language variants).
-         Combined with robots.txt Sitemap directive for optimal crawler guidance.
-         See: https://www.sitemaps.org/protocol.html
-    -->
-    <link rel="sitemap" href="/sitemap-index.xml" type="application/xml" />
-
-    <!-- Open Graph / Facebook -->
-    <meta property="og:title" content={title} />
-    <meta property="og:description" content={description} />
-    <meta property="og:url" content={canonicalURL} />
-    <meta property="og:image" content={socialImageURL} />
-
-    <!-- Article Published/Modified time -->
-    {
-      pubDatetime && (
-        <meta
-          property="article:published_time"
-          content={pubDatetime.toISOString()}
-        />
-      )
-    }
-    {
-      modDatetime && (
-        <meta
-          property="article:modified_time"
-          content={modDatetime.toISOString()}
-        />
-      )
-    }
-
-    <!-- Twitter -->
-    <meta property="twitter:card" content="summary_large_image" />
-    <meta property="twitter:url" content={canonicalURL} />
-    <meta property="twitter:title" content={title} />
-    <meta property="twitter:description" content={description} />
-    <meta property="twitter:image" content={socialImageURL} />
-
-    <!-- Google JSON-LD Structured data -->
-    <script
-      type="application/ld+json"
-      is:inline
-      set:html={JSON.stringify(structuredData)}
-    />
-
-    <!-- Enable RSS feed auto-discovery  -->
-    <!-- https://docs.astro.build/en/recipes/rss/#enabling-rss-feed-auto-discovery -->
-    <link
-      rel="alternate"
-      type="application/rss+xml"
-      title={SITE.title}
-      href={new URL("rss.xml", Astro.site)}
-    />
-
-    <meta name="theme-color" content="" />
+    <!-- Other essential head tags -->
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <link rel="alternate" type="application/rss+xml" title={SITE.title} href={new URL("rss.xml", Astro.site)} />
 
     {
-      // If PUBLIC_GOOGLE_SITE_VERIFICATION is set in the environment variable,
-      // include google-site-verification tag in the heading
-      // Learn more: https://support.google.com/webmasters/answer/9008080#meta_tag_verification&zippy=%2Chtml-tag
       PUBLIC_GOOGLE_SITE_VERIFICATION && (
         <meta
           name="google-site-verification"
@@ -188,100 +91,15 @@ const structuredData = {
       )
     }
 
-    <!-- Critical inline styles to prevent FOUC and CLS -->
-    <style is:inline>
-      /* Prevent flash of unstyled content during theme load */
-      html {
-        color-scheme: light dark;
-      }
-    </style>
-
-    <!-- =================================================================================
-         INSTANT THEME-SETTING SCRIPT
-         This inline script runs before any content is rendered to prevent FOUC.
-         It's small, has no dependencies, and executes instantly.
-         It must come BEFORE any CSS that depends on the data-theme attribute.
-         
-         IMPORTANT: Priority order is: saved theme > system preference > default (light)
-         This ensures user's choice always persists across page navigations.
-    ================================================================================== -->
-    <script is:inline>
-      (function () {
-        // First, check if user has a saved theme preference
-        let theme;
-        if (typeof localStorage !== "undefined") {
-          const savedTheme = localStorage.getItem("theme");
-          if (savedTheme) {
-            theme = savedTheme;
-          } else if (
-            window.matchMedia("(prefers-color-scheme: dark)").matches
-          ) {
-            theme = "dark";
-          } else {
-            theme = "light";
-          }
-        } else {
-          // Fallback if localStorage is unavailable
-          theme = window.matchMedia("(prefers-color-scheme: dark)").matches
-            ? "dark"
-            : "light";
-        }
-
-        // Apply theme immediately to prevent flash
-        document.documentElement.dataset.theme = theme;
-        window.initialTheme = theme;
-      })();
-    </script>
-    <!-- END: INSTANT THEME-SETTING SCRIPT -->
-
-    <!-- DEFERRED INTERACTIVE SCRIPT
-         This script loads after the page is parsed and handles the button click.
-         Loaded as standard src to allow browser caching independently.
-    ================================================================================== -->
-    <script is:inline defer src="/toggle-theme.js"></script>
-
-    <!-- Vercel Web Analytics & Speed Insights
-         Using official @vercel/analytics package via client script
-         The beforeSend callback filters sensitive data and localhost traffic
-         See: https://vercel.com/docs/analytics
-    ================================================================================== -->
-    <script is:inline>
-      // Set up beforeSend callback before analytics script loads
-      // This filters localhost traffic and sensitive pages
-      window.webAnalyticsBeforeSend = function (event) {
-        // Ignore all events from localhost to avoid wasting quota during development
-        if (window.location.hostname === "localhost") {
-          return null;
-        }
-
-        // Ignore tracking for the Sentry test page
-        if (event.url && event.url.includes("/sentry-test")) {
-          return null;
-        }
-
-        // Track the event normally
-        return event;
-      };
-    </script>
-
-    <!-- Enable view transitions for faster navigation -->
+    <!-- Enable View Transitions -->
+    <slot name="head" />
     <ClientRouter />
   </head>
+
   <body>
     <slot />
 
-    <!-- Initialize error tracking after page load with requestIdleCallback -->
-    <!-- This defers Sentry initialization to avoid blocking LCP (saves ~900ms) -->
-    <script>
-      import { initDeferred } from "@/utils/sentry-client-init";
-
-      // Use requestIdleCallback to defer Sentry until browser is idle
-      // Falls back to setTimeout(fn, 2000) for unsupported browsers
-      if ("requestIdleCallback" in window) {
-        requestIdleCallback(() => initDeferred(), { timeout: 2000 });
-      } else {
-        setTimeout(() => initDeferred(), 2000);
-      }
-    </script>
+    <!-- REFACTORED: Delegate analytics to its own component -->
+    <Analytics />
   </body>
 </html>

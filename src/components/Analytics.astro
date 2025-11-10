@@ -1,0 +1,36 @@
+---
+// This component initializes all analytics and error tracking.
+---
+
+<!-- Vercel Web Analytics & Speed Insights -->
+<script is:inline>
+  // Set up beforeSend callback before analytics script loads
+  // This filters localhost traffic and sensitive pages
+  window.webAnalyticsBeforeSend = function (event) {
+    // Ignore all events from localhost to avoid wasting quota during development
+    if (window.location.hostname === "localhost") {
+      return null;
+    }
+
+    // Ignore tracking for the Sentry test page
+    if (event.url && event.url.includes("/sentry-test")) {
+      return null;
+    }
+
+    // Track the event normally
+    return event;
+  };
+</script>
+
+<!-- Sentry Error Tracking (deferred for performance) -->
+<script>
+  import { initDeferred } from "@/utils/sentry-client-init";
+
+  // Use requestIdleCallback to defer Sentry until browser is idle
+  // Falls back to setTimeout(fn, 2000) for unsupported browsers
+  if ("requestIdleCallback" in window) {
+    requestIdleCallback(() => initDeferred(), { timeout: 2000 });
+  } else {
+    setTimeout(() => initDeferred(), 2000);
+  }
+</script>
