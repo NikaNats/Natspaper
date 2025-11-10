@@ -1,45 +1,35 @@
 ---
-/**
- * ReadingTime Component
- *
- * Displays estimated reading time for blog posts with optional word count.
- * Improves UX by helping users understand content commitment.
- *
- * Features:
- * - Responsive sizing (sm/lg)
- * - Optional word count display
- * - Icon integration
- * - Accessible metadata markup
- */
+// REFACTORED: Removed calculation logic - now a pure presentational component.
+import IconClock from "@/assets/icons/IconClock.svg";
 
-import { getReadingTimeDisplay } from "@/utils/readingTime";
-import IconClock from "@/assets/icons/IconClock.svg"; // <-- ADD THIS IMPORT
-
+// REFACTORED: The Props interface is now much simpler.
+// It asks for the final `text` to display, not the raw `content` to process.
 export interface Props {
+  text: string;
   class?: string;
   size?: "sm" | "lg";
-  content: string;
-  includeWordCount?: boolean;
 }
 
 const {
-  content,
+  text,
   size = "sm",
   class: className = "",
-  includeWordCount = true,
 } = Astro.props;
-
-const readingTimeText = getReadingTimeDisplay(content, includeWordCount);
 ---
 
-<div class:list={["reading-time metadata", className]}>
-  {/* V START: ADD THE ICON HERE V */}
+{/*
+  REFACTORED: The parent div now handles the text sizing to avoid repetition (DRY).
+  The component is now much cleaner and more declarative.
+*/}
+<div
+  class:list={[
+    "reading-time metadata",
+    size === "sm" ? "text-sm" : "sm:text-base",
+    className,
+  ]}
+>
   <IconClock
     class:list={["inline-block size-5 min-w-5", { "scale-90": size === "sm" }]}
   />
-  {/* V END: ADD THE ICON HERE V */}
-
-  <span class:list={["text-sm", { "sm:text-base": size === "lg" }]}>
-    {readingTimeText}
-  </span>
+  <span>{text}</span>
 </div>
