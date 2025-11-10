@@ -1,10 +1,23 @@
 ---
+// REFACTORED: Props are now focused on the component's single responsibility.
 export interface Props {
-  noPadding?: boolean;
-  ariaHidden?: boolean;
+  class?: string;
+  /** If true, the <hr> is purely decorative and will be hidden from screen readers. */
+  decorative?: boolean;
 }
 
-const { noPadding = false } = Astro.props;
+const { class: className, decorative = false } = Astro.props;
 ---
 
-<div class:list={["mx-auto max-w-app", noPadding ? "px-0" : "px-4"]}></div>
+{/*
+  REFACTORED: The root element is now a semantic <hr> tag.
+  It has its own default styling but can be customized with the `class` prop.
+*/}
+<hr
+  class:list={[
+    "border-t border-dashed border-border", // Sensible, theme-aware default styles
+    className, // Allows for custom classes like `my-8` to be passed in
+  ]}
+  role={decorative ? "presentation" : undefined}
+  aria-hidden={decorative ? "true" : undefined}
+/>
