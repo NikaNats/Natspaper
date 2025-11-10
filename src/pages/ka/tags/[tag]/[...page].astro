@@ -58,7 +58,12 @@ const { page, tagName } = Astro.props;
     </ul>
   </Main>
 
-  <Pagination {page} />
+  <Pagination
+    currentPage={page.currentPage}
+    totalPages={page.lastPage}
+    prevUrl={page.url.prev}
+    nextUrl={page.url.next}
+  />
 
   <Footer noMarginTop={page.lastPage > 1} />
 </Layout>
