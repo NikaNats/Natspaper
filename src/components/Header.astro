@@ -97,7 +97,7 @@ function isActive(path: string) {
           >
             <IconX class="size-6" />
           </button>
-          
+
           {/* The original list of menu items */}
           <ul
             id="menu-items"
@@ -145,7 +145,9 @@ function isActive(path: string) {
                 </li>
               )
             }
-            {/* V START: Comment out this entire list item for the search button */}
+            {
+              /* V START: Comment out this entire list item for the search button */
+            }
             <!-- <li>
               <LinkButton
                 href={`/${Astro.currentLocale}/search`}
@@ -160,7 +162,9 @@ function isActive(path: string) {
                 <span class="sr-only">Search</span>
               </LinkButton>
             </li> -->
-            {/* V END: Comment out this entire list item for the search button */}
+            {
+              /* V END: Comment out this entire list item for the search button */
+            }
             {
               SITE.lightAndDarkMode && (
                 <li>

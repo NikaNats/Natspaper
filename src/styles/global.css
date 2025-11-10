@@ -249,17 +249,17 @@ header {
     /* Use inset-0 for full-screen coverage */
     inset: 0;
     top: 4rem; /* Start below the header */
-    
+
     /* Layout */
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     gap: 2rem; /* More space between items */
-    
+
     /* Appearance */
     background-color: var(--background);
-    
+
     /* Prevent body scroll when menu is open */
     overscroll-behavior-y: contain;
   }
@@ -272,7 +272,7 @@ header {
 
   /* Reduce horizontal padding on main content for smaller screens */
   main#main-content {
-    padding-left: 1rem;  /* 16px */
+    padding-left: 1rem; /* 16px */
     padding-right: 1rem; /* 16px */
   }
 
@@ -295,12 +295,15 @@ a:active {
 }
 
 /* Prevent accidental zoom on double-tap for buttons */
-button, [role="button"], a {
+button,
+[role="button"],
+a {
   touch-action: manipulation;
 }
 
 /* Prevent accidental horizontal scrolling */
-html, body {
+html,
+body {
   overflow-x: hidden;
 }
 
