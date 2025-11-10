@@ -241,3 +241,81 @@ header {
 :target {
   scroll-margin-block: 1rem;
 }
+
+@media (max-width: 640px) {
+  /* Mobile Menu Overlay */
+  #menu-items:not(.hidden) {
+    position: fixed;
+    /* Use inset-0 for full-screen coverage */
+    inset: 0;
+    top: 4rem; /* Start below the header */
+    
+    /* Layout */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2rem; /* More space between items */
+    
+    /* Appearance */
+    background-color: var(--background);
+    
+    /* Prevent body scroll when menu is open */
+    overscroll-behavior-y: contain;
+  }
+
+  /* Make menu items larger on mobile */
+  #menu-items li a {
+    font-size: 1.5rem; /* Larger, easier-to-read text */
+    padding: 0.5rem 1rem;
+  }
+
+  /* Reduce horizontal padding on main content for smaller screens */
+  main#main-content {
+    padding-left: 1rem;  /* 16px */
+    padding-right: 1rem; /* 16px */
+  }
+
+  /* Make headings slightly smaller on mobile to improve hierarchy */
+  .app-prose h1 {
+    font-size: 2rem; /* from 2.25rem */
+  }
+  .app-prose h2 {
+    font-size: 1.75rem; /* from 2rem */
+  }
+}
+
+/* Improve tap feedback on all buttons */
+button:active,
+[role="button"]:active,
+a:active {
+  /* Briefly scale down to simulate a press */
+  transform: scale(0.96);
+  transition: transform 0.1s ease;
+}
+
+/* Prevent accidental zoom on double-tap for buttons */
+button, [role="button"], a {
+  touch-action: manipulation;
+}
+
+/* Prevent accidental horizontal scrolling */
+html, body {
+  overflow-x: hidden;
+}
+
+/* === Mobile Menu Enhancement === */
+
+/* Prevent the page from scrolling when the menu is open */
+body.menu-open {
+  overflow: hidden;
+}
+
+@media (max-width: 640px) {
+  #mobile-menu-overlay ul li a {
+    /* Make menu items larger and easier to tap on mobile */
+    font-size: 1.5rem; /* 24px */
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem; /* Optional: adds rounded corners */
+  }
+}

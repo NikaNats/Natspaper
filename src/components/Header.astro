@@ -53,7 +53,7 @@ function isActive(path: string) {
   </a>
 
   <!-- Centered container wrapper -->
-  <div class="mx-auto flex w-full max-w-app items-center justify-between">
+  <div class="mx-auto flex w-full max-w-app items-center justify-between px-4">
     <!-- Main navigation wrapper with improved spacing and border styling -->
     <nav
       id="top-nav-wrap"
@@ -77,95 +77,112 @@ function isActive(path: string) {
           class="rounded-md p-2 text-foreground transition-colors hover:text-accent focus:outline-none sm:hidden"
           aria-label="Open Menu"
           aria-expanded="false"
-          aria-controls="menu-items"
+          aria-controls="mobile-menu-overlay"
         >
           <IconMenuDeep id="menu-icon" class="size-6" />
-          <IconX id="close-icon" class="hidden size-6" />
         </button>
 
-        <!-- Navigation menu items - transforms into mobile overlay on small screens -->
-        <ul
-          id="menu-items"
-          class="absolute top-16 right-0 left-0 z-40 hidden flex-col items-center gap-3 bg-background p-4 shadow-md sm:relative sm:top-0 sm:flex sm:flex-row sm:border-none sm:bg-transparent sm:p-0 sm:shadow-none"
+        <!-- V START: This is our new full-screen overlay -->
+        <div
+          id="mobile-menu-overlay"
+          class="fixed inset-0 z-50 hidden flex-col items-center justify-center gap-6 bg-background sm:relative sm:top-0 sm:z-auto sm:flex sm:flex-row sm:border-none sm:bg-transparent sm:p-0 sm:shadow-none"
+          role="dialog"
+          aria-modal="true"
         >
-          <li>
-            <!-- MODIFIED FOR SYMMETRY: Added flex, items-center, h-8 and removed vertical padding -->
-            <a
-              href={`/${Astro.currentLocale}/posts`}
-              class:list={{
-                "active-nav text-accent": isActive("/posts"),
-              }}
-              class="flex h-8 items-center rounded px-2 font-sans text-sm font-medium text-foreground no-underline transition-colors hover:text-accent focus:outline-none"
-            >
-              Posts
-            </a>
-          </li>
-          <li>
-            <!-- MODIFIED FOR SYMMETRY: Added flex, items-center, h-8 and removed vertical padding -->
-            <a
-              href={`/${Astro.currentLocale}/tags`}
-              class:list={{
-                "active-nav text-accent": isActive("/tags"),
-              }}
-              class="flex h-8 items-center rounded px-2 font-sans text-sm font-medium text-foreground no-underline transition-colors hover:text-accent focus:outline-none"
-            >
-              Tags
-            </a>
-          </li>
-          {
-            SITE.showArchives && (
-              <li>
-                <LinkButton
-                  href={`/${Astro.currentLocale}/archives`}
-                  class:list={[
-                    "flex items-center justify-center rounded-md p-1.5 text-foreground transition-colors hover:text-accent focus:outline-none",
-                    { "active-nav text-accent": isActive("/archives") },
-                  ]}
-                  ariaLabel="archives"
-                  title="Archives"
-                >
-                  <IconArchive class="size-5" />
-                  <span class="sr-only">Archives</span>
-                </LinkButton>
-              </li>
-            )
-          }
-          {/* V START: Comment out this entire list item for the search button */}
-          <!-- <li>
-            <LinkButton
-              href={`/${Astro.currentLocale}/search`}
-              class:list={[
-                "flex items-center justify-center rounded-md p-1.5 text-foreground transition-colors hover:text-accent focus:outline-none",
-                { "active-nav text-accent": isActive("/search") },
-              ]}
-              ariaLabel="search"
-              title="Search"
-            >
-              <IconSearch class="size-5" />
-              <span class="sr-only">Search</span>
-            </LinkButton>
-          </li> -->
-          {/* V END: Comment out this entire list item for the search button */}
-          {
-            SITE.lightAndDarkMode && (
-              <li>
-                <button
-                  id="theme-btn"
-                  class="inline-flex items-center justify-center rounded-md p-1.5 text-foreground transition-colors hover:text-accent focus:outline-none"
-                  title="Toggle light & dark theme"
-                  aria-label="Toggle theme"
-                  aria-live="polite"
-                >
-                  <IconMoon class="hidden size-5 dark:block" />
-                  <IconSunHigh class="size-5 dark:hidden" />
-                </button>
-              </li>
-            )
-          }
-          <li>
-            <LanguagePicker />
-          </li>
-        </ul>
+          {/* Dedicated Close Button */}
+          <button
+            id="menu-close-btn"
+            class="absolute top-4 right-4 rounded-md p-2 text-foreground transition-colors hover:text-accent focus:outline-none sm:hidden"
+            aria-label="Close Menu"
+          >
+            <IconX class="size-6" />
+          </button>
+          
+          {/* The original list of menu items */}
+          <ul
+            id="menu-items"
+            class="flex flex-col items-center gap-6 sm:flex-row sm:gap-3"
+          >
+            <li>
+              <!-- MODIFIED FOR SYMMETRY: Added flex, items-center, h-8 and removed vertical padding -->
+              <a
+                href={`/${Astro.currentLocale}/posts`}
+                class:list={{
+                  "active-nav text-accent": isActive("/posts"),
+                }}
+                class="flex h-8 items-center rounded px-2 font-sans text-sm font-medium text-foreground no-underline transition-colors hover:text-accent focus:outline-none"
+              >
+                Posts
+              </a>
+            </li>
+            <li>
+              <!-- MODIFIED FOR SYMMETRY: Added flex, items-center, h-8 and removed vertical padding -->
+              <a
+                href={`/${Astro.currentLocale}/tags`}
+                class:list={{
+                  "active-nav text-accent": isActive("/tags"),
+                }}
+                class="flex h-8 items-center rounded px-2 font-sans text-sm font-medium text-foreground no-underline transition-colors hover:text-accent focus:outline-none"
+              >
+                Tags
+              </a>
+            </li>
+            {
+              SITE.showArchives && (
+                <li>
+                  <LinkButton
+                    href={`/${Astro.currentLocale}/archives`}
+                    class:list={[
+                      "flex items-center justify-center rounded-md p-2.5 text-foreground transition-colors hover:text-accent focus:outline-none",
+                      { "active-nav text-accent": isActive("/archives") },
+                    ]}
+                    ariaLabel="archives"
+                    title="Archives"
+                  >
+                    <IconArchive class="size-5" />
+                    <span class="sr-only">Archives</span>
+                  </LinkButton>
+                </li>
+              )
+            }
+            {/* V START: Comment out this entire list item for the search button */}
+            <!-- <li>
+              <LinkButton
+                href={`/${Astro.currentLocale}/search`}
+                class:list={[
+                  "flex items-center justify-center rounded-md p-1.5 text-foreground transition-colors hover:text-accent focus:outline-none",
+                  { "active-nav text-accent": isActive("/search") },
+                ]}
+                ariaLabel="search"
+                title="Search"
+              >
+                <IconSearch class="size-5" />
+                <span class="sr-only">Search</span>
+              </LinkButton>
+            </li> -->
+            {/* V END: Comment out this entire list item for the search button */}
+            {
+              SITE.lightAndDarkMode && (
+                <li>
+                  <button
+                    id="theme-btn"
+                    class="inline-flex items-center justify-center rounded-md p-2.5 text-foreground transition-colors hover:text-accent focus:outline-none"
+                    title="Toggle light & dark theme"
+                    aria-label="Toggle theme"
+                    aria-live="polite"
+                  >
+                    <IconMoon class="hidden size-5 dark:block" />
+                    <IconSunHigh class="size-5 dark:hidden" />
+                  </button>
+                </li>
+              )
+            }
+            <li>
+              <LanguagePicker />
+            </li>
+          </ul>
+        </div>
+        {/* V END: End of the overlay */}
       </div>
     </nav>
   </div>
@@ -173,35 +190,33 @@ function isActive(path: string) {
 
 <script lang="ts" is:inline>
   function setupNavigation() {
-    const menuBtn = document.querySelector("#menu-btn");
-    const menuItems = document.querySelector("#menu-items");
-    const menuIcon = document.querySelector("#menu-icon");
-    const closeIcon = document.querySelector("#close-icon");
+    const menuOpenBtn = document.querySelector("#menu-btn");
+    const menuCloseBtn = document.querySelector("#menu-close-btn");
+    const menuOverlay = document.querySelector("#mobile-menu-overlay");
 
-    if (!menuBtn || !menuItems || !menuIcon || !closeIcon) return;
+    if (!menuOpenBtn || !menuCloseBtn || !menuOverlay) return;
 
-    const toggleMenu = () => {
-      const isOpen = menuBtn.getAttribute("aria-expanded") === "true";
-      const newState = !isOpen;
-
-      menuBtn.setAttribute("aria-expanded", String(newState));
-      menuBtn.setAttribute("aria-label", newState ? "Close Menu" : "Open Menu");
-
-      menuItems.classList.toggle("hidden", !newState);
-      menuIcon.classList.toggle("hidden", newState);
-      closeIcon.classList.toggle("hidden", !newState);
+    const openMenu = () => {
+      menuOverlay.classList.remove("hidden");
+      menuOverlay.classList.add("flex");
+      menuOpenBtn.setAttribute("aria-expanded", "true");
+      document.body.classList.add("menu-open"); // Prevent body scroll
     };
 
-    menuBtn.addEventListener("click", toggleMenu);
+    const closeMenu = () => {
+      menuOverlay.classList.add("hidden");
+      menuOverlay.classList.remove("flex");
+      menuOpenBtn.setAttribute("aria-expanded", "false");
+      document.body.classList.remove("menu-open"); // Allow body scroll
+    };
 
-    // Close menu when a navigation item is clicked
-    const navLinks = menuItems.querySelectorAll("a");
+    menuOpenBtn.addEventListener("click", openMenu);
+    menuCloseBtn.addEventListener("click", closeMenu);
+
+    // Close menu when a navigation link is clicked (for single-page feel)
+    const navLinks = menuOverlay.querySelectorAll("a");
     navLinks.forEach(link => {
-      link.addEventListener("click", () => {
-        if (menuBtn.getAttribute("aria-expanded") === "true") {
-          toggleMenu();
-        }
-      });
+      link.addEventListener("click", closeMenu);
     });
   }
 
