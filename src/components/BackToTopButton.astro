@@ -5,10 +5,10 @@ import IconArrowNarrowUp from "@/assets/icons/IconArrowNarrowUp.svg";
 
 <div
   id="btt-btn-container"
+  data-visible="false"
   class:list={[
-    "fixed end-4 bottom-8 z-50",
+    "fixed end-4 bottom-8 z-50 transition-opacity-transform duration-500",
     "md:sticky md:end-auto md:float-end md:me-1",
-    "translate-y-14 opacity-0 transition duration-500",
   ]}
 >
   <button
@@ -32,47 +32,59 @@ import IconArrowNarrowUp from "@/assets/icons/IconArrowNarrowUp.svg";
   </button>
 </div>
 
+{/* NEW: Component-scoped styles for visibility */}
+<style>
+  #btt-btn-container {
+    opacity: 0;
+    transform: translateY(3.5rem); /* Equivalent to translate-y-14 */
+  }
+  #btt-btn-container[data-visible="true"] {
+    opacity: 1;
+    transform: translateY(0);
+  }
+</style>
+
 <script is:inline data-astro-rerun>
-  /** Scrolls the document to the top when
-   * the "Back to Top" button is clicked. */
-  function backToTop() {
-    const rootElement = document.documentElement;
-    const btnContainer = document.querySelector("#btt-btn-container");
-    const backToTopBtn = document.querySelector("[data-button='back-to-top']");
-    const progressIndicator = document.querySelector("#progress-indicator");
+  function initBackToTop() {
+    // REFACTORED: Use a constant for the visibility threshold
+    const VISIBILITY_THRESHOLD = 0.3;
+    
+    // REFACTORED: Scope all queries to this component instance
+    const container = document.getElementById("btt-btn-container");
+    if (!container || container.dataset.initialized) return; // Early exit if not found or already initialized
 
-    if (!rootElement || !btnContainer || !backToTopBtn || !progressIndicator)
-      return;
+    const button = container.querySelector("[data-button='back-to-top']");
+    const progressIndicator = container.querySelector("#progress-indicator");
 
-    // Attach click event handler for back-to-top button
-    backToTopBtn.addEventListener("click", () => {
-      document.body.scrollTop = 0; // For Safari
-      document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
+    // NEW: Use modern, smooth scrolling API
+    button.addEventListener("click", () => {
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth", // Provides a much nicer user experience
+      });
     });
 
-    // Handle button visibility according to scroll position
-    let lastVisible = null;
-    function handleScroll() {
-      const scrollTotal = rootElement.scrollHeight - rootElement.clientHeight;
-      const scrollTop = rootElement.scrollTop;
-      const scrollPercent = Math.floor((scrollTop / scrollTotal) * 100);
-
-      progressIndicator.style.setProperty(
-        "background-image",
-        `conic-gradient(var(--accent), var(--accent) ${scrollPercent}%, transparent ${scrollPercent}%)`
-      );
-
-      const isVisible = scrollTop / scrollTotal > 0.3;
-
-      if (isVisible !== lastVisible) {
-        btnContainer.classList.toggle("opacity-100", isVisible);
-        btnContainer.classList.toggle("translate-y-0", isVisible);
-        btnContainer.classList.toggle("opacity-0", !isVisible);
-        btnContainer.classList.toggle("translate-y-14", !isVisible);
-        lastVisible = isVisible;
+    const handleScroll = () => {
+      const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
+      const scrollTotal = scrollHeight - clientHeight;
+      
+      // Prevent division by zero on pages with no scroll
+      if (scrollTotal <= 0) {
+        container.dataset.visible = "false";
+        return;
       }
-    }
+      
+      const scrollPercent = (scrollTop / scrollTotal) * 100;
+      
+      // REFACTORED: Simplified style update
+      progressIndicator.style.backgroundImage = `conic-gradient(var(--accent) ${scrollPercent}%, transparent ${scrollPercent}%)`;
+      
+      // REFACTORED: Declarative state change
+      const isVisible = scrollTop / scrollTotal > VISIBILITY_THRESHOLD;
+      container.dataset.visible = isVisible.toString();
+    };
 
+    // Performance: Use requestAnimationFrame for smooth scroll handling
     let ticking = false;
     document.addEventListener("scroll", () => {
       if (!ticking) {
@@ -83,6 +95,12 @@ import IconArrowNarrowUp from "@/assets/icons/IconArrowNarrowUp.svg";
         ticking = true;
       }
     });
+
+    // Mark as initialized to prevent re-attaching listeners on page transitions
+    container.dataset.initialized = "true";
   }
-  backToTop();
+  
+  // Ensure script runs on initial load and after Astro's view transitions
+  initBackToTop();
+  document.addEventListener("astro:page-load", initBackToTop);
 </script>
