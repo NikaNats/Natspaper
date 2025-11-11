@@ -3,18 +3,7 @@
  *
  * This file defines all hardcoded UI text that appears in components.
  * Each language should have complete translations for all keys.
- *
- * Language codes:
- * - en: English
- * - ka: Georgian (ქართული)
  */
-
-export const languages = {
-  en: "English",
-  ka: "ქართული", // Georgian
-} as const;
-
-export const defaultLang = "en" as const;
 
 export const ui = {
   en: {
@@ -90,4 +79,3 @@ export const ui = {
 } as const;
 
 export type UIKey = keyof typeof ui.en;
-export type Lang = keyof typeof ui;

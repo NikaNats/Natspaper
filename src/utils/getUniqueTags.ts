@@ -1,7 +1,7 @@
 import type { CollectionEntry } from "astro:content";
 import { slugifyStr } from "./slugify";
 import postFilter from "./postFilter";
-import { getTranslatedTagName } from "@/i18n/tags";
+import { getI18n } from "@/i18n";
 
 interface Tag {
   tag: string;
@@ -23,7 +23,9 @@ const getUniqueTags = (posts: CollectionEntry<"blog">[], locale?: string) => {
     .map(tag => {
       const tagSlug = slugifyStr(tag);
       // If locale is provided, use translated name, otherwise use original tag
-      const tagName = locale ? getTranslatedTagName(tagSlug, locale) : tag;
+      const tagName = locale
+        ? getI18n(locale as "en" | "ka").tTag(tagSlug)
+        : tag;
       return { tag: tagSlug, tagName };
     })
     .filter(

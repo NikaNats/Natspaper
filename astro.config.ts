@@ -93,8 +93,8 @@ export default defineConfig({
     remarkPlugins: [
       remarkModifiedTime,
       remarkMath,
-      remarkToc,
-      [remarkCollapse, { test: "Table of contents" }],
+      [remarkToc, { heading: "(table of contents|შინაარსის ცხრილი)" }],
+      [remarkCollapse, { test: "(Table of contents|შინაარსის ცხრილი)" }],
     ],
     rehypePlugins: [rehypeKatex],
     shikiConfig: {

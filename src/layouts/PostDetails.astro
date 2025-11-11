@@ -16,7 +16,7 @@ import IconChevronLeft from "@/assets/icons/IconChevronLeft.svg";
 import IconChevronRight from "@/assets/icons/IconChevronRight.svg";
 import { SITE } from "@/config";
 import katexStyles from "katex/dist/katex.min.css?url";
-import { useTranslations } from "@/i18n/utils";
+import { getI18n } from "@/i18n";
 
 /**
  * Post Details Layout Component
@@ -98,7 +98,7 @@ const showEditPost =
 // V END
 
 // REFACTORED: Moved copyright logic from Footer to parent layout
-const t = useTranslations(Astro.currentLocale as "en" | "ka");
+const { t, tTag } = getI18n(Astro.currentLocale as "en" | "ka" | undefined);
 const currentYear = new Date().getFullYear();
 const copyrightText = `Copyright © ${currentYear} • ${t("footer.copyright")}`;
 
@@ -174,7 +174,7 @@ const { previous: prevPost, next: nextPost } = getAdjacentPosts(posts, post.id);
     }
 
     <ul class="mt-4 mb-8 sm:my-8">
-      {tags.map(tag => <Tag tag={slugifyStr(tag)} tagName={tag} />)}
+      {tags.map(tag => <Tag tag={slugifyStr(tag)} tagName={tTag(tag)} />)}
     </ul>
 
     <BackToTopButton />

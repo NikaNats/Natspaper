@@ -1,4 +1,4 @@
-import { useTranslations } from "@/i18n/utils";
+import { getI18n } from "@/i18n";
 
 /**
  * Generates copyright text for the footer
@@ -6,7 +6,7 @@ import { useTranslations } from "@/i18n/utils";
  * @returns Formatted copyright text with current year and translated copyright notice
  */
 export function getCopyrightText(locale: "en" | "ka"): string {
-  const t = useTranslations(locale);
+  const { t } = getI18n(locale);
   const currentYear = new Date().getFullYear();
   return `Copyright © ${currentYear} • ${t("footer.copyright")}`;
 }

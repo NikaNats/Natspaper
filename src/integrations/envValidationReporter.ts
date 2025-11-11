@@ -21,7 +21,9 @@ function createSection(
   if (issues.length === 0) return "";
 
   const border = "=".repeat(70);
-  const formattedIssues = issues.map(issue => formatIssue(issue, symbol)).join("\n\n");
+  const formattedIssues = issues
+    .map(issue => formatIssue(issue, symbol))
+    .join("\n\n");
 
   return [
     "", // Leading newline

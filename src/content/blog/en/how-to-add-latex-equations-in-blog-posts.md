@@ -48,8 +48,8 @@ In this section, you will find instructions on how to add support for LaTeX in y
      markdown: {
        remarkPlugins: [
          remarkMath, // [!code ++]
-         remarkToc,
-         [remarkCollapse, { test: "Table of contents" }],
+         [remarkToc, { heading: "(table of contents|შინაარსის ცხრილი)" }], // [!code ++]
+         [remarkCollapse, { test: "(Table of contents|შინაარსის ცხრილი)" }], // [!code ++]
        ],
        rehypePlugins: [rehypeKatex], // [!code ++]
        shikiConfig: {

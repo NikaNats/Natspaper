@@ -48,8 +48,8 @@ description: ისწავლეთ როგორ დავამატო�
      markdown: {
        remarkPlugins: [
          remarkMath, // [!code ++]
-         remarkToc,
-         [remarkCollapse, { test: "Table of contents" }],
+         [remarkToc, { heading: "(table of contents|შინაარსის ცხრილი)" }], // [!code ++]
+         [remarkCollapse, { test: "(Table of contents|შინაარსის ცხრილი)" }], // [!code ++]
        ],
        rehypePlugins: [rehypeKatex], // [!code ++]
        shikiConfig: {
