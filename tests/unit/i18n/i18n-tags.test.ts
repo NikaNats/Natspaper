@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { getI18n } from '@/i18n';
-import { tagTranslations } from '../../src/i18n/dictionaries/tags';
+import { tagTranslations } from '../../../src/i18n/dictionaries/tags';
 
 /**
  * Unit Tests for i18n Tag Translation System
