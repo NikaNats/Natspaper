@@ -14,9 +14,10 @@ const URL = Astro.url;
         {SHARE_LINKS.map(social => {
           const Icon = social.icon;
           // Handle both string and function linkTitle
-          const linkTitle = typeof social.linkTitle === 'function'
-            ? social.linkTitle(SITE.title)
-            : social.linkTitle;
+          const linkTitle =
+            typeof social.linkTitle === "function"
+              ? social.linkTitle(SITE.title)
+              : social.linkTitle;
 
           return (
             <LinkButton

@@ -33,9 +33,10 @@ const { links, centered = false } = Astro.props;
     links.map(social => {
       const Icon = social.icon;
       // REFACTORED: Handle both string and function linkTitle
-      const linkTitle = typeof social.linkTitle === 'function'
-        ? social.linkTitle(SITE.title)
-        : social.linkTitle;
+      const linkTitle =
+        typeof social.linkTitle === "function"
+          ? social.linkTitle(SITE.title)
+          : social.linkTitle;
 
       return (
         <LinkButton

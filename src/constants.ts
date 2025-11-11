@@ -23,25 +23,25 @@ export const SOCIALS: Social[] = [
   {
     name: "GitHub",
     href: "https://github.com/NikaNats",
-    linkTitle: (siteTitle) => `${siteTitle} on GitHub`,
+    linkTitle: siteTitle => `${siteTitle} on GitHub`,
     icon: IconGitHub,
   },
   {
     name: "X",
     href: "https://x.com/NNats8",
-    linkTitle: (siteTitle) => `${siteTitle} on X`,
+    linkTitle: siteTitle => `${siteTitle} on X`,
     icon: IconBrandX,
   },
   {
     name: "LinkedIn",
     href: "https://www.linkedin.com/in/nika-natsvlishvili/",
-    linkTitle: (siteTitle) => `${siteTitle} on LinkedIn`,
+    linkTitle: siteTitle => `${siteTitle} on LinkedIn`,
     icon: IconLinkedin,
   },
   {
     name: "Mail",
     href: "mailto:nika.nacvlishvili1@gmail.com",
-    linkTitle: (siteTitle) => `Send an email to ${siteTitle}`,
+    linkTitle: siteTitle => `Send an email to ${siteTitle}`,
     icon: IconMail,
   },
   {

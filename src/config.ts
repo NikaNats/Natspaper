@@ -1,5 +1,5 @@
-import { siteConfig } from './site.config';
-import { settingsConfig } from './settings.config';
+import { siteConfig } from "./site.config";
+import { settingsConfig } from "./settings.config";
 
 /**
  * Validate that the timezone is a valid IANA timezone identifier.

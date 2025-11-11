@@ -17,7 +17,7 @@ import type { Page } from '@playwright/test';
  */
 async function openMobileMenuIfNeeded(page: Page) {
   const menuBtn = page.locator('#menu-btn');
-  const menuItems = page.locator('#menu-items');
+  const menuItems = page.locator('#mobile-menu-overlay');
   
   // Check if we're on mobile (menu button exists and menu is hidden)
   if (await menuBtn.isVisible() && await menuItems.isHidden()) {
