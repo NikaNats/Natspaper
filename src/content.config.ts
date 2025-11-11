@@ -1,11 +1,12 @@
 import { defineCollection, z } from "astro:content";
-import { SITE } from "@/config";
+import { siteConfig } from "./site.config"; // Import from the pure metadata file.
 
 const blog = defineCollection({
   // 'content' is appropriate for MD/MDX files
   type: "content",
   schema: z.object({
-    author: z.string().default(SITE.author),
+    // REFACTORED: The default value is now taken from a pure, non-circular dependency.
+    author: z.string().default(siteConfig.author),
     pubDatetime: z.coerce.date(),
     modDatetime: z.coerce.date().optional().nullable(),
     title: z.string(),
