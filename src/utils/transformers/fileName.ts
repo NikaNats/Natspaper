@@ -8,10 +8,35 @@
  * ```
  */
 
+/* eslint-disable no-console */
+
+// --- Rendering Strategies ---
+
+// This interface defines the "contract" for any style we might add in the future.
+interface StyleStrategy {
+  render(filename: string, displayName: string): string;
+}
+
+const v1Strategy: StyleStrategy = {
+  render: (_filename, displayName) =>
+    `<div class="filename-label">${displayName}</div>`,
+};
+
+const v2Strategy: StyleStrategy = {
+  render: (filename, displayName) =>
+    `<div class="code-filename" data-filename="${filename}">${displayName}</div>`,
+};
+
+// This object maps style names to their strategy. It's easily extensible.
+const strategies: Record<string, StyleStrategy> = {
+  v1: v1Strategy,
+  v2: v2Strategy,
+};
+
+// --- The Main Transformer Function ---
+
 export interface TransformerFileNameOptions {
-  /** Style version: 'v1' or 'v2' */
   style?: "v1" | "v2";
-  /** Whether to hide the dot in filenames */
   hideDot?: boolean;
 }
 
@@ -20,34 +45,36 @@ export function transformerFileName(
 ): Record<string, unknown> {
   const { style = "v2", hideDot = false } = options;
 
+  // Select the rendering strategy based on the options.
+  const strategy = strategies[style];
+
+  if (!strategy) {
+    // Fail gracefully if an invalid style is provided.
+    console.warn(
+      `[transformerFileName] Unknown style "${style}". Defaulting to "v2".`
+    );
+    return transformerFileName({ ...options, style: "v2" });
+  }
+
   return {
     name: "transformer-filename",
-    postprocess(html: string) {
-      // This runs after code highlighting
-      // Extract filename from data-file-name attribute if present
+    postprocess(html: string): string {
       const fileNameRegex = /data-file-name="([^"]+)"/;
-      const fileNameMatch = fileNameRegex.exec(html);
+      const match = html.match(fileNameRegex);
+      const filename = match?.[1];
 
-      if (!fileNameMatch?.[1]) {
+      if (!filename) {
         return html;
       }
 
-      const filename = fileNameMatch[1];
-      let displayName = filename;
+      // 1. Logic: Process the data
+      const displayName =
+        hideDot && filename.startsWith(".") ? filename.substring(1) : filename;
 
-      // Optionally hide the leading dot in filenames like .gitignore
-      if (hideDot && displayName.startsWith(".")) {
-        displayName = displayName.substring(1);
-      }
+      // 2. Presentation: Delegate rendering to the chosen strategy
+      const headerHtml = strategy.render(filename, displayName);
 
-      // Add filename wrapper based on style
-      if (style === "v1") {
-        // Simple style: just add a div with the filename
-        return `<div class="filename-label">${displayName}</div>\n${html}`;
-      }
-
-      // v2 style: more polished with data attributes
-      return `<div class="code-filename" data-filename="${filename}">${displayName}</div>\n${html}`;
+      return `${headerHtml}\n${html}`;
     },
   };
 }
