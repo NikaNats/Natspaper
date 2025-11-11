@@ -7,57 +7,12 @@
 
 import type { AstroIntegration } from "astro";
 import { envManager } from "../env";
+import { formatValidationResult } from "./envValidationReporter"; // Import the new reporter
 
 /**
- * Format validation errors for console output
- */
-function formatValidationOutput(): string {
-  if (!envManager) {
-    return ""; // Environment manager not available in this context
-  }
-
-  const errors = envManager.getErrors();
-  const warnings = envManager.getWarnings();
-
-  let output = "";
-
-  // Errors section
-  if (errors.length > 0) {
-    output += "\n" + "=".repeat(70) + "\n";
-    output += "❌ ENVIRONMENT VALIDATION FAILED\n";
-    output += "=".repeat(70) + "\n\n";
-
-    for (const error of errors) {
-      output += `❌ ${error.variable}\n`;
-      output += `   ${error.message}\n\n`;
-    }
-
-    output += "=".repeat(70) + "\n";
-    output += "⚠️  Build cannot proceed. Please fix the errors above.\n";
-    output += "=".repeat(70) + "\n\n";
-  }
-
-  // Warnings section
-  if (warnings.length > 0) {
-    output += "\n" + "=".repeat(70) + "\n";
-    output += "⚠️  ENVIRONMENT WARNINGS (Non-critical)\n";
-    output += "=".repeat(70) + "\n\n";
-
-    for (const warning of warnings) {
-      output += `⚠️  ${warning.variable}\n`;
-      output += `   ${warning.message}\n\n`;
-    }
-
-    output +=
-      "ℹ️  These are optional. Your build will succeed, but some features may be limited.\n";
-    output += "=".repeat(70) + "\n\n";
-  }
-
-  return output;
-}
-
-/**
- * Astro integration for environment validation
+ * Astro integration for environment validation.
+ * This integration acts as a controller: it orchestrates the validation
+ * and reporting, but delegates the formatting to a dedicated reporter.
  */
 export const envValidationIntegration = (): AstroIntegration => {
   return {
@@ -68,18 +23,27 @@ export const envValidationIntegration = (): AstroIntegration => {
           return; // Environment manager not available
         }
 
-        const isValid = envManager.validate();
-        const output = formatValidationOutput();
+        // 1. Perform the validation
+        envManager.validate();
+        const errors = envManager.getErrors();
+        const warnings = envManager.getWarnings();
 
-        if (output) {
-          if (isValid) {
-            // eslint-disable-next-line no-console
-            console.warn(output);
-          } else {
-            // eslint-disable-next-line no-console
-            console.error(output);
-            process.exit(1);
-          }
+        // 2. If there's nothing to report, do nothing.
+        if (errors.length === 0 && warnings.length === 0) {
+          return;
+        }
+
+        // 3. Delegate formatting to the reporter
+        const output = formatValidationResult(errors, warnings);
+
+        // 4. Handle side effects (logging and exiting)
+        if (errors.length > 0) {
+          // eslint-disable-next-line no-console
+          console.error(output);
+          process.exit(1);
+        } else {
+          // eslint-disable-next-line no-console
+          console.warn(output);
         }
       },
     },
