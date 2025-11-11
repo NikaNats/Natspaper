@@ -4,7 +4,7 @@ import {
   resolveOgImageUrl,
   getAdjacentPosts,
   generatePostStructuredData,
-} from "./postHelpers";
+} from "./post/postHelpers";
 
 // Mock SITE config
 vi.mock("@/config", () => ({

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { ConcurrencyLimiter } from "./concurrencyLimiter";
+import { ConcurrencyLimiter } from "./core/concurrencyLimiter";
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 

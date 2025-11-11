@@ -1,6 +1,6 @@
 import rss from "@astrojs/rss";
 import { getCollection } from "astro:content";
-import getSortedPosts from "@/utils/getSortedPosts";
+import { getSortedPosts } from "@/utils/post";
 import { SITE } from "@/config";
 import { sanitizeMarkdownUrls } from "@/utils/sanitizeMarkdownUrls";
 

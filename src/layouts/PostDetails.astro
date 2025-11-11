@@ -9,9 +9,9 @@ import ReadingTime from "@/components/ReadingTime.astro";
 import EditPost from "@/components/EditPost.astro";
 import ShareLinks from "@/components/ShareLinks.astro";
 import BackToTopButton from "@/components/BackToTopButton.astro";
-import { slugifyStr } from "@/utils/slugify";
-import { resolveOgImageUrl, getAdjacentPosts } from "@/utils/postHelpers";
-import { getReadingTimeDisplay } from "@/utils/readingTime"; // <-- ADD THIS IMPORT
+import { slugifyStr } from "@/utils/core";
+import { resolveOgImageUrl, getAdjacentPosts } from "@/utils/post";
+import { getReadingTimeDisplay } from "@/utils/post"; // <-- ADD THIS IMPORT
 import IconChevronLeft from "@/assets/icons/IconChevronLeft.svg";
 import IconChevronRight from "@/assets/icons/IconChevronRight.svg";
 import { SITE } from "@/config";

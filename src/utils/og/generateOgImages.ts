@@ -1,6 +1,6 @@
 import { Resvg } from "@resvg/resvg-js";
 import { type CollectionEntry } from "astro:content";
-import postOgImage from "./og-templates/post";
+import postOgImage from "./templates/post";
 
 /**
  * Helper: Clean up Resvg native memory

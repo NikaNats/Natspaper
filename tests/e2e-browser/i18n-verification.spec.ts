@@ -18,13 +18,13 @@ import { test, expect, type Page } from '@playwright/test';
  */
 async function openMobileMenuIfNeeded(page: Page) {
   const menuBtn = page.locator('#menu-btn');
-  const menuItems = page.locator('#menu-items');
+  const menuOverlay = page.locator('#mobile-menu-overlay');
   
   // Check if we're on mobile (menu button exists and menu is hidden)
-  if (await menuBtn.isVisible() && await menuItems.isHidden()) {
+  if (await menuBtn.isVisible() && await menuOverlay.isHidden()) {
     await menuBtn.click();
     // Wait for menu to open
-    await expect(menuItems).toBeVisible();
+    await expect(menuOverlay).toBeVisible();
   }
 }
 
@@ -184,7 +184,7 @@ test.describe('i18n Implementation - Verification Tests', () => {
       await openMobileMenuIfNeeded(page);
 
       // Check navigation items exist using href attributes
-      const postsLink = page.locator('#menu-items a[href*="/en/posts"]');
+      const postsLink = page.locator('a[href*="/en/posts"]');
       await expect(postsLink).toBeVisible();
     });
 
@@ -217,7 +217,7 @@ test.describe('i18n Implementation - Verification Tests', () => {
       await openMobileMenuIfNeeded(page);
 
       // Check navigation items exist using href attributes
-      const postsLink = page.locator('#menu-items a[href*="/ka/posts"]');
+      const postsLink = page.locator('a[href*="/ka/posts"]');
       await expect(postsLink).toBeVisible();
     });
 

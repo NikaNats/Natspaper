@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { slugifyStr, slugifyAll } from "@/utils/slugify";
+import { slugifyStr, slugifyAll } from "@/utils/core";
 
 describe("slugify", () => {
   describe("slugifyStr", () => {

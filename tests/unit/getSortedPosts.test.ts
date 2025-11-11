@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import getSortedPosts from "@/utils/getSortedPosts";
+import { getSortedPosts } from "@/utils/post";
 import { createMockBlogPost } from "@tests/helpers/mockBlogPost";
 
 // Use the shared typed helper

@@ -22,15 +22,4 @@
   };
 </script>
 
-<!-- Sentry Error Tracking (deferred for performance) -->
-<script>
-  import { initDeferred } from "@/utils/sentry-client-init";
-
-  // Use requestIdleCallback to defer Sentry until browser is idle
-  // Falls back to setTimeout(fn, 2000) for unsupported browsers
-  if ("requestIdleCallback" in window) {
-    requestIdleCallback(() => initDeferred(), { timeout: 2000 });
-  } else {
-    setTimeout(() => initDeferred(), 2000);
-  }
-</script>
+<!-- Sentry Error Tracking is now handled by sentry.client.config.ts -->

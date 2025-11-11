@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import getPostsByTag from "@/utils/getPostsByTag";
+import { getPostsByTag } from "@/utils/post";
 import { createMockBlogPost } from "@tests/helpers/mockBlogPost";
 
 // Helper to create mock blog posts with specific tags

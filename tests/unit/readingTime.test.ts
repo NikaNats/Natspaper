@@ -3,7 +3,7 @@ import {
   calculateReadingTime,
   formatReadingTime,
   getReadingTimeDisplay,
-} from "@/utils/readingTime";
+} from "@/utils/post";
 
 describe("readingTime", () => {
   describe("calculateReadingTime", () => {

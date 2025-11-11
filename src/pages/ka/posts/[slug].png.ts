@@ -1,7 +1,7 @@
 import type { APIRoute } from "astro";
 import { getCollection, type CollectionEntry } from "astro:content";
-import { generateOgImageForPost } from "@/utils/generateOgImages";
-import { ogImageLimiter } from "@/utils/concurrencyLimiter";
+import { generateOgImageForPost } from "@/utils/og";
+import { ogImageLimiter } from "@/utils/core";
 import { SITE } from "@/config";
 
 /**

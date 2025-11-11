@@ -1,5 +1,5 @@
 import type { CollectionEntry } from "astro:content";
-import { slugifyStr } from "./slugify";
+import { slugifyStr } from "../core/slugify";
 import postFilter from "./postFilter";
 import { getI18n } from "@/i18n";
 

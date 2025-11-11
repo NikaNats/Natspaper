@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import type { CollectionEntry } from "astro:content";
-import getUniqueTags from "@/utils/getUniqueTags";
+import { getUniqueTags } from "@/utils/post";
 import { createMockBlogPost } from "@tests/helpers/mockBlogPost";
 
 // Helper to create mock blog posts with custom tags
