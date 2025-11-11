@@ -4,10 +4,13 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { initProgressBar } from "@/utils/features/progressBar";
+import { ProgressBar } from "@/utils/features/progressBar";
 
 describe("Progress Bar Feature", () => {
+  let progressBar: ProgressBar;
+
   beforeEach(() => {
+    progressBar = new ProgressBar();
     // Create a simple DOM structure
     document.body.innerHTML = '<article id="article">Content</article>';
 
@@ -43,7 +46,7 @@ describe("Progress Bar Feature", () => {
   });
 
   it("should create a progress container element", () => {
-    initProgressBar();
+    progressBar.init();
 
     const container = document.getElementById("progress-container");
     expect(container).toBeTruthy();
@@ -52,7 +55,7 @@ describe("Progress Bar Feature", () => {
   });
 
   it("should create a progress bar element inside container", () => {
-    initProgressBar();
+    progressBar.init();
 
     const bar = document.getElementById("myBar");
     expect(bar).toBeTruthy();
@@ -61,14 +64,14 @@ describe("Progress Bar Feature", () => {
   });
 
   it("should initialize progress bar width to 0", () => {
-    initProgressBar();
+    progressBar.init();
 
     const bar = document.getElementById("myBar") as HTMLElement;
     expect(bar.style.width).toBe("");
   });
 
   it("should update progress bar width on scroll", async () => {
-    initProgressBar();
+    progressBar.init();
 
     const bar = document.getElementById("myBar") as HTMLElement;
 
@@ -89,7 +92,7 @@ describe("Progress Bar Feature", () => {
   });
 
   it("should update progress bar to 100% at bottom", async () => {
-    initProgressBar();
+    progressBar.init();
 
     const bar = document.getElementById("myBar") as HTMLElement;
 
@@ -108,12 +111,12 @@ describe("Progress Bar Feature", () => {
   });
 
   it("should remove existing progress bar on re-initialization", () => {
-    initProgressBar();
+    progressBar.init();
     const firstContainer = document.getElementById("progress-container");
     expect(firstContainer).toBeTruthy();
 
     // Re-initialize
-    initProgressBar();
+    progressBar.init();
     const secondContainer = document.getElementById("progress-container");
 
     // Should be a new element (not the same reference)
@@ -132,11 +135,12 @@ describe("Progress Bar Feature", () => {
     const addEventListenerSpy = vi.spyOn(document, "addEventListener");
 
     // Import fresh instance after reset
-    const { initProgressBar: initProgressBarFresh } = await import(
+    const { ProgressBar: ProgressBarFresh } = await import(
       "@/utils/features/progressBar"
     );
 
-    initProgressBarFresh();
+    const progressBarFresh = new ProgressBarFresh();
+    progressBarFresh.init();
 
     // Check that addEventListener was called with scroll event
     const scrollCall = addEventListenerSpy.mock.calls.find(
@@ -151,7 +155,7 @@ describe("Progress Bar Feature", () => {
   });
 
   it("should handle percentage calculation at various scroll positions", async () => {
-    initProgressBar();
+    progressBar.init();
 
     const bar = document.getElementById("myBar") as HTMLElement;
     const testCases = [
@@ -186,7 +190,7 @@ describe("Progress Bar Feature", () => {
     });
 
     // Initialize with body scroll instead
-    initProgressBar();
+    progressBar.init();
 
     const bar = document.getElementById("myBar") as HTMLElement;
 

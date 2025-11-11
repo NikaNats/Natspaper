@@ -1,8 +1,10 @@
 /**
  * Post Features Barrel Export
- * Exports all post-specific features
+ * Exports the centralized feature management system
+ *
+ * This replaces the old individual function exports with a cohesive
+ * object-oriented system following SOLID principles.
  */
 
-export { initProgressBar } from "./progressBar";
-export { initHeadingLinks } from "./headingLinks";
-export { initCopyButtons } from "./copyButton";
+export { featureManager } from "./FeatureManager";
+export type { Feature } from "./Feature";

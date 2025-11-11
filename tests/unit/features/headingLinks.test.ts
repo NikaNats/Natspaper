@@ -4,10 +4,13 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import { initHeadingLinks } from "@/utils/features/headingLinks";
+import { HeadingLinks } from "@/utils/features/headingLinks";
 
 describe("Heading Links Feature", () => {
+  let headingLinks: HeadingLinks;
+
   beforeEach(() => {
+    headingLinks = new HeadingLinks();
     document.body.innerHTML = `
       <h1>Page Title</h1>
       <h2 id="section-1">Section 1</h2>
@@ -24,7 +27,7 @@ describe("Heading Links Feature", () => {
   });
 
   it("should find all heading elements (h2-h6)", () => {
-    initHeadingLinks();
+    headingLinks.init();
 
     // Check that all headings (h2-h6) have been processed
     const h2 = document.querySelector("h2");
@@ -41,14 +44,14 @@ describe("Heading Links Feature", () => {
   });
 
   it("should not add links to h1 elements", () => {
-    initHeadingLinks();
+    headingLinks.init();
 
     const h1 = document.querySelector("h1");
     expect(h1?.querySelector("a.heading-link")).toBeFalsy();
   });
 
   it("should add 'group' class to headings", () => {
-    initHeadingLinks();
+    headingLinks.init();
 
     const headings = document.querySelectorAll("h2, h3, h4, h5, h6");
     for (const heading of headings) {
@@ -57,7 +60,7 @@ describe("Heading Links Feature", () => {
   });
 
   it("should add 'has-heading-link' class to prevent duplicates", () => {
-    initHeadingLinks();
+    headingLinks.init();
 
     const headings = document.querySelectorAll("h2, h3, h4, h5, h6");
     for (const heading of headings) {
@@ -66,7 +69,7 @@ describe("Heading Links Feature", () => {
   });
 
   it("should create heading links with correct href", () => {
-    initHeadingLinks();
+    headingLinks.init();
 
     const h2 = document.querySelector("h2") as HTMLElement;
     const link = h2.querySelector("a.heading-link") as HTMLAnchorElement;
@@ -75,7 +78,7 @@ describe("Heading Links Feature", () => {
   });
 
   it("should create link with anchor symbol", () => {
-    initHeadingLinks();
+    headingLinks.init();
 
     const h2 = document.querySelector("h2") as HTMLElement;
     const link = h2.querySelector("a.heading-link") as HTMLAnchorElement;
@@ -86,7 +89,7 @@ describe("Heading Links Feature", () => {
   });
 
   it("should apply correct CSS classes to links", () => {
-    initHeadingLinks();
+    headingLinks.init();
 
     const h2 = document.querySelector("h2") as HTMLElement;
     const link = h2.querySelector("a.heading-link") as HTMLAnchorElement;
@@ -99,7 +102,7 @@ describe("Heading Links Feature", () => {
   });
 
   it("should set title attribute on links for accessibility", () => {
-    initHeadingLinks();
+    headingLinks.init();
 
     const h2 = document.querySelector("h2") as HTMLElement;
     const link = h2.querySelector("a.heading-link") as HTMLAnchorElement;
@@ -108,20 +111,20 @@ describe("Heading Links Feature", () => {
   });
 
   it("should prevent duplicate links on re-initialization", () => {
-    initHeadingLinks();
+    headingLinks.init();
 
     let links = document.querySelectorAll("a.heading-link");
     const initialCount = links.length;
 
     // Re-initialize
-    initHeadingLinks();
+    headingLinks.init();
 
     links = document.querySelectorAll("a.heading-link");
     expect(links.length).toBe(initialCount);
   });
 
   it("should add links to dynamically added headings", () => {
-    initHeadingLinks();
+    headingLinks.init();
 
     // Verify initial state
     let links = document.querySelectorAll("a.heading-link");
@@ -134,7 +137,7 @@ describe("Heading Links Feature", () => {
     document.body.appendChild(newHeading);
 
     // Re-initialize
-    initHeadingLinks();
+    headingLinks.init();
 
     // Should have added a link to the new heading
     const newLink = newHeading.querySelector("a.heading-link");
@@ -151,7 +154,7 @@ describe("Heading Links Feature", () => {
       <h3 id="with-id">Heading with ID</h3>
     `;
 
-    initHeadingLinks();
+    headingLinks.init();
 
     const h2 = document.querySelector("h2") as HTMLElement;
     const h2Link = h2.querySelector("a.heading-link") as HTMLAnchorElement;
@@ -162,7 +165,7 @@ describe("Heading Links Feature", () => {
   });
 
   it("should append link to end of heading element", () => {
-    initHeadingLinks();
+    headingLinks.init();
 
     const h2 = document.querySelector("h2") as HTMLElement;
     const children = Array.from(h2.children);

@@ -4,10 +4,13 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { initCopyButtons } from "@/utils/features/copyButton";
+import { CopyButtons } from "@/utils/features/copyButton";
 
 describe("Copy Button Feature", () => {
+  let copyButtons: CopyButtons;
+
   beforeEach(() => {
+    copyButtons = new CopyButtons();
     document.body.innerHTML = `
       <pre><code>const greeting = "Hello, World!";</code></pre>
       <pre><code>console.log("Test");</code></pre>
@@ -36,14 +39,14 @@ describe("Copy Button Feature", () => {
   });
 
   it("should find all code blocks", () => {
-    initCopyButtons();
+    copyButtons.init();
 
     const buttons = document.querySelectorAll("button.copy-code");
     expect(buttons.length).toBe(2);
   });
 
   it("should create copy button for each code block", () => {
-    initCopyButtons();
+    copyButtons.init();
 
     const codeBlocks = document.querySelectorAll("pre");
     for (const block of codeBlocks) {
@@ -54,7 +57,7 @@ describe("Copy Button Feature", () => {
   });
 
   it("should add 'has-copy-button' class to prevent duplicates", () => {
-    initCopyButtons();
+    copyButtons.init();
 
     const codeBlocks = document.querySelectorAll("pre");
     for (const block of codeBlocks) {
@@ -63,7 +66,7 @@ describe("Copy Button Feature", () => {
   });
 
   it("should apply correct CSS classes to copy button", () => {
-    initCopyButtons();
+    copyButtons.init();
 
     const button = document.querySelector("button.copy-code");
     expect(button?.className).toContain("copy-code");
@@ -74,28 +77,28 @@ describe("Copy Button Feature", () => {
   });
 
   it("should set title for accessibility", () => {
-    initCopyButtons();
+    copyButtons.init();
 
     const button = document.querySelector("button.copy-code") as HTMLButtonElement;
     expect(button.title).toBe("Copy code block");
   });
 
   it("should set button type to 'button'", () => {
-    initCopyButtons();
+    copyButtons.init();
 
     const button = document.querySelector("button.copy-code") as HTMLButtonElement;
     expect(button.type).toBe("button");
   });
 
   it("should set tabindex on code block", () => {
-    initCopyButtons();
+    copyButtons.init();
 
     const codeBlock = document.querySelector("pre");
     expect(codeBlock?.getAttribute("tabindex")).toBe("0");
   });
 
   it("should wrap code block in div with relative position", () => {
-    initCopyButtons();
+    copyButtons.init();
 
     const codeBlock = document.querySelector("pre");
     const wrapper = codeBlock?.parentElement;
@@ -104,7 +107,7 @@ describe("Copy Button Feature", () => {
   });
 
   it("should copy code content to clipboard on button click", async () => {
-    initCopyButtons();
+    copyButtons.init();
 
     const button = document.querySelector("button.copy-code") as HTMLButtonElement;
     button.click();
@@ -119,7 +122,7 @@ describe("Copy Button Feature", () => {
   it("should show 'Copied' feedback after successful copy", async () => {
     vi.useFakeTimers();
 
-    initCopyButtons();
+    copyButtons.init();
 
     const button = document.querySelector("button.copy-code") as HTMLButtonElement;
     expect(button.textContent).toBe("Copy");
@@ -142,7 +145,7 @@ describe("Copy Button Feature", () => {
       .writeText as unknown as ReturnType<typeof vi.fn>;
     clipboardMock.mockRejectedValueOnce(new Error("Clipboard access denied"));
 
-    initCopyButtons();
+    copyButtons.init();
 
     const button = document.querySelector("button.copy-code") as HTMLButtonElement;
 
@@ -161,7 +164,7 @@ describe("Copy Button Feature", () => {
     
     document.body.innerHTML = '<pre><code></code></pre>';
 
-    initCopyButtons();
+    copyButtons.init();
 
     const button = document.querySelector("button.copy-code") as HTMLButtonElement;
     button.click();
@@ -179,7 +182,7 @@ describe("Copy Button Feature", () => {
     
     document.body.innerHTML = "<pre>Plain text content</pre>";
 
-    initCopyButtons();
+    copyButtons.init();
 
     const button = document.querySelector("button.copy-code") as HTMLButtonElement;
     button.click();
@@ -194,20 +197,20 @@ describe("Copy Button Feature", () => {
   });
 
   it("should prevent duplicate buttons on re-initialization", () => {
-    initCopyButtons();
+    copyButtons.init();
 
     let buttons = document.querySelectorAll("button.copy-code");
     const initialCount = buttons.length;
 
     // Re-initialize
-    initCopyButtons();
+    copyButtons.init();
 
     buttons = document.querySelectorAll("button.copy-code");
     expect(buttons.length).toBe(initialCount);
   });
 
   it("should add buttons to dynamically added code blocks", async () => {
-    initCopyButtons();
+    copyButtons.init();
 
     let buttons = document.querySelectorAll("button.copy-code");
     const initialCount = buttons.length;
@@ -220,7 +223,7 @@ describe("Copy Button Feature", () => {
     document.body.appendChild(newPre);
 
     // Re-initialize
-    initCopyButtons();
+    copyButtons.init();
 
     buttons = document.querySelectorAll("button.copy-code");
     expect(buttons.length).toBeGreaterThan(initialCount);
@@ -241,7 +244,7 @@ describe("Copy Button Feature", () => {
 
     document.body.innerHTML = "<pre><code>test</code></pre>";
 
-    initCopyButtons();
+    copyButtons.init();
 
     const button = document.querySelector("button.copy-code");
     expect(button?.className).toContain("top-(--file-name-offset)");
@@ -250,7 +253,7 @@ describe("Copy Button Feature", () => {
   it("should use default top class without file name offset", () => {
     document.body.innerHTML = '<pre><code>test</code></pre>';
 
-    initCopyButtons();
+    copyButtons.init();
 
     const button = document.querySelector("button.copy-code");
     expect(button?.className).toContain("-top-3");

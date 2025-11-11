@@ -219,11 +219,7 @@ const { previous: prevPost, next: nextPost } = getAdjacentPosts(posts, post.id);
 </Layout>
 
 <script>
-  import {
-    initProgressBar,
-    initHeadingLinks,
-    // initCopyButtons, // No longer needed
-  } from "@/utils/features";
+  import { featureManager } from "@/utils/features/FeatureManager";
 
   /**
    * Initialize all post detail features
@@ -232,12 +228,18 @@ const { previous: prevPost, next: nextPost } = getAdjacentPosts(posts, post.id);
    * Features initialized:
    * - Progress bar: Shows scroll position with visual indicator
    * - Heading links: Adds clickable anchors to headings
-   * - Copy buttons: Adds copy-to-clipboard buttons to code blocks (disabled)
+   * - Copy buttons: Adds copy-to-clipboard buttons to code blocks
    */
   function initializePostFeatures(): void {
-    initProgressBar();
-    initHeadingLinks();
-    // initCopyButtons(); // This is now disabled
+    featureManager.initializeFeatures();
+  }
+
+  /**
+   * Clean up all post detail features
+   * Called before navigation transitions to prevent memory leaks
+   */
+  function cleanupPostFeatures(): void {
+    featureManager.cleanupFeatures();
   }
 
   // Initialize features when page loads
@@ -252,4 +254,8 @@ const { previous: prevPost, next: nextPost } = getAdjacentPosts(posts, post.id);
     // Go to page start after page swap
     window.scrollTo({ left: 0, top: 0, behavior: "instant" });
   });
+
+  // Clean up features before navigation
+  // Prevents memory leaks and conflicts during page transitions
+  document.addEventListener("astro:before-swap", cleanupPostFeatures);
 </script>

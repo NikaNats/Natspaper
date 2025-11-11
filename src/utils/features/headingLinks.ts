@@ -1,5 +1,5 @@
 /**
- * Heading Links Feature Module
+ * Heading Links Feature Class
  * Adds clickable anchor links to document headings for easy sharing and navigation
  *
  * Features:
@@ -7,30 +7,52 @@
  * - Creates anchor links with consistent styling
  * - Shows/hides link symbol on hover (desktop) or always visible (mobile)
  * - Safe re-initialization for page transitions (Astro Islands)
+ * - Proper cleanup for memory management
  *
- * Usage in Astro components:
+ * Usage:
  * ```ts
- * import { initHeadingLinks } from "@/utils/features/headingLinks";
- * document.addEventListener('astro:page-load', initHeadingLinks);
- * document.addEventListener('astro:after-swap', initHeadingLinks);
+ * const headingLinks = new HeadingLinks();
+ * headingLinks.init(); // Initialize the feature
+ * headingLinks.cleanup(); // Clean up when done
  * ```
  */
 
-/**
- * Add heading anchor links to all h2-h6 elements
- * Each heading becomes clickable and shareable
- * Re-initialization safely handles newly added headings
- */
-export function initHeadingLinks(): void {
-  // Find all headings that don't already have a link
-  // (prevents duplicate links during re-initialization)
-  const headings = Array.from(
-    document.querySelectorAll(
-      "h2:not(.has-heading-link), h3:not(.has-heading-link), h4:not(.has-heading-link), h5:not(.has-heading-link), h6:not(.has-heading-link)"
-    )
-  );
+import type { Feature } from "./Feature";
 
-  for (const heading of headings) {
+export class HeadingLinks implements Feature {
+  /**
+   * Initialize the heading links feature
+   * Adds heading anchor links to all h2-h6 elements that don't already have them
+   * Each heading becomes clickable and shareable
+   * Safe to call multiple times (re-initialization for page transitions)
+   */
+  public init(): void {
+    const headings = Array.from(
+      document.querySelectorAll(
+        "h2:not(.has-heading-link), h3:not(.has-heading-link), h4:not(.has-heading-link), h5:not(.has-heading-link), h6:not(.has-heading-link)"
+      )
+    );
+
+    for (const heading of headings) {
+      this.attachLinkToHeading(heading as HTMLElement);
+    }
+  }
+
+  /**
+   * Clean up the heading links feature
+   * Since links are part of the DOM that gets replaced during navigation,
+   * cleanup is less critical here, but good practice for consistency
+   */
+  public cleanup(): void {
+    // Links are part of the DOM that gets replaced, so manual cleanup is less critical here,
+    // but good practice for more complex listeners or persistent state.
+  }
+
+  /**
+   * Attach an anchor link to a specific heading
+   * Creates a clickable link with hover effects for navigation
+   */
+  private attachLinkToHeading(heading: HTMLElement): void {
     heading.classList.add("group", "has-heading-link");
 
     const link = document.createElement("a");
@@ -43,6 +65,7 @@ export function initHeadingLinks(): void {
     span.ariaHidden = "true";
     span.innerText = "#";
     link.appendChild(span);
+
     heading.appendChild(link);
   }
 }

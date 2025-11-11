@@ -1,5 +1,5 @@
 /**
- * Copy Button Feature Module
+ * Copy Buttons Feature Class
  * Attaches copy-to-clipboard buttons to code blocks for easy code sharing
  *
  * Features:
@@ -8,92 +8,100 @@
  * - Shows visual feedback when code is copied
  * - Safe re-initialization for page transitions (Astro Islands)
  * - Handles custom file name offsets from markdown plugins
+ * - Proper cleanup for memory management
  *
- * Usage in Astro components:
+ * Usage:
  * ```ts
- * import { initCopyButtons } from "@/utils/features/copyButton";
- * document.addEventListener('astro:page-load', initCopyButtons);
- * document.addEventListener('astro:after-swap', initCopyButtons);
+ * const copyButtons = new CopyButtons();
+ * copyButtons.init(); // Initialize the feature
+ * copyButtons.cleanup(); // Clean up when done
  * ```
  */
 
-const COPY_BUTTON_LABEL = "Copy";
-const COPIED_FEEDBACK_DURATION = 700; // milliseconds
+import type { Feature } from "./Feature";
 
-/**
- * Attach copy buttons to all code blocks
- * Re-initialization safely handles newly added code blocks
- * Skips code blocks that already have copy buttons
- */
-export function initCopyButtons(): void {
-  // Find code blocks that don't already have copy buttons
-  // (prevents duplicate buttons during re-initialization)
-  const codeBlocks = Array.from(
-    document.querySelectorAll("pre:not(.has-copy-button)")
-  );
+export class CopyButtons implements Feature {
+  private readonly COPY_LABEL = "Copy";
+  private readonly COPIED_LABEL = "Copied";
+  private readonly COPY_FAILED_LABEL = "Copy failed";
+  private readonly FEEDBACK_DURATION = 700; // milliseconds
 
-  for (const codeBlock of codeBlocks) {
-    attachCopyButtonToBlock(codeBlock);
+  /**
+   * Initialize the copy buttons feature
+   * Attaches copy buttons to all code blocks that don't already have them
+   * Safe to call multiple times (re-initialization for page transitions)
+   */
+  public init(): void {
+    const codeBlocks = document.querySelectorAll<HTMLElement>(
+      "pre:not(.has-copy-button)"
+    );
+    codeBlocks.forEach(block => this.attachButton(block));
   }
-}
 
-/**
- * Attach a copy button to a specific code block
- * Handles positioning based on file name offset (from markdown plugins)
- */
-function attachCopyButtonToBlock(codeBlock: Element): void {
-  const wrapper = document.createElement("div");
-  wrapper.style.position = "relative";
+  /**
+   * Clean up the copy buttons feature
+   * Since buttons are part of the DOM that gets replaced during navigation,
+   * cleanup is less critical here, but good practice for consistency
+   */
+  public cleanup(): void {
+    // Buttons are part of the DOM that gets replaced, so manual cleanup is less critical here,
+    // but good practice for more complex listeners or persistent state.
+  }
 
-  const computedStyle = getComputedStyle(codeBlock);
-  const hasFileNameOffset =
-    computedStyle.getPropertyValue("--file-name-offset").trim() !== "";
+  /**
+   * Attach a copy button to a specific code block
+   * Handles positioning based on file name offset (from markdown plugins)
+   */
+  private attachButton(codeBlock: HTMLElement): void {
+    const wrapper = document.createElement("div");
+    wrapper.style.position = "relative";
 
-  const topClass = hasFileNameOffset ? "top-(--file-name-offset)" : "-top-3";
+    const computedStyle = getComputedStyle(codeBlock);
+    const hasFileNameOffset =
+      computedStyle.getPropertyValue("--file-name-offset").trim() !== "";
 
-  const copyButton = document.createElement("button");
-  copyButton.className = `copy-code absolute end-3 ${topClass} rounded bg-muted border border-muted px-2 py-1 text-xs leading-4 text-foreground font-medium`;
-  copyButton.textContent = COPY_BUTTON_LABEL;
-  copyButton.type = "button";
-  copyButton.title = "Copy code block";
+    const topClass = hasFileNameOffset ? "top-(--file-name-offset)" : "-top-3";
 
-  codeBlock.setAttribute("tabindex", "0");
-  codeBlock.appendChild(copyButton);
-  codeBlock.classList.add("has-copy-button");
+    const copyButton = document.createElement("button");
+    copyButton.className = `copy-code absolute end-3 ${topClass} rounded bg-muted border border-muted px-2 py-1 text-xs leading-4 text-foreground font-medium`;
+    copyButton.textContent = this.COPY_LABEL;
+    copyButton.type = "button";
+    copyButton.title = "Copy code block";
 
-  codeBlock.parentNode?.insertBefore(wrapper, codeBlock);
-  wrapper.appendChild(codeBlock);
+    codeBlock.setAttribute("tabindex", "0");
+    codeBlock.appendChild(copyButton);
+    codeBlock.classList.add("has-copy-button");
 
-  copyButton.addEventListener("click", async () => {
-    await copyCode(codeBlock as HTMLElement, copyButton);
-  });
-}
+    codeBlock.parentNode?.insertBefore(wrapper, codeBlock);
+    wrapper.appendChild(codeBlock);
 
-/**
- * Copy code block content to clipboard and show feedback
- * Shows "Copied" message for COPIED_FEEDBACK_DURATION milliseconds
- */
-async function copyCode(
-  block: HTMLElement,
-  button: HTMLButtonElement
-): Promise<void> {
-  const code = block.querySelector("code");
-  const text = code?.innerText;
+    copyButton.addEventListener("click", () =>
+      this.handleCopy(codeBlock, copyButton)
+    );
+  }
 
-  try {
-    await navigator.clipboard.writeText(text ?? "");
+  /**
+   * Handle copying code block content to clipboard and show feedback
+   * Shows appropriate message for COPIED_FEEDBACK_DURATION milliseconds
+   */
+  private async handleCopy(
+    block: HTMLElement,
+    button: HTMLButtonElement
+  ): Promise<void> {
+    const code = block.querySelector("code");
+    const text = code?.innerText ?? "";
 
-    button.textContent = "Copied";
-
-    setTimeout(() => {
-      button.textContent = COPY_BUTTON_LABEL;
-    }, COPIED_FEEDBACK_DURATION);
-  } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error("Failed to copy code:", error);
-    button.textContent = "Copy failed";
-    setTimeout(() => {
-      button.textContent = COPY_BUTTON_LABEL;
-    }, COPIED_FEEDBACK_DURATION);
+    try {
+      await navigator.clipboard.writeText(text);
+      button.textContent = this.COPIED_LABEL;
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error("Failed to copy code:", error);
+      button.textContent = this.COPY_FAILED_LABEL;
+    } finally {
+      setTimeout(() => {
+        button.textContent = this.COPY_LABEL;
+      }, this.FEEDBACK_DURATION);
+    }
   }
 }
