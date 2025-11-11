@@ -5,7 +5,7 @@
  * Used by both client and server initialization.
  */
 
-import { getEnv } from "@/env";
+import { buildSentryConfig } from "./sentry.builder";
 
 /**
  * Sentry configuration object
@@ -20,51 +20,11 @@ export interface SentryConfig {
 }
 
 /**
- * Get Sentry configuration for the given context
- *
- * @param context - "client" for browser, "server" for Node.js
- * @returns SentryConfig object ready to pass to Sentry.init()
+ * REFACTORED: This function is now just a simple wrapper around the builder.
+ * All the complex, hard-coded logic is gone.
  */
 export function getSentryConfig(context: "client" | "server"): SentryConfig {
-  const isDev = import.meta.env.MODE === "development";
-
-  // Determine DSN based on context
-  let dsn: string | undefined;
-
-  if (context === "client") {
-    // Client uses public DSN (safe to expose)
-    dsn = getEnv("PUBLIC_SENTRY_DSN");
-  } else {
-    // Server can use private DSN first, fallback to public
-    dsn = getEnv("SENTRY_DSN") ?? getEnv("PUBLIC_SENTRY_DSN");
-  }
-
-  // Determine environment label
-  const environment =
-    getEnv("PUBLIC_SENTRY_ENVIRONMENT") ||
-    (isDev ? "development" : "production");
-
-  // Parse sampling rates
-  const tracesSampleRate = parseFloat(
-    getEnv("PUBLIC_SENTRY_TRACES_SAMPLE_RATE") || (isDev ? "1" : "0.1")
-  );
-
-  const replaysSessionSampleRate = parseFloat(
-    getEnv("PUBLIC_SENTRY_REPLAYS_SESSION_SAMPLE_RATE") || "0.1"
-  );
-
-  const replaysOnErrorSampleRate = parseFloat(
-    getEnv("PUBLIC_SENTRY_REPLAYS_ON_ERROR_SAMPLE_RATE") || "1"
-  );
-
-  return {
-    enabled: Boolean(dsn),
-    dsn: dsn || "",
-    environment,
-    tracesSampleRate,
-    replaysSessionSampleRate,
-    replaysOnErrorSampleRate,
-  };
+  return buildSentryConfig(context);
 }
 
 /**
