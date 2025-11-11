@@ -5,7 +5,19 @@
  */
 
 import type { EnvSchema } from "./schema";
-import { ENV_DEFINITIONS, getRequiredVars } from "./schema";
+import { ENV_DEFINITIONS } from "./schema";
+import type { ValidatorFn } from "./validators";
+
+// Extended schema definition with validators
+interface EnvDefinitionWithValidators {
+  type: string;
+  required?: boolean;
+  access: string;
+  context: string;
+  validators: readonly ValidatorFn[];
+  severity?: "error" | "warning";
+  [key: string]: unknown; // For other properties
+}
 
 /**
  * Validation error details
@@ -31,88 +43,35 @@ class EnvironmentManager {
   }
 
   /**
-   * Validate all environment variables
-   * Called once at build time by the validation integration
+   * REFACTORED: The validate method is now a generic, extensible loop.
+   * It no longer contains any hard-coded logic for specific variables.
    */
   validate(): boolean {
     this.errors = [];
     this.warnings = [];
 
-    // Check required variables
-    const requiredVars = getRequiredVars();
-    for (const varName of requiredVars) {
-      const value = this.env[varName];
+    for (const [key, definition] of Object.entries(ENV_DEFINITIONS)) {
+      const value = this.env[key];
 
-      if (!value || value.trim() === "") {
-        this.errors.push({
-          variable: varName,
-          severity: "error",
-          message: `Required environment variable is missing or empty: ${varName}`,
-        });
-      }
-    }
+      // Safe cast since we know our schema structure
+      const def = definition as EnvDefinitionWithValidators;
+      const validators = def.validators || [];
+      const severity = def.severity || "error"; // Default to error
 
-    // Type validation for enum values
-    if (this.env.NODE_ENV) {
-      const def = ENV_DEFINITIONS.NODE_ENV;
-      if (
-        def.type === "enum" &&
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        !def.values?.includes(this.env.NODE_ENV as any)
-      ) {
-        this.errors.push({
-          variable: "NODE_ENV",
-          severity: "error",
-          message: `Invalid NODE_ENV value: "${this.env.NODE_ENV}". Must be one of: ${def.values?.join(", ")}`,
-        });
-      }
-    }
-
-    // Validate Sentry DSN format (if provided)
-    const sentryDsn = this.env.SENTRY_DSN || this.env.PUBLIC_SENTRY_DSN;
-    if (sentryDsn && !this.isValidSentryDsn(sentryDsn)) {
-      this.warnings.push({
-        variable: "SENTRY_DSN",
-        severity: "warning",
-        message: `SENTRY_DSN format looks invalid. Should be like: https://key@sentry.io/project-id`,
-      });
-    }
-
-    // Validate sampling rates (0-1)
-    const samplingVars = [
-      "SENTRY_TRACE_SAMPLE_RATE",
-      "PUBLIC_SENTRY_TRACES_SAMPLE_RATE",
-      "PUBLIC_SENTRY_REPLAYS_SESSION_SAMPLE_RATE",
-      "PUBLIC_SENTRY_REPLAYS_ON_ERROR_SAMPLE_RATE",
-    ];
-
-    for (const varName of samplingVars) {
-      const value = this.env[varName];
-      if (value !== undefined) {
-        const rate = parseFloat(value);
-        if (isNaN(rate) || rate < 0 || rate > 1) {
-          this.errors.push({
-            variable: varName,
-            severity: "error",
-            message: `${varName} must be a number between 0 and 1, got: "${value}"`,
-          });
+      for (const validator of validators) {
+        const errorMessage = validator(value, key);
+        if (errorMessage) {
+          const issue = { variable: key, message: errorMessage, severity };
+          if (severity === "error") {
+            this.errors.push(issue);
+          } else {
+            this.warnings.push(issue);
+          }
         }
       }
     }
 
     return this.errors.length === 0;
-  }
-
-  /**
-   * Basic Sentry DSN format validation
-   */
-  private isValidSentryDsn(dsn: string): boolean {
-    try {
-      const url = new URL(dsn);
-      return url.protocol === "https:" && url.hostname.includes("sentry.io");
-    } catch {
-      return false;
-    }
   }
 
   /**
