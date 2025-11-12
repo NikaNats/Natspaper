@@ -1,14 +1,23 @@
-# Ignore everything
+# Ignore everything in the project
 /*
 
-# Except these files & folders
+# But DO format the following directories recursively
 !/src
 !/public
 !/.github
-!tsconfig.json
-!astro.config.ts
-!.prettierrc.mjs
-!package.json
-!.prettierrc
-!eslint.config.js
-!README.md
+
+# And DO format specific file types in the root directory
+!/*.js
+!/*.mjs
+!/*.ts
+!/*.json
+!/*.md
+!/*.yaml
+!/*.yml
+
+# Un-ignore the LICENSE file which has no extension
+!/LICENSE
+
+# Ignore generated and lock files
+pnpm-lock.yaml
+docker-compose.yml

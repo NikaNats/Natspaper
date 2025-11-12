@@ -18,21 +18,21 @@ export default {
       },
       /**
        * Font Family Configuration
-       * 
+       *
        * Research-Backed Typography Strategy:
        * ====================================
-       * 
+       *
        * Font Pairing: Merriweather + Roboto (based on technical guidelines)
        * Alternative implementation available: Can use custom font stack if Roboto not available
-       * 
+       *
        * Current Implementation: Using Inter for body text (high x-height, screen-optimized)
        * Note: Studies show Roboto provides similar/equivalent performance
-       * 
+       *
        * Recommendation for Future Enhancement:
        * - Consider switching body font to Roboto for potential 35% reading speed increase
        * - Inter and Roboto are nearly interchangeable for accessibility
        * - x-height ratio with Merriweather: ~0.95 (visually harmonious)
-       * 
+       *
        * Font Metrics for Reference:
        * - Roboto x-height: High (0.52 of cap height)
        * - Inter x-height: High (0.5 of cap height)
