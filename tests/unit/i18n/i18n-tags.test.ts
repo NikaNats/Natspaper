@@ -27,7 +27,7 @@ import { tagTranslations } from '../../../src/i18n/dictionaries/tags';
       
       // English and Georgian should have same tag keys
       enKeys.forEach(key => {
-        expect(tagTranslations.ka[key]).toBeDefined();
+        expect(tagTranslations.ka[key as keyof typeof tagTranslations.ka]).toBeDefined();
       });
       
       // Both should have content

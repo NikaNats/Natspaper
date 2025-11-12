@@ -182,7 +182,11 @@ const { previous: prevPost, next: nextPost } = getAdjacentPosts(posts, post.id);
     }
 
     <ul class="mt-4 mb-8 sm:my-8">
-      {tags.map(tag => <Tag tag={slugifyStr(tag)} tagName={tTag(tag)} />)}
+      {
+        tags.map((tag: string) => (
+          <Tag tag={slugifyStr(tag)} tagName={tTag(tag)} />
+        ))
+      }
     </ul>
 
     <BackToTopButton />

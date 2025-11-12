@@ -13,7 +13,7 @@ import { defineConfig, devices } from "@playwright/test";
  * - pnpm test:e2e:debug    # Debug mode
  */
 
-const baseURL = process.env.BASE_URL || 'http://localhost:4321';
+const baseURL = process.env.BASE_URL || "http://localhost:4321";
 
 export default defineConfig({
   testDir: "./tests/e2e-browser",
@@ -87,18 +87,20 @@ export default defineConfig({
   ],
 
   /* Run your local dev server before starting the tests */
-  ...(process.env.BASE_URL ? {} : {
-    webServer: {
-      command: "pnpm run dev",
-      url: "http://localhost:4321",
-      reuseExistingServer: false, // Always start fresh to avoid conflicts
-      timeout: process.env["CI"] ? 300 * 1000 : 120 * 1000, // 5 min in CI, 2 min locally
-      stdout: "pipe",
-      stderr: "pipe",
-      // Increase readiness check retries for Firefox
-      env: {
-        NODE_ENV: "development",
-      },
-    },
-  }),
+  ...(process.env.BASE_URL
+    ? {}
+    : {
+        webServer: {
+          command: "pnpm run dev",
+          url: "http://localhost:4321",
+          reuseExistingServer: false, // Always start fresh to avoid conflicts
+          timeout: process.env["CI"] ? 300 * 1000 : 120 * 1000, // 5 min in CI, 2 min locally
+          stdout: "pipe",
+          stderr: "pipe",
+          // Increase readiness check retries for Firefox
+          env: {
+            NODE_ENV: "development",
+          },
+        },
+      }),
 });
