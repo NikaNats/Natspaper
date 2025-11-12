@@ -5,6 +5,8 @@ import expressiveCode from "astro-expressive-code";
 import { envValidationIntegration } from "../src/integrations/envValidation";
 import { SITE } from "../src/config";
 
+const isProduction = process.env.NODE_ENV === 'production';
+
 export function getIntegrations() {
   const integrations = [
     envValidationIntegration(),
@@ -35,7 +37,15 @@ export function getIntegrations() {
       // At typical blog scale, a single sitemap-0.xml is sufficient
       entryLimit: 45000,
     }),
-    sentry({
+    expressiveCode(),
+    Sonda({
+      format: ["html", "json"],
+    }),
+  ];
+
+  // Conditionally add Sentry only for production builds
+  if (isProduction) {
+    integrations.push(sentry({
       // Configuration for source map uploads during build
       // Enables readable stack traces in production by uploading source maps
       sourceMapsUploadOptions: {
@@ -49,12 +59,8 @@ export function getIntegrations() {
       autoInstrumentation: {
         requestHandler: true,
       },
-    }),
-    expressiveCode(),
-    Sonda({
-      format: ["html", "json"],
-    }),
-  ];
+    }));
+  }
 
   return integrations;
 }
