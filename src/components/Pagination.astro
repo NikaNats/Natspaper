@@ -1,0 +1,60 @@
+---
+// REFACTORED: Removed Astro-specific dependencies - now a pure presentational component.
+import IconArrowLeft from "@/assets/icons/IconArrowLeft.svg";
+import IconArrowRight from "@/assets/icons/IconArrowRight.svg";
+import LinkButton from "./ui/LinkButton.astro";
+
+// REFACTORED: The component now depends on a simple, abstract interface, not Astro's Page object.
+export interface Props {
+  currentPage: number;
+  totalPages: number;
+  prevUrl?: string;
+  nextUrl?: string;
+  class?: string;
+}
+
+const {
+  currentPage,
+  totalPages,
+  prevUrl,
+  nextUrl,
+  class: className,
+} = Astro.props;
+---
+
+{
+  totalPages > 1 && (
+    <nav
+      class:list={[
+        "mt-auto mb-8 flex items-center justify-center gap-4",
+        className,
+      ]}
+      aria-label="Pagination"
+    >
+      {/* REFACTORED: LinkButton now correctly handles an undefined href,
+          making the 'as string' cast unnecessary and the code type-safe. */}
+      <LinkButton
+        href={prevUrl}
+        class:list={["select-none", { "opacity-50": !prevUrl }]}
+        ariaLabel="Previous Page"
+      >
+        <IconArrowLeft class="inline-block rtl:rotate-180" />
+        Prev
+      </LinkButton>
+
+      {/* IMPROVED UX: The text is now more descriptive and accessible. */}
+      <span class="text-sm text-text-secondary">
+        Page {currentPage} of {totalPages}
+      </span>
+
+      <LinkButton
+        href={nextUrl}
+        class:list={["select-none", { "opacity-50": !nextUrl }]}
+        ariaLabel="Next Page"
+      >
+        Next
+        <IconArrowRight class="inline-block rtl:rotate-180" />
+      </LinkButton>
+    </nav>
+  )
+}

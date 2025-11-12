@@ -1,0 +1,53 @@
+---
+// REFACTORED: Removed direct import of SOCIALS constant.
+// The component now accepts data via props (Dependency Inversion).
+import type { SvgComponent } from "astro/types";
+import LinkButton from "./ui/LinkButton.astro";
+import { SITE } from "@/config";
+
+// REFACTORED: Define the shape of the data this component expects.
+// This is an "abstraction" that decouples the component from the global constant.
+export interface SocialLink {
+  href: string;
+  linkTitle: string | ((siteTitle: string) => string);
+  icon: SvgComponent;
+}
+
+// REFACTORED: The component now accepts the links via props.
+export interface Props {
+  links: SocialLink[];
+  centered?: boolean;
+}
+
+const { links, centered = false } = Astro.props;
+---
+
+<div
+  class:list={[
+    "flex flex-wrap justify-center gap-2",
+    // REFACTORED: Simplified conditional class logic
+    { "flex-row items-center": centered },
+  ]}
+>
+  {
+    links.map(social => {
+      const Icon = social.icon;
+      // REFACTORED: Handle both string and function linkTitle
+      const linkTitle =
+        typeof social.linkTitle === "function"
+          ? social.linkTitle(SITE.title)
+          : social.linkTitle;
+
+      return (
+        <LinkButton
+          href={social.href}
+          class="p-2 transition-transform hover:rotate-6 sm:p-1"
+          title={linkTitle}
+        >
+          <Icon class="inline-block size-6 scale-125 fill-transparent stroke-current stroke-2 opacity-90 group-hover:fill-transparent sm:scale-110" />
+          <span class="sr-only">{linkTitle}</span>
+        </LinkButton>
+      );
+    })
+  }
+</div>

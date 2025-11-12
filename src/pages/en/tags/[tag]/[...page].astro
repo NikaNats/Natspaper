@@ -5,7 +5,7 @@ import Main from "@/layouts/Main.astro";
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/layout/Header.astro";
 import Footer from "@/components/layout/Footer.astro";
-import Card from "@/components/ui/Card.astro";
+import PostSummaryCard from "@/components/post/PostSummaryCard.astro";
 import Pagination from "@/components/ui/Pagination.astro";
 import { getUniqueTags, getPostsByTag } from "@/utils/post";
 import { SITE } from "@/config";
@@ -46,7 +46,7 @@ const { page, tagName } = Astro.props;
     <ul>
       {
         page.data.map(({ data, slug }) => (
-          <Card
+          <PostSummaryCard
             title={data.title}
             description={data.description}
             pubDatetime={data.pubDatetime}

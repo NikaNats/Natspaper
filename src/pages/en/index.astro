@@ -6,7 +6,7 @@ import Header from "@/components/layout/Header.astro";
 import Footer from "@/components/layout/Footer.astro";
 import Socials from "@/components/features/Socials.astro";
 import Hr from "@/components/ui/Hr.astro";
-import PostCard from "@/components/post/PostCard.astro";
+import FeaturedPostCard from "@/components/post/FeaturedPostCard.astro";
 import { getSortedPosts } from "@/utils/post";
 import { SOCIALS } from "@/data/socials";
 import { SITE } from "@/config";
@@ -99,7 +99,7 @@ const featuredPosts = sortedPosts.filter(({ data }) => data.featured);
             <h2 class="mb-6 text-2xl font-bold">Featured Posts</h2>
             <ul class="grid gap-4 sm:grid-cols-2">
               {featuredPosts.map(({ data, id }) => (
-                <PostCard href={`/en/posts/${id}`} frontmatter={data} />
+                <FeaturedPostCard href={`/en/posts/${id}`} frontmatter={data} />
               ))}
             </ul>
           </section>
