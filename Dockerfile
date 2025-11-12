@@ -14,4 +14,8 @@ RUN pnpm run build
 # Runtime stage for serving the application
 FROM nginx:mainline-alpine-slim AS runtime
 COPY --from=base /app/dist /usr/share/nginx/html
+
+# Switch to the non-root nginx user for enhanced security
+USER nginx
+
 EXPOSE 80
