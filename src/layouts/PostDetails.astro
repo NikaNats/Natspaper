@@ -137,7 +137,13 @@ const { previous: prevPost, next: nextPost } = getAdjacentPosts(posts, post.id);
       class="my-4 flex flex-col items-start gap-y-2 text-sm text-text-secondary sm:flex-row sm:items-center sm:justify-between sm:text-base"
     >
       {/* Left Side: This will stay on the left */}
-      <Datetime {pubDatetime} {modDatetime} {timezone} size="lg" data-testid="post-datetime" />
+      <Datetime
+        {pubDatetime}
+        {modDatetime}
+        {timezone}
+        size="lg"
+        data-testid="post-datetime"
+      />
 
       {/* Right Side: This group will be pushed to the right on desktop */}
       <div class="flex items-center gap-x-4">

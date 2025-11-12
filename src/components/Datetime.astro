@@ -37,7 +37,10 @@ const datetime = dayjs(dateToShow).tz(effectiveTimezone);
 const formattedDate = datetime.format("D MMM, YYYY");
 ---
 
-<div class:list={["flex items-center gap-2", "metadata", className]} data-testid="post-datetime">
+<div
+  class:list={["flex items-center gap-2", "metadata", className]}
+  data-testid="post-datetime"
+>
   <IconCalendar
     class:list={["inline-block size-5 min-w-5", { "scale-90": size === "sm" }]}
   />
