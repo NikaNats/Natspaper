@@ -32,6 +32,7 @@ const styles = {
     href={`/${Astro.currentLocale}/tags/${tag}/`}
     transition:name={tag}
     class:list={styles.a}
+    data-testid="post-tag-link"
   >
     <IconHash class:list={styles.icon} />
     <span>{tagName}</span>

@@ -26,7 +26,7 @@ const {
 const HeadingTag = variant === "h2" ? "h2" : "h3";
 ---
 
-<li class="my-8">
+<li class="my-8" data-testid="post-card">
   <a
     href={`/${Astro.currentLocale}/posts/${slug}`}
     class="group block no-underline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-accent focus-visible:outline-dashed"

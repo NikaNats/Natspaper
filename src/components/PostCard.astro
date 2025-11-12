@@ -12,7 +12,7 @@ const { href, frontmatter } = Astro.props;
 const { title, description, pubDatetime, modDatetime, timezone } = frontmatter;
 ---
 
-<li class="my-4">
+<li class="my-4" data-testid="post-card">
   <a
     href={href}
     class="group block no-underline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-accent focus-visible:outline-dashed"
