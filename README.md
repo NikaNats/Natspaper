@@ -13,8 +13,10 @@
   <br/>
 
 [![CI/CD Pipeline](https://github.com/NikaNats/Natspaper/actions/workflows/cd-deploy.yml/badge.svg)](https://github.com/NikaNats/Natspaper/actions/workflows/cd-deploy.yml)
-[![GitHub License](https://img.shields.io/github/license/NikaNats/Natspaper?style=flat-square)](./LICENSE)
-[![GitHub Stars](https://img.shields.io/github/stars/NikaNats/Natspaper?style=flat-square)](https://github.com/NikaNats/Natspaper/stargazers)
+[![Astro Version](https://img.shields.io/badge/Astro-5.15.5-E53512?logo=astro)](https://astro.build/)
+[![TypeScript Version](https://img.shields.io/badge/TypeScript-5.9.3-3178C6?logo=typescript)](https://www.typescriptlang.org/)
+[![Test Quality](https://img.shields.io/badge/QA%20Pipeline-Passing-2ECC71)](./tests)
+[![License](https://img.shields.io/badge/License-MIT-green)](./LICENSE)
 
 </div>
 
