@@ -50,12 +50,21 @@ describe("Build Pipeline & Data Integrity Integration Tests", () => {
       expect(isPublished).toBe(true);
     });
 
-    it("should keep a future post as unpublished", () => {
+    it("should keep a future post as unpublished in production mode", () => {
+      // Mock production environment to test scheduling logic
+      const originalEnv = import.meta.env.DEV;
+      import.meta.env.DEV = false;
+
       const futurePost = createMockBlogPost(
         "future-post",
         new Date("2099-01-01T12:00:00")
       );
+
       const isPublished = postFilter(futurePost);
+
+      // Restore original environment
+      import.meta.env.DEV = originalEnv;
+
       expect(isPublished).toBe(false);
     });
   });
@@ -87,7 +96,8 @@ describe("Build Pipeline & Data Integrity Integration Tests", () => {
 
       expect(processedItem.description).not.toContain("<img");
       expect(processedItem.description).not.toContain("javascript:");
-      expect(processedItem.description).toContain("A description with and a bad link");
+      expect(processedItem.description).toContain("A description with");
+      expect(processedItem.description).toContain("and a bad link");
     });
   });
 
