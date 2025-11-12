@@ -1,12 +1,16 @@
 .git
 .gitignore
+.env
 .env.local
 .env*.local
+.env.production
 node_modules/
 dist/
 .vercel
 .vscode
 .idea
+.astro/
+.sonda/
 *.log
 .DS_Store
 README.md
@@ -14,3 +18,5 @@ LICENSE
 tests/
 scripts/
 .github/
+playwright-report/
+test-results/
