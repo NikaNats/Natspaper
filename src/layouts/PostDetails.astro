@@ -1,14 +1,14 @@
 ---
 import { render, type CollectionEntry } from "astro:content";
 import Layout from "@/layouts/Layout.astro";
-import Header from "@/components/Header.astro";
-import Footer from "@/components/Footer.astro";
-import Tag from "@/components/Tag.astro";
-import Datetime from "@/components/Datetime.astro";
-import ReadingTime from "@/components/ReadingTime.astro";
-import EditPost from "@/components/EditPost.astro";
-import ShareLinks from "@/components/ShareLinks.astro";
-import BackToTopButton from "@/components/BackToTopButton.astro";
+import Header from "@/components/layout/Header.astro";
+import Footer from "@/components/layout/Footer.astro";
+import Tag from "@/components/post/Tag.astro";
+import Datetime from "@/components/post/Datetime.astro";
+import ReadingTime from "@/components/post/ReadingTime.astro";
+import EditPost from "@/components/features/EditPost.astro";
+import ShareLinks from "@/components/features/ShareLinks.astro";
+import BackToTopButton from "@/components/features/BackToTopButton.astro";
 import { slugifyStr } from "@/utils/core";
 import { resolveOgImageUrl, getAdjacentPosts } from "@/utils/post";
 import { getReadingTimeDisplay } from "@/utils/post"; // <-- ADD THIS IMPORT
