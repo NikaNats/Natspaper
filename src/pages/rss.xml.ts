@@ -2,8 +2,11 @@ import rss from "@astrojs/rss";
 import { getCollection } from "astro:content";
 import { getSortedPosts } from "@/utils/post";
 import { SITE } from "@/config";
-import { sanitizeMarkdownUrls } from "@/utils/sanitizeMarkdownUrls";
-import { escapeHtml, sanitizeDescription } from "@/utils/rss";
+import {
+  sanitizeMarkdownUrls,
+  escapeHtml,
+  sanitizeDescription,
+} from "@/utils/rss";
 
 /**
  * Generate RSS feed with pagination, XSS protection, and proper XML formatting.

@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import type { CollectionEntry } from "astro:content";
-import getPostsByGroupCondition from "@/utils/getPostsByGroupCondition";
+import getPostsByGroupCondition from "@/utils/post/getPostsByGroupCondition";
 import { createMockBlogPost } from "@tests/helpers/mockBlogPost";
 
 // Helper to create mock blog posts with custom tags
