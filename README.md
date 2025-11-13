@@ -26,30 +26,30 @@
 
 This project is built on three pillars: performance, quality, and experience.
 
-*   **🚀 Built for Speed:** Every architectural decision prioritizes performance. By leveraging Astro's static-site generation, shipping minimal JavaScript, and optimizing assets at build time, Natspaper achieves near-perfect Lighthouse scores and a snappy user experience.
-*   **🛡️ Engineered for Quality:** A comprehensive testing suite (unit, integration, and E2E), strict TypeScript, and automated quality checks ensure the codebase is stable, maintainable, and reliable. Security is hardened with a strict Content Security Policy (CSP) and automated monitoring.
-*   **✍️ Designed for Writers:** The focus is on the content. A clean, distraction-free UI, first-class LaTeX support, and a simple Markdown-based workflow make writing and publishing a pleasure.
+- **🚀 Built for Speed:** Every architectural decision prioritizes performance. By leveraging Astro's static-site generation, shipping minimal JavaScript, and optimizing assets at build time, Natspaper achieves near-perfect Lighthouse scores and a snappy user experience.
+- **🛡️ Engineered for Quality:** A comprehensive testing suite (unit, integration, and E2E), strict TypeScript, and automated quality checks ensure the codebase is stable, maintainable, and reliable. Security is hardened with a strict Content Security Policy (CSP) and automated monitoring.
+- **✍️ Designed for Writers:** The focus is on the content. A clean, distraction-free UI, first-class LaTeX support, and a simple Markdown-based workflow make writing and publishing a pleasure.
 
 ## Features at a Glance
 
-| Feature                         | Description                                                                                             |
-| :------------------------------ | :------------------------------------------------------------------------------------------------------ |
-| **⚡️ Instant Performance**      | Statically-generated HTML with Astro. No server, no database, no lag.                                   |
-| **✍️ Flawless LaTeX Rendering** | Server-side KaTeX rendering for beautiful, accessible math equations (`$E=mc^2$`).                       |
-| **🎨 FOUC-Free Dark Mode**      | Automatic theme detection with persistence. A critical inline script prevents any "flash" on page load. |
+| Feature                         | Description                                                                                               |
+| :------------------------------ | :-------------------------------------------------------------------------------------------------------- |
+| **⚡️ Instant Performance**     | Statically-generated HTML with Astro. No server, no database, no lag.                                     |
+| **✍️ Flawless LaTeX Rendering** | Server-side KaTeX rendering for beautiful, accessible math equations (`$E=mc^2$`).                        |
+| **🎨 FOUC-Free Dark Mode**      | Automatic theme detection with persistence. A critical inline script prevents any "flash" on page load.   |
 | **🌐 Advanced i18n Support**    | SEO-friendly routing for multiple languages (`/en/`, `/ka/`) with automatic browser language detection.   |
-| **🖼️ Dynamic OG Images**        | Automatically generates beautiful social media preview cards for every post, enhancing shareability.     |
+| **🖼️ Dynamic OG Images**        | Automatically generates beautiful social media preview cards for every post, enhancing shareability.      |
 | **🔒 Hardened Security**        | Strict Content Security Policy (CSP) and other security headers configured for production environments.   |
 | **🔍 Blazing-Fast Search**      | Client-side full-text search powered by Pagefind, delivering instant results without a server round-trip. |
-| **✅ Comprehensive Testing**    | Unit, integration, and E2E tests with Vitest and Playwright ensure exceptional code quality.             |
+| **✅ Comprehensive Testing**    | Unit, integration, and E2E tests with Vitest and Playwright ensure exceptional code quality.              |
 
 ## 🚀 Getting Started
 
 ### Prerequisites
 
-*   Node.js `v20.x` or higher
-*   pnpm `v10.x` or higher
-*   Git
+- Node.js `v20.x` or higher
+- pnpm `v10.x` or higher
+- Git
 
 ### 1. Set Up Your Local Environment
 
@@ -90,7 +90,6 @@ tags:
   - "getting-started"
   - "astro"
 ---
-
 Welcome to my new blog! This content is written in Markdown.
 ```
 
@@ -100,17 +99,17 @@ Save the file, and your new post will instantly appear on the site.
 
 Natspaper includes a suite of scripts to streamline development, testing, and production builds.
 
-| Command             | Description                                                   |
-| :------------------ | :------------------------------------------------------------ |
-| `pnpm dev`          | Start the development server with hot-reloading.              |
-| `pnpm build`        | Create a production-ready build in the `dist/` directory.     |
-| `pnpm preview`      | Preview the local production build.                           |
-| `pnpm test:run`     | Run all unit and integration tests with Vitest.               |
-| `pnpm test:e2e`     | Run all end-to-end browser tests with Playwright.             |
-| `pnpm test:all`     | Run all unit, integration, and E2E tests.                     |
-| `pnpm lint`         | Check for code style and linting errors.                      |
-| `pnpm format:check` | Check for code formatting inconsistencies with Prettier.      |
-| `pnpm astro check`  | Validate TypeScript and Astro types across the project.       |
+| Command             | Description                                               |
+| :------------------ | :-------------------------------------------------------- |
+| `pnpm dev`          | Start the development server with hot-reloading.          |
+| `pnpm build`        | Create a production-ready build in the `dist/` directory. |
+| `pnpm preview`      | Preview the local production build.                       |
+| `pnpm test:run`     | Run all unit and integration tests with Vitest.           |
+| `pnpm test:e2e`     | Run all end-to-end browser tests with Playwright.         |
+| `pnpm test:all`     | Run all unit, integration, and E2E tests.                 |
+| `pnpm lint`         | Check for code style and linting errors.                  |
+| `pnpm format:check` | Check for code formatting inconsistencies with Prettier.  |
+| `pnpm astro check`  | Validate TypeScript and Astro types across the project.   |
 
 ## ⚙️ Developer's Guide
 
@@ -178,25 +177,25 @@ All blog posts are written in Markdown and live in `src/content/blog/`. The fron
 
 #### Frontmatter Fields
 
-| Key           | Required | Type                | Description                                                                                              |
-| :------------ | :------- | :------------------ | :------------------------------------------------------------------------------------------------------- |
-| `title`       | **Yes**  | `string`            | The title of the post.                                                                                   |
-| `pubDatetime` | **Yes**  | `Date` (ISO String) | The publication date (e.g., `2024-10-28T10:00:00Z`). Use `Z` for UTC.                                     |
-| `description` | **Yes**  | `string`            | A short summary for SEO and social cards.                                                                |
-| `author`      | No       | `string`            | Defaults to the site author in `src/config.ts`.                                                          |
-| `modDatetime` | No       | `Date` (ISO String) | The date the post was last modified. Can be auto-generated from Git history.                             |
-| `tags`        | No       | `string[]`          | An array of tags for categorization.                                                                     |
-| `featured`    | No       | `boolean`           | Set to `true` to feature the post on the homepage.                                                       |
-| `draft`       | No       | `boolean`           | Set to `true` to prevent the post from being published.                                                  |
-| `ogImage`     | No       | `string`            | URL to a custom Open Graph image. If omitted, one will be generated automatically.                       |
+| Key           | Required | Type                | Description                                                                        |
+| :------------ | :------- | :------------------ | :--------------------------------------------------------------------------------- |
+| `title`       | **Yes**  | `string`            | The title of the post.                                                             |
+| `pubDatetime` | **Yes**  | `Date` (ISO String) | The publication date (e.g., `2024-10-28T10:00:00Z`). Use `Z` for UTC.              |
+| `description` | **Yes**  | `string`            | A short summary for SEO and social cards.                                          |
+| `author`      | No       | `string`            | Defaults to the site author in `src/config.ts`.                                    |
+| `modDatetime` | No       | `Date` (ISO String) | The date the post was last modified. Can be auto-generated from Git history.       |
+| `tags`        | No       | `string[]`          | An array of tags for categorization.                                               |
+| `featured`    | No       | `boolean`           | Set to `true` to feature the post on the homepage.                                 |
+| `draft`       | No       | `boolean`           | Set to `true` to prevent the post from being published.                            |
+| `ogImage`     | No       | `string`            | URL to a custom Open Graph image. If omitted, one will be generated automatically. |
 
 ## 🧪 Testing & Quality Assurance
 
 This project maintains a high standard of quality through a comprehensive, multi-layered testing strategy.
 
-*   **Unit & Integration Tests (Vitest):** Core utilities and component interactions are tested in isolation for speed and reliability.
-*   **End-to-End Tests (Playwright):** Critical user journeys, such as navigating posts and switching languages, are tested in a real browser to guarantee functionality.
-*   **Static Analysis:** TypeScript, ESLint, and Prettier are used to catch errors and enforce a consistent code style before code is ever committed.
+- **Unit & Integration Tests (Vitest):** Core utilities and component interactions are tested in isolation for speed and reliability.
+- **End-to-End Tests (Playwright):** Critical user journeys, such as navigating posts and switching languages, are tested in a real browser to guarantee functionality.
+- **Static Analysis:** TypeScript, ESLint, and Prettier are used to catch errors and enforce a consistent code style before code is ever committed.
 
 Run all tests to ensure your changes are safe:
 
@@ -213,17 +212,16 @@ The project is optimized for Vercel and includes CI/CD workflows for automated d
 1.  Push your repository to GitHub.
 2.  Import the project on your Vercel dashboard.
 3.  Add your environment variables in **Project Settings → Environment Variables**. At a minimum, you need:
-    *   `SITE_WEBSITE`: The full URL of your live site (e.g., `https://your-domain.com`).
+    - `SITE_WEBSITE`: The full URL of your live site (e.g., `https://your-domain.com`).
 
 The workflows in `.github/workflows/` will automatically handle preview and production deployments.
-
 
 ## 🎨 Acknowledgements & Inspiration
 
 Natspaper stands on the shoulders of giants. This project draws inspiration from the design philosophy and best practices of several excellent open-source projects:
 
-*   **[Hugo PaperMod](https://github.com/adityatelange/hugo-PaperMod):** Provided the foundational design philosophy for Natspaper's academic-inspired aesthetic and performance-first approach.
-*   **[Astro Paper](https://github.com/satnaing/astro-paper):** Demonstrated best practices for building blog themes with Astro, content management, and modern web patterns.
+- **[Hugo PaperMod](https://github.com/adityatelange/hugo-PaperMod):** Provided the foundational design philosophy for Natspaper's academic-inspired aesthetic and performance-first approach.
+- **[Astro Paper](https://github.com/satnaing/astro-paper):** Demonstrated best practices for building blog themes with Astro, content management, and modern web patterns.
 
 ## 📄 License
 
