@@ -1,4 +1,5 @@
 import * as Sentry from "@sentry/astro";
+import { SENTRY_DSN } from "astro:env/server";
 
 /**
  * Server-side Sentry initialization (Node.js runtime)
@@ -12,7 +13,8 @@ import * as Sentry from "@sentry/astro";
  */
 
 Sentry.init({
-  dsn: process.env.SENTRY_DSN || process.env.PUBLIC_SENTRY_DSN,
+  // Prefer server-side DSN when available, fall back to a public DSN if provided
+  dsn: SENTRY_DSN || process.env.PUBLIC_SENTRY_DSN,
 
   // Collects request headers and user IP address (server-side)
   // Set to false to protect user privacy (default: false)

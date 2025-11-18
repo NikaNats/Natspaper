@@ -1,5 +1,5 @@
 ---
-import { getCollection } from "astro:content";
+import { contentRepo } from "@/utils/content.repository";
 import Main from "@/layouts/Main.astro";
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/layout/Header.astro";
@@ -13,9 +13,7 @@ if (!SITE.showArchives) {
   return Astro.redirect("/ka/404");
 }
 
-const allPosts = await getCollection("blog", ({ data }) => !data.draft);
-// Filter posts for Georgian language
-const posts = allPosts.filter(post => post.slug.startsWith("ka/"));
+const posts = await contentRepo.getPostsByLocale("ka");
 
 const months = [
   "იანვარი",

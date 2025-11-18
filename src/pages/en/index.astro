@@ -1,5 +1,5 @@
 ---
-import { getCollection } from "astro:content";
+import { contentRepo } from "@/utils/content.repository";
 import { Picture } from "astro:assets";
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/layout/Header.astro";
@@ -7,16 +7,13 @@ import Footer from "@/components/layout/Footer.astro";
 import Socials from "@/components/features/Socials.astro";
 import Hr from "@/components/ui/Hr.astro";
 import FeaturedPostCard from "@/components/post/FeaturedPostCard.astro";
-import { getSortedPosts } from "@/utils/post";
+// getSortedPosts is handled by contentRepo; remove redundant import
 import { SOCIALS } from "@/data/socials";
 import { SITE } from "@/config";
 import profilePic from "@/assets/images/me.jpeg";
 
-// Get posts only for the English language
-const allPosts = await getCollection("blog");
-const posts = allPosts.filter(post => post.slug.startsWith("en/"));
-
-const sortedPosts = getSortedPosts(posts);
+// Get posts only for the English language using the centralized repository
+const sortedPosts = await contentRepo.getPostsByLocale("en");
 const featuredPosts = sortedPosts.filter(({ data }) => data.featured);
 ---
 

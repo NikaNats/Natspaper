@@ -1,5 +1,6 @@
 import type { APIRoute } from "astro";
-import { getCollection, type CollectionEntry } from "astro:content";
+import { type CollectionEntry } from "astro:content";
+import { contentRepo } from "@/utils/content.repository";
 import { generateOgImageForPost } from "@/utils/og";
 import { ogImageLimiter } from "@/utils/core";
 import { SITE } from "@/config";
@@ -17,8 +18,8 @@ export async function getStaticPaths() {
     return [];
   }
 
-  const posts = await getCollection("blog").then(p =>
-    p.filter(({ data }) => !data.draft && !data.ogImage)
+  const posts = (await contentRepo.getPostsByLocale("ka")).filter(
+    ({ data }) => !data.ogImage
   );
 
   return posts.map(post => {

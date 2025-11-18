@@ -1,5 +1,4 @@
 ---
-import { getCollection } from "astro:content";
 import Main from "@/layouts/Main.astro";
 import Layout from "@/layouts/Layout.astro";
 import Tag from "@/components/post/Tag.astro";
@@ -8,12 +7,11 @@ import Footer from "@/components/layout/Footer.astro";
 import { getUniqueTags } from "@/utils/post";
 import { SITE } from "@/config";
 
-const allPosts = await getCollection("blog");
-// Filter posts for Georgian language
-const posts = allPosts.filter(post => post.slug.startsWith("ka/"));
+import { contentRepo } from "@/utils/content.repository";
+const posts = await contentRepo.getPostsByLocale("ka");
 
-// Get tags with Georgian translations
-let tags = getUniqueTags(posts, "ka");
+// Get tags with translated names for the current locale
+let tags = getUniqueTags(posts, Astro.currentLocale as "en" | "ka");
 ---
 
 <Layout title={`თეგები | ${SITE.title}`}>

@@ -1,5 +1,5 @@
 ---
-import { getCollection } from "astro:content";
+import { contentRepo } from "@/utils/content.repository";
 import Main from "@/layouts/Main.astro";
 import Layout from "@/layouts/Layout.astro";
 import Tag from "@/components/post/Tag.astro";
@@ -8,10 +8,11 @@ import Footer from "@/components/layout/Footer.astro";
 import { getUniqueTags } from "@/utils/post";
 import { SITE } from "@/config";
 
-const posts = await getCollection("blog");
-
-// Get tags with English translations
-let tags = getUniqueTags(posts, Astro.currentLocale);
+const posts = await contentRepo.getPostsByLocale(
+  Astro.currentLocale as "en" | "ka"
+);
+// Get tags with translated names for the current locale
+let tags = getUniqueTags(posts, Astro.currentLocale as "en" | "ka");
 ---
 
 <Layout title={`Tags | ${SITE.title}`}>
