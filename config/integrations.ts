@@ -37,7 +37,25 @@ export function getIntegrations() {
       // At typical blog scale, a single sitemap-0.xml is sufficient
       entryLimit: 45000,
     }),
-    expressiveCode(),
+    expressiveCode({
+      themes: ["min-light", "night-owl"],
+      styleOverrides: {
+        codeFontFamily: "'JetBrains Mono', monospace",
+        uiFontFamily: "'Inter', sans-serif",
+        borderColor: "transparent",
+        frames: {
+          frameBoxShadowCssValue: "none",
+          tooltipSuccessBackground: "var(--accent)",
+          editorActiveTabBackground: "transparent",
+          editorTabBorderRadius: "0",
+          showCopyToClipboardButton: true,
+          editorTabBarBackground: "transparent",
+          terminalTitlebarBackground: "transparent",
+          terminalTitlebarBorderBottomColor: "transparent",
+          editorTabBarBorderBottomColor: "transparent",
+        },
+      },
+    }),
     Sonda({
       format: ["html", "json"],
     }),

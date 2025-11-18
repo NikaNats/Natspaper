@@ -25,7 +25,6 @@
 
 import type { Feature } from "./Feature";
 import { ProgressBar } from "./progressBar";
-import { CopyButtons } from "./copyButton";
 import { HeadingLinks } from "./headingLinks";
 
 class FeatureManager {
@@ -35,7 +34,7 @@ class FeatureManager {
     // The list of all features to manage. Open for extension!
     // To add a new feature, simply create a new class implementing Feature
     // and add an instance of it to this array.
-    this.features = [new ProgressBar(), new CopyButtons(), new HeadingLinks()];
+    this.features = [new ProgressBar(), new HeadingLinks()];
   }
 
   /**

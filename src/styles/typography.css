@@ -208,7 +208,7 @@
      * - Background color (bg-muted) provides distinction without distraction
      * - Font size: 0.95em (slightly smaller) maintains visual hierarchy
      */
-    code {
+    :not(pre) > code {
       @apply rounded bg-muted px-1.5 py-0.5 wrap-break-word text-foreground before:content-none after:content-none;
       font-family: var(--font-jetbrains-mono), monospace;
       font-size: 0.95em;
@@ -217,9 +217,11 @@
       letter-spacing: 0.1px;
     }
 
+    /* 
     .astro-code code {
       @apply flex-[1_0_100%] bg-inherit p-0 text-inherit;
     }
+    */
 
     /**
      * Blockquotes: Editorial styling with visual hierarchy
@@ -292,11 +294,11 @@
    * Follows Astro documentation standard for Shiki syntax highlighting
    * with support for light and dark mode themes via CSS variables
    */
+  /* 
   .astro-code,
   .astro-code span {
     color: var(--shiki-light) !important;
     background-color: var(--shiki-light-bg) !important;
-    /* Optional: apply font styles if provided by theme */
     font-style: var(--shiki-light-font-style, normal) !important;
     font-weight: var(--shiki-light-font-weight, normal) !important;
     text-decoration: var(--shiki-light-text-decoration, none) !important;
@@ -309,20 +311,17 @@
     line-height: 1.6;
   }
 
-  /* Light mode: applied via data attribute (your custom theme system) */
   html[data-theme="light"] .astro-code,
   html[data-theme="light"] .astro-code span {
     color: var(--shiki-light) !important;
     background-color: var(--shiki-light-bg) !important;
   }
 
-  /* Dark mode: follows Astro documentation pattern with media query fallback */
   @media (prefers-color-scheme: dark) {
     .astro-code,
     .astro-code span {
       color: var(--shiki-dark) !important;
       background-color: var(--shiki-dark-bg) !important;
-      /* Optional: apply font styles if provided by theme */
       font-style: var(--shiki-dark-font-style, normal) !important;
       font-weight: var(--shiki-dark-font-weight, normal) !important;
       text-decoration: var(--shiki-dark-text-decoration, none) !important;
@@ -334,11 +333,13 @@
     color: var(--shiki-dark) !important;
     background-color: var(--shiki-dark-bg) !important;
   }
+  */
 
   /**
    * Shiki Transformers: Visual indicators for code changes and highlights
    * Color-coded diffs for clarity
    */
+  /*
   .astro-code {
     .line.diff.add {
       @apply relative inline-block w-full bg-green-400/10 before:absolute before:-left-3 before:text-green-600 before:content-['+'];
@@ -353,6 +354,7 @@
       @apply rounded-sm border border-border px-0.5 py-px;
     }
   }
+  */
 }
 
 /**
