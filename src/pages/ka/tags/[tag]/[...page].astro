@@ -40,7 +40,12 @@ const { page, tagName } = Astro.props;
     titleTransition={tag}
     pageDesc={`ყველა სტატია თეგით "${tagName}".`}
   >
-    <h1 slot="title" transition:name={tag} data-testid="tag-archive-title">
+    <h1
+      slot="title"
+      class="main-heading"
+      transition:name={tag}
+      data-testid="tag-archive-title"
+    >
       {`თეგი:${tag}`}
     </h1>
     <ul>

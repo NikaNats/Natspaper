@@ -405,6 +405,38 @@
   line-height: 1.25;
 }
 
+/*
+   * Main heading utility
+   * - Use this utility on top-level/hero h1 titles (page title, post title, hero, etc.)
+   * - Matches spec: xs/sm: 24px/32px; md: 32px/40px; lg: 48px/56px
+   */
+.main-heading {
+  font-weight: 700;
+  font-family: var(--font-inter), sans-serif;
+  /* Very Small Screen (xs, sm) */
+  font-size: 1.5rem; /* 24px */
+  line-height: 2rem; /* 32px */
+  letter-spacing: -0.96px;
+}
+
+/* Medium screens (md) */
+@media (min-width: 768px) {
+  .main-heading {
+    font-size: 2rem; /* 32px */
+    line-height: 2.5rem; /* 40px */
+    letter-spacing: -1.28px;
+  }
+}
+
+/* Large screens (lg) */
+@media (min-width: 1024px) {
+  .main-heading {
+    font-size: 3rem; /* 48px */
+    line-height: 3.5rem; /* 56px */
+    letter-spacing: -2.88px;
+  }
+}
+
 .profile-bio {
   font-size: 1rem;
   line-height: 1.6;
