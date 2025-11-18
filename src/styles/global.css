@@ -232,7 +232,10 @@ header {
 
   z-index: 1000;
 
-  background-color: var(--background);
+  /* Make header transparent so site hero/layout can show underneath. If you want
+     a solid background when scrolling, add a class such as `scrolled` with a
+     background-color of var(--background). */
+  background-color: transparent;
 }
 
 /* padding-top for main removed (previously used to offset a fixed/sticky header) */

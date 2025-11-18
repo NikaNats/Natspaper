@@ -54,9 +54,11 @@
 header {
   position: relative; /* Changed from sticky so header scrolls with page */
   z-index: 100;
-  background-color: var(
-    --background
-  ); /* Keep a solid background while scrolling */
+
+  /* Transparent header so background/hero can show through by default. Use
+     `.scrolled` class to add a background while reading: `background-color:
+     var(--background)` */
+  background-color: transparent;
   transition: background-color 0.3s ease;
 }
 
