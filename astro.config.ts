@@ -78,16 +78,6 @@ export default defineConfig({
         display: "swap", // Same behavior as your old setup
       },
       {
-        // Headings & Editorial Font
-        name: "Merriweather",
-        provider: fontProviders.fontsource(),
-        weights: [400],
-        styles: ["normal"],
-        cssVariable: "--font-merriweather",
-        fallbacks: ["serif"],
-        display: "swap",
-      },
-      {
         // Code Font
         name: "JetBrains Mono",
         provider: fontProviders.fontsource(),

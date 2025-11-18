@@ -301,6 +301,28 @@ button#theme-toggle svg {
   color: var(--background);
 }
 
+/* Explicit Post Title class
+   Ensures the post title uses Inter + bold weight, and defines a visual hierarchy
+   independent of any cascaded global defaults. This keeps the editorial title
+   consistent across themes and layout contexts. */
+.post-title {
+  font-family: var(--font-inter), sans-serif;
+  /* Use theme font-weight variable — keeps weights consistent */
+  font-weight: var(--font-weight-bold);
+  color: var(--accent);
+  /* Use semantic sizing consistent with tailwind utilities, this is a graceful fallback */
+  font-size: var(--text-2xl);
+  line-height: var(--text-2xl--line-height);
+  display: inline-block;
+}
+
+@media (min-width: 640px) {
+  .post-title {
+    font-size: var(--text-3xl);
+    line-height: var(--text-3xl--line-height);
+  }
+}
+
 /**
  * Metadata Display
  *

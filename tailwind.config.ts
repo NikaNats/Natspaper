@@ -22,7 +22,7 @@ export default {
        * Research-Backed Typography Strategy:
        * ====================================
        *
-       * Font Pairing: Merriweather + Roboto (based on technical guidelines)
+      * Font Pairing: Inter for both UI and editorial headings — single-family strategy for performance
        * Alternative implementation available: Can use custom font stack if Roboto not available
        *
        * Current Implementation: Using Inter for body text (high x-height, screen-optimized)
@@ -36,14 +36,15 @@ export default {
        * Font Metrics for Reference:
        * - Roboto x-height: High (0.52 of cap height)
        * - Inter x-height: High (0.5 of cap height)
-       * - Merriweather x-height: Medium (0.5 of cap height)
+      * - Inter x-height: High for readability and consistency
        * - Compatibility ratio: 0.95–1.0 (excellent pairing)
        */
       fontFamily: {
         // Body & UI: High x-height for rapid character recognition
         sans: ["var(--font-inter)", "sans-serif"],
-        // Headings & Editorial: Serif for trustworthiness and visual hierarchy
-        serif: ["var(--font-merriweather)", "serif"],
+        // Headings & Editorial: Switched to Inter (sans) - use Inter variable for consistent heading styles
+        // Keeping `serif` key available if you want to revert to a serif heading in the future
+          // CHANGED: removed serif token entirely so `font-serif` uses browser fallback.
         // Code: Monospace for technical clarity
         mono: ["var(--font-jetbrains-mono)", "monospace"],
       },

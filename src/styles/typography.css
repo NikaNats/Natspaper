@@ -6,8 +6,8 @@
  * Technical Foundation (from cognitive psychology and UX research):
  * ================================================================
  * 
- * Font Pairing: Merriweather (serif, headings) + Roboto (sans-serif, body)
- * - Merriweather: Editorial tone, trustworthiness, elegance (headings)
+ * Font Pairing: Inter (sans, headings & body) — single-family strategy for clarity
+ * - Inter: Screen-optimized, high x-height, consistent across headings & body
  * - Roboto: High legibility, screen-optimized, 35% faster reading speed
  * - x-height ratio: ~0.95 (ensures visual harmony and balance)
  * 
@@ -30,7 +30,7 @@
    * Core typography hierarchy and spacing
    * 
    * Research Foundation:
-   * - Merriweather (serif) for headings: Associated with trustworthiness, 
+   * - Inter for headings: Unifies the editorial voice and reduces webfont payload
    *   elegance, and editorial authority
    * - Heading line-height: 1.2–1.3 (tighter than body for visual distinction)
    * - Heading letter-spacing: Reduced to -0.3px (improves visual density)
@@ -43,7 +43,7 @@
     /* Line-height 1.5–1.6 range optimized per WCAG + cognitive research */
     line-height: 1.6;
 
-    /* Heading Styles: Merriweather serif family (strong editorial voice) */
+    /* Heading Styles: Moved to Inter for consistent UI body/headline rhythm */
     h1,
     h2,
     h3,
@@ -52,7 +52,8 @@
     h6,
     th {
       @apply relative mb-4 text-foreground;
-      font-family: var(--font-merriweather), serif;
+      /* CHANGED: Use Inter for headings (strict bold below) */
+      font-family: var(--font-inter), sans-serif;
       line-height: 1.2;
       letter-spacing: -0.3px;
       font-weight: 700;
@@ -110,6 +111,9 @@
     p {
       margin-bottom: 1.25rem;
       line-height: 1.6;
+      /* Use Inter for paragraph text; ensure normal (not bold) weight */
+      font-family: var(--font-inter), sans-serif;
+      font-weight: 400; /* normal weight for paragraphs */
     }
 
     /**
@@ -164,6 +168,7 @@
       @apply my-3 marker:text-accent;
       /* No margin-left needed with list-inside */
       line-height: 1.6;
+      font-family: var(--font-inter), sans-serif;
     }
 
     /**
@@ -220,7 +225,7 @@
      * Blockquotes: Editorial styling with visual hierarchy
      * 
      * Design Intent:
-     * - Merriweather serif reinforces editorial/literary tone
+     * - Inter supports both editorial and UI use; we prefer a single family for performance
      * - Left border (accent/40 opacity) provides visual distinction
      * - Italic style (font-style: italic) aids semantic clarity
      * - Reduced opacity (0.85) de-emphasizes while maintaining readability
@@ -228,7 +233,8 @@
     blockquote {
       @apply my-6 border-s-4 border-s-accent/40 ps-4 wrap-break-word italic opacity-85;
       line-height: 1.6;
-      font-family: var(--font-merriweather), Georgia, serif;
+      /* CHANGED: Updated to Inter for consistency */
+      font-family: var(--font-inter), sans-serif;
       /* Slightly reduced opacity for quotations */
     }
 
@@ -249,6 +255,7 @@
 
     summary {
       @apply cursor-pointer font-medium focus-visible:no-underline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-accent focus-visible:outline-dashed;
+      font-family: var(--font-inter), sans-serif;
     }
 
     pre {
@@ -353,7 +360,7 @@
  * 
  * Hero section for home pages with:
  * - Centered profile image
- * - Main headline (Merriweather for editorial tone)
+ * - Main headline uses Inter to reduce font switching, maintain clarity
  * - Bio/description (Inter body text, readable line-height)
  * - Social icons
  * 
@@ -391,7 +398,8 @@
   font-size: 2.5rem;
   font-weight: 700;
   color: var(--foreground);
-  font-family: var(--font-merriweather), Georgia, serif;
+  /* CHANGED: Merriweather -> Inter for improved visual rhythm */
+  font-family: var(--font-inter), sans-serif;
   line-height: 1.25;
 }
 
