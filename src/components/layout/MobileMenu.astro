@@ -4,15 +4,17 @@
 import IconX from "@/assets/icons/IconX.svg";
 import IconMenuDeep from "@/assets/icons/IconMenuDeep.svg";
 import NavMenu from "./NavMenu.astro";
+import { getI18n, type Lang } from "@/i18n";
 
 const { currentPath, locale, otherLanguageLinks } = Astro.props;
+const { t } = getI18n(locale as Lang);
 ---
 
 <!-- Mobile Menu Button (Hamburger) -->
 <button
   id="menu-btn"
   class="rounded-md p-2 text-foreground transition-colors hover:text-accent focus:outline-none sm:hidden"
-  aria-label="Open Menu"
+  aria-label={t("nav.openMenu")}
   aria-expanded="false"
   aria-controls="mobile-menu-overlay"
 >
@@ -30,7 +32,7 @@ const { currentPath, locale, otherLanguageLinks } = Astro.props;
   <button
     id="menu-close-btn"
     class="absolute top-4 right-4 rounded-md p-2 text-foreground transition-colors hover:text-accent focus:outline-none sm:hidden"
-    aria-label="Close Menu"
+    aria-label={t("nav.closeMenu")}
   >
     <IconX class="size-6" />
   </button>

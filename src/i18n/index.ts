@@ -1,5 +1,6 @@
 import { defaultLang, languages, supportedLangs } from "./config";
 import type { Lang } from "./config";
+export type { Lang };
 import { ui } from "./dictionaries/ui";
 import { tagTranslations } from "./dictionaries/tags";
 

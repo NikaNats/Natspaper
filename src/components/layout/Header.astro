@@ -5,8 +5,10 @@ import { SITE } from "@/config";
 import MobileMenu from "./MobileMenu.astro";
 import type { LanguageLink } from "../features/LanguagePicker.astro";
 import { getRelativeLocaleUrl } from "astro:i18n";
+import { getI18n, type Lang } from "@/i18n";
 
 const { pathname } = Astro.url;
+const { t } = getI18n(Astro.currentLocale as Lang);
 
 // V START: Add the i18n logic here
 const allLanguages = [
@@ -35,18 +37,17 @@ const otherLanguageLinks: LanguageLink[] = allLanguages
     href="#main-content"
     class="visually-hidden focus:absolute focus:start-4 focus:top-4 focus:z-50 focus:bg-background focus:p-3 focus:text-accent"
   >
-    Skip to content
+    {t("nav.skipToContent")}
   </a>
 
   <div class="mx-auto flex w-full max-w-app items-center justify-between px-4">
     <nav
-      class="relative flex h-16 w-full items-center justify-between gap-4 bg-background transition-colors"
-      style="background-color: transparent; border-color: transparent;"
+      class="relative flex h-16 w-full items-center justify-between gap-4 border-transparent bg-transparent transition-colors"
     >
       <a
         href={`/${Astro.currentLocale}/`}
         class="shrink-0 rounded-md font-sans text-lg font-bold text-foreground no-underline transition-colors hover:text-accent focus:outline-none"
-        title="Home"
+        title={t("nav.home")}
       >
         {SITE.title}
       </a>

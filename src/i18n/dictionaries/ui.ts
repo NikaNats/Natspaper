@@ -12,6 +12,10 @@ export const ui = {
     "nav.tags": "Tags",
     "nav.archives": "Archives",
     "nav.search": "Search",
+    "nav.openMenu": "Open Menu",
+    "nav.closeMenu": "Close Menu",
+    "nav.skipToContent": "Skip to content",
+    "nav.home": "Home",
 
     // Footer
     "footer.copyright": "All rights reserved.",
@@ -47,6 +51,10 @@ export const ui = {
     "nav.tags": "Tags",
     "nav.archives": "არქივი",
     "nav.search": "ძებნა",
+    "nav.openMenu": "მენიუს გახსნა",
+    "nav.closeMenu": "მენიუს დახურვა",
+    "nav.skipToContent": "შინაარსზე გადასვლა",
+    "nav.home": "მთავარი",
 
     // Footer
     "footer.copyright": "ყველა უფლება დაცულია.",
