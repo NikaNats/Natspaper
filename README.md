@@ -67,6 +67,27 @@ pnpm install
 cp .env.example .env.local
 ```
 
+### PNPM lockfile and CI notes
+
+The project's CI runs `pnpm install` with `--frozen-lockfile` which will fail if `package.json` changes but `pnpm-lock.yaml` is not updated. When you add or remove dependencies locally, update the lockfile and commit it before pushing:
+
+```bash
+# Regenerate lockfile if dependencies changed
+pnpm install
+
+# Commit package.json and pnpm-lock.yaml
+git add package.json pnpm-lock.yaml
+git commit -m "chore: update dependencies"
+```
+
+If you must update dependencies in a CI job where `--frozen-lockfile` is enforced, temporarily run:
+
+```bash
+pnpm install --no-frozen-lockfile --prefer-offline
+```
+
+Then commit the lockfile changes and rerun CI.
+
 ### 2. Start the Development Server
 
 Launch the Astro development server with hot-reloading.
