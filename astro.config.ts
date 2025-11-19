@@ -8,12 +8,8 @@ import remarkCollapse from "remark-collapse";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 import { remarkModifiedTime } from "./src/lib/remark/remark-modified-time.mjs";
-import {
-  transformerNotationDiff,
-  transformerNotationHighlight,
-  transformerNotationWordHighlight,
-} from "@shikijs/transformers";
-import { transformerFileName } from "./src/utils/transformers/fileName";
+// These Shiki transformers were planned but are not used yet. Keep them removed
+// until we actually need them to prevent unused import eslint errors.
 import { fontProviders } from "astro/config";
 
 // Get site URL from environment or use default from config

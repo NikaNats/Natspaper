@@ -12,7 +12,8 @@ export const GET: APIRoute = async ({ params, site }) => {
   const locale = params.locale as "en" | "ka";
   const posts = await contentRepo.getPostsByLocale(locale);
 
-  const recentPosts = posts.slice(0, 50);
+  // REFACTORED: Use the global setting variable instead of magic number 50
+  const recentPosts = posts.slice(0, SITE.rssLimit);
 
   return rss({
     title: `${SITE.title} - ${locale.toUpperCase()}`,

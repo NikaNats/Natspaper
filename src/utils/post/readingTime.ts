@@ -35,9 +35,12 @@ export interface ReadingTimeResult {
  * console.log(result.words); // 11
  * ```
  */
+import { SITE } from "@/config";
+
 export function calculateReadingTime(
   content: string,
-  wordsPerMinute: number = 200
+  // REFACTORED: Default value comes from global settings
+  wordsPerMinute: number = SITE.readingTimeWPM
 ): ReadingTimeResult {
   if (!content || typeof content !== "string") {
     return {

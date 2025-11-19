@@ -340,8 +340,15 @@ const { previous: prevPost, next: nextPost } = getAdjacentPosts(posts, post.id);
         setTimeout(() => {
           feedback.classList.add("hidden");
         }, 2000);
-      } catch (err) {
-        console.error("Failed to copy URL: ", err);
+      } catch {
+        // Fail gracefully: provide user feedback without using console logs
+        feedback.textContent = "Failed to copy";
+        feedback.classList.remove("hidden");
+        // Restore original success text after a timeout so the UI remains consistent
+        setTimeout(() => {
+          feedback.classList.add("hidden");
+          feedback.textContent = "Copied!";
+        }, 2000);
       }
     };
 

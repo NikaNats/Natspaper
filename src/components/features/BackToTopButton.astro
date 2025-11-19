@@ -1,10 +1,12 @@
 ---
 import IconChevronLeft from "@/assets/icons/IconChevronLeft.svg";
 import IconArrowNarrowUp from "@/assets/icons/IconArrowNarrowUp.svg";
+import { SITE } from "@/config"; // Import configuration
 ---
 
 <div
   id="btt-btn-container"
+  data-threshold={SITE.backToTopThreshold}
   data-visible="false"
   class:list={[
     "transition-opacity-transform fixed end-4 bottom-8 z-50 duration-500",
@@ -46,8 +48,7 @@ import IconArrowNarrowUp from "@/assets/icons/IconArrowNarrowUp.svg";
 
 <script is:inline data-astro-rerun>
   function initBackToTop() {
-    // REFACTORED: Use a constant for the visibility threshold
-    const VISIBILITY_THRESHOLD = 0.3;
+    // REFACTORED: Get threshold from data attribute (sourced from config)
 
     // REFACTORED: Scope all queries to this component instance
     const container = document.getElementById("btt-btn-container");
@@ -55,6 +56,9 @@ import IconArrowNarrowUp from "@/assets/icons/IconArrowNarrowUp.svg";
 
     const button = container.querySelector("[data-button='back-to-top']");
     const progressIndicator = container.querySelector("#progress-indicator");
+    const VISIBILITY_THRESHOLD = parseFloat(
+      container.dataset.threshold || "0.3"
+    );
 
     // NEW: Use modern, smooth scrolling API
     button.addEventListener("click", () => {

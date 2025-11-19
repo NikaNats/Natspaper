@@ -1,13 +1,16 @@
 ---
 import { isActive } from "./NavLinks.astro";
+import { NAV_LINKS } from "@/data/navigation";
 import LinkButton from "../ui/LinkButton.astro";
 import IconArchive from "@/assets/icons/IconArchive.svg";
 import { SITE } from "@/config";
 import LanguagePicker from "../features/LanguagePicker.astro";
 import IconMoon from "@/assets/icons/IconMoon.svg";
 import IconSunHigh from "@/assets/icons/IconSunHigh.svg";
+import { getI18n } from "@/i18n";
 
 const { currentPath, locale, otherLanguageLinks } = Astro.props;
+const { t } = getI18n(locale);
 ---
 
 <ul
@@ -16,28 +19,22 @@ const { currentPath, locale, otherLanguageLinks } = Astro.props;
     "flex flex-col items-center gap-6 sm:flex-row sm:gap-3",
   ]}
 >
-  <li>
-    <a
-      href={`/${locale}/posts`}
-      class:list={{
-        "active-nav text-accent": isActive(currentPath, "/posts", locale),
-      }}
-      class="flex h-8 items-center rounded px-2 font-sans text-sm font-medium text-foreground no-underline transition-colors hover:text-accent focus:outline-none"
-    >
-      Posts
-    </a>
-  </li>
-  <li>
-    <a
-      href={`/${locale}/tags`}
-      class:list={{
-        "active-nav text-accent": isActive(currentPath, "/tags", locale),
-      }}
-      class="flex h-8 items-center rounded px-2 font-sans text-sm font-medium text-foreground no-underline transition-colors hover:text-accent focus:outline-none"
-    >
-      Tags
-    </a>
-  </li>
+  {/* Dynamically render main nav links from configuration */}
+  {
+    NAV_LINKS.filter(link => link.href !== "/archives").map(link => (
+      <li>
+        <a
+          href={`/${locale}${link.href}`}
+          class:list={{
+            "active-nav text-accent": isActive(currentPath, link.href, locale),
+          }}
+          class="flex h-8 items-center rounded px-2 font-sans text-sm font-medium text-foreground no-underline transition-colors hover:text-accent focus:outline-none"
+        >
+          {t(link.text)} {/* Use i18n key from config */}
+        </a>
+      </li>
+    ))
+  }
   {
     SITE.showArchives && (
       <li>
@@ -53,11 +50,11 @@ const { currentPath, locale, otherLanguageLinks } = Astro.props;
               ),
             },
           ]}
-          ariaLabel="archives"
-          title="Archives"
+          ariaLabel={t("nav.archives")}
+          title={t("nav.archives")}
         >
           <IconArchive class="size-5" />
-          <span class="sr-only">Archives</span>
+          <span class="sr-only">{t("nav.archives")}</span>
         </LinkButton>
       </li>
     )

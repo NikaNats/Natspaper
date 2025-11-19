@@ -87,6 +87,10 @@ html[data-theme="dark"] {
   --color-muted: var(--muted);
   --color-border: var(--border);
   --color-text-secondary: var(--text-secondary);
+  /* Mapping new tokens to Tailwind utilities */
+  --animate-duration-fast: var(--transition-fast);
+  --animate-duration-normal: var(--transition-normal);
+  --animate-duration-slow: var(--transition-slow);
 }
 
 @layer base {
@@ -164,7 +168,7 @@ html[data-theme="dark"] {
     letter-spacing: 0.2px;
   }
 
-  /* Smooth theme transition for all color properties */
+  transition: color var(--transition-normal) ease;
   body,
   header {
     transition:
@@ -172,7 +176,7 @@ html[data-theme="dark"] {
       color 0.3s ease;
   }
 
-  a,
+  transition: text-decoration-color var(--transition-normal) ease;
   button {
     @apply outline-offset-1 outline-accent focus-visible:no-underline focus-visible:outline-2 focus-visible:outline-dashed;
     transition: color 0.2s ease;

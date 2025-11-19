@@ -1,12 +1,11 @@
 ---
 // This component has no HTML output. It only prepares data and logic.
 
-// 1. Define the navigation links as a clean data structure.
-export const navLinks = [
-  { href: "/posts", text: "Posts" },
-  { href: "/tags", text: "Tags" },
-  { href: "/archives", text: "Archives", icon: "IconArchive" },
-];
+// 1. Import the navigation links from a single source of truth
+import { NAV_LINKS } from "@/data/navigation";
+
+// Re-export the data so existing consumers still work.
+export const navLinks = NAV_LINKS;
 
 // 2. The isActive logic is now self-contained here.
 export function isActive(
