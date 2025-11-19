@@ -98,7 +98,7 @@ a:focus-visible:not(.no-underline) {
 main {
   flex: 1;
   width: 100%;
-  max-width: 42rem; /* ~720px with padding */
+  max-width: 50rem; /* ~720px with padding */
 }
 
 main > * + * {
@@ -343,6 +343,32 @@ button#theme-toggle svg {
   margin-right: 1rem;
 }
 
+/* Align post hero metadata horizontally:
+   Ensure icons and text for reading-time, copy button and datetime are vertically aligned
+   and do not have top/bottom offsets when placed in the hero metadata bar. */
+.post-hero-meta {
+  /* Use center alignment for consistent baseline */
+  align-items: center;
+}
+
+.post-hero-meta .metadata {
+  /* Remove the global top margin used elsewhere so items do not sit lower */
+  margin-top: 0;
+  /* ensure inner items center vertically */
+  align-items: center;
+}
+
+.post-hero-meta svg,
+.post-hero-meta .size-5 {
+  /* Gentle vertical alignment for inline svgs */
+  vertical-align: middle;
+}
+
+/* Some components use `scale-90` on the icons; ensure the scale does not alter baseline */
+.post-hero-meta .scale-90 {
+  transform-origin: center;
+}
+
 /**
  * Responsive Utilities
  *
@@ -477,4 +503,38 @@ body.dark #moon {
 
 body:not(.dark) #sun {
   display: none;
+}
+
+/*
+ * Post Hero Title
+ * Matches specific design requirements for the blog post header
+ */
+.post-hero-title {
+  /* Mobile fallback */
+  font-size: 2.5rem;
+  line-height: 1.1;
+
+  /* Design specs */
+  font-weight: 600;
+  text-align: center;
+  /* Experimental typographic balance for large headings */
+  text-wrap: balance;
+  color: var(--foreground);
+}
+
+@media (min-width: 768px) {
+  .post-hero-title {
+    font-size: 3.5rem; /* ~56px */
+    line-height: 3.5rem;
+    letter-spacing: -3.36px;
+  }
+}
+
+/* Metadata Bar Icons Styling */
+.meta-icon {
+  display: inline-block;
+  width: 1.25rem; /* size-5 equivalent */
+  height: 1.25rem;
+  opacity: 0.7;
+  vertical-align: text-bottom;
 }

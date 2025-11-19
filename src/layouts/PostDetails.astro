@@ -125,35 +125,88 @@ const { previous: prevPost, next: nextPost } = getAdjacentPosts(posts, post.id);
     ]}
     data-pagefind-body
   >
-    <!-- Header Section -->
-    <header class="mx-auto mb-10 max-w-2xl text-center">
+    <!-- ======================================================== -->
+    <!-- REFACTORED HERO SECTION STARTS HERE                      -->
+    <!-- ======================================================== -->
+    <header class="mx-auto mt-6 mb-12 max-w-4xl">
+      <!-- 1. The Huge Hero Title -->
       <h1
         transition:name={slugifyStr(title)}
-        class="main-heading mb-4 font-sans text-foreground"
+        class="post-hero-title mb-8"
         data-testid="post-title"
       >
         {title}
       </h1>
 
-      {
-        /* Description/Excerpt removed to avoid repeating post summary in header */
-      }
-
-      {/* Metadata: Date & Reading Time */}
+      <!-- 2. The Metadata Bar -->
+      <!-- We use justify-between to push Read/Copy to left and Date to right -->
       <div
-        class="flex items-center justify-center gap-3 text-sm text-text-secondary/80"
+        class="post-hero-meta flex flex-wrap items-center justify-between gap-4 border-y border-dashed border-border py-3 text-sm font-medium text-text-secondary"
       >
-        <Datetime
-          {pubDatetime}
-          {modDatetime}
-          {timezone}
-          size="sm"
-          className="opacity-100"
-        />
-        <span class="opacity-40">•</span>
-        <ReadingTime text={readingTimeText} size="sm" className="opacity-100" />
+        <!-- Left Group: Reading Time & Copy URL -->
+        <div class="flex items-center gap-6">
+          <!-- Reading Time -->
+          <div class="opacity-90 transition-opacity hover:opacity-100">
+            <ReadingTime text={readingTimeText} size="sm" />
+          </div>
+
+          <!-- Copy URL Button -->
+          <button
+            id="copy-url-btn"
+            class="group flex items-center gap-1.5 opacity-90 transition-opacity hover:text-accent hover:opacity-100 focus:outline-none"
+            title="Copy article URL"
+            aria-label="Copy article URL to clipboard"
+          >
+            <!-- Simple Link Icon SVG inline for perfect control -->
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="size-5"
+            >
+              <path
+                d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"
+              ></path>
+              <path
+                d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"
+              ></path>
+            </svg>
+            <span>Copy URL</span>
+
+            <!-- Success Feedback (Hidden by default) -->
+            <span
+              id="copy-feedback"
+              class="ml-1 hidden animate-pulse text-xs font-bold text-green-500"
+            >
+              Copied!
+            </span>
+          </button>
+        </div>
+
+        <!-- Right Group: Date -->
+        <div class="opacity-90 transition-opacity hover:opacity-100">
+          <Datetime {pubDatetime} {modDatetime} {timezone} size="sm" />
+        </div>
       </div>
+
+      {/* Description/Excerpt (Optional, kept if needed) */}
+      {
+        description && (
+          <p class="mx-auto mt-8 max-w-2xl text-center text-lg leading-relaxed text-text-secondary italic">
+            {description}
+          </p>
+        )
+      }
     </header>
+    <!-- ======================================================== -->
+    <!-- HERO SECTION ENDS                                        -->
+    <!-- ======================================================== -->
 
     {/* Featured Image (if any) could go here */}
 
@@ -251,6 +304,8 @@ const { previous: prevPost, next: nextPost } = getAdjacentPosts(posts, post.id);
    */
   function initializePostFeatures(): void {
     featureManager.initializeFeatures();
+    // Initialize Copy URL button
+    setupCopyUrl();
   }
 
   /**
@@ -277,4 +332,30 @@ const { previous: prevPost, next: nextPost } = getAdjacentPosts(posts, post.id);
   // Clean up features before navigation
   // Prevents memory leaks and conflicts during page transitions
   document.addEventListener("astro:before-swap", cleanupPostFeatures);
+
+  // Copy URL button setup
+  function setupCopyUrl(): void {
+    const btn = document.getElementById("copy-url-btn");
+    const feedback = document.getElementById("copy-feedback");
+
+    if (!btn || !feedback) return;
+
+    const handler = async () => {
+      try {
+        await navigator.clipboard.writeText(window.location.href);
+        feedback.classList.remove("hidden");
+        setTimeout(() => {
+          feedback.classList.add("hidden");
+        }, 2000);
+      } catch (err) {
+        console.error("Failed to copy URL: ", err);
+      }
+    };
+
+    btn.onclick = handler;
+
+    // Note: `initializePostFeatures` is called after navigation transitions
+    // (astro:after-swap) which will call this function again. We use
+    // `onclick` assignment to ensure idempotent handler wiring.
+  }
 </script>
