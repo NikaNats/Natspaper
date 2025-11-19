@@ -98,7 +98,7 @@ a:focus-visible:not(.no-underline) {
 main {
   flex: 1;
   width: 100%;
-  max-width: 50rem; /* ~720px with padding */
+  max-width: 45rem; /* ~720px with padding */
 }
 
 main > * + * {
