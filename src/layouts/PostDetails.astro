@@ -135,13 +135,8 @@ const { previous: prevPost, next: nextPost } = getAdjacentPosts(posts, post.id);
         {title}
       </h1>
 
-      {/* Description/Excerpt */}
       {
-        description && (
-          <p class="mx-auto mb-6 max-w-xl text-lg leading-relaxed text-text-secondary">
-            {description}
-          </p>
-        )
+        /* Description/Excerpt removed to avoid repeating post summary in header */
       }
 
       {/* Metadata: Date & Reading Time */}
