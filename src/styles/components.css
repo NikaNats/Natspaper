@@ -1,540 +1,213 @@
 /**
  * Component-Specific Styles
- * Scholarly Minimalist Design System (inspired by arduin.io)
- *
- * This file contains specialized styling for reusable components
- * that implement the content-first, minimal design philosophy.
+ * Scholarly Minimalist Design System
  */
 
-/**
- * Post Entry Card Component
- *
- * The fundamental building block for all list views.
- *
- * Features:
- * - Large clickable target (entire card area)
- * - Prominent title with clear hierarchy
- * - Subtle metadata display
- * - Left border accent for visual indicator
- * - Smooth hover/focus transitions
- */
-.post-entry {
-  position: relative;
-  transition:
-    border-color 0.2s ease,
-    background-color 0.15s ease;
-  border-left: 4px solid transparent;
-  padding-left: 1rem;
-}
+@layer components {
+  /* --- LAYOUT COMPONENTS --- */
 
-.post-entry:hover {
-  background-color: var(--muted);
-  border-left-color: var(--accent);
-  border-radius: 0.375rem;
-}
-
-.post-entry:focus-within {
-  background-color: var(--muted);
-  border-left-color: var(--accent);
-  border-radius: 0.375rem;
-}
-
-/**
- * Navigation Bar
- *
- * Fixed-height horizontal navigation with:
- * - Clear site identity (logo/title)
- * - Primary navigation links
- * - Theme toggle
- * - Responsive mobile menu
- *
- * The header uses the same background color as the body for consistency.
- * This ensures header and body always match the current theme.
- */
-header {
-  position: relative; /* Changed from sticky so header scrolls with page */
-  z-index: 100;
-
-  /* Transparent header so background/hero can show through by default. Use
-     `.scrolled` class to add a background while reading: `background-color:
-     var(--background)` */
-  background-color: transparent;
-  transition: background-color 0.3s ease;
-}
-
-/**
- * Link Styling - OPTIMIZED FOR PERFORMANCE
- *
- * Performance improvement: Use border-bottom instead of changing text-decoration-style.
- * Changing text-decoration-style from dashed to solid on hover causes layout reflow
- * and repaints on every link in the document.
- *
- * Solution: Use a solid underline by default (via text-decoration) and add a
- * bottom-border that appears on hover. This prevents the expensive decoration-style change.
- *
- * Side benefit: More control over appearance and better visual consistency.
- */
-a:not(.no-underline) {
-  text-decoration: underline;
-  text-decoration-thickness: 1px;
-  text-underline-offset: 0.25em;
-  text-decoration-color: var(--accent);
-  transition: text-decoration-color 0.2s ease;
-}
-
-a:hover:not(.no-underline),
-a:focus-visible:not(.no-underline) {
-  /* No reflow-causing style changes - just color shift */
-  text-decoration-color: var(--accent);
-  text-decoration-thickness: 2px;
-}
-
-/**
- * Content Main Area
- *
- * Centered, constrained width (~720px) for optimal readability
- * Generous vertical spacing for reduced cognitive load
- */
-main {
-  flex: 1;
-  width: 100%;
-  max-width: 45rem; /* ~720px with padding */
-}
-
-main > * + * {
-  margin-top: 2rem;
-}
-
-/**
- * Code Block Enhancement
- *
- * Responsive overflow and visual clarity
- */
-.astro-code {
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-}
-
-.astro-code::-webkit-scrollbar {
-  height: 0.5rem;
-}
-
-.astro-code::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.astro-code::-webkit-scrollbar-thumb {
-  background-color: var(--muted);
-  border-radius: 0.25rem;
-}
-
-/**
- * Accessibility: Skip to Content Link
- *
- * Invisible by default, visible on focus
- * Allows keyboard navigation to bypass header
- */
-#skip-to-content {
-  position: absolute;
-  top: -2rem;
-  left: 1rem;
-  background-color: var(--background);
-  padding: 0.5rem 0.75rem;
-  text-decoration: none;
-  z-index: 1000;
-  border-radius: 0.25rem;
-}
-
-#skip-to-content:focus {
-  top: 1rem;
-  transition: top 0.2s ease;
-}
-
-/**
- * Back to Top Button
- *
- * Appears only after scrolling (JavaScript-controlled)
- * Positioned fixed at bottom-right
- * Non-intrusive utility element
- */
-#back-to-top {
-  position: fixed;
-  bottom: 2rem;
-  right: 2rem;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  pointer-events: none;
-}
-
-#back-to-top.show {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-/**
- * Search Bar
- *
- * Client-side search with real-time filtering
- * Minimal visual design matching the content-first philosophy
- */
-.search-container {
-  position: relative;
-  margin-bottom: 1rem;
-}
-
-.search-input {
-  width: 100%;
-  padding: 0.75rem 1rem;
-  border: 1px solid var(--border);
-  border-radius: 0.375rem;
-  background-color: var(--background);
-  color: var(--foreground);
-  font-family: inherit;
-  font-size: 1rem;
-  transition:
-    border-color 0.2s ease,
-    background-color 0.2s ease;
-}
-
-.search-input:focus {
-  outline: none;
-  border-color: var(--accent);
-  background-color: var(--muted);
-}
-
-/**
- * Theme Toggle Button
- *
- * SVG-based icon for theme switching
- * Persistent state via storage with graceful fallback to in-memory
- * Works in restricted contexts (artifacts, iframes) without localStorage
- */
-button#theme-toggle {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 2.5rem;
-  height: 2.5rem;
-  padding: 0;
-  background: none;
-  border: 1px solid var(--border);
-  border-radius: 0.375rem;
-  cursor: pointer;
-  transition:
-    border-color 0.2s ease,
-    background-color 0.2s ease;
-  color: var(--foreground);
-  font-size: 1.5rem;
-}
-
-button#theme-toggle:hover,
-button#theme-toggle:focus-visible {
-  background-color: var(--muted);
-  border-color: var(--accent);
-  color: var(--accent);
-}
-
-button#theme-toggle svg {
-  width: 1.25rem;
-  height: 1.25rem;
-  color: currentColor;
-}
-
-/**
- * Pagination
- *
- * Simple, minimal navigation between post lists
- * Clear active state
- */
-.pagination {
-  display: flex;
-  justify-content: center;
-  gap: 1rem;
-  margin: 2rem 0;
-  list-style: none;
-  padding: 0;
-}
-
-.pagination a,
-.pagination span {
-  padding: 0.5rem 0.75rem;
-  border: 1px solid var(--border);
-  border-radius: 0.25rem;
-  text-decoration: none;
-  transition:
-    border-color 0.2s ease,
-    background-color 0.2s ease;
-}
-
-.pagination a:hover,
-.pagination a:focus-visible {
-  background-color: var(--muted);
-  border-color: var(--accent);
-}
-
-.pagination .active {
-  background-color: var(--accent);
-  color: var(--background);
-  border-color: var(--accent);
-}
-
-/**
- * Tag Display
- *
- * Minimal tag styling for topic taxonomy
- */
-.tag {
-  display: inline-block;
-  padding: 0.375rem 0.75rem;
-  margin-right: 0.5rem;
-  margin-bottom: 0.5rem;
-  background-color: var(--muted);
-  color: var(--foreground);
-  border-radius: 0.25rem;
-  font-size: 0.875rem;
-  text-decoration: none;
-  transition:
-    background-color 0.2s ease,
-    color 0.2s ease;
-}
-
-.tag:hover {
-  background-color: var(--accent);
-  color: var(--background);
-}
-
-/* Explicit Post Title class
-   Ensures the post title uses Inter + bold weight, and defines a visual hierarchy
-   independent of any cascaded global defaults. This keeps the editorial title
-   consistent across themes and layout contexts. */
-.post-title {
-  font-family: var(--font-inter), sans-serif;
-  /* Use theme font-weight variable — keeps weights consistent */
-  font-weight: var(--font-weight-bold);
-  color: var(--accent);
-  /* Use semantic sizing consistent with tailwind utilities, this is a graceful fallback */
-  font-size: var(--text-2xl);
-  line-height: var(--text-2xl--line-height);
-  display: inline-block;
-}
-
-@media (min-width: 640px) {
-  .post-title {
-    font-size: var(--text-3xl);
-    line-height: var(--text-3xl--line-height);
+  /* Header */
+  header {
+    /* 
+       FIXED: z-50-ზე მაღლა ავწიეთ, რომ 'Main'-ს გადაფაროს.
+       მნიშვნელოვანია: არ გამოიყენოთ 'transform' ან 'filter' აქ, 
+       თორემ 'fixed' შვილი ელემენტები გაფუჭდება.
+    */
+    @apply relative z-50 w-full bg-transparent transition-colors duration-300;
   }
-}
 
-/**
- * Metadata Display
- *
- * Subtle styling for dates, reading time, etc.
- */
-.metadata {
-  display: flex;
-  gap: 1rem;
-  font-size: 0.875rem;
-  color: var(--text-secondary);
-  margin-top: 0.5rem;
-}
-
-.metadata span + span::before {
-  content: "•";
-  margin-right: 1rem;
-}
-
-/* Align post hero metadata horizontally:
-   Ensure icons and text for reading-time, copy button and datetime are vertically aligned
-   and do not have top/bottom offsets when placed in the hero metadata bar. */
-.post-hero-meta {
-  /* Use center alignment for consistent baseline */
-  align-items: center;
-}
-
-.post-hero-meta .metadata {
-  /* Remove the global top margin used elsewhere so items do not sit lower */
-  margin-top: 0;
-  /* ensure inner items center vertically */
-  align-items: center;
-}
-
-.post-hero-meta svg,
-.post-hero-meta .size-5 {
-  /* Gentle vertical alignment for inline svgs */
-  vertical-align: middle;
-}
-
-/* Some components use `scale-90` on the icons; ensure the scale does not alter baseline */
-.post-hero-meta .scale-90 {
-  transform-origin: center;
-}
-
-/**
- * Responsive Utilities
- *
- * Mobile-first adjustments for smaller screens
- */
-@media (max-width: 640px) {
+  /* Main Content Area */
   main {
-    padding-left: 1rem;
-    padding-right: 1rem;
+    @apply mx-auto w-full flex-1;
+    max-width: var(--main-width);
+    padding-inline: 1rem;
+
+    /* 
+       CRITICAL FIX: ეს აუცილებელია! 
+       ეს ქმნის ახალ კონტექსტს (0), რათა View Transition-მა 
+       ელემენტი (სათაური) არ "ამოაგდოს" ჰეღერის ზემოთ.
+    */
+    position: relative;
+    z-index: 0;
   }
 
-  #back-to-top {
-    bottom: 1rem;
-    right: 1rem;
+  /* Vertical Rhythm */
+  main > * + * {
+    margin-top: 2rem;
+  }
+
+  /* --- FEATURE COMPONENTS --- */
+
+  .post-entry {
+    @apply relative border-l-4 border-transparent pl-4 transition-all duration-200;
+  }
+
+  .post-entry:hover,
+  .post-entry:focus-within {
+    @apply rounded-r-md border-accent bg-muted;
+  }
+
+  /* Post Hero Title */
+  .post-hero-title {
+    @apply text-center font-bold text-foreground;
+    font-family: var(--font-inter), sans-serif;
+    font-size: clamp(2rem, 5vw, 3rem);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+
+    /* 
+       უსაფრთხოებისთვის: თუ view-transition აქტიურია, 
+       ეს ეუბნება ბრაუზერს, რომ ელემენტი main-ის კონტექსტში დარჩეს 
+    */
+    position: relative;
+    z-index: 1;
+  }
+
+  .post-hero-meta {
+    @apply mt-4 flex flex-wrap items-center justify-between gap-4 border-b border-dashed border-border pb-4;
+  }
+
+  .metadata {
+    @apply flex items-center gap-3 text-sm font-medium text-text-secondary;
   }
 
   .pagination {
-    gap: 0.5rem;
+    @apply my-12 flex list-none justify-center gap-4 p-0;
   }
 
   .pagination a,
   .pagination span {
-    padding: 0.375rem 0.5rem;
-    font-size: 0.875rem;
+    @apply rounded-md border border-border px-4 py-2 text-sm transition-colors;
   }
 
-  .post-entry {
-    padding-left: 0.75rem;
+  .pagination a:hover {
+    @apply border-accent bg-muted text-accent;
   }
 
-  .profile {
-    min-height: auto;
+  .pagination .active {
+    @apply border-accent bg-accent font-medium text-background;
+  }
+
+  .tag {
+    @apply mr-2 mb-2 inline-flex items-center rounded-full px-3 py-1 text-sm transition-colors;
+    @apply border border-transparent bg-muted text-foreground;
+  }
+
+  .tag:hover {
+    @apply border-accent/20 bg-accent/10 text-accent;
+  }
+
+  .search-container {
+    @apply relative mb-6;
+  }
+
+  .search-input {
+    @apply w-full rounded-lg border border-border bg-background px-4 py-3 text-foreground transition-all;
+    font-size: 1rem;
+  }
+
+  .search-input:focus {
+    @apply border-accent ring-2 ring-accent/20 outline-none;
+  }
+
+  /* --- ACCESSIBILITY UTILITIES --- */
+
+  .visually-hidden {
+    @apply sr-only;
+  }
+
+  #skip-to-content {
+    @apply absolute -top-12 left-4 z-[100] rounded bg-accent px-4 py-2 text-white transition-all;
+  }
+
+  #skip-to-content:focus {
+    @apply top-4;
+  }
+
+  /* --- SPECIALIZED COMPONENTS --- */
+
+  .active-nav {
+    @apply font-medium text-accent;
+    text-decoration-line: underline;
+    text-decoration-style: wavy;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 6px;
+  }
+
+  .astro-code {
+    @apply my-6 overflow-x-auto rounded-lg border border-border/50;
+    scrollbar-width: thin;
+  }
+
+  .astro-code::-webkit-scrollbar {
+    height: 8px;
+  }
+
+  .astro-code::-webkit-scrollbar-thumb {
+    @apply rounded-full bg-muted;
+  }
+}
+
+/* 
+   MOBILE MENU CRITICAL OVERRIDES
+*/
+@media (max-width: 640px) {
+  #mobile-menu-overlay {
+    /* იყენებს ფიქსირებულ პოზიციას Viewport-ის მიმართ */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100dvh;
+
+    /* 
+       Max Int Z-Index: გარანტია რომ ყველაფერს გადაფარავს. 
+       მაგრამ მთავარია header-ის z-index > main-ის z-index-ზე.
+    */
+    z-index: 2147483647;
+
+    /* სრული გაუმჭვირვალობა */
+    background-color: var(--background);
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2rem;
     padding: 1rem;
+
+    /* Hardware Acceleration-ის იძულება, რომ ახალ შრედ დახატოს */
+    transform: translateZ(0);
+    will-change: opacity, transform;
   }
 
-  .profile h1 {
-    font-size: 1.75rem;
+  #mobile-menu-overlay.hidden {
+    display: none;
   }
 
-  .social-icons {
-    gap: 0.5rem;
+  #mobile-menu-overlay ul {
+    @apply flex w-full flex-col items-center gap-6;
   }
 
-  .social-icons a {
-    width: 36px;
-    height: 36px;
+  #mobile-menu-overlay a {
+    @apply block py-2 text-2xl font-medium;
   }
 
-  .newsbox {
-    margin: 1rem 0;
-    padding: 1rem;
+  #menu-close-btn {
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+    z-index: 2147483647; /* იგივე მაქსიმუმი */
+    padding: 10px;
   }
 
-  .newsbox-title {
-    font-size: 1.1rem;
+  .pagination a,
+  .pagination span {
+    @apply px-4 py-3 text-base;
   }
-}
 
-/**
- * Navigation (arduin.io inspired refinements)
- */
-.nav {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  max-width: calc(var(--nav-width) + var(--gap) * 2);
-  margin: auto;
-  line-height: var(--header-height);
-}
-
-.logo {
-  display: flex;
-  margin: auto var(--gap);
-}
-
-.logo a {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--foreground);
-  text-decoration: none;
-  transition: color 0.2s ease;
-}
-
-.logo a:hover {
-  color: var(--accent);
-}
-
-#menu {
-  list-style: none;
-  overflow-x: auto;
-  white-space: nowrap;
-  display: flex;
-  margin: auto var(--gap);
-}
-
-#menu li + li {
-  margin-inline-start: var(--gap);
-}
-
-#menu a {
-  font-size: 0.95rem;
-  color: var(--foreground);
-  text-decoration: none;
-  transition: color 0.2s ease;
-}
-
-#menu a:hover {
-  color: var(--accent);
-}
-
-#menu .active {
-  font-weight: 500;
-  border-bottom: 2px solid var(--accent);
-  color: var(--accent);
-}
-
-/**
- * Logo Switches (Theme Toggle)
- */
-.logo-switches {
-  display: inline-flex;
-  margin: auto 0.25rem;
-}
-
-button#theme-toggle {
-  margin: auto 0.25rem;
-}
-
-body.dark #moon {
-  display: none;
-}
-
-body:not(.dark) #sun {
-  display: none;
-}
-
-/*
- * Post Hero Title
- * Matches specific design requirements for the blog post header
- */
-.post-hero-title {
-  /* Mobile fallback */
-  font-size: 2.5rem;
-  line-height: 1.1;
-
-  /* Design specs */
-  font-weight: 600;
-  text-align: center;
-  /* Experimental typographic balance for large headings */
-  text-wrap: balance;
-  color: var(--foreground);
-}
-
-@media (min-width: 768px) {
-  .post-hero-title {
-    font-size: 3.5rem; /* ~56px */
-    line-height: 3.5rem;
-    letter-spacing: -3.36px;
+  body.menu-open {
+    overflow: hidden;
   }
-}
-
-/* Metadata Bar Icons Styling */
-.meta-icon {
-  display: inline-block;
-  width: 1.25rem; /* size-5 equivalent */
-  height: 1.25rem;
-  opacity: 0.7;
-  vertical-align: text-bottom;
 }

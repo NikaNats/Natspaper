@@ -1,332 +1,191 @@
-/* PERFORMANCE: Optimized Font Loading with Fontsource
-   - Uses Fontsource npm packages for self-hosted fonts (better control & performance)
-   - Fonts imported in Layout.astro with display=swap for zero-FOUT
-  - Reduced font weights (3 total: Inter 400/700, JetBrains Mono 400)
-   - Fonts preloaded in network waterfall */
+/* ==========================================================================
+   GLOBAL STYLESHEET (Tailwind v4)
+   Architecture: Imports -> Config -> Variables -> Base -> Print
+   ========================================================================== */
+
+/* 1. IMPORTS */
 @import "tailwindcss";
+/* Typography defines the 'prose' layer */
 @import "./typography.css";
+/* Components defines specialized UI patterns */
 @import "./components.css";
 
+/* 2. TAILWIND CONFIGURATION & TOKENS */
 @custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
 
-/**
-Color System: Scholarly Minimalism (inspired by arduin.io)
-
-Light mode: Black/dark gray text on white background
-
-Dark mode: Light gray text on near-black background
-
-Accent: Used sparingly for links and interactive elements
-
-Minimal decorative colors, content-first approach
-*/
-:root,
-html[data-theme="light"] {
-  --gap: 24px;
-  --content-gap: 20px;
-  --nav-width: 1024px;
-  --main-width: 720px;
-  --header-height: 60px;
-  --footer-height: 100px;
-  --radius: 8px;
-
-  /* Light Theme Palette (WCAG AA Compliant)
-     Research-backed colors that reduce eye strain and maintain excellent contrast */
-  --background: #fafafa;
-  /* Off-white background reduces eye strain vs pure #ffffff */
-  --foreground: #212121;
-  /* Near-black provides excellent contrast (21:1 ratio) without harshness */
-  --accent: #0066ff;
-  /* Desaturated blue - professional and universally accessible */
-  --muted: #f7f7f7;
-  /* Subtle surface differentiation for visual hierarchy */
-  --border: #e0e0e0;
-  /* Soft borders that don't compete with content */
-  --text-secondary: #757575;
-  /* Sufficient contrast (7:1 ratio) while being clearly de-emphasized */
-  --code-block-bg: #1c1d21;
-  /* Dark background for code blocks ensures readability */
-  --code-bg: #f0f0f0;
-  /* Light code inline background with high contrast */
-}
-
-html[data-theme="dark"] {
-  --gap: 24px;
-  --content-gap: 20px;
-  --nav-width: 1024px;
-  --main-width: 720px;
-  --header-height: 60px;
-  --footer-height: 100px;
-  --radius: 8px;
-
-  /* Dark Theme Palette (WCAG AA Compliant)
-     Research-backed colors that eliminate eye strain in low-light conditions
-     and create visual depth through layered grays */
-  --background: #121212;
-  /* Google Material Design standard - allows depth without eye strain */
-  --foreground: #e0e0e0;
-  /* Near-white with high contrast (15:1 ratio) without glare or ghosting */
-  --accent: #4da6ff;
-  /* Lighter, desaturated blue maintains contrast and visual weight in dark mode */
-  --muted: #1e1e1e;
-  /* Slightly lighter surface creates hierarchy and distinguishes interactive elements */
-  --border: #2d2d2d;
-  /* Subtle borders visible against dark background */
-  --text-secondary: #a3a3a3;
-  /* Light gray easily readable (8:1 ratio) but clearly de-emphasized */
-  --code-block-bg: #1a1a1a;
-  /* Slightly darker than background for code block distinction */
-  --code-bg: #2a2a2a;
-  /* Inline code background with sufficient contrast */
-}
-
 @theme inline {
+  /* Map CSS Variables to Tailwind Utilities */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-accent: var(--accent);
   --color-muted: var(--muted);
   --color-border: var(--border);
   --color-text-secondary: var(--text-secondary);
-  /* Mapping new tokens to Tailwind utilities */
-  --animate-duration-fast: var(--transition-fast);
-  --animate-duration-normal: var(--transition-normal);
-  --animate-duration-slow: var(--transition-slow);
+
+  /* Animation Tokens */
+  --animate-duration-fast: 150ms;
+  --animate-duration-normal: 300ms;
+  --animate-duration-slow: 500ms;
 }
 
+/* 3. CSS VARIABLES (DESIGN SYSTEM) */
+:root {
+  /* Layout Metrics */
+  --gap: 24px;
+  --content-gap: 20px;
+  --nav-width: 1024px;
+  --main-width: 720px;
+  --header-height: 64px;
+  --radius: 8px;
+}
+
+/* Light Theme (Default) - WCAG AA+ Compliant */
+:root,
+html[data-theme="light"] {
+  --background: #fafafa; /* Off-white: Reduces eye strain vs pure white */
+  --foreground: #212121; /* Deep Grey: 21:1 Contrast Ratio */
+  --accent: #0066ff; /* Accessible Blue */
+  --muted: #f7f7f7; /* Subtle background differentiation */
+  --border: #e0e0e0; /* Soft structural boundaries */
+  --text-secondary: #757575; /* De-emphasized meta text */
+  --code-block-bg: #1c1d21; /* Dark code blocks for contrast */
+  --code-bg: #f0f0f0; /* Inline code background */
+}
+
+/* Dark Theme - "OLED Friendly" & Low Strain */
+html[data-theme="dark"] {
+  --background: #121212; /* Material Design standard dark */
+  --foreground: #e0e0e0; /* Reduced glare text */
+  --accent: #4da6ff; /* Lighter blue for dark mode contrast */
+  --muted: #1e1e1e; /* Surface elevation */
+  --border: #2d2d2d; /* Subtle borders */
+  --text-secondary: #a3a3a3; /* Readable grey */
+  --code-block-bg: #1a1a1a;
+  --code-bg: #2a2a2a;
+}
+
+/* 4. BASE LAYER (Resets & Defaults) */
 @layer base {
-  /**
-  System Font Stack
-
-  Performance-optimized: Uses native fonts for maximum speed
-
-  Familiar and legible across all devices
-  */
-
-  * {
-    @apply border-border outline-accent/75;
-    scrollbar-width: auto;
-    scrollbar-color: var(--color-muted) transparent;
+  /* Accessibility: Respect reduced motion preferences */
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      @apply scroll-smooth;
+    }
   }
 
-  /**
-  Typography Base Settings
-  
-  Evidence-Based Font Sizing (Research-Backed):
-  =============================================
-  - Desktop (1024px+): 18px baseline
-    * Improves reading comprehension and reduces eye strain
-    * Sweet spot for longform content consumption
-    * Reduces eye fixation duration
-  
-  - Mobile (≤768px): 16px baseline
-    * Maintains WCAG accessibility guidance
-    * Optimized for smaller screens without overwhelming
-    * Ensures readable font sizes on narrow viewports
-  
-  x-height Optimization:
-  - Roboto (sans-serif body): High x-height improves character recognition speed
-  - 35% faster reading speed when font is individually matched (UCF study)
-  - Comprehension maintained at ≥90% with optimized fonts
-  */
-
   html {
-    @apply scroll-smooth bg-background;
-    /* Desktop: 18px for optimal longform readability per research */
+    @apply bg-background;
+    /* Research-backed reading size: 18px for desktop decreases cognitive load */
     font-size: 18px;
-    /* Body font: Roboto (high x-height, screen-optimized) */
-    font-family: var(--font-inter), sans-serif;
+    font-family: var(--font-inter), system-ui, sans-serif;
+    /* Prevent layout shift when scrollbar appears/disappears */
+    scrollbar-gutter: stable;
   }
 
   @media (max-width: 768px) {
     html {
-      /* Mobile: 16px baseline per WCAG accessibility guidance */
-      font-size: 16px;
+      font-size: 16px; /* Standard accessible size for mobile */
     }
   }
 
   body {
-    /* CHANGED: font-mono -> font-sans to use Inter for body text */
-    @apply flex min-h-svh flex-col font-sans text-foreground selection:bg-accent/75 selection:text-background;
-    /**
-     * Line-height Optimization for Reading Comfort
-     * 
-     * Research Foundation:
-     * - Line-height 1.5–1.6 range: Optimal for longform content
-     * - 1.55 specifically chosen: Middle of recommended range
-     * - Benefits:
-     *   • Reduces regressions (rereading) by 10–20%
-     *   • Improves eye tracking efficiency (saccade patterns)
-     *   • Reduces cumulative eye strain for extended reading
-     *   • Increases reading speed without sacrificing comprehension
-     * 
-     * WCAG Compliance:
-     * - Meets WCAG 2.1 Success Criterion 1.4.8 (Visual Presentation)
-     * - Combined with 16–18px font size: Optimal accessibility
-     */
-    line-height: 1.55;
-    /* Letter-spacing: Minimal to preserve word recognition speed */
-    letter-spacing: 0.2px;
-  }
-
-  transition: color var(--transition-normal) ease;
-  body,
-  header {
+    @apply flex min-h-svh flex-col font-sans text-foreground antialiased;
+    line-height: 1.6;
+    letter-spacing: 0.01em;
+    /* Smooth transitions for theme toggling */
     transition:
       background-color 0.3s ease,
       color 0.3s ease;
   }
 
-  transition: text-decoration-color var(--transition-normal) ease;
+  /* Optimized Link Styling - Prevents Layout Thrashing */
+  /* We animate color/thickness instead of line-style to avoid reflows */
+  a:not(.no-underline) {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.25em;
+    text-decoration-color: var(--accent);
+    transition:
+      text-decoration-color 0.2s ease,
+      text-decoration-thickness 0.2s ease;
+  }
+
+  a:hover:not(.no-underline),
+  a:focus-visible:not(.no-underline) {
+    text-decoration-thickness: 2px;
+  }
+
+  /* Focus Management */
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-accent;
+  }
+
+  /* Standard Element Defaults */
+  * {
+    @apply border-border;
+    scrollbar-width: thin;
+    scrollbar-color: var(--muted) transparent;
+  }
+
   button {
-    @apply outline-offset-1 outline-accent focus-visible:no-underline focus-visible:outline-2 focus-visible:outline-dashed;
-    transition: color 0.2s ease;
+    @apply cursor-pointer;
+    touch-action: manipulation; /* Disables double-tap zoom delay on mobile */
   }
 
-  button:not(:disabled),
-  [role="button"]:not(:disabled) {
-    cursor: pointer;
+  button:active,
+  [role="button"]:active {
+    transform: scale(0.98); /* Subtle click feedback */
   }
 
-  /* Visually hide an element but keep it accessible to screen readers */
-  .visually-hidden:not(:focus):not(:active) {
-    clip: rect(0 0 0 0);
-    clip-path: inset(50%);
-    height: 1px;
-    overflow: hidden;
-    position: absolute;
-    white-space: nowrap;
-    width: 1px;
-  }
-
-  /**
-  Main content area: 60 characters per line (60ch) for optimal readability
-  
-  Research Rationale:
-  ===================
-  - Line length 50–75 characters: Optimal for reading comprehension
-  - 60 characters: Widely tested sweet spot in typography research
-  - Benefits:
-    • Reduces eye strain (optimal saccade distance)
-    • Improves comprehension and information retention
-    • Minimizes regressions (rereading) due to lost lines
-    • Creates natural reading rhythm and flow
-  - Implementation: Converted from max-width pixels to 60ch for accessibility
-    • Allows responsive scaling based on actual character width
-    • Font size changes automatically adjust line length
-  */
+  /* Global Layout Constraints */
   section,
   footer {
-    @apply mx-auto max-w-2xl px-4;
-    max-width: 60ch;
+    @apply mx-auto w-full px-4;
+    max-width: 65ch; /* Golden ratio for readability */
   }
 }
 
+/* 5. UTILITY EXTENSIONS */
 @utility max-w-app {
   @apply max-w-2xl;
 }
 
-.active-nav {
-  @apply decoration-wavy decoration-2 underline-offset-4;
-}
-
-header {
-  position: relative; /* Was fixed; changed so header scrolls away with content */
-  left: 0;
-  width: 100%;
-
-  z-index: 1000;
-
-  /* Make header transparent so site hero/layout can show underneath. If you want
-     a solid background when scrolling, add a class such as `scrolled` with a
-     background-color of var(--background). */
-  background-color: transparent;
-}
-
-/* padding-top for main removed (previously used to offset a fixed/sticky header) */
-
-/* Source: https://piccalil.li/blog/a-more-modern-css-reset/ */
-/* Anything that has been anchored to should have extra scroll margin */
-:target {
-  scroll-margin-block: 1rem;
-}
-
-@media (max-width: 640px) {
-  /* Mobile Menu Overlay */
-  #menu-items:not(.hidden) {
-    position: fixed;
-    /* Use inset-0 for full-screen coverage */
-    inset: 0;
-    top: 4rem; /* Start below the header */
-
-    /* Layout */
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 2rem; /* More space between items */
-
-    /* Appearance */
-    background-color: var(--background);
-
-    /* Prevent body scroll when menu is open */
-    overscroll-behavior-y: contain;
+/* 6. PRINT STYLES (Academic Optimization) */
+@media print {
+  html {
+    font-size: 14pt;
+  }
+  body {
+    @apply bg-white text-black;
   }
 
-  /* Make menu items larger on mobile */
-  #menu-items li a {
-    font-size: 1.5rem; /* Larger, easier-to-read text */
-    padding: 0.5rem 1rem;
+  /* Hide UI elements */
+  header,
+  footer,
+  #back-to-top,
+  .no-print,
+  button {
+    display: none !important;
   }
 
-  /* Reduce horizontal padding on main content for smaller screens */
-  main#main-content {
-    padding-left: 1rem; /* 16px */
-    padding-right: 1rem; /* 16px */
+  /* Ensure readability */
+  a {
+    text-decoration: none;
+    color: black;
   }
 
-  /* Make headings slightly smaller on mobile to improve hierarchy */
-  .app-prose h1 {
-    font-size: 2rem; /* from 2.25rem */
+  /* Academic Citation: Append URL to links */
+  a[href^="http"]:after {
+    content: " (" attr(href) ")";
+    font-size: 0.9em;
+    color: #444;
   }
-  .app-prose h2 {
-    font-size: 1.75rem; /* from 2rem */
-  }
-}
 
-/* Improve tap feedback on all buttons */
-button:active,
-[role="button"]:active,
-a:active {
-  /* Briefly scale down to simulate a press */
-  transform: scale(0.96);
-  transition: transform 0.1s ease;
-}
-
-/* Prevent accidental zoom on double-tap for buttons */
-button,
-[role="button"],
-a {
-  touch-action: manipulation;
-}
-
-/* Prevent accidental horizontal scrolling */
-html,
-body {
-  overflow-x: hidden;
-}
-
-/* === Mobile Menu Enhancement === */
-
-/* Prevent the page from scrolling when the menu is open */
-body.menu-open {
-  overflow: hidden;
-}
-
-@media (max-width: 640px) {
-  #mobile-menu-overlay ul li a {
-    /* Make menu items larger and easier to tap on mobile */
-    font-size: 1.5rem; /* 24px */
-    padding: 0.5rem 1rem;
-    border-radius: 0.5rem; /* Optional: adds rounded corners */
+  /* Code formatting for print */
+  pre,
+  code {
+    white-space: pre-wrap;
+    border: 1px solid #ccc;
+    page-break-inside: avoid;
   }
 }
