@@ -30,6 +30,14 @@
 
 /* 3. CSS VARIABLES (DESIGN SYSTEM) */
 :root {
+  /* Font Definitions */
+  --font-inter:
+    "Inter-3dcd4455b90e4525", "Inter-3dcd4455b90e4525 fallback: Arial",
+    sans-serif;
+  --font-jetbrains-mono:
+    "JetBrains Mono-9f910b5ba3c9ba86",
+    "JetBrains Mono-9f910b5ba3c9ba86 fallback: Courier New", monospace;
+
   /* Layout Metrics */
   --gap: 24px;
   --content-gap: 20px;

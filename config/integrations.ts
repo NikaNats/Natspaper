@@ -37,27 +37,10 @@ export function getIntegrations() {
       // At typical blog scale, a single sitemap-0.xml is sufficient
       entryLimit: 45000,
     }),
-    expressiveCode({
-      themes: ["min-light", "night-owl"],
-      frames: {
-        showCopyToClipboardButton: true,
-      },
-      styleOverrides: {
-        codeFontFamily: "'JetBrains Mono', monospace",
-        uiFontFamily: "'Inter', sans-serif",
-        borderColor: "transparent",
-        frames: {
-          frameBoxShadowCssValue: "none",
-          tooltipSuccessBackground: "var(--accent)",
-          editorActiveTabBackground: "transparent",
-          editorTabBorderRadius: "0",
-          editorTabBarBackground: "transparent",
-          terminalTitlebarBackground: "transparent",
-          terminalTitlebarBorderBottomColor: "transparent",
-          editorTabBarBorderBottomColor: "transparent",
-        },
-      },
-    }),
+    // Use external `ec.config.mjs` for Expressive Code configuration where possible.
+    // This avoids duplicating settings and allows you to use <Code /> safely in .astro/.mdx
+    // Keep inline options out of the integration so the external config file is the single source of truth.
+    expressiveCode(),
     Sonda({
       format: ["html", "json"],
     }),

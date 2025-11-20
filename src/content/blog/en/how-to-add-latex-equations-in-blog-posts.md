@@ -32,13 +32,19 @@ In this section, you will find instructions on how to add support for LaTeX in y
 
 1. Install the necessary remark and rehype plugins by running:
 
-   ```bash
+   ```bash title="Terminal"
    pnpm install rehype-katex remark-math katex
    ```
 
-2. Update the Astro configuration to use the these plugins:
+2. Update the Astro configuration to use these plugins:
 
-   ```ts file=astro.config.ts
+   <!--
+      Expressive Code Feature:
+      - title="astro.config.ts": Adds a file tab UI
+      - ins={9-11, 13}: Highlights lines 9-11 and 13 in green (showing additions)
+   -->
+
+   ```ts title="astro.config.ts" ins={9-11, 13}
    // ...
    import remarkMath from "remark-math";
    import rehypeKatex from "rehype-katex";
@@ -47,11 +53,11 @@ In this section, you will find instructions on how to add support for LaTeX in y
      // ...
      markdown: {
        remarkPlugins: [
-         remarkMath, // [!code ++]
-         [remarkToc, { heading: "(table of contents|შინაარსის ცხრილი)" }], // [!code ++]
-         [remarkCollapse, { test: "(Table of contents|შინაარსის ცხრილი)" }], // [!code ++]
+         remarkMath,
+         [remarkToc, { heading: "(table of contents|შინაარსის ცხრილი)" }],
+         [remarkCollapse, { test: "(Table of contents|შინაარსის ცხრილი)" }],
        ],
-       rehypePlugins: [rehypeKatex], // [!code ++]
+       rehypePlugins: [rehypeKatex],
        shikiConfig: {
          // For more themes, visit https://shiki.style/themes
          themes: { light: "min-light", dark: "night-owl" },
@@ -66,13 +72,19 @@ In this section, you will find instructions on how to add support for LaTeX in y
 
    To ensure KaTeX styles are loaded efficiently only on pages that need them, import the CSS directly into your post layout (e.g., `src/layouts/PostDetails.astro`). This enables automatic code-splitting and bundling optimization by Astro's build tool.
 
-   ```astro file=src/layouts/PostDetails.astro
+   <!--
+      Expressive Code Feature:
+      - {6}: Highlights line 6 neutrally (focus attention)
+      - title="...": Adds file context
+   -->
+
+   ```astro title="src/layouts/PostDetails.astro" {6}
    ---
    import { render, type CollectionEntry } from "astro:content";
    import Layout from "@/layouts/Layout.astro";
    // ... other imports
 
-   import "katex/dist/katex.min.css"; // [!code highlight]
+   import "katex/dist/katex.min.css";
 
    export interface Props {
      // ...
@@ -88,14 +100,18 @@ In this section, you will find instructions on how to add support for LaTeX in y
 
 4. As the last step, add a text-color for `katex` in `typography.css`.
 
-   ```css file=src/styles/typography.css
+   <!--
+      Expressive Code Feature:
+      - ins={7-9}: Highlights the added CSS rule in green
+   -->
+
+   ```css title="src/styles/typography.css" ins={7-9}
    @plugin "@tailwindcss/typography";
 
    @layer base {
      /* other classes */
 
      /* Katex text color */
-     /* [!code highlight:3] */
      .prose .katex-display {
        @apply text-foreground;
      }
@@ -125,19 +141,19 @@ For more complex equations or when you want the equation to be displayed on its 
 
 The Gaussian integral:
 
-```bash
+```latex
 $$ \int_{-\infty}^{\infty} e^{-x^2} dx = \sqrt{\pi} $$
 ```
 
 The definition of the Riemann zeta function:
 
-```bash
+```latex
 $$ \zeta(s) = \sum_{n=1}^{\infty} \frac{1}{n^s} $$
 ```
 
 Maxwell's equations in differential form:
 
-```bash
+```latex
 $$
 \begin{aligned}
 \nabla \cdot \mathbf{E} &= \frac{\rho}{\varepsilon_0} \\
