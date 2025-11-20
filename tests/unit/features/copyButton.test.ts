@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { CopyButtons } from "@/utils/features/copyButton";
+import { CopyButtons } from "@/utils/features";
 
 describe("Copy Button Feature", () => {
   let copyButtons: CopyButtons;

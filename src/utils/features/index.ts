@@ -8,3 +8,4 @@
 
 export { featureManager } from "./FeatureManager";
 export type { Feature } from "./Feature";
+export { CopyButtons } from "./copyButton";
