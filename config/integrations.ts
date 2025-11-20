@@ -39,6 +39,9 @@ export function getIntegrations() {
     }),
     expressiveCode({
       themes: ["min-light", "night-owl"],
+      frames: {
+        showCopyToClipboardButton: true,
+      },
       styleOverrides: {
         codeFontFamily: "'JetBrains Mono', monospace",
         uiFontFamily: "'Inter', sans-serif",
@@ -48,7 +51,6 @@ export function getIntegrations() {
           tooltipSuccessBackground: "var(--accent)",
           editorActiveTabBackground: "transparent",
           editorTabBorderRadius: "0",
-          showCopyToClipboardButton: true,
           editorTabBarBackground: "transparent",
           terminalTitlebarBackground: "transparent",
           terminalTitlebarBorderBottomColor: "transparent",
