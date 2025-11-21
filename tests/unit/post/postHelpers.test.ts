@@ -5,7 +5,6 @@ import {
   getAdjacentPosts,
   generatePostStructuredData,
 } from "@/utils/post/postHelpers";
-import { assertDefined } from "../../test-utils";
 
 // Mock SITE config
 vi.mock("@/config", () => ({
