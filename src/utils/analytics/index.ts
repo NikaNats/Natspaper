@@ -251,14 +251,5 @@ export const setUserLanguageProperty = (locale: string) =>
 export type { AnalyticsEvent } from "./provider";
 export { ANALYTICS_CONFIG } from "./google-analytics.provider";
 
-/**
- * TypeScript type definitions for window.gtag
- */
-declare global {
-  interface Window {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    gtag?: (...args: any[]) => void;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    dataLayer?: any[];
-  }
-}
+// Type definitions are now in src/types/global.d.ts
+// This prevents duplicate declarations and ensures single source of truth

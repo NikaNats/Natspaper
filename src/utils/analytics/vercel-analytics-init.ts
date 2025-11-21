@@ -10,16 +10,8 @@
  * See: https://vercel.com/docs/analytics/redacting-sensitive-data
  */
 
-export interface BeforeSendEvent {
+export interface BeforeSendEvent extends Record<string, unknown> {
   url: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  [key: string]: any;
-}
-
-interface WindowWithAnalytics extends Window {
-  webAnalyticsBeforeSend?: (event: BeforeSendEvent) => BeforeSendEvent | null;
-  __VERCEL_ANALYTICS_INITIALIZED?: boolean;
-  __VERCEL_ANALYTICS_LOADED?: boolean;
 }
 
 /**
@@ -41,19 +33,17 @@ export function initVercelAnalyticsClient(): void {
     return;
   }
 
-  const windowWithAnalytics = window as WindowWithAnalytics;
-
   // Skip if already initialized in this session
-  if (windowWithAnalytics.__VERCEL_ANALYTICS_INITIALIZED) {
+  if (window.__VERCEL_ANALYTICS_INITIALIZED) {
     return;
   }
 
   try {
-    windowWithAnalytics.__VERCEL_ANALYTICS_INITIALIZED = true;
+    window.__VERCEL_ANALYTICS_INITIALIZED = true;
 
     // Check if @vercel/analytics is available (it's auto-injected by Astro)
     // If not, load it manually via the official Vercel endpoint
-    if (!windowWithAnalytics.__VERCEL_ANALYTICS_LOADED) {
+    if (!window.__VERCEL_ANALYTICS_LOADED) {
       // The @vercel/analytics package will load the script from /_vercel/insights/script.js
       // if it hasn't been loaded already. This is handled by Astro's integration.
       // We just need to ensure the beforeSend callback is set up first.
@@ -73,8 +63,7 @@ function loadVercelAnalyticsScript(): void {
   try {
     // Check if script already exists
     if (document.querySelector('script[src*="_vercel/insights"]')) {
-      const windowWithAnalytics = window as WindowWithAnalytics;
-      windowWithAnalytics.__VERCEL_ANALYTICS_LOADED = true;
+      window.__VERCEL_ANALYTICS_LOADED = true;
       return;
     }
 
@@ -84,8 +73,7 @@ function loadVercelAnalyticsScript(): void {
     script.defer = true;
 
     script.onload = () => {
-      const windowWithAnalytics = window as WindowWithAnalytics;
-      windowWithAnalytics.__VERCEL_ANALYTICS_LOADED = true;
+      window.__VERCEL_ANALYTICS_LOADED = true;
     };
 
     script.onerror = () => {

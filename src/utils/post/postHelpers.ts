@@ -116,12 +116,16 @@ export function getAdjacentPosts(
     return { previous: null, next: null };
   }
 
+  const previousPost =
+    currentIndex > 0 ? navigationPosts.at(currentIndex - 1) : undefined;
+  const nextPost =
+    currentIndex < navigationPosts.length - 1
+      ? navigationPosts.at(currentIndex + 1)
+      : undefined;
+
   return {
-    previous: currentIndex > 0 ? navigationPosts[currentIndex - 1] : null,
-    next:
-      currentIndex < navigationPosts.length - 1
-        ? navigationPosts[currentIndex + 1]
-        : null,
+    previous: previousPost ?? null,
+    next: nextPost ?? null,
   };
 }
 

@@ -1,6 +1,7 @@
 ---
 // Replaced manual filtering with ContentRepository
 import type { GetStaticPathsOptions } from "astro";
+import { getLastPathSegment } from "@/utils/core/slugify";
 import Main from "@/layouts/Main.astro";
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/layout/Header.astro";
@@ -50,16 +51,18 @@ const { page, tagName } = Astro.props;
     </h1>
     <ul>
       {
-        page.data.map(({ data, slug }) => (
-          <PostSummaryCard
-            title={data.title}
-            description={data.description}
-            pubDatetime={data.pubDatetime}
-            modDatetime={data.modDatetime}
-            timezone={data.timezone}
-            slug={slug.split("/").slice(-1)[0]}
-          />
-        ))
+        page.data
+          .filter(item => item !== undefined)
+          .map(({ data, slug }) => (
+            <PostSummaryCard
+              title={data.title}
+              description={data.description}
+              pubDatetime={data.pubDatetime}
+              modDatetime={data.modDatetime}
+              timezone={data.timezone}
+              slug={getLastPathSegment(slug)}
+            />
+          ))
       }
     </ul>
   </Main>

@@ -13,6 +13,7 @@ const getPostsByGroupCondition = (
   const result: Record<GroupKey, CollectionEntry<"blog">[]> = {};
   for (let i = 0; i < posts.length; i++) {
     const item = posts[i];
+    if (item === undefined) continue; // Skip undefined items
     const groupKey = groupFunction(item, i);
     if (!result[groupKey]) {
       result[groupKey] = [];

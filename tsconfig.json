@@ -10,6 +10,8 @@
     },
     "jsx": "react-jsx",
     "jsxImportSource": "react",
-    "noImplicitAny": true
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "noUncheckedIndexedAccess": true
   }
 }

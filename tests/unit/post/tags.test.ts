@@ -43,7 +43,7 @@ describe('Tag Utilities', () => {
       const uniqueTags = getUniqueTags(posts);
 
       expect(uniqueTags).toHaveLength(1);
-      expect(uniqueTags[0].tag).toBe('published');
+      expect(uniqueTags[0]?.tag).toBe('published');
     });
 
     it('should handle posts with no tags', () => {
@@ -59,7 +59,7 @@ describe('Tag Utilities', () => {
       const uniqueTags = getUniqueTags(posts);
 
       expect(uniqueTags).toHaveLength(1);
-      expect(uniqueTags[0].tag).toBe('tag-1'); // slugify converts to kebab-case
+      expect(uniqueTags[0]?.tag).toBe('tag-1'); // slugify converts to kebab-case
     });
 
     it('should sort tags alphabetically', () => {
@@ -71,8 +71,8 @@ describe('Tag Utilities', () => {
 
       const uniqueTags = getUniqueTags(posts);
 
-      expect(uniqueTags[0].tag).toBe('alpha');
-      expect(uniqueTags[1].tag).toBe('zebra');
+      expect(uniqueTags[0]?.tag).toBe('alpha');
+      expect(uniqueTags[1]?.tag).toBe('zebra');
     });
   });
 
@@ -93,8 +93,8 @@ describe('Tag Utilities', () => {
       const javascriptPosts = getPostsByTag(posts, 'javascript');
 
       expect(javascriptPosts).toHaveLength(2);
-      expect(javascriptPosts[0].id).toBe('post3'); // Most recent first
-      expect(javascriptPosts[1].id).toBe('post1');
+      expect(javascriptPosts[0]?.id).toBe('post3'); // Most recent first
+      expect(javascriptPosts[1]?.id).toBe('post1');
     });
 
     it('should return empty array for non-existent tag', () => {
@@ -124,9 +124,9 @@ describe('Tag Utilities', () => {
 
       const webPosts = getPostsByTag(posts, 'web');
 
-      expect(webPosts[0].id).toBe('post2'); // Most recent
-      expect(webPosts[1].id).toBe('post3');
-      expect(webPosts[2].id).toBe('post1');
+      expect(webPosts[0]?.id).toBe('post2'); // Most recent
+      expect(webPosts[1]?.id).toBe('post3');
+      expect(webPosts[2]?.id).toBe('post1');
     });
   });
 

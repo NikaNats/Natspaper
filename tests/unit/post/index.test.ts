@@ -6,6 +6,7 @@ import { getAdjacentPosts, resolveOgImageUrl } from "@/utils/post/postHelpers";
 import { calculateReadingTime, formatReadingTime, getReadingTimeDisplay } from "@/utils/post/readingTime";
 import { createMockBlogPost } from "@tests/helpers/mockBlogPost";
 import type { CollectionEntry } from "astro:content";
+import { assertDefined } from "../../test-utils";
 
 /**
  * Unit tests for post-related functionality
@@ -90,7 +91,7 @@ describe("Post Utilities", () => {
       const result = getPostsByTag(posts, "typescript");
 
       expect(result).toHaveLength(1);
-      expect(result[0].id).toBe("post2");
+      expect(result[0]?.id).toBe("post2");
     });
 
     it("should filter out draft posts", () => {
@@ -115,7 +116,7 @@ describe("Post Utilities", () => {
       const result = getPostsByTag(posts, "react");
 
       expect(result).toHaveLength(1);
-      expect(result[0].id).toBe("post1");
+      expect(result[0]?.id).toBe("post1");
     });
 
     it("should handle special characters in tags", () => {
@@ -191,7 +192,7 @@ describe("Post Utilities", () => {
       const result = getPostsByTag(posts, "type");
 
       expect(result).toHaveLength(1);
-      expect(result[0].id).toBe("post2");
+      expect(result[0]?.id).toBe("post2");
     });
 
     it("should handle mixed case with spaces and hyphens", () => {
@@ -230,9 +231,9 @@ describe("Post Utilities", () => {
 
       const sorted = getSortedPosts(posts);
 
-      expect(sorted[0].id).toBe("post3");
-      expect(sorted[1].id).toBe("post2");
-      expect(sorted[2].id).toBe("post1");
+      expect(sorted[0]?.id).toBe("post3");
+      expect(sorted[1]?.id).toBe("post2");
+      expect(sorted[2]?.id).toBe("post1");
     });
 
     it("should use modDatetime if available", () => {
@@ -244,7 +245,7 @@ describe("Post Utilities", () => {
       const sorted = getSortedPosts(posts);
 
       // post1 has modDate of 2024-03-15, which is newer than post2's pubDate
-      expect(sorted[0].id).toBe("post1");
+      expect(sorted[0]?.id).toBe("post1");
     });
 
     it("should filter out draft posts", () => {
@@ -270,7 +271,7 @@ describe("Post Utilities", () => {
       const sorted = getSortedPosts(posts);
 
       expect(sorted).toHaveLength(1);
-      expect(sorted[0].id).toBe("post1");
+      expect(sorted[0]?.id).toBe("post1");
     });
 
     it("should handle posts with same date", () => {
@@ -301,9 +302,9 @@ describe("Post Utilities", () => {
       expect(sorted).toHaveLength(3);
 
       // Verify oldest is last
-      expect(sorted[2].id).toBe("post1");
+      expect(sorted[2]?.id).toBe("post1");
       // Verify newest is first
-      expect(sorted[0].id).toBe("post2");
+      expect(sorted[0]?.id).toBe("post2");
     });
 
     it("should handle mixed draft and published posts", () => {
@@ -329,7 +330,7 @@ describe("Post Utilities", () => {
       const sorted = getSortedPosts(posts);
 
       // post1 has modDate 2024-03-15 which is newest
-      expect(sorted[0].id).toBe("post1");
+      expect(sorted[0]?.id).toBe("post1");
     });
 
     it("should handle large number of posts efficiently", () => {
@@ -341,26 +342,33 @@ describe("Post Utilities", () => {
 
       // Should still be sorted correctly
       for (let i = 0; i < sorted.length - 1; i++) {
-        const current = new Date(sorted[i].data.modDatetime ?? sorted[i].data.pubDatetime);
-        const next = new Date(sorted[i + 1].data.modDatetime ?? sorted[i + 1].data.pubDatetime);
-        expect(current.getTime()).toBeGreaterThanOrEqual(next.getTime());
+        const current = sorted[i];
+        const next = sorted[i + 1];
+        if (current && next) {
+          const currentDate = new Date(current.data.modDatetime ?? current.data.pubDatetime);
+          const nextDate = new Date(next.data.modDatetime ?? next.data.pubDatetime);
+          expect(currentDate.getTime()).toBeGreaterThanOrEqual(nextDate.getTime());
+        }
       }
     });
 
-    it("should handle real-world blog post scenarios", () => {
+    it('should handle real-world blog post scenarios', () => {
       const posts = [
-        createMockPost("getting-started", [], true, new Date("2024-01-15")),
-        createMockPost("draft-post", [], false, new Date("2024-02-01")),
-        createMockPost("updated-guide", [], true, new Date("2024-02-01"), new Date("2024-02-10")),
-        createMockPost("latest-news", [], true, new Date("2024-02-15")),
+        createMockPost('getting-started', [], true, new Date('2024-01-15')),
+        createMockPost('draft-post', [], false, new Date('2024-02-01')),
+        createMockPost('updated-guide', [], true, new Date('2024-02-01'), new Date('2024-02-10')),
+        createMockPost('latest-news', [], true, new Date('2024-02-15')),
       ];
 
       const sorted = getSortedPosts(posts);
 
       expect(sorted).toHaveLength(3);
-      expect(sorted[0].id).toBe("latest-news");
-      expect(sorted[1].id).toBe("updated-guide");
-      expect(sorted[2].id).toBe("getting-started");
+      const post0 = assertDefined(sorted[0], 'First sorted post should be defined');
+      const post1 = assertDefined(sorted[1], 'Second sorted post should be defined');
+      const post2 = assertDefined(sorted[2], 'Third sorted post should be defined');
+      expect(post0.id).toBe('latest-news');
+      expect(post1.id).toBe('updated-guide');
+      expect(post2.id).toBe('getting-started');
     });
 
     it("should maintain sort stability", () => {
@@ -408,28 +416,31 @@ describe("Post Utilities", () => {
       expect(tags.map(t => t.tag)).toEqual(["react", "typescript", "web"]);
     });
 
-    it("should preserve original tag names", () => {
+    it('should preserve original tag names', () => {
       const posts = [
-        createMockPostForTags("post1", ["TypeScript", "Web Development"]),
+        createMockPostForTags('post1', ['TypeScript', 'Web Development']),
       ];
 
       const tags = getUniqueTags(posts);
 
       expect(tags).toHaveLength(2);
       // Tags are sorted alphabetically by slug, so type-script comes before web-development
-      expect(tags[0].tag).toBe("type-script");
-      expect(tags[0].tagName).toBe("TypeScript");
-      expect(tags[1].tag).toBe("web-development");
-      expect(tags[1].tagName).toBe("Web Development");
+      const firstTag = assertDefined(tags[0], 'First tag should be defined');
+      const secondTag = assertDefined(tags[1], 'Second tag should be defined');
+      expect(firstTag.tag).toBe('type-script');
+      expect(firstTag.tagName).toBe('TypeScript');
+      expect(secondTag.tag).toBe('web-development');
+      expect(secondTag.tagName).toBe('Web Development');
     });
 
-    it("should return both slug and tagName", () => {
-      const posts = [createMockPostForTags("post1", ["My Test Tag"])];
+    it('should return both slug and tagName', () => {
+      const posts = [createMockPostForTags('post1', ['My Test Tag'])];
 
       const tags = getUniqueTags(posts);
 
-      expect(tags[0]).toHaveProperty("tag", "my-test-tag");
-      expect(tags[0]).toHaveProperty("tagName", "My Test Tag");
+      const firstTag = assertDefined(tags[0], 'First tag should be defined');
+      expect(firstTag).toHaveProperty('tag', 'my-test-tag');
+      expect(firstTag).toHaveProperty('tagName', 'My Test Tag');
     });
 
     it("should handle empty post array", () => {
@@ -437,16 +448,19 @@ describe("Post Utilities", () => {
       expect(tags).toEqual([]);
     });
 
-    it("should sort tags alphabetically by slug", () => {
+    it('should sort tags alphabetically by slug', () => {
       const posts = [
-        createMockPostForTags("post1", ["Zebra", "Apple", "Banana"]),
+        createMockPostForTags('post1', ['Zebra', 'Apple', 'Banana']),
       ];
 
       const tags = getUniqueTags(posts);
 
-      expect(tags[0].tag).toBe("apple");
-      expect(tags[1].tag).toBe("banana");
-      expect(tags[2].tag).toBe("zebra");
+      const tag0 = assertDefined(tags[0], 'First tag should be defined');
+      const tag1 = assertDefined(tags[1], 'Second tag should be defined');
+      const tag2 = assertDefined(tags[2], 'Third tag should be defined');
+      expect(tag0.tag).toBe('apple');
+      expect(tag1.tag).toBe('banana');
+      expect(tag2.tag).toBe('zebra');
     });
 
     it("should filter out duplicate tags (case-insensitive)", () => {

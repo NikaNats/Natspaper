@@ -96,21 +96,20 @@ class GoogleAnalyticsProvider implements AnalyticsProvider {
       document.head.appendChild(script);
 
       // Initialize dataLayer
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (window as any).dataLayer = (window as any).dataLayer || [];
+      window.dataLayer = window.dataLayer || [];
 
       // Initialize gtag function
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (window as any).gtag = function gtag(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        ...gtagArgs: any[]
+      window.gtag = function gtag(
+        ...gtagArgs: Array<
+          string | number | boolean | Date | Record<string, unknown>
+        >
       ): void {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (window as any).dataLayer.push(gtagArgs);
+        if (window.dataLayer) {
+          window.dataLayer.push(gtagArgs);
+        }
       };
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (window as any).gtag("js", new Date());
+      window.gtag("js", new Date());
 
       if (ANALYTICS_CONFIG.ENABLE_DEBUG) {
         console.log("✅ Google Analytics script loaded");

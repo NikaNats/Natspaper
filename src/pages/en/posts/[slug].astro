@@ -1,5 +1,6 @@
 ---
 import { type CollectionEntry } from "astro:content";
+import { getLastPathSegment } from "@/utils/core/slugify";
 import PostDetails from "@/layouts/PostDetails.astro";
 
 export interface Props {
@@ -18,7 +19,7 @@ export async function getStaticPaths() {
   // Add only the clean slug paths (catch route handles .md redirects)
   for (const post of posts) {
     postResult.push({
-      params: { slug: post.slug.split("/").slice(-1)[0] },
+      params: { slug: getLastPathSegment(post.slug) },
       props: { post },
     });
   }

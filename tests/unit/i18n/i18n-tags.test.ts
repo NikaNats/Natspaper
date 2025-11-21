@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { getI18n } from '@/i18n';
 import { tagTranslations } from '../../../src/i18n/dictionaries/tags';
+import { assertDefined } from '../../test-utils';
 
 /**
  * Unit Tests for i18n Tag Translation System
@@ -87,16 +88,18 @@ import { tagTranslations } from '../../../src/i18n/dictionaries/tags';
       const tags = ['docs'];
       const result = tags.map(tag => ({ slug: tag, name: getI18n('en').tTag(tag) }));
       
-      expect(result[0].slug).toBe('docs');
-      expect(result[0].name).toBe('docs');
+      const firstResult = assertDefined(result[0], 'First result should be defined');
+      expect(firstResult.slug).toBe('docs');
+      expect(firstResult.name).toBe('docs');
     });
 
     it('should return correct structure for Georgian tags', () => {
       const tags = ['docs'];
       const result = tags.map(tag => ({ slug: tag, name: getI18n('ka').tTag(tag) }));
       
-      expect(result[0].slug).toBe('docs');
-      expect(result[0].name).toBe('დოკუმენტაცია');
+      const firstResult = assertDefined(result[0], 'First Georgian result should be defined');
+      expect(firstResult.slug).toBe('docs');
+      expect(firstResult.name).toBe('დოკუმენტაცია');
     });
 
     it('should handle multiple tags', () => {
@@ -123,7 +126,8 @@ import { tagTranslations } from '../../../src/i18n/dictionaries/tags';
       const result = tags.map(tag => ({ slug: tag, name: getI18n('ka').tTag(tag) }));
       
       tags.forEach((tag, index) => {
-        expect(result[index].slug).toBe(tag);
+        const item = assertDefined(result[index], `Result at index ${index} should be defined`);
+        expect(item.slug).toBe(tag);
       });
     });
   });

@@ -1,5 +1,6 @@
 ---
 import type { GetStaticPaths } from "astro";
+import { getLastPathSegment } from "@/utils/core/slugify";
 import Main from "@/layouts/Main.astro";
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/layout/Header.astro";
@@ -31,7 +32,7 @@ const { page } = Astro.props;
             pubDatetime={data.pubDatetime}
             modDatetime={data.modDatetime}
             timezone={data.timezone}
-            slug={slug.split("/").slice(-1)[0]}
+            slug={getLastPathSegment(slug)}
           />
         ))
       }

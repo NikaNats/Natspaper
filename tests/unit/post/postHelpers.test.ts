@@ -5,6 +5,7 @@ import {
   getAdjacentPosts,
   generatePostStructuredData,
 } from "@/utils/post/postHelpers";
+import { assertDefined } from "../../test-utils";
 
 // Mock SITE config
 vi.mock("@/config", () => ({
@@ -159,7 +160,7 @@ describe("postHelpers", () => {
     });
 
     it("should work with single post", () => {
-      const singlePost = [mockPosts[0]];
+      const singlePost = [mockPosts.at(0)].filter((p): p is CollectionEntry<"blog"> => p !== undefined);
       const result = getAdjacentPosts(singlePost, "post-1");
 
       expect(result.previous).toBeNull();
@@ -167,7 +168,7 @@ describe("postHelpers", () => {
     });
 
     it("should work with two posts", () => {
-      const twoPosts = [mockPosts[0], mockPosts[1]];
+      const twoPosts = [mockPosts.at(0), mockPosts.at(1)].filter((p): p is CollectionEntry<"blog"> => p !== undefined);
 
       const firstResult = getAdjacentPosts(twoPosts, "post-1");
       expect(firstResult.previous).toBeNull();
