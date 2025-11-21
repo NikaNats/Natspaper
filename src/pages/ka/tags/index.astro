@@ -11,13 +11,15 @@ const posts = await contentRepo.getPostsByLocale("ka");
 
 // 1. Get tags and calculate counts
 // We map over the unique tags and use your existing utility to find the count
-const tags = getUniqueTags(posts, Astro.currentLocale as "en" | "ka").map(tagItem => {
-  const count = getPostsByTag(posts, tagItem.tag).length;
-  return {
-    ...tagItem,
-    count
-  };
-}).sort((a, b) => b.count - a.count); // Sort by popularity (descending)
+const tags = getUniqueTags(posts, Astro.currentLocale as "en" | "ka")
+  .map(tagItem => {
+    const count = getPostsByTag(posts, tagItem.tag).length;
+    return {
+      ...tagItem,
+      count,
+    };
+  })
+  .sort((a, b) => b.count - a.count); // Sort by popularity (descending)
 ---
 
 <Layout title={`თეგები | ${SITE.title}`}>
@@ -28,25 +30,28 @@ const tags = getUniqueTags(posts, Astro.currentLocale as "en" | "ka").map(tagIte
   >
     <!-- 2. The Taxonomy Cloud -->
     <!-- max-w-3xl ensures the cloud doesn't get too wide and hard to read -->
-    <ul class="flex flex-wrap gap-3 mx-auto max-w-3xl mt-8">
-      {tags.map(({ tag, tagName, count }) => (
-        <li>
-          <a
-            href={`/${Astro.currentLocale}/tags/${tag}/`}
-            transition:name={tag}
-            class="group flex items-center justify-between gap-3 px-5 py-3 text-base border border-border/50 bg-muted/10 rounded-full hover:border-accent hover:bg-accent/5 hover:scale-105 transition-all duration-300 no-underline"
-          >
-            <span class="font-medium text-foreground group-hover:text-accent transition-colors">
-              <span class="text-accent/50 mr-0.5">#</span>{tagName}
-            </span>
-            
-            {/* The Counter Badge */}
-            <span class="flex items-center justify-center h-5 min-w-5 px-1.5 text-xs font-mono text-text-secondary bg-background border border-border rounded-full group-hover:border-accent/30 group-hover:text-accent transition-colors">
-              {count}
-            </span>
-          </a>
-        </li>
-      ))}
+    <ul class="mx-auto mt-8 flex max-w-3xl flex-wrap gap-3">
+      {
+        tags.map(({ tag, tagName, count }) => (
+          <li>
+            <a
+              href={`/${Astro.currentLocale}/tags/${tag}/`}
+              transition:name={tag}
+              class="group flex items-center justify-between gap-3 rounded-full border border-border/50 bg-muted/10 px-5 py-3 text-base no-underline transition-all duration-300 hover:scale-105 hover:border-accent hover:bg-accent/5"
+            >
+              <span class="font-medium text-foreground transition-colors group-hover:text-accent">
+                <span class="mr-0.5 text-accent/50">#</span>
+                {tagName}
+              </span>
+
+              {/* The Counter Badge */}
+              <span class="flex h-5 min-w-5 items-center justify-center rounded-full border border-border bg-background px-1.5 font-mono text-xs text-text-secondary transition-colors group-hover:border-accent/30 group-hover:text-accent">
+                {count}
+              </span>
+            </a>
+          </li>
+        ))
+      }
     </ul>
   </Main>
   <Footer />
