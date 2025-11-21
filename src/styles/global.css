@@ -79,8 +79,9 @@ html[data-theme="dark"] {
 
     /* Single, consistent size for all languages */
     font-size: 18px;
-
     scrollbar-gutter: stable;
+
+    scroll-padding-top: var(--header-height, 64px);
   }
 
   @media (max-width: 768px) {

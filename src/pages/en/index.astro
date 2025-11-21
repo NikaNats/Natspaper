@@ -44,6 +44,7 @@ const featuredPosts = sortedPosts.filter(({ data }) => data.featured);
           height={160}
           class="rounded-full"
           loading="eager"
+          fetchpriority="high"
           decoding="sync"
         />
         <h1 class="main-heading mb-4 inline-block sm:mb-8">
