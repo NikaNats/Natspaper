@@ -1,20 +1,14 @@
 /* ==========================================================================
-   GLOBAL STYLESHEET (Tailwind v4)
-   Architecture: Imports -> Config -> Variables -> Base -> Print
+   GLOBAL STYLESHEET (Universal Architecture)
    ========================================================================== */
 
-/* 1. IMPORTS */
 @import "tailwindcss";
-/* Typography defines the 'prose' layer */
 @import "./typography.css";
-/* Components defines specialized UI patterns */
 @import "./components.css";
 
-/* 2. TAILWIND CONFIGURATION & TOKENS */
 @custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
 
 @theme inline {
-  /* Map CSS Variables to Tailwind Utilities */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-accent: var(--accent);
@@ -22,23 +16,13 @@
   --color-border: var(--border);
   --color-text-secondary: var(--text-secondary);
 
-  /* Animation Tokens */
   --animate-duration-fast: 150ms;
   --animate-duration-normal: 300ms;
   --animate-duration-slow: 500ms;
 }
 
-/* 3. CSS VARIABLES (DESIGN SYSTEM) */
+/* --- DESIGN TOKENS --- */
 :root {
-  /* Font Definitions */
-  --font-inter:
-    "Inter-3dcd4455b90e4525", "Inter-3dcd4455b90e4525 fallback: Arial",
-    sans-serif;
-  --font-jetbrains-mono:
-    "JetBrains Mono-9f910b5ba3c9ba86",
-    "JetBrains Mono-9f910b5ba3c9ba86 fallback: Courier New", monospace;
-
-  /* Layout Metrics */
   --gap: 24px;
   --content-gap: 20px;
   --nav-width: 1024px;
@@ -47,34 +31,33 @@
   --radius: 8px;
 }
 
-/* Light Theme (Default) - WCAG AA+ Compliant */
+/* Light Theme */
 :root,
 html[data-theme="light"] {
-  --background: #fafafa; /* Off-white: Reduces eye strain vs pure white */
-  --foreground: #212121; /* Deep Grey: 21:1 Contrast Ratio */
-  --accent: #0066ff; /* Accessible Blue */
-  --muted: #f7f7f7; /* Subtle background differentiation */
-  --border: #e0e0e0; /* Soft structural boundaries */
-  --text-secondary: #757575; /* De-emphasized meta text */
-  --code-block-bg: #1c1d21; /* Dark code blocks for contrast */
-  --code-bg: #f0f0f0; /* Inline code background */
+  --background: #fafafa;
+  --foreground: #212121;
+  --accent: #0066ff;
+  --muted: #f7f7f7;
+  --border: #e0e0e0;
+  --text-secondary: #757575;
+  --code-block-bg: #1c1d21;
+  --code-bg: #f0f0f0;
 }
 
-/* Dark Theme - "OLED Friendly" & Low Strain */
+/* Dark Theme */
 html[data-theme="dark"] {
-  --background: #121212; /* Material Design standard dark */
-  --foreground: #e0e0e0; /* Reduced glare text */
-  --accent: #4da6ff; /* Lighter blue for dark mode contrast */
-  --muted: #1e1e1e; /* Surface elevation */
-  --border: #2d2d2d; /* Subtle borders */
-  --text-secondary: #a3a3a3; /* Readable grey */
+  --background: #121212;
+  --foreground: #e0e0e0;
+  --accent: #4da6ff;
+  --muted: #1e1e1e;
+  --border: #2d2d2d;
+  --text-secondary: #a3a3a3;
   --code-block-bg: #1a1a1a;
   --code-bg: #2a2a2a;
 }
 
-/* 4. BASE LAYER (Resets & Defaults) */
+/* --- BASE LAYER --- */
 @layer base {
-  /* Accessibility: Respect reduced motion preferences */
   @media (prefers-reduced-motion: no-preference) {
     html {
       @apply scroll-smooth;
@@ -83,31 +66,40 @@ html[data-theme="dark"] {
 
   html {
     @apply bg-background;
-    /* Research-backed reading size: 18px for desktop decreases cognitive load */
+
+    /* 
+       UNIVERSAL FONT STACK
+       1. var(--font-inter): Handles Latin characters, Numbers, & Punctuation.
+       2. var(--font-georgian): Browser automatically picks this up for Georgian glyphs.
+       3. Fallbacks: Standard system fonts.
+    */
+    font-family:
+      var(--font-inter), var(--font-georgian), "Helvetica Neue", Arial,
+      sans-serif;
+
+    /* Single, consistent size for all languages */
     font-size: 18px;
-    font-family: var(--font-inter), system-ui, sans-serif;
-    /* Prevent layout shift when scrollbar appears/disappears */
+
     scrollbar-gutter: stable;
   }
 
   @media (max-width: 768px) {
     html {
-      font-size: 16px; /* Standard accessible size for mobile */
+      font-size: 16px;
     }
   }
 
   body {
     @apply flex min-h-svh flex-col font-sans text-foreground antialiased;
+    /* Universal line-height */
     line-height: 1.6;
     letter-spacing: 0.01em;
-    /* Smooth transitions for theme toggling */
     transition:
       background-color 0.3s ease,
       color 0.3s ease;
   }
 
-  /* Optimized Link Styling - Prevents Layout Thrashing */
-  /* We animate color/thickness instead of line-style to avoid reflows */
+  /* Link Styling */
   a:not(.no-underline) {
     text-decoration: underline;
     text-decoration-thickness: 1px;
@@ -123,12 +115,10 @@ html[data-theme="dark"] {
     text-decoration-thickness: 2px;
   }
 
-  /* Focus Management */
   :focus-visible {
     @apply outline-2 outline-offset-2 outline-accent;
   }
 
-  /* Standard Element Defaults */
   * {
     @apply border-border;
     scrollbar-width: thin;
@@ -137,37 +127,34 @@ html[data-theme="dark"] {
 
   button {
     @apply cursor-pointer;
-    touch-action: manipulation; /* Disables double-tap zoom delay on mobile */
+    touch-action: manipulation;
   }
 
   button:active,
   [role="button"]:active {
-    transform: scale(0.98); /* Subtle click feedback */
+    transform: scale(0.98);
   }
 
-  /* Global Layout Constraints */
   section,
   footer {
     @apply mx-auto w-full px-4;
-    max-width: 65ch; /* Golden ratio for readability */
+    max-width: 65ch;
   }
 }
 
-/* 5. UTILITY EXTENSIONS */
+/* --- UTILITIES --- */
 @utility max-w-app {
   @apply max-w-2xl;
 }
 
-/* 6. PRINT STYLES (Academic Optimization) */
+/* --- PRINT STYLES --- */
 @media print {
   html {
-    font-size: 14pt;
+    font-size: 12pt;
   }
   body {
     @apply bg-white text-black;
   }
-
-  /* Hide UI elements */
   header,
   footer,
   #back-to-top,
@@ -175,21 +162,15 @@ html[data-theme="dark"] {
   button {
     display: none !important;
   }
-
-  /* Ensure readability */
   a {
     text-decoration: none;
     color: black;
   }
-
-  /* Academic Citation: Append URL to links */
   a[href^="http"]:after {
     content: " (" attr(href) ")";
-    font-size: 0.9em;
-    color: #444;
+    font-size: 0.8em;
+    color: #666;
   }
-
-  /* Code formatting for print */
   pre,
   code {
     white-space: pre-wrap;

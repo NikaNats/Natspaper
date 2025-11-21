@@ -34,6 +34,7 @@
     "@expressive-code/plugin-line-numbers": "^0.41.3",
     "@fontsource/inter": "^5.2.8",
     "@fontsource/jetbrains-mono": "^5.2.8",
+    "@fontsource/noto-sans-georgian": "^5.2.8",
     "@resvg/resvg-js": "^2.6.2",
     "@sentry/astro": "^10.25.0",
     "@tailwindcss/vite": "^4.1.17",

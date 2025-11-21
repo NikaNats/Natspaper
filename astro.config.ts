@@ -1,4 +1,4 @@
-import { defineConfig } from "astro/config";
+import { defineConfig, fontProviders } from "astro/config"; // Ensure fontProviders is imported
 import { getIntegrations } from "./config/integrations";
 import { getViteConfig } from "./config/vite";
 import { getEnvSchema } from "./config/env";
@@ -8,23 +8,12 @@ import remarkCollapse from "remark-collapse";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 import { remarkModifiedTime } from "./src/lib/remark/remark-modified-time.mjs";
-// These Shiki transformers were planned but are not used yet. Keep them removed
-// until we actually need them to prevent unused import eslint errors.
-import { fontProviders } from "astro/config";
 
-// Get site URL from environment or use default from config
 const siteUrl = process.env.SITE_WEBSITE || SITE.website;
 
-// https://astro.build/config
 export default defineConfig({
   site: siteUrl,
-  output: "static", // Fully static build - no server-side rendering
-
-  // Internationalization (i18n) Configuration
-  // - defaultLocale: 'en' sets English as the default language
-  // - locales: ['en', 'ka'] defines supported languages (English and Georgian)
-  // - prefixDefaultLocale: true ensures all URLs, including English, have a language prefix (e.g., /en/about)
-  //   This creates a consistent URL structure across all languages and is highly recommended for SEO
+  output: "static",
   i18n: {
     defaultLocale: "en",
     locales: ["en", "ka"],
@@ -32,8 +21,6 @@ export default defineConfig({
       prefixDefaultLocale: true,
     },
   },
-
-  // Import configurations from dedicated modules
   integrations: getIntegrations(),
   markdown: {
     remarkPlugins: [
@@ -52,15 +39,28 @@ export default defineConfig({
     headingIdCompat: true,
     fonts: [
       {
-        // Body & UI Font
+        // English / Default Body
         name: "Inter",
         provider: fontProviders.fontsource(),
-        weights: [400, 700], // The exact weights you use
+        weights: [400, 700],
         styles: ["normal"],
-        cssVariable: "--font-inter", // We will use this in our CSS
+        cssVariable: "--font-inter",
         fallbacks: ["sans-serif"],
-        display: "swap", // Same behavior as your old setup
+        display: "swap",
       },
+      // START OF NEW CONFIG
+      {
+        // Georgian Font
+        name: "Noto Sans Georgian",
+        provider: fontProviders.fontsource(),
+        weights: [400, 700],
+        styles: ["normal"],
+        // This variable name MUST match what is in Layout.astro
+        cssVariable: "--font-georgian",
+        fallbacks: ["sans-serif"],
+        display: "swap",
+      },
+      // END OF NEW CONFIG
       {
         // Code Font
         name: "JetBrains Mono",
@@ -72,11 +72,7 @@ export default defineConfig({
         display: "swap",
       },
     ],
-    // CSP is configured via Vercel HTTP headers (vercel.json)
-    // Not using Astro's CSP meta tag generation to avoid conflicts with dynamic styles
-    // from ClientRouter which can't be pre-hashed
   },
-
   image: {
     responsiveStyles: true,
     layout: "constrained",
