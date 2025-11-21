@@ -1,5 +1,6 @@
 import { siteConfig } from "./site.config";
 import { settingsConfig } from "./settings.config";
+import { LANGUAGES, DEFAULT_LANG, SUPPORTED_LANGS } from "./i18n/config";
 
 /**
  * Validate that the timezone is a valid IANA timezone identifier.
@@ -44,10 +45,16 @@ const runtimeConfig = {
 // Validate the runtime config immediately.
 validateTimezone(runtimeConfig.timezone);
 
-// Export a single, unified SITE object for easy access in your app.
-// This is a composition of all the other config files.
+// Unified SITE Object
+// This is a composition of all the other config files + i18n constants
 export const SITE = {
   ...siteConfig,
   ...settingsConfig,
   ...runtimeConfig,
+  // Expose i18n constants here for easy access in components without double importing
+  i18n: {
+    languages: LANGUAGES,
+    defaultLang: DEFAULT_LANG,
+    supportedLangs: SUPPORTED_LANGS,
+  },
 } as const;

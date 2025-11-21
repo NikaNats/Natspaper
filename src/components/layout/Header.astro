@@ -6,29 +6,23 @@ import MobileMenu from "./MobileMenu.astro";
 import type { LanguageLink } from "../features/LanguagePicker.astro";
 import { getRelativeLocaleUrl } from "astro:i18n";
 import { getI18n, type Lang } from "@/i18n";
+// NEW: Import constants
+import { LANGUAGES, SUPPORTED_LANGS } from "@/i18n/config";
 
 const { pathname } = Astro.url;
 const { t } = getI18n(Astro.currentLocale as Lang);
 
-// V START: Add the i18n logic here
-const allLanguages = [
-  { code: "en", name: "English" },
-  { code: "ka", name: "ქართული" },
-] as const;
-
-// Logic to generate the links for the other languages
-const otherLanguageLinks: LanguageLink[] = allLanguages
-  .filter(lang => lang.code !== Astro.currentLocale)
-  .map(lang => {
-    // We need the path without the locale prefix
-    const path = pathname.replace(`/${Astro.currentLocale}`, "");
-    return {
-      code: lang.code,
-      name: lang.name,
-      url: getRelativeLocaleUrl(lang.code, path),
-    };
-  });
-// V END
+// REFACTORED: Dynamic generation of language links
+const otherLanguageLinks: LanguageLink[] = SUPPORTED_LANGS.filter(
+  lang => lang !== Astro.currentLocale
+).map(lang => {
+  const path = pathname.replace(`/${Astro.currentLocale}`, "");
+  return {
+    code: lang,
+    name: LANGUAGES[lang], // Access friendly name from map
+    url: getRelativeLocaleUrl(lang, path),
+  };
+});
 ---
 
 <header>

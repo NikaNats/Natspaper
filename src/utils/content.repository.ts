@@ -1,7 +1,6 @@
 import { getCollection, type CollectionEntry } from "astro:content";
 import { getSortedPosts } from "@/utils/post";
-
-type Locale = "en" | "ka";
+import type { Lang } from "@/i18n/config"; // SSOT Import
 
 export class ContentRepository {
   private static instance: ContentRepository;
@@ -35,7 +34,7 @@ export class ContentRepository {
    * Get sorted posts for a specific locale.
    */
   public async getPostsByLocale(
-    locale: Locale
+    locale: Lang
   ): Promise<CollectionEntry<"blog">[]> {
     const allPosts = await this.getAllPosts();
     const localizedPosts = allPosts.filter(post =>
@@ -48,7 +47,7 @@ export class ContentRepository {
    * Get a specific post by slug and locale, ensuring it exists.
    */
   public async getPost(
-    locale: Locale,
+    locale: Lang,
     slug: string
   ): Promise<CollectionEntry<"blog"> | undefined> {
     const posts = await this.getAllPosts();
@@ -60,7 +59,7 @@ export class ContentRepository {
    * Get featured posts for a locale
    */
   public async getFeaturedPosts(
-    locale: Locale
+    locale: Lang
   ): Promise<CollectionEntry<"blog">[]> {
     const posts = await this.getPostsByLocale(locale);
     return posts.filter(p => p.data.featured);

@@ -3,16 +3,22 @@
 
 // This page is now a static HTML shell with a client-side script for redirection.
 // It no longer uses any server-side Astro APIs.
-const supportedLocales = ["en", "ka"];
-const defaultLocale = "en";
+import { SUPPORTED_LANGS, DEFAULT_LANG } from "@/i18n/config";
 ---
 
 <!doctype html>
-<html lang="en" data-pagefind-ignore="all">
+<html lang={DEFAULT_LANG} data-pagefind-ignore="all">
   <head>
     <meta charset="UTF-8" />
     <title>Redirecting...</title>
-    <script is:inline define:vars={{ supportedLocales, defaultLocale }}>
+    <!-- Pass config variables to the client script -->
+    <script
+      is:inline
+      define:vars={{
+        supportedLocales: SUPPORTED_LANGS,
+        defaultLocale: DEFAULT_LANG,
+      }}
+    >
       /**
        * Client-side redirect to the user's preferred language.
        * This runs instantly in the browser, preserving the benefits of a static site.
@@ -35,12 +41,12 @@ const defaultLocale = "en";
     </script>
     <noscript>
       <!-- Fallback for users with JavaScript disabled -->
-      <meta http-equiv="refresh" content={`0;url=/${defaultLocale}/`} />
+      <meta http-equiv="refresh" content={`0;url=/${DEFAULT_LANG}/`} />
     </noscript>
   </head>
   <body>
     <p>
-      If you are not redirected automatically, <a href={`/${defaultLocale}/`}
+      If you are not redirected automatically, <a href={`/${DEFAULT_LANG}/`}
         >click here</a
       >.
     </p>

@@ -1,6 +1,7 @@
 import rss from "@astrojs/rss";
 import type { APIRoute } from "astro";
 import { SITE } from "@/config";
+import { SUPPORTED_LANGS, type Lang } from "@/i18n/config"; // SSOT
 import { contentRepo } from "@/utils/content.repository";
 import {
   sanitizeMarkdownUrls,
@@ -9,7 +10,7 @@ import {
 } from "@/utils/rss";
 
 export const GET: APIRoute = async ({ params, site }) => {
-  const locale = params.locale as "en" | "ka";
+  const locale = params.locale as Lang;
   const posts = await contentRepo.getPostsByLocale(locale);
 
   // REFACTORED: Use the global setting variable instead of magic number 50
@@ -37,6 +38,7 @@ export const GET: APIRoute = async ({ params, site }) => {
   });
 };
 
+// REFACTORED: Generate paths dynamically from config
 export function getStaticPaths() {
-  return [{ params: { locale: "en" } }, { params: { locale: "ka" } }];
+  return SUPPORTED_LANGS.map(locale => ({ params: { locale } }));
 }

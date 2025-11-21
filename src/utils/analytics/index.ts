@@ -1,4 +1,5 @@
 import { googleAnalyticsProvider as provider } from "./google-analytics.provider";
+import { DEFAULT_LANG } from "@/i18n/config";
 
 /**
  * Analytics Configuration and Helpers
@@ -31,7 +32,7 @@ import { googleAnalyticsProvider as provider } from "./google-analytics.provider
  */
 
 class AnalyticsService {
-  private locale = "en";
+  private locale: string = DEFAULT_LANG;
 
   /**
    * Initialize Google Analytics with language tracking
@@ -39,7 +40,7 @@ class AnalyticsService {
    *
    * @param locale - Current page locale (e.g., 'en', 'ka')
    */
-  public init(locale: string = "en"): void {
+  public init(locale: string = DEFAULT_LANG): void {
     this.locale = locale;
     provider.init(locale);
     this.setUserLanguageProperty(locale);

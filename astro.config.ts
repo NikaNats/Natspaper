@@ -1,8 +1,10 @@
-import { defineConfig, fontProviders } from "astro/config"; // Ensure fontProviders is imported
+import { defineConfig, fontProviders } from "astro/config";
 import { getIntegrations } from "./config/integrations";
 import { getViteConfig } from "./config/vite";
 import { getEnvSchema } from "./config/env";
 import { SITE } from "./src/config";
+// NEW: Import directly from i18n config to avoid circular dependencies with src/config
+import { DEFAULT_LANG, SUPPORTED_LANGS } from "./src/i18n/config";
 import remarkToc from "remark-toc";
 import remarkCollapse from "remark-collapse";
 import remarkMath from "remark-math";
@@ -15,8 +17,8 @@ export default defineConfig({
   site: siteUrl,
   output: "static",
   i18n: {
-    defaultLocale: "en",
-    locales: ["en", "ka"],
+    defaultLocale: DEFAULT_LANG,
+    locales: [...SUPPORTED_LANGS], // Spread to ensure mutability if needed by Astro types
     routing: {
       prefixDefaultLocale: true,
     },
@@ -39,7 +41,6 @@ export default defineConfig({
     headingIdCompat: true,
     fonts: [
       {
-        // English / Default Body
         name: "Inter",
         provider: fontProviders.fontsource(),
         weights: [400, 700],
@@ -48,21 +49,16 @@ export default defineConfig({
         fallbacks: ["sans-serif"],
         display: "swap",
       },
-      // START OF NEW CONFIG
       {
-        // Georgian Font
         name: "Noto Sans Georgian",
         provider: fontProviders.fontsource(),
         weights: [400, 700],
         styles: ["normal"],
-        // This variable name MUST match what is in Layout.astro
         cssVariable: "--font-georgian",
         fallbacks: ["sans-serif"],
         display: "swap",
       },
-      // END OF NEW CONFIG
       {
-        // Code Font
         name: "JetBrains Mono",
         provider: fontProviders.fontsource(),
         weights: [400],
