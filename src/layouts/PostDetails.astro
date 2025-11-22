@@ -128,74 +128,26 @@ const { previous: prevPost, next: nextPost } = getAdjacentPosts(posts, post.id);
     <!-- ======================================================== -->
     <!-- REFACTORED HERO SECTION STARTS HERE                      -->
     <!-- ======================================================== -->
-    <header class="mx-auto mt-6 mb-12 max-w-4xl">
+    <header class="mx-auto mt-10 mb-14 max-w-3xl text-center">
       <!-- 1. The Huge Hero Title -->
       <h1
         transition:name={slugifyStr(title)}
-        class="post-hero-title mb-8"
+        class="post-hero-title mb-6 text-4xl font-bold tracking-tight sm:text-5xl"
         data-testid="post-title"
       >
         {title}
       </h1>
 
       <!-- 2. The Metadata Bar -->
-      <!-- We use justify-between to push Read/Copy to left and Date to right -->
       <div
-        class="post-hero-meta flex flex-wrap items-center justify-between gap-4 border-y border-dashed border-border py-3 text-sm font-medium text-text-secondary"
+        class="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-sm text-text-secondary"
       >
-        <!-- Left Group: Reading Time & Copy URL -->
-        <div class="flex items-center gap-6">
-          <!-- Reading Time -->
-          <div class="opacity-90 transition-opacity hover:opacity-100">
-            <ReadingTime text={readingTimeText} size="sm" />
-          </div>
-
-          <!-- Copy URL Button -->
-          <button
-            id="copy-url-btn"
-            class="group flex items-center gap-1.5 opacity-90 transition-opacity hover:text-accent hover:opacity-100 focus:outline-none"
-            title="Copy article URL"
-            aria-label="Copy article URL to clipboard"
-          >
-            <!-- Simple Link Icon SVG inline for perfect control -->
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              class="size-5"
-            >
-              <path
-                d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"
-              ></path>
-              <path
-                d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"
-              ></path>
-            </svg>
-            <span>Copy URL</span>
-
-            <!-- Success Feedback (Hidden by default) -->
-            <span
-              id="copy-feedback"
-              class="ml-1 hidden animate-pulse text-xs font-bold text-green-500"
-            >
-              Copied!
-            </span>
-          </button>
-        </div>
-
-        <!-- Right Group: Date -->
-        <div class="opacity-90 transition-opacity hover:opacity-100">
-          <Datetime {pubDatetime} {modDatetime} {timezone} size="sm" />
-        </div>
+        <Datetime {pubDatetime} {modDatetime} {timezone} size="sm" />
+        
+        <span class="text-border" aria-hidden="true">/</span>
+        
+        <ReadingTime text={readingTimeText} size="sm" />
       </div>
-
-      <!-- Description/Excerpt removed from header -->
     </header>
     <!-- ======================================================== -->
     <!-- HERO SECTION ENDS                                        -->
@@ -214,20 +166,20 @@ const { previous: prevPost, next: nextPost } = getAdjacentPosts(posts, post.id);
     </article>
 
     {/* Footer Section */}
-    <footer class="mx-auto mt-16 max-w-2xl border-t border-border/50 pt-10">
+    <footer class="mx-auto mt-24 max-w-3xl border-t border-border/40 pt-10">
       {/* Tags */}
       {
         tags.length > 0 && (
-          <div class="mb-10 flex flex-wrap justify-center gap-2">
+          <ul class="mb-12 flex flex-wrap justify-center gap-2">
             {tags.map((tag: string) => (
               <Tag tag={slugifyStr(tag)} tagName={tTag(tag)} />
             ))}
-          </div>
+          </ul>
         )
       }
 
       {/* Share & Actions */}
-      <div class="mb-12 flex flex-col items-center gap-6">
+      <div class="mb-16 flex flex-col items-center gap-8">
         <ShareLinks />
 
         <div class="flex gap-4">
@@ -241,18 +193,18 @@ const { previous: prevPost, next: nextPost } = getAdjacentPosts(posts, post.id);
       </div>
 
       {/* Navigation */}
-      <nav class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <nav class="grid grid-cols-1 gap-6 sm:grid-cols-2">
         {
           prevPost ? (
             <a
               href={`/${Astro.currentLocale}/posts/${String(prevPost.id).split("/").slice(-1)[0]}`}
-              class="group flex flex-col gap-1 rounded-lg border border-border/50 p-4 transition-colors hover:border-accent/30 hover:bg-muted/30"
+              class="group flex flex-col gap-2 rounded-xl border border-border/40 p-6 transition-all hover:border-accent/30 hover:bg-muted/30"
             >
-              <span class="flex items-center gap-1 text-xs font-medium tracking-wider text-text-secondary uppercase group-hover:text-accent">
+              <span class="flex items-center gap-2 text-xs font-medium tracking-wider text-text-secondary uppercase group-hover:text-accent">
                 <IconChevronLeft class="h-4 w-4" />
                 Previous
               </span>
-              <span class="line-clamp-2 font-medium text-foreground transition-colors group-hover:text-accent">
+              <span class="font-medium text-foreground transition-colors group-hover:text-accent">
                 {prevPost.title}
               </span>
             </a>
@@ -265,13 +217,13 @@ const { previous: prevPost, next: nextPost } = getAdjacentPosts(posts, post.id);
           nextPost && (
             <a
               href={`/${Astro.currentLocale}/posts/${String(nextPost.id).split("/").slice(-1)[0]}`}
-              class="group flex flex-col items-end gap-1 rounded-lg border border-border/50 p-4 text-right transition-colors hover:border-accent/30 hover:bg-muted/30"
+              class="group flex flex-col items-end gap-2 rounded-xl border border-border/40 p-6 text-right transition-all hover:border-accent/30 hover:bg-muted/30"
             >
-              <span class="flex items-center gap-1 text-xs font-medium tracking-wider text-text-secondary uppercase group-hover:text-accent">
+              <span class="flex items-center gap-2 text-xs font-medium tracking-wider text-text-secondary uppercase group-hover:text-accent">
                 Next
                 <IconChevronRight class="h-4 w-4" />
               </span>
-              <span class="line-clamp-2 font-medium text-foreground transition-colors group-hover:text-accent">
+              <span class="font-medium text-foreground transition-colors group-hover:text-accent">
                 {nextPost.title}
               </span>
             </a>
@@ -297,8 +249,6 @@ const { previous: prevPost, next: nextPost } = getAdjacentPosts(posts, post.id);
    */
   function initializePostFeatures(): void {
     featureManager.initializeFeatures();
-    // Initialize Copy URL button
-    setupCopyUrl();
   }
 
   /**
@@ -325,37 +275,4 @@ const { previous: prevPost, next: nextPost } = getAdjacentPosts(posts, post.id);
   // Clean up features before navigation
   // Prevents memory leaks and conflicts during page transitions
   document.addEventListener("astro:before-swap", cleanupPostFeatures);
-
-  // Copy URL button setup
-  function setupCopyUrl(): void {
-    const btn = document.getElementById("copy-url-btn");
-    const feedback = document.getElementById("copy-feedback");
-
-    if (!btn || !feedback) return;
-
-    const handler = async () => {
-      try {
-        await navigator.clipboard.writeText(window.location.href);
-        feedback.classList.remove("hidden");
-        setTimeout(() => {
-          feedback.classList.add("hidden");
-        }, 2000);
-      } catch {
-        // Fail gracefully: provide user feedback without using console logs
-        feedback.textContent = "Failed to copy";
-        feedback.classList.remove("hidden");
-        // Restore original success text after a timeout so the UI remains consistent
-        setTimeout(() => {
-          feedback.classList.add("hidden");
-          feedback.textContent = "Copied!";
-        }, 2000);
-      }
-    };
-
-    btn.onclick = handler;
-
-    // Note: `initializePostFeatures` is called after navigation transitions
-    // (astro:after-swap) which will call this function again. We use
-    // `onclick` assignment to ensure idempotent handler wiring.
-  }
 </script>
