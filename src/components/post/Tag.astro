@@ -9,32 +9,50 @@ export interface Props {
 
 const { tag, tagName, size = "sm" } = Astro.props;
 
-// REFACTORED: Centralize all style variations into a single object.
-// This is now the single source of truth for styling.
-const styles = {
-  li: [
-    "group inline-block",
-    size === "sm" ? "my-1 underline-offset-4" : "mx-1 my-3 underline-offset-8",
-  ],
-  a: [
-    "relative flex items-center group-hover:-top-0.5 group-hover:text-accent focus-visible:p-1 focus-visible:no-underline",
-    size === "sm" ? "text-sm" : "text-lg",
-  ],
-  icon: [
-    "inline-block opacity-80",
-    size === "sm" ? "-me-1.5 size-4" : "-me-2 size-6",
-  ],
+// Configuration for size variants
+const variants = {
+  sm: {
+    li: "my-1",
+    a: "text-xs px-2.5 py-1 gap-1",
+    icon: "size-3",
+  },
+  lg: {
+    li: "mx-1 my-2",
+    a: "text-sm px-3.5 py-1.5 gap-1.5",
+    icon: "size-4",
+  },
 };
+
+const current = variants[size];
 ---
 
-<li class:list={styles.li}>
+<li class:list={["group inline-block", current.li]}>
   <a
     href={`/${Astro.currentLocale}/tags/${tag}/`}
     transition:name={tag}
-    class:list={styles.a}
+    class:list={[
+      // Layout
+      "relative flex items-center rounded-md border no-underline transition-all duration-200",
+      current.a,
+
+      // Default State: Subtle background, neutral text
+      "border-transparent bg-muted/50 text-text-secondary",
+
+      // Hover State: Accent tint, distinct border, colored text
+      "hover:border-accent/20 hover:bg-accent/5 hover:text-accent",
+
+      // Focus State (Accessibility)
+      "focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/20 focus-visible:outline-none",
+    ]}
     data-testid="post-tag-link"
   >
-    <IconHash class:list={styles.icon} />
-    <span>{tagName}</span>
+    <IconHash
+      class:list={[
+        "inline-block opacity-40 transition-opacity duration-200 group-hover:opacity-100",
+        current.icon,
+      ]}
+      aria-hidden="true"
+    />
+    <span class="font-medium tracking-wide">{tagName}</span>
   </a>
 </li>
