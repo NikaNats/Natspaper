@@ -47,6 +47,29 @@
     @apply rounded-r-md border-accent bg-muted;
   }
 
+  /* Enhanced Post Summary Card */
+  .post-summary-item {
+    @apply transition-all duration-200;
+  }
+
+  .post-summary-item .post-entry {
+    @apply border-l-0;
+  }
+
+  .post-summary-item:hover .post-entry,
+  .post-summary-item:focus-within .post-entry {
+    @apply rounded-lg;
+  }
+
+  /* Featured Post Card Enhanced */
+  .post-featured-card {
+    @apply transition-all duration-300;
+  }
+
+  .post-featured-card:hover {
+    @apply shadow-xl shadow-accent/10;
+  }
+
   /* Post Hero Title */
   .post-hero-title {
     @apply text-center font-bold text-foreground;
@@ -96,6 +119,38 @@
 
   .tag:hover {
     @apply border-accent/20 bg-accent/10 text-accent;
+  }
+
+  /* Posts Grid Container */
+  .posts-container {
+    @apply grid gap-6;
+  }
+
+  .posts-list {
+    @apply space-y-0;
+  }
+
+  /* Post Card Metadata Layout */
+  .post-metadata {
+    @apply flex flex-wrap items-center gap-4 text-sm;
+  }
+
+  /* Tag Preview Container */
+  .tag-preview {
+    @apply flex flex-wrap gap-2;
+  }
+
+  /* Empty State */
+  .posts-empty {
+    @apply rounded-lg border-2 border-dashed border-border/40 p-8 text-center;
+  }
+
+  .posts-empty h3 {
+    @apply mb-2 text-xl font-bold text-foreground;
+  }
+
+  .posts-empty p {
+    @apply text-text-secondary;
   }
 
   .search-container {

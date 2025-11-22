@@ -23,20 +23,29 @@ const { page } = Astro.props;
 <Layout title={`პოსტები | ${SITE.title}`}>
   <Header />
   <Main pageTitle="პოსტები" pageDesc="ყველა სტატია რომელიც მე დავპოსტე.">
-    <ul>
-      {
-        page.data.map(({ data, slug }) => (
-          <PostSummaryCard
-            title={data.title}
-            description={data.description}
-            pubDatetime={data.pubDatetime}
-            modDatetime={data.modDatetime}
-            timezone={data.timezone}
-            slug={getLastPathSegment(slug)}
-          />
-        ))
-      }
-    </ul>
+    <div class="grid gap-6">
+      <ul class="space-y-0">
+        {
+          page.data.map(({ data, slug, body }) => {
+            // Calculate word count for reading time
+            const wordCount = body.split(/\s+/).length;
+            return (
+              <PostSummaryCard
+                title={data.title}
+                description={data.description}
+                pubDatetime={data.pubDatetime}
+                modDatetime={data.modDatetime}
+                timezone={data.timezone}
+                slug={getLastPathSegment(slug)}
+                wordCount={wordCount}
+                tags={data.tags}
+                featured={data.featured}
+              />
+            );
+          })
+        }
+      </ul>
+    </div>
   </Main>
 
   <Pagination
