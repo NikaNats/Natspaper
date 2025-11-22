@@ -154,19 +154,23 @@
     }
 
     /**
-     * Lists: Enhanced readability with consistent line height
-     * Maintains body line-height throughout for visual harmony
+     * Lists: Fixed alignment issue
+     * 
+     * CHANGED: 
+     * - list-inside -> list-outside: Fixes the "newline" bug with block content
+     * - Added ml-5: Creates space (gutter) for the numbers/bullets so they aren't cut off
+     * - Removed overflow-x-clip: It can clip the markers when using list-outside
      */
     ul,
     ol {
-      @apply my-6 list-inside overflow-x-clip;
-      /* Line-height matching body for consistency */
+      @apply my-6 ml-5 list-outside;
       line-height: 1.6;
     }
 
     li {
-      @apply my-3 marker:text-accent;
-      /* No margin-left needed with list-inside */
+      @apply my-2 marker:text-accent;
+      /* Added slight padding to separate text from marker visually */
+      padding-left: 0.375rem;
       line-height: 1.6;
       font-family: var(--font-inter), sans-serif;
     }
