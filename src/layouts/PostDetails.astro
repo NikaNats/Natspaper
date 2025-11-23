@@ -1,5 +1,15 @@
 ---
 import { render, type CollectionEntry } from "astro:content";
+import { SITE } from "@/config";
+import { getI18n } from "@/i18n";
+import { slugifyStr } from "@/utils/core";
+import {
+  resolveOgImageUrl,
+  getAdjacentPosts,
+  getReadingTimeDisplay,
+} from "@/utils/post";
+
+// Components
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/layout/Header.astro";
 import Footer from "@/components/layout/Footer.astro";
@@ -10,49 +20,19 @@ import EditPost from "@/components/features/EditPost.astro";
 import ShareLinks from "@/components/features/ShareLinks.astro";
 import BackToTopButton from "@/components/features/BackToTopButton.astro";
 import Hr from "@/components/ui/Hr.astro";
-import { slugifyStr } from "@/utils/core";
-import { resolveOgImageUrl, getAdjacentPosts } from "@/utils/post";
-import { getReadingTimeDisplay } from "@/utils/post"; // <-- ADD THIS IMPORT
+
+// Assets
 import IconChevronLeft from "@/assets/icons/IconChevronLeft.svg";
 import IconChevronRight from "@/assets/icons/IconChevronRight.svg";
 import IconHash from "@/assets/icons/IconHash.svg";
-import { SITE } from "@/config";
 import katexStyles from "katex/dist/katex.min.css?url";
-import { getI18n } from "@/i18n";
-
-/**
- * Post Details Layout Component
- *
- * Specialized layout for blog post pages that extends the base Layout.
- * Provides:
- * - Post header with title, date, and reading time
- * - Article content rendering with proper styling
- * - Tag list and sharing options
- * - Previous/Next post navigation
- * - Edit post link (if enabled)
- * - Back to top button
- *
- * This layout nests the base Layout component following Astro's best practice
- * pattern for composable, reusable layouts.
- *
- * @example
- * ```astro
- * import PostDetails from '@/layouts/PostDetails.astro';
- * const { post, posts } = Astro.props;
- *
- * <PostDetails {post} {posts} />
- * ```
- */
 
 export interface Props {
-  /** Blog post entry from content collection */
   post: CollectionEntry<"blog">;
-  /** All blog posts for adjacent post navigation */
   posts: CollectionEntry<"blog">[];
 }
 
 const { post, posts } = Astro.props;
-
 const {
   title,
   author,
@@ -65,51 +45,43 @@ const {
   tags,
   hideEditPost,
 } = post.data;
-
 const { Content } = await render(post);
 
-// Get content as plain text for reading time calculation
-// The body contains the raw markdown content which is perfect for word counting
-const bodyContent = post.body || "";
-
-// V START: Add this new logic line
-// The calculation logic now lives here, in the "smart" parent component.
-const readingTimeText = getReadingTimeDisplay(bodyContent);
-// V END
-
-// Resolve OG image URL using centralized utility
-// Handles string URLs, asset objects, and dynamic OG images
+// 1. Data Preparation
+const { t, tTag } = getI18n(Astro.currentLocale as "en" | "ka" | undefined);
+const readingTimeText = getReadingTimeDisplay(post.body || "");
 const ogImage = resolveOgImageUrl(initOgImage, post.slug, Astro.url.origin);
+const { previous: prevPost, next: nextPost } = getAdjacentPosts(posts, post.id);
 
-const layoutProps = {
-  title: `${title} | ${SITE.title}`,
-  author,
-  description,
-  pubDatetime,
-  modDatetime,
-  canonicalURL,
-  ogImage,
-  scrollSmooth: true,
-};
-
-// V START: Add this new logic block
+// 2. Config & Helpers
 const editPostConfig = SITE.editPost;
-const editPostHref = `${editPostConfig.url}${post.filePath}`;
 const showEditPost =
   editPostConfig.enabled && !hideEditPost && editPostConfig.url;
-// V END
-
-// REFACTORED: Moved copyright logic from Footer to parent layout
-const { t, tTag } = getI18n(Astro.currentLocale as "en" | "ka" | undefined);
 const currentYear = new Date().getFullYear();
 const copyrightText = `Copyright © ${currentYear} • ${t("footer.copyright")}`;
 
-// Get adjacent posts for navigation using centralized utility
-const { previous: prevPost, next: nextPost } = getAdjacentPosts(posts, post.id);
+// FIX: Relaxed type definition to accept both CollectionEntry and NavigationPost
+const getPostHref = (p: { id: string }) =>
+  `/${Astro.currentLocale}/posts/${String(p.id).split("/").slice(-1)[0]}`;
+
+// Shared Tailwind Classes (DRY)
+const navLinkClasses =
+  "group relative flex flex-col gap-1 overflow-hidden rounded-xl border border-border/60 p-6 transition-all hover:border-accent/40 hover:bg-muted/40 hover:shadow-sm h-full";
+const navDecorationClasses =
+  "absolute top-0 h-full w-1 bg-border/50 transition-colors group-hover:bg-accent/50";
 ---
 
-<Layout {...layoutProps}>
-  <!-- Defer KaTeX CSS to prevent render-blocking -->
+<Layout
+  title={`${title} | ${SITE.title}`}
+  author={author}
+  description={description}
+  pubDatetime={pubDatetime}
+  modDatetime={modDatetime}
+  canonicalURL={canonicalURL}
+  ogImage={ogImage}
+  scrollSmooth
+>
+  <!-- Resource Hints: 'onload' logic retained for non-blocking CSS loading -->
   <link
     slot="head"
     rel="stylesheet"
@@ -118,7 +90,9 @@ const { previous: prevPost, next: nextPost } = getAdjacentPosts(posts, post.id);
     onload="this.media='all'"
   />
   <noscript slot="head"><link rel="stylesheet" href={katexStyles} /></noscript>
+
   <Header />
+
   <main
     id="main-content"
     class:list={[
@@ -127,38 +101,25 @@ const { previous: prevPost, next: nextPost } = getAdjacentPosts(posts, post.id);
     ]}
     data-pagefind-body
   >
-    <!-- ======================================================== -->
-    <!-- REFACTORED HERO SECTION STARTS HERE                      -->
-    <!-- ======================================================== -->
+    <!-- Hero Section -->
     <header class="mx-auto mt-10 mb-14 max-w-3xl text-center">
-      <!-- 1. The Huge Hero Title -->
       <h1
         transition:name={slugifyStr(title)}
-        class="post-hero-title mb-6 text-4xl font-bold tracking-tight sm:text-5xl"
+        class="mb-6 text-4xl font-bold tracking-tight sm:text-5xl"
         data-testid="post-title"
       >
         {title}
       </h1>
-
-      <!-- 2. The Metadata Bar -->
       <div
         class="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-sm text-text-secondary"
       >
         <Datetime {pubDatetime} {modDatetime} {timezone} size="sm" />
-
         <span class="text-border" aria-hidden="true">/</span>
-
         <ReadingTime text={readingTimeText} size="sm" />
       </div>
     </header>
-    <!-- ======================================================== -->
-    <!-- HERO SECTION ENDS                                        -->
-    <!-- ======================================================== -->
 
-    {/* Featured Image (if any) could go here */}
-
-    {/* Removed separator for cleaner look */}
-
+    <!-- Article Content -->
     <article
       id="article"
       class="app-prose mx-auto max-w-none prose-headings:text-center prose-img:rounded-xl prose-img:shadow-sm"
@@ -167,64 +128,58 @@ const { previous: prevPost, next: nextPost } = getAdjacentPosts(posts, post.id);
       <Content />
     </article>
 
-    {/* ======================================================== */}
-    {/* IMPROVED FOOTER DESIGN: ACTION DASHBOARD               */}
-    {/* ======================================================== */}
-    <footer class="mx-auto max-w-3xl">
+    <!-- Post Footer / Actions -->
+    <footer class="mx-auto mt-14 max-w-3xl">
       <Hr class="mb-14" aria-hidden="true" />
 
-      {/* 1. Taxonomy Section: Clearly labeled topics */}
+      <!-- Topics -->
       {
         tags.length > 0 && (
-          <div class="mb-12 space-y-3">
+          <nav aria-label="Topics" class="mb-12 space-y-3">
             <div class="flex items-center gap-2 pl-1 text-xs font-bold tracking-widest text-text-secondary uppercase opacity-75">
-              <IconHash class="size-3.5 opacity-60" />
-              <span>Topics</span>
+              <IconHash class="size-3.5 opacity-60" /> <span>Topics</span>
             </div>
             <ul class="flex flex-wrap gap-2">
-              {tags.map((tag: string) => (
+              {tags.map(tag => (
                 <Tag tag={slugifyStr(tag)} tagName={tTag(tag)} />
               ))}
             </ul>
-          </div>
+          </nav>
         )
       }
 
-      {/* 2. Unified Action Toolbar: Sharing + Tools */}
+      <!-- Toolbar -->
       <div
-        class="mb-16 flex flex-col items-center justify-between gap-2 rounded-2xl border border-border/50 bg-muted/30 px-3 py-3 sm:flex-row sm:gap-6 sm:px-6 sm:py-5"
+        class="mb-16 flex flex-col items-center justify-between gap-4 rounded-2xl border border-border/50 bg-muted/30 px-4 py-4 sm:flex-row sm:px-6"
       >
-        {/* Left: Sharing */}
-        <div class="flex flex-col items-center gap-2 sm:items-start">
-          <ShareLinks />
-        </div>
-
-        {/* Right: Page Actions (Edit, Back to Top) */}
+        <ShareLinks />
         <div
-          class="flex items-center gap-3 border-t border-border/40 pt-3 sm:gap-6 sm:border-t-0 sm:border-l sm:pt-0 sm:pl-6"
+          class="flex w-full items-center justify-center gap-4 border-t border-border/40 pt-4 sm:w-auto sm:justify-end sm:border-0 sm:pt-0"
         >
           {
             showEditPost && (
-              <EditPost href={editPostHref} text={editPostConfig.text} />
+              <EditPost
+                href={`${editPostConfig.url}${post.filePath}`}
+                text={editPostConfig.text}
+              />
             )
           }
-          <div class="flex items-center gap-2">
-            <BackToTopButton />
-          </div>
+          <BackToTopButton />
         </div>
       </div>
 
-      {/* 3. Navigation Cards: High visibility "What to read next" */}
-      <nav class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+      <!-- Navigation -->
+      <nav
+        class="grid grid-cols-1 gap-6 sm:grid-cols-2"
+        aria-label="Post Navigation"
+      >
+        {/* Previous Post */}
         {
           prevPost ? (
-            <a
-              href={`/${Astro.currentLocale}/posts/${String(prevPost.id).split("/").slice(-1)[0]}`}
-              class="group relative flex flex-col gap-1 overflow-hidden rounded-xl border border-border/60 p-6 transition-all hover:border-accent/40 hover:bg-muted/40 hover:shadow-sm"
-            >
-              <span class="absolute top-0 left-0 h-full w-1 bg-border/50 transition-colors group-hover:bg-accent/50" />
+            <a href={getPostHref(prevPost)} class={navLinkClasses}>
+              <span class={`${navDecorationClasses} left-0`} />
               <span class="mb-1 flex items-center gap-2 text-xs font-bold tracking-wider text-text-secondary uppercase group-hover:text-accent">
-                <IconChevronLeft class="h-3 w-3 transition-transform group-hover:-translate-x-1" />
+                <IconChevronLeft class="size-3 transition-transform group-hover:-translate-x-1" />{" "}
                 Previous Article
               </span>
               <span class="line-clamp-2 font-medium text-foreground group-hover:text-accent">
@@ -232,20 +187,21 @@ const { previous: prevPost, next: nextPost } = getAdjacentPosts(posts, post.id);
               </span>
             </a>
           ) : (
-            <div aria-hidden="true" />
+            <div />
           )
         }
 
+        {/* Next Post */}
         {
           nextPost && (
             <a
-              href={`/${Astro.currentLocale}/posts/${String(nextPost.id).split("/").slice(-1)[0]}`}
-              class="group relative flex flex-col items-end gap-1 overflow-hidden rounded-xl border border-border/60 p-6 text-right transition-all hover:border-accent/40 hover:bg-muted/40 hover:shadow-sm"
+              href={getPostHref(nextPost)}
+              class={`${navLinkClasses} items-end text-right`}
             >
-              <span class="absolute top-0 right-0 h-full w-1 bg-border/50 transition-colors group-hover:bg-accent/50" />
+              <span class={`${navDecorationClasses} right-0`} />
               <span class="mb-1 flex items-center gap-2 text-xs font-bold tracking-wider text-text-secondary uppercase group-hover:text-accent">
-                Next Article
-                <IconChevronRight class="h-3 w-3 transition-transform group-hover:translate-x-1" />
+                Next Article{" "}
+                <IconChevronRight class="size-3 transition-transform group-hover:translate-x-1" />
               </span>
               <span class="line-clamp-2 font-medium text-foreground group-hover:text-accent">
                 {nextPost.title}
@@ -256,47 +212,26 @@ const { previous: prevPost, next: nextPost } = getAdjacentPosts(posts, post.id);
       </nav>
     </footer>
   </main>
-  <Footer copyrightText={copyrightText} />
+
+  <Footer {copyrightText} />
 </Layout>
 
 <script>
   import { featureManager } from "@/utils/features/FeatureManager";
 
-  /**
-   * Initialize all post detail features
-   * Called on page load and after navigation transitions
-   *
-   * Features initialized:
-   * - Progress bar: Shows scroll position with visual indicator
-   * - Heading links: Adds clickable anchors to headings
-   * - Copy buttons: Adds copy-to-clipboard buttons to code blocks
-   */
-  function initializePostFeatures(): void {
+  // Lifecycle Event Manager
+  const init = () => {
     featureManager.initializeFeatures();
-  }
+    // Reset scroll only on navigation, logic handled by listener type
+    if (document.documentElement.scrollTop > 0)
+      window.scrollTo({ left: 0, top: 0, behavior: "instant" });
+  };
 
-  /**
-   * Clean up all post detail features
-   * Called before navigation transitions to prevent memory leaks
-   */
-  function cleanupPostFeatures(): void {
-    featureManager.cleanupFeatures();
-  }
+  const cleanup = () => featureManager.cleanupFeatures();
 
-  // Initialize features when page loads
-  // Runs on first page visit
-  document.addEventListener("astro:page-load", initializePostFeatures);
-
-  // Re-initialize features after navigation
-  // Astro View Transitions uses this event after swapping page content
-  // Ensures features work with newly added elements
-  document.addEventListener("astro:after-swap", () => {
-    initializePostFeatures();
-    // Go to page start after page swap
-    window.scrollTo({ left: 0, top: 0, behavior: "instant" });
-  });
-
-  // Clean up features before navigation
-  // Prevents memory leaks and conflicts during page transitions
-  document.addEventListener("astro:before-swap", cleanupPostFeatures);
+  document.addEventListener("astro:page-load", () =>
+    featureManager.initializeFeatures()
+  );
+  document.addEventListener("astro:after-swap", init);
+  document.addEventListener("astro:before-swap", cleanup);
 </script>
