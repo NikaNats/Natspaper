@@ -35,57 +35,82 @@ const months = [
 <Layout title={`Archives | ${SITE.title}`}>
   <Header />
   <Main pageTitle="Archives" pageDesc="All the articles I've archived.">
-    {
-      Object.entries(
-        getPostsByGroupCondition(posts, post =>
-          post.data.pubDatetime.getFullYear()
+    <div class="mt-8 space-y-12">
+      {
+        Object.entries(
+          getPostsByGroupCondition(posts, post =>
+            post.data.pubDatetime.getFullYear()
+          )
         )
-      )
-        .sort(([yearA], [yearB]) => Number(yearB) - Number(yearA))
-        .map(([year, yearGroup]) => (
-          <div>
-            <span class="text-2xl font-bold">{year}</span>
-            <sup class="text-sm">{yearGroup.length}</sup>
-            {Object.entries(
-              getPostsByGroupCondition(
-                yearGroup,
-                post => post.data.pubDatetime.getMonth() + 1
-              )
-            )
-              .sort(([monthA], [monthB]) => Number(monthB) - Number(monthA))
-              .map(([month, monthGroup]) => (
-                <div class="flex flex-col sm:flex-row">
-                  <div class="mt-6 min-w-36 text-lg sm:my-6">
-                    <span class="font-bold">{months[Number(month) - 1]}</span>
-                    <sup class="text-xs">{monthGroup.length}</sup>
-                  </div>
-                  <ul>
-                    {monthGroup
-                      .sort(
-                        (a, b) =>
-                          Math.floor(
-                            new Date(b.data.pubDatetime).getTime() / 1000
-                          ) -
-                          Math.floor(
-                            new Date(a.data.pubDatetime).getTime() / 1000
+          .sort(([yearA], [yearB]) => Number(yearB) - Number(yearA))
+          .map(([year, yearGroup]) => (
+            <div class="relative border-l-2 border-dashed border-border/50 pt-2 pl-8">
+              {/* Year Label (Sticky or absolute for style) */}
+              <span class="absolute top-2 -left-[9px] h-4 w-4 rounded-full border-4 border-background bg-accent" />
+
+              <h3 class="mb-8 flex items-center gap-2 text-3xl font-bold text-foreground">
+                {year}
+                <span class="rounded-full bg-muted px-2 py-1 text-xs font-medium text-text-secondary">
+                  {yearGroup.length}
+                </span>
+              </h3>
+
+              <div class="space-y-8">
+                {Object.entries(
+                  getPostsByGroupCondition(
+                    yearGroup,
+                    post => post.data.pubDatetime.getMonth() + 1
+                  )
+                )
+                  .sort(([monthA], [monthB]) => Number(monthB) - Number(monthA))
+                  .map(([month, monthGroup]) => (
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-[100px_1fr] sm:gap-8">
+                      {/* Month Label: Aligned right on desktop for a timeline look */}
+                      <div class="flex flex-row items-baseline gap-2 text-lg sm:flex-col sm:items-end sm:gap-0 sm:text-right">
+                        <span class="font-bold text-text-secondary">
+                          {months[Number(month) - 1]}
+                        </span>
+                        <span class="text-xs text-text-secondary/60">
+                          {monthGroup.length}{" "}
+                          {monthGroup.length === 1 ? "post" : "posts"}
+                        </span>
+                      </div>
+
+                      {/* Posts List */}
+                      <ul class="space-y-4">
+                        {monthGroup
+                          .sort(
+                            (a, b) =>
+                              Math.floor(
+                                new Date(b.data.pubDatetime).getTime() / 1000
+                              ) -
+                              Math.floor(
+                                new Date(a.data.pubDatetime).getTime() / 1000
+                              )
                           )
-                      )
-                      .map(({ data, slug }) => (
-                        <PostSummaryCard
-                          title={data.title}
-                          description={data.description}
-                          pubDatetime={data.pubDatetime}
-                          modDatetime={data.modDatetime}
-                          timezone={data.timezone}
-                          slug={getLastPathSegment(slug)}
-                        />
-                      ))}
-                  </ul>
-                </div>
-              ))}
-          </div>
-        ))
-    }
+                          .map(({ data, slug, body }) => {
+                            const wordCount = body.split(/\s+/).length;
+
+                            return (
+                              <PostSummaryCard
+                                title={data.title}
+                                description={data.description}
+                                pubDatetime={data.pubDatetime}
+                                modDatetime={null}
+                                timezone={data.timezone}
+                                slug={getLastPathSegment(slug)}
+                                wordCount={wordCount}
+                              />
+                            );
+                          })}
+                      </ul>
+                    </div>
+                  ))}
+              </div>
+            </div>
+          ))
+      }
+    </div>
   </Main>
   <Footer />
 </Layout>

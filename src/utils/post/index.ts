@@ -12,6 +12,7 @@ export {
 } from "./postHelpers";
 export {
   calculateReadingTime,
+  calculateReadingTimeFromWords,
   formatReadingTime,
   getReadingTimeDisplay,
 } from "./readingTime";

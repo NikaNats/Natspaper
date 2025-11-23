@@ -2,7 +2,7 @@
 import { slugifyStr } from "@/utils/core";
 import Datetime from "../post/Datetime.astro";
 import ReadingTime from "../post/ReadingTime.astro";
-import { getReadingTimeDisplay } from "@/utils/post";
+import { calculateReadingTimeFromWords, formatReadingTime } from "@/utils/post";
 
 export interface Props {
   title: string;
@@ -38,7 +38,9 @@ const HeadingTag = variant === "h2" ? "h2" : "h3";
 
 // Calculate reading time if word count provided
 const readingTimeText =
-  wordCount > 0 ? getReadingTimeDisplay(" ".repeat(wordCount)) : "";
+  wordCount > 0
+    ? formatReadingTime(calculateReadingTimeFromWords(wordCount))
+    : "";
 
 // Format tags for preview (show max 3)
 const tagPreview = tags.slice(0, 3);

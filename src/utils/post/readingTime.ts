@@ -111,3 +111,32 @@ export function getReadingTimeDisplay(
   const result = calculateReadingTime(content);
   return includeWordCount ? formatReadingTime(result) : result.displayText;
 }
+
+/**
+ * Calculate reading time from word count
+ *
+ * @param wordCount - Number of words in the content
+ * @param wordsPerMinute - Reading speed (default: 200 WPM)
+ * @returns Object with minutes, words, and displayText
+ */
+export function calculateReadingTimeFromWords(
+  wordCount: number,
+  wordsPerMinute: number = SITE.readingTimeWPM
+): ReadingTimeResult {
+  if (wordCount <= 0) {
+    return {
+      minutes: 1,
+      words: 0,
+      displayText: "1 min read",
+    };
+  }
+
+  // Calculate minutes: round up to ensure minimum accuracy
+  const minutes = Math.max(1, Math.ceil(wordCount / wordsPerMinute));
+
+  return {
+    minutes,
+    words: wordCount,
+    displayText: minutes === 1 ? "1 min read" : `${minutes} min read`,
+  };
+}
