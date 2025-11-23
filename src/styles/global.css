@@ -1,13 +1,15 @@
 /* ==========================================================================
-   GLOBAL STYLESHEET (Universal Architecture)
+   GLOBAL STYLESHEET (Refactored for Tailwind v4 & Clean Code)
    ========================================================================== */
 
 @import "tailwindcss";
 @import "./typography.css";
 @import "./components.css";
 
+/* Define custom variant for cleaner HTML selection */
 @custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
 
+/* Map CSS Variables to Tailwind Utility Classes */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -15,6 +17,7 @@
   --color-muted: var(--muted);
   --color-border: var(--border);
   --color-text-secondary: var(--text-secondary);
+  --color-code-bg: var(--code-bg);
 
   --animate-duration-fast: 150ms;
   --animate-duration-normal: 300ms;
@@ -23,28 +26,27 @@
 
 /* --- DESIGN TOKENS --- */
 :root {
+  /* Layout Tokens */
   --gap: 24px;
-  --content-gap: 20px;
   --nav-width: 1024px;
-  --main-width: 720px;
+  --main-width: 720px; /* Or 45rem / 65ch */
   --header-height: 64px;
   --radius: 8px;
-}
 
-/* Light Theme */
-:root,
-html[data-theme="light"] {
+  /* Theme: Light (Default) */
   --background: #fafafa;
   --foreground: #212121;
   --accent: #0066ff;
   --muted: #f7f7f7;
   --border: #e0e0e0;
   --text-secondary: #757575;
-  --code-block-bg: #1c1d21;
   --code-bg: #f0f0f0;
+
+  /* Native UI Adaptation */
+  color-scheme: light;
 }
 
-/* Dark Theme */
+/* Theme: Dark */
 html[data-theme="dark"] {
   --background: #121212;
   --foreground: #e0e0e0;
@@ -52,130 +54,129 @@ html[data-theme="dark"] {
   --muted: #1e1e1e;
   --border: #2d2d2d;
   --text-secondary: #a3a3a3;
-  --code-block-bg: #1a1a1a;
   --code-bg: #2a2a2a;
+
+  color-scheme: dark;
 }
 
 /* --- BASE LAYER --- */
 @layer base {
-  @media (prefers-reduced-motion: no-preference) {
-    html {
-      @apply scroll-smooth;
-    }
-  }
-
   html {
-    @apply bg-background;
+    @apply scroll-smooth bg-background;
 
-    /* 
-       UNIVERSAL FONT STACK
-       1. var(--font-inter): Handles Latin characters, Numbers, & Punctuation.
-       2. var(--font-georgian): Browser automatically picks this up for Georgian glyphs.
-       3. Fallbacks: Standard system fonts.
-    */
-    font-family:
-      var(--font-inter), var(--font-georgian), "Helvetica Neue", Arial,
-      sans-serif;
+    /* Font Stack: System + Inter + Georgian */
+    font-family: var(--font-inter), var(--font-georgian), system-ui, sans-serif;
 
-    /* Single, consistent size for all languages */
-    font-size: 18px;
+    /* Mobile-First Sizing */
+    font-size: 16px;
+
+    /* UI Stability */
     scrollbar-gutter: stable;
+    scroll-padding-top: var(--header-height);
 
-    scroll-padding-top: var(--header-height, 64px);
-  }
+    @media (min-width: 768px) {
+      font-size: 18px;
+    }
 
-  @media (max-width: 768px) {
-    html {
-      font-size: 16px;
+    @media (prefers-reduced-motion: reduce) {
+      scroll-behavior: auto;
     }
   }
 
   body {
     @apply flex min-h-svh flex-col font-sans text-foreground antialiased;
-    /* Universal line-height */
     line-height: 1.6;
     letter-spacing: 0.01em;
+
+    /* Smooth Theme Transition */
     transition:
       background-color 0.3s ease,
       color 0.3s ease;
   }
 
-  /* Link Styling */
-  a:not(.no-underline) {
-    text-decoration: underline;
-    text-decoration-thickness: 1px;
-    text-underline-offset: 0.25em;
-    text-decoration-color: var(--accent);
-    transition:
-      text-decoration-color 0.2s ease,
-      text-decoration-thickness 0.2s ease;
+  /* Semantic Content Layout */
+  section,
+  footer {
+    @apply mx-auto w-full px-4;
+    max-width: var(--main-width);
   }
 
-  a:hover:not(.no-underline),
-  a:focus-visible:not(.no-underline) {
-    text-decoration-thickness: 2px;
+  /* Global Resets & Utilities */
+  * {
+    @apply border-border;
+
+    /* Scrollbar Styling (Firefox support + Custom Webkit) */
+    scrollbar-width: thin;
+    scrollbar-color: var(--muted) transparent;
   }
 
   :focus-visible {
     @apply outline-2 outline-offset-2 outline-accent;
   }
 
-  * {
-    @apply border-border;
-    scrollbar-width: thin;
-    scrollbar-color: var(--muted) transparent;
-  }
-
+  /* Interactive Elements */
   button {
-    @apply cursor-pointer;
-    touch-action: manipulation;
+    @apply cursor-pointer touch-manipulation;
+
+    &:active,
+    &[role="button"]:active {
+      transform: scale(0.98);
+    }
   }
 
-  button:active,
-  [role="button"]:active {
-    transform: scale(0.98);
-  }
+  /* Enhanced Links */
+  a:not(.no-underline) {
+    text-decoration: underline 1px;
+    text-underline-offset: 0.25em;
+    text-decoration-color: var(--accent);
+    transition:
+      text-decoration-color 0.2s ease,
+      text-decoration-thickness 0.2s ease;
 
-  section,
-  footer {
-    @apply mx-auto w-full px-4;
-    max-width: 65ch;
+    &:is(:hover, :focus-visible) {
+      text-decoration-thickness: 2px;
+    }
   }
 }
 
-/* --- UTILITIES --- */
+/* --- CUSTOM UTILITIES --- */
 @utility max-w-app {
   @apply max-w-2xl;
 }
 
 /* --- PRINT STYLES --- */
 @media print {
-  html {
-    font-size: 12pt;
+  /* Hide interactive/nav elements */
+  header,
+  footer,
+  button,
+  .no-print {
+    display: none !important;
   }
+
   body {
     @apply bg-white text-black;
   }
-  header,
-  footer,
-  #back-to-top,
-  .no-print,
-  button {
-    display: none !important;
+
+  html {
+    font-size: 12pt;
   }
+
+  /* Expand links for paper reading */
   a {
     text-decoration: none;
     color: black;
+
+    &[href^="http"]:after {
+      content: " (" attr(href) ")";
+      @apply text-xs text-gray-600;
+    }
   }
-  a[href^="http"]:after {
-    content: " (" attr(href) ")";
-    font-size: 0.8em;
-    color: #666;
-  }
+
+  /* Preserve Code formatting */
   pre,
   code {
-    white-space: pre-wrap;
-    border: 1px solid #ccc;
+    @apply border border-gray-300 whitespace-pre-wrap;
     page-break-inside: avoid;
   }
 }
