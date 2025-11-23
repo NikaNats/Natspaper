@@ -14,7 +14,6 @@ export const ui = {
     "nav.search": "Search",
     "nav.openMenu": "Open Menu",
     "nav.closeMenu": "Close Menu",
-    "nav.skipToContent": "Skip to content",
     "nav.home": "Home",
 
     // Footer
@@ -53,7 +52,6 @@ export const ui = {
     "nav.search": "ძებნა",
     "nav.openMenu": "მენიუს გახსნა",
     "nav.closeMenu": "მენიუს დახურვა",
-    "nav.skipToContent": "შინაარსზე გადასვლა",
     "nav.home": "მთავარი",
 
     // Footer
