@@ -1,8 +1,6 @@
 // ============================================================
 // Robust, Synchronous Theme Toggle Script
-// ============================================================
-// This script ensures header and body change theme SYNCHRONOUSLY
-// and maintain the same color at all times.
+// Optimized to eliminate Forced Reflows (Lighthouse fix)
 // ============================================================
 
 const themeStorageKey = "theme";
@@ -26,18 +24,19 @@ const setPreference = theme => {
   applyTheme(theme);
 };
 
-// Apply theme to the document SYNCHRONOUSLY
-// This ensures header, body, and all elements update at the same time
+// Apply theme to the document
+// Optimized to eliminate forced reflows and layout thrashing
 const applyTheme = theme => {
-  // 1. Apply theme class to html element IMMEDIATELY (no async)
+  // 1. WRITE: Apply theme class immediately
+  // This is a visual update and should happen synchronously
   document.documentElement.dataset.theme = theme;
   document.documentElement.classList.toggle("dark", theme === "dark");
 
-  // 2. Force a reflow to ensure CSS recalculation happens synchronously
-  // This makes the theme apply to header and body at the same moment
-  void document.documentElement.offsetHeight;
+  // PERF FIX: Removed "void document.documentElement.offsetHeight;"
+  // This line was explicitly forcing a layout recalculation (reflow),
+  // causing the performance penalty flagged by Lighthouse.
 
-  // 3. Update button aria-label
+  // 2. WRITE: Update button state
   const themeBtn = document.querySelector("#theme-btn");
   if (themeBtn) {
     const label =
@@ -45,19 +44,9 @@ const applyTheme = theme => {
     themeBtn.setAttribute("aria-label", label);
   }
 
-  // 4. Update meta theme-color synchronously (no requestAnimationFrame)
-  const metaThemeColor = document.querySelector("meta[name='theme-color']");
-  if (metaThemeColor) {
-    // Use body background for meta theme-color instead
-    const bgColor = getComputedStyle(document.body).backgroundColor;
-    metaThemeColor.setAttribute("content", bgColor || "#fafafa");
-  }
-
-  // 5. Make header and top-nav-wrap fully transparent
+  // 3. WRITE: Reset styles
   const header = document.querySelector("header");
-  if (header) {
-    header.style.backgroundColor = "transparent";
-  }
+  if (header) header.style.backgroundColor = "transparent";
 
   const topNavWrap = document.querySelector("#top-nav-wrap");
   if (topNavWrap) {
@@ -65,7 +54,22 @@ const applyTheme = theme => {
     topNavWrap.style.borderColor = "transparent";
   }
 
-  // 5. Dispatch custom event so other components know theme changed
+  // 4. READ & WRITE: Update meta theme-color
+  // PERF FIX: Wrapped in requestAnimationFrame
+  // Reading getComputedStyle immediately after changing classes forces the browser
+  // to recalculate styles synchronously (Layout Thrashing).
+  // By moving this to the next frame, we let the browser batch the layout work.
+  requestAnimationFrame(() => {
+    const metaThemeColor = document.querySelector("meta[name='theme-color']");
+    if (metaThemeColor) {
+      // Now it's safe to read the computed style because the browser has likely
+      // finished the previous paint task.
+      const bgColor = getComputedStyle(document.body).backgroundColor;
+      metaThemeColor.setAttribute("content", bgColor || "#fafafa");
+    }
+  });
+
+  // 5. Dispatch event
   document.dispatchEvent(
     new CustomEvent("theme-changed", { detail: { theme } })
   );
@@ -82,7 +86,6 @@ const attachToggleListener = () => {
   const themeBtn = document.querySelector("#theme-btn");
   if (!themeBtn) return;
 
-  // Remove any existing listeners to prevent duplicates
   const newBtn = themeBtn.cloneNode(true);
   themeBtn.parentNode?.replaceChild(newBtn, themeBtn);
 
@@ -108,21 +111,15 @@ const handleSystemThemeChange = e => {
 mediaQuery.addEventListener("change", handleSystemThemeChange);
 
 // --- EXECUTION ---
-// Restore theme immediately
 restoreTheme();
-
-// Attach toggle listener on initial load
 attachToggleListener();
 
-// Listen for Astro View Transition events
 document.addEventListener("astro:transition:start", restoreTheme);
 document.addEventListener("astro:before-swap", restoreTheme);
 document.addEventListener("astro:after-swap", () => {
   attachToggleListener();
   restoreTheme();
 });
-
-// Also listen for Astro router events (newer versions)
 document.addEventListener("astro:before-preparation", restoreTheme);
 document.addEventListener("astro:after-preparation", () => {
   attachToggleListener();
