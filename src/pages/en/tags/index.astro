@@ -1,5 +1,5 @@
 ---
-import { contentRepo } from "@/utils/content.repository";
+import { PostRepository } from "@/utils/post/repository";
 import Main from "@/layouts/Main.astro";
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/layout/Header.astro";
@@ -7,7 +7,7 @@ import Footer from "@/components/layout/Footer.astro";
 import { getUniqueTags, getPostsByTag } from "@/utils/post";
 import { SITE } from "@/config";
 
-const posts = await contentRepo.getPostsByLocale(
+const posts = await PostRepository.getByLocale(
   Astro.currentLocale as "en" | "ka"
 );
 

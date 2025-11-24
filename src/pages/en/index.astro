@@ -1,5 +1,5 @@
 ---
-import { contentRepo } from "@/utils/content.repository";
+import { PostRepository } from "@/utils/post/repository";
 import { Picture } from "astro:assets";
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/layout/Header.astro";
@@ -13,7 +13,7 @@ import { SITE } from "@/config";
 import profilePic from "@/assets/images/me.jpeg";
 
 // Get posts only for the English language using the centralized repository
-const sortedPosts = await contentRepo.getPostsByLocale("en");
+const sortedPosts = await PostRepository.getByLocale("en");
 const featuredPosts = sortedPosts.filter(({ data }) => data.featured);
 ---
 

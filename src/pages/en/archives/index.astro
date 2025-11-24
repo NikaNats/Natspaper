@@ -1,5 +1,5 @@
 ---
-import { contentRepo } from "@/utils/content.repository";
+import { PostRepository } from "@/utils/post/repository";
 import { getLastPathSegment } from "@/utils/core/slugify";
 import Main from "@/layouts/Main.astro";
 import Layout from "@/layouts/Layout.astro";
@@ -14,7 +14,7 @@ if (!SITE.showArchives) {
   return Astro.redirect("/404");
 }
 
-const posts = await contentRepo.getPostsByLocale("en");
+const posts = await PostRepository.getByLocale("en");
 
 const months = [
   "January",

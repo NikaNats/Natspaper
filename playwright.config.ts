@@ -16,7 +16,8 @@ import { defineConfig, devices } from "@playwright/test";
 const baseURL = process.env.BASE_URL || "http://localhost:4321";
 
 export default defineConfig({
-  testDir: "./tests/e2e-browser",
+  testDir: "./tests",
+  testMatch: ["e2e/**/*.spec.ts", "e2e-browser/**/*.spec.ts"],
 
   /* Run tests in files in parallel */
   fullyParallel: true,
@@ -93,7 +94,7 @@ export default defineConfig({
         webServer: {
           command: "pnpm run dev",
           url: "http://localhost:4321",
-          reuseExistingServer: false, // Always start fresh to avoid conflicts
+          reuseExistingServer: !process.env.CI, // Reuse local server
           timeout: process.env["CI"] ? 300 * 1000 : 120 * 1000, // 5 min in CI, 2 min locally
           stdout: "pipe",
           stderr: "pipe",

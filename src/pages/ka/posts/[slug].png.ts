@@ -1,6 +1,6 @@
 import type { APIRoute } from "astro";
 import { type CollectionEntry } from "astro:content";
-import { contentRepo } from "@/utils/content.repository";
+import { PostRepository } from "@/utils/post/repository";
 import { getLastPathSegment } from "@/utils/core/slugify";
 import { generateOgImageForPost } from "@/utils/og";
 import { ogImageLimiter } from "@/utils/core";
@@ -19,7 +19,7 @@ export async function getStaticPaths() {
     return [];
   }
 
-  const posts = (await contentRepo.getPostsByLocale("ka")).filter(
+  const posts = (await PostRepository.getByLocale("ka")).filter(
     ({ data }) => !data.ogImage
   );
 

@@ -7,14 +7,12 @@ import Header from "@/components/layout/Header.astro";
 import Footer from "@/components/layout/Footer.astro";
 import PostSummaryCard from "@/components/post/PostSummaryCard.astro";
 import Pagination from "@/components/ui/Pagination.astro";
-// Replaced manual filtering with ContentRepository
+import { PostRepository } from "@/utils/post/repository";
 import { SITE } from "@/config";
 
 export const getStaticPaths = (async ({ paginate }) => {
-  // Centralized locale logic – use ContentRepository
-  const posts = await (
-    await import("@/utils/content.repository")
-  ).contentRepo.getPostsByLocale("en");
+  // Centralized locale logic – use PostRepository
+  const posts = await PostRepository.getByLocale("en");
   return paginate(posts, { pageSize: SITE.postPerPage });
 }) satisfies GetStaticPaths;
 

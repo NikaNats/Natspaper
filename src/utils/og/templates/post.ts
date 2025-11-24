@@ -1,8 +1,11 @@
 import satori from "satori";
 import { html } from "satori-html";
 import { SITE } from "@/config";
+import type { CollectionEntry } from "astro:content";
 
-export default async function generatePostOgImage(post) {
+export default async function generatePostOgImage(
+  post: CollectionEntry<"blog">
+) {
   const markup = html`<div
     style="background-color: #fefbfb; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;"
   >

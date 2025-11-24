@@ -59,7 +59,7 @@ describe('SEO Utilities', () => {
     it('should include OG image when available', () => {
       const post = createMockBlogPost("test-post", new Date("2025-01-15"), null, true, {
         data: {
-          ogImage: 'https://example.com/og.jpg'
+          ogImage: { src: 'https://example.com/og.jpg', width: 1200, height: 630, format: 'jpg' }
         }
       });
 
@@ -88,7 +88,7 @@ describe('SEO Utilities', () => {
     it('should handle posts with local OG image asset', () => {
       const post = createMockBlogPost("test-post", new Date("2025-01-15"), null, true, {
         data: {
-          ogImage: '/images/og.png'
+          ogImage: { src: '/images/og.png', width: 1200, height: 630, format: 'png' }
         }
       });
 

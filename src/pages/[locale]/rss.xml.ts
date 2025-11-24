@@ -2,7 +2,7 @@ import rss from "@astrojs/rss";
 import type { APIRoute } from "astro";
 import { SITE } from "@/config";
 import { SUPPORTED_LANGS, type Lang } from "@/i18n/config"; // SSOT
-import { contentRepo } from "@/utils/content.repository";
+import { PostRepository } from "@/utils/post/repository";
 import {
   sanitizeMarkdownUrls,
   escapeHtml,
@@ -11,7 +11,7 @@ import {
 
 export const GET: APIRoute = async ({ params, site }) => {
   const locale = params.locale as Lang;
-  const posts = await contentRepo.getPostsByLocale(locale);
+  const posts = await PostRepository.getByLocale(locale);
 
   // REFACTORED: Use the global setting variable instead of magic number 50
   const recentPosts = posts.slice(0, SITE.rssLimit);

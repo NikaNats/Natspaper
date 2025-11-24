@@ -1,0 +1,33 @@
+---
+import { slugifyStr } from "@/utils/core";
+import Datetime from "./Datetime.astro";
+import ReadingTime from "./ReadingTime.astro";
+
+export interface Props {
+  title: string;
+  pubDatetime: Date;
+  modDatetime?: Date | null;
+  timezone?: string;
+  readingTimeText: string;
+}
+
+const { title, pubDatetime, modDatetime, timezone, readingTimeText } =
+  Astro.props;
+---
+
+<header class="mx-auto mt-10 mb-14 max-w-3xl text-center">
+  <h1
+    transition:name={slugifyStr(title)}
+    class="mb-6 text-4xl font-bold tracking-tight sm:text-5xl"
+    data-testid="post-title"
+  >
+    {title}
+  </h1>
+  <div
+    class="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-sm text-text-secondary"
+  >
+    <Datetime {pubDatetime} {modDatetime} {timezone} size="sm" />
+    <span class="text-border" aria-hidden="true">/</span>
+    <ReadingTime text={readingTimeText} size="sm" />
+  </div>
+</header>

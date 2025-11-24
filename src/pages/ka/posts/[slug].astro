@@ -8,9 +8,9 @@ export interface Props {
 }
 
 export async function getStaticPaths() {
-  const { contentRepo } = await import("@/utils/content.repository");
-  // Centralized locale logic – use ContentRepository
-  const posts = await contentRepo.getPostsByLocale("ka");
+  const { PostRepository } = await import("@/utils/post/repository");
+  // Centralized locale logic – use PostRepository
+  const posts = await PostRepository.getByLocale("ka");
   const postResult: Array<{
     params: { slug: string };
     props: { post: CollectionEntry<"blog"> };
@@ -30,8 +30,8 @@ export async function getStaticPaths() {
 const { post } = Astro.props;
 
 const sortedPosts = await (
-  await import("@/utils/content.repository")
-).contentRepo.getPostsByLocale("ka");
+  await import("@/utils/post/repository")
+).PostRepository.getByLocale("ka");
 ---
 
 <PostDetails post={post} posts={sortedPosts} />

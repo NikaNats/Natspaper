@@ -1,60 +1,40 @@
-import { siteConfig } from "./site.config";
-import { settingsConfig } from "./settings.config";
-import { LANGUAGES, DEFAULT_LANG, SUPPORTED_LANGS } from "./i18n/config";
+import type { Site } from "./types";
 
-/**
- * Validate that the timezone is a valid IANA timezone identifier.
- * Prevents silent failures where typos like "Asia/Bangkk" go unnoticed.
- * This validation runs at config load time (build-time) so errors are caught immediately.
- *
- * @param timezone - Timezone string to validate (IANA format)
- * @throws Error if timezone is invalid
- * @example
- *   validateTimezone("America/New_York"); // OK
- *   validateTimezone("Invalid/Zone"); // Throws
- */
-function validateTimezone(timezone: string): void {
-  if (!timezone || typeof timezone !== "string") {
-    throw new Error(
-      "SITE.timezone must be a non-empty string (valid IANA timezone identifier)"
-    );
-  }
-
-  try {
-    // Try to format a date in this timezone. If it fails, timezone is invalid.
-    // This is the most reliable way to validate IANA timezones.
-    const formatter = new Intl.DateTimeFormat("en-US", {
-      timeZone: timezone,
-    });
-    // Force evaluation by formatting a date to catch any errors
-    formatter.format(new Date());
-  } catch (error) {
-    throw new Error(
-      `Invalid SITE.timezone: "${timezone}". Must be a valid IANA timezone identifier. ` +
-        `See: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones. ` +
-        `Error: ${error instanceof Error ? error.message : String(error)}`
-    );
-  }
-}
-
-// This is the runtime configuration that requires validation.
-const runtimeConfig = {
+export const SITE: Site = {
+  website: "https://natspaper.vercel.app/",
+  author: "Nika Natsvlishvili",
+  desc: ".NET Developer | Software Engineer specializing in microservices architecture and enterprise solutions",
+  title: "NatsPaper",
+  ogImage: "astropaper-og.jpg",
+  lightAndDarkMode: true,
+  postPerPage: 4,
+  scheduledPostMargin: 15 * 60 * 1000, // 15 minutes
+  showArchives: true,
+  editPost: {
+    enabled: false,
+    text: "Edit page",
+    url: "https://github.com/NikaNats/portfolio/edit/main/",
+  },
+  profile: "https://www.linkedin.com/in/nika-natsvlishvili/",
+  scrollSmooth: true,
+  dir: "ltr",
+  lang: "en",
+  readingTimeWPM: 200,
+  rssLimit: 50,
+  dynamicOgImage: true,
   timezone: "Asia/Tbilisi",
+  showBackButton: true,
+  backToTopThreshold: 0.3,
 };
 
-// Validate the runtime config immediately.
-validateTimezone(runtimeConfig.timezone);
-
-// Unified SITE Object
-// This is a composition of all the other config files + i18n constants
-export const SITE = {
-  ...siteConfig,
-  ...settingsConfig,
-  ...runtimeConfig,
-  // Expose i18n constants here for easy access in components without double importing
-  i18n: {
-    languages: LANGUAGES,
-    defaultLang: DEFAULT_LANG,
-    supportedLangs: SUPPORTED_LANGS,
-  },
+export const LOCALE = {
+  lang: "en", // html lang code. Set this once.
+  langTag: ["en-EN"], // BCP 47 Language Tags.
 } as const;
+
+export const LOGO_IMAGE = {
+  enable: false,
+  svg: true,
+  width: 216,
+  height: 46,
+};

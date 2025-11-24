@@ -1,0 +1,124 @@
+---
+import Hr from "@/components/ui/Hr.astro";
+import Tag from "./Tag.astro";
+import ShareLinks from "@/components/features/ShareLinks.astro";
+import EditPost from "@/components/features/EditPost.astro";
+import BackToTopButton from "@/components/features/BackToTopButton.astro";
+import IconHash from "@/assets/icons/IconHash.svg";
+import IconChevronLeft from "@/assets/icons/IconChevronLeft.svg";
+import IconChevronRight from "@/assets/icons/IconChevronRight.svg";
+import { slugifyStr } from "@/utils/core";
+import type { CollectionEntry } from "astro:content";
+
+export interface NavigationPost {
+  id: string;
+  title: string;
+  filePath?: string;
+}
+
+export interface Props {
+  tags: string[];
+  showEditPost: boolean;
+  editPostConfig: { url: string; text: string };
+  post: CollectionEntry<"blog">;
+  prevPost?: NavigationPost | null;
+  nextPost?: NavigationPost | null;
+  tTag: (tag: string) => string;
+}
+
+const { tags, showEditPost, editPostConfig, post, prevPost, nextPost, tTag } =
+  Astro.props;
+
+// FIX: Relaxed type definition to accept both CollectionEntry and NavigationPost
+const getPostHref = (p: { id: string }) =>
+  `/${Astro.currentLocale}/posts/${String(p.id).split("/").slice(-1)[0]}`;
+
+// Shared Tailwind Classes (DRY)
+const navLinkClasses =
+  "group relative flex flex-col gap-1 overflow-hidden rounded-xl border border-border/60 p-6 transition-all hover:border-accent/40 hover:bg-muted/40 hover:shadow-sm h-full";
+const navDecorationClasses =
+  "absolute top-0 h-full w-1 bg-border/50 transition-colors group-hover:bg-accent/50";
+---
+
+<footer class="mx-auto mt-14 max-w-3xl">
+  <Hr class="mb-14" aria-hidden="true" />
+
+  <!-- Topics -->
+  {
+    tags.length > 0 && (
+      <nav aria-label="Topics" class="mb-12 space-y-3">
+        <div class="flex items-center gap-2 pl-1 text-xs font-bold tracking-widest text-text-secondary uppercase opacity-75">
+          <IconHash class="size-3.5 opacity-60" /> <span>Topics</span>
+        </div>
+        <ul class="flex flex-wrap gap-2">
+          {tags.map(tag => (
+            <Tag tag={slugifyStr(tag)} tagName={tTag(tag)} />
+          ))}
+        </ul>
+      </nav>
+    )
+  }
+
+  <!-- Toolbar -->
+  <div
+    class="mb-16 flex flex-col items-center justify-between gap-4 rounded-2xl border border-border/50 bg-muted/30 px-4 py-4 sm:flex-row sm:px-6"
+  >
+    <ShareLinks />
+    <div
+      class="flex w-full items-center justify-center gap-4 border-t border-border/40 pt-4 sm:w-auto sm:justify-end sm:border-0 sm:pt-0"
+    >
+      {
+        showEditPost && (
+          <EditPost
+            href={`${editPostConfig.url}${post.filePath}`}
+            text={editPostConfig.text}
+          />
+        )
+      }
+      <BackToTopButton />
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <nav
+    class="grid grid-cols-1 gap-6 sm:grid-cols-2"
+    aria-label="Post Navigation"
+  >
+    {/* Previous Post */}
+    {
+      prevPost ? (
+        <a href={getPostHref(prevPost)} class={navLinkClasses}>
+          <span class={`${navDecorationClasses} left-0`} />
+          <span class="mb-1 flex items-center gap-2 text-xs font-bold tracking-wider text-text-secondary uppercase group-hover:text-accent">
+            <IconChevronLeft class="size-3 transition-transform group-hover:-translate-x-1" />{" "}
+            Previous Article
+          </span>
+          <span class="line-clamp-2 font-medium text-foreground group-hover:text-accent">
+            {prevPost.title}
+          </span>
+        </a>
+      ) : (
+        <div />
+      )
+    }
+
+    {/* Next Post */}
+    {
+      nextPost && (
+        <a
+          href={getPostHref(nextPost)}
+          class={`${navLinkClasses} items-end text-right`}
+        >
+          <span class={`${navDecorationClasses} right-0`} />
+          <span class="mb-1 flex items-center gap-2 text-xs font-bold tracking-wider text-text-secondary uppercase group-hover:text-accent">
+            Next Article{" "}
+            <IconChevronRight class="size-3 transition-transform group-hover:translate-x-1" />
+          </span>
+          <span class="line-clamp-2 font-medium text-foreground group-hover:text-accent">
+            {nextPost.title}
+          </span>
+        </a>
+      )
+    }
+  </nav>
+</footer>

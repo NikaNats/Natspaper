@@ -6,8 +6,8 @@ import Footer from "@/components/layout/Footer.astro";
 import { getUniqueTags, getPostsByTag } from "@/utils/post";
 import { SITE } from "@/config";
 
-import { contentRepo } from "@/utils/content.repository";
-const posts = await contentRepo.getPostsByLocale("ka");
+import { PostRepository } from "@/utils/post/repository";
+const posts = await PostRepository.getByLocale("ka");
 
 // 1. Get tags and calculate counts
 // We map over the unique tags and use your existing utility to find the count

@@ -12,7 +12,7 @@ export default defineConfig({
     globals: true,
     environment: "happy-dom",
     include: ["tests/**/*.test.ts", "tests/**/*.spec.ts"],
-    exclude: ["tests/e2e-browser/**"],
+    exclude: ["tests/e2e-browser/**", "tests/e2e/**"],
     coverage: {
       provider: "v8",
       reporter: ["text", "json", "html"],
