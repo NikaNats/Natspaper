@@ -11,12 +11,14 @@ description: ისწავლეთ როგორ დავამატო�
 ეს დოკუმენტი აჩვენებს როგორ გამოიყენოთ LaTeX განტოლებები თქვენი Markdown ფაილებში AstroPaper-ზე. LaTeX არის მძლავრი ტიპოგრაფიული სისტემა, რომელიც ხშირად გამოიყენება მათემატიკური და სამეცნიერო დოკუმენტებისთვის.
 
 <figure>
+  <!-- ✅ PERFORMANCE FIX: Applied same LCP optimizations -->
   <img
     src="/images/latex-equations-blackboard.jpeg"
     alt="დახურული ხედი რთული განტოლებებით დაფაზე, რომელიც აჩვენებს ქიმიის და მათემატიკის სიმბოლოებს"
     width="1260"
     height="750"
-    loading="lazy"
+    loading="eager"
+    fetchpriority="high"
     decoding="async"
   />
   <figcaption class="text-center">
