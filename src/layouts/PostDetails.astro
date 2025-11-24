@@ -16,8 +16,9 @@ import PostHero from "@/components/post/PostHero.astro";
 import PostContent from "@/components/post/PostContent.astro";
 import PostFooter from "@/components/post/PostFooter.astro";
 
-// Assets
-import katexStyles from "katex/dist/katex.min.css?url";
+// PERFORMANCE FIX: Import CSS directly to bundle it.
+// This eliminates the network chain and prevents layout shifts.
+import "katex/dist/katex.min.css";
 
 export interface Props {
   post: CollectionEntry<"blog">;
@@ -66,15 +67,11 @@ const copyrightText = `Copyright © ${currentYear} • ${t("footer.copyright")}`
   ogImage={ogImage}
   scrollSmooth
 >
-  <!-- Resource Hints: 'onload' logic retained for non-blocking CSS loading -->
-  <link
-    slot="head"
-    rel="stylesheet"
-    href={katexStyles}
-    media="print"
-    onload="this.media='all'"
-  />
-  <noscript slot="head"><link rel="stylesheet" href={katexStyles} /></noscript>
+  <!-- 
+    PERFORMANCE FIX: 
+    Removed manual <link> tag for KaTeX. 
+    The styles are now bundled in the critical CSS.
+  -->
 
   <Header />
 

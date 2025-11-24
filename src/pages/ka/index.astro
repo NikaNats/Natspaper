@@ -24,6 +24,13 @@ const featuredPosts = sortedPosts.filter(({ data }) => data.featured);
     data-layout="index"
     class="mx-auto flex w-full max-w-app flex-col items-center justify-center px-4 pb-12"
   >
+    <!-- VISUAL FIX: Added background gradient blob to match English version -->
+    <div
+      class="pointer-events-none fixed inset-0 -z-10 flex items-center justify-center"
+    >
+      <div class="h-[500px] w-[500px] rounded-full bg-accent/10 blur-[120px]">
+      </div>
+    </div>
     <section id="hero" class="py-8">
       <div class="flex flex-col items-center justify-center gap-4 text-center">
         <!-- PERFORMANCE: Image optimization
@@ -33,6 +40,8 @@ const featuredPosts = sortedPosts.filter(({ data }) => data.featured);
              - Use eager loading for above-fold image
              - Inline placeholder to prevent FOUC
         -->
+        <!-- VISUAL FIX: Updated Picture styling with shadow and ring to match English version -->
+        <!-- Also added fetchpriority="high" for LCP optimization -->
         <Picture
           src={profilePic}
           formats={["avif", "webp"]}
@@ -42,25 +51,33 @@ const featuredPosts = sortedPosts.filter(({ data }) => data.featured);
           title="პროფილი"
           width={160}
           height={160}
-          class="rounded-full"
+          class="rounded-full shadow-[0_0_60px_-15px_var(--color-accent)] ring-2 ring-accent/50"
           loading="eager"
+          fetchpriority="high"
           decoding="sync"
         />
         <h1 class="main-heading mb-4 inline-block sm:mb-8">
           {SITE.author}
         </h1>
-        <p class="text-lg font-semibold text-accent">
+        <!-- VISUAL FIX: Updated typography classes for role description -->
+        <p
+          class="mb-6 bg-linear-to-r from-accent to-purple-400 bg-clip-text text-xl font-bold text-transparent sm:text-2xl"
+        >
           .NET დეველოპერი | პროგრამული ინჟინერი
         </p>
         <p class="max-w-2xl">
           მიკროსერვისების არქიტექტურაში სპეციალიზირებული .NET დეველოპერი და
           პროგრამული ინჟინერი
         </p>
-        <p class="mt-2 max-w-2xl">
+        <p class="mt-2 max-w-2xl leading-relaxed">
           ყოველდღიური მიღწევები მოიცავს საკრედიტო რეპორტირების სისტემის
-          მიგრაციას მონოლიტიდან მიკროსერვისებზე (40% შესრულების გაუმჯობესება),
-          ქართულენოვანი AI ასისტენტის არქიტექტურას, რომელმაც მოიპოვა ჟიური Prize
-          Award-ი GAIA Hackathon-ზე, და საწარმო-კლასის სისტემებზე, როგორიცაა
+          მიგრაციას მონოლიტიდან მიკროსერვისებზე <span
+            class="rounded border border-accent/20 bg-accent/10 px-1.5 py-0.5 font-mono text-sm text-accent"
+            >40% შესრულების გაუმჯობესება</span
+          >, ქართულენოვანი AI ასისტენტის არქიტექტურას, რომელმაც მოიპოვა <span
+            class="rounded border border-accent/20 bg-accent/10 px-1.5 py-0.5 font-mono text-sm text-accent"
+            >ჟიური Prize Award-ი</span
+          > GAIA Hackathon-ზე, და საწარმო-კლასის სისტემებზე, როგორიცაა
           <a
             href="https://github.com/NikaNats"
             class="underline decoration-dashed underline-offset-4 hover:text-accent"
@@ -77,6 +94,18 @@ const featuredPosts = sortedPosts.filter(({ data }) => data.featured);
           > .NET, მიკროსერვისებების ან AI/ML ინტეგრაციის შესახებ განსახილველი საკითხების
           შესაფერი.
         </p>
+        <!-- VISUAL FIX: Added Tech Stack Pills section to match English version -->
+        <div class="my-6 flex flex-wrap justify-center gap-2">
+          {
+            [".NET Core", "Microservices", "AI/ML", "TypeScript", "Astro"].map(
+              tech => (
+                <span class="cursor-default rounded-full border border-accent/20 bg-accent/5 px-3 py-1 text-xs font-medium text-foreground transition-all hover:-translate-y-0.5 hover:border-accent/50 hover:bg-accent/10 hover:text-accent">
+                  {tech}
+                </span>
+              )
+            )
+          }
+        </div>
         {
           // only display if at least one social link is enabled
           SOCIALS.length > 0 && (

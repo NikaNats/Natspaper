@@ -10,26 +10,18 @@ description: Learn how to add LaTeX equations in Astro blog posts using Markdown
 
 This document demonstrates how to use LaTeX equations in your Markdown files for AstroPaper. LaTeX is a powerful typesetting system often used for mathematical and scientific documents.
 
-<figure>
-  <!-- 
-    ✅ PERFORMANCE FIX: 
-    1. Changed loading="lazy" to "eager" (Critical for LCP)
-    2. Added fetchpriority="high" (Signals high relative priority to browser)
-    3. Kept dimensions to prevent Cumulative Layout Shift (CLS)
-  -->
-  <img
-    src="/images/latex-equations-blackboard.jpeg"
-    alt="Close-up of complex equations on a chalkboard, showcasing chemistry and math symbols"
-    width="1260"
-    height="750"
-    loading="eager"
-    fetchpriority="high"
-    decoding="async"
-  />
-  <figcaption class="text-center">
-    Photo by <a href="https://www.pexels.com/photo/close-up-of-complicated-equations-written-on-a-blackboard-22690748/">Vitaly Gariev</a>
-  </figcaption>
-</figure>
+<!--
+  PERFORMANCE FIX:
+  Replaced raw HTML <img> with Markdown syntax.
+  Astro will now automatically:
+  1. Convert this to WebP/AVIF (Format Optimization)
+  2. Generate multiple sizes (Responsive Images)
+  3. Lazy load it with decoding="async"
+-->
+
+![Close-up of complex equations on a chalkboard, showcasing chemistry and math symbols](../../../assets/images/latex-equations-blackboard.jpeg)
+
+_Photo by [Vitaly Gariev](https://www.pexels.com/photo/close-up-of-complicated-equations-written-on-a-blackboard-22690748/)_
 
 ## Table of contents
 

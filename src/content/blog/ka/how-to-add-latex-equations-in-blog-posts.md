@@ -10,21 +10,18 @@ description: ისწავლეთ როგორ დავამატო�
 
 ეს დოკუმენტი აჩვენებს როგორ გამოიყენოთ LaTeX განტოლებები თქვენი Markdown ფაილებში AstroPaper-ზე. LaTeX არის მძლავრი ტიპოგრაფიული სისტემა, რომელიც ხშირად გამოიყენება მათემატიკური და სამეცნიერო დოკუმენტებისთვის.
 
-<figure>
-  <!-- ✅ PERFORMANCE FIX: Applied same LCP optimizations -->
-  <img
-    src="/images/latex-equations-blackboard.jpeg"
-    alt="დახურული ხედი რთული განტოლებებით დაფაზე, რომელიც აჩვენებს ქიმიის და მათემატიკის სიმბოლოებს"
-    width="1260"
-    height="750"
-    loading="eager"
-    fetchpriority="high"
-    decoding="async"
-  />
-  <figcaption class="text-center">
-    ფოტო <a href="https://www.pexels.com/photo/close-up-of-complicated-equations-written-on-a-blackboard-22690748/">Vitaly Gariev</a>-ის მიერ
-  </figcaption>
-</figure>
+<!--
+  PERFORMANCE FIX:
+  Replaced raw HTML <img> with Markdown syntax.
+  Astro will now automatically:
+  1. Convert this to WebP/AVIF (Format Optimization)
+  2. Generate multiple sizes (Responsive Images)
+  3. Lazy load it with decoding="async"
+-->
+
+![დახურული ხედი რთული განტოლებებით დაფაზე, რომელიც აჩვენებს ქიმიის და მათემატიკის სიმბოლოებს](../../../assets/images/latex-equations-blackboard.jpeg)
+
+_ფოტო [Vitaly Gariev](https://www.pexels.com/photo/close-up-of-complicated-equations-written-on-a-blackboard-22690748/)-ის მიერ_
 
 ## შინაარსის ცხრილი
 
