@@ -12,7 +12,7 @@ description: ისწავლეთ როგორ დავამატო�
 
 <figure>
   <img
-    src="https://images.pexels.com/photos/22690748/pexels-photo-22690748/free-photo-of-close-up-of-complicated-equations-written-on-a-blackboard.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
+    src="/images/latex-equations-blackboard.jpeg"
     alt="დახურული ხედი რთული განტოლებებით დაფაზე, რომელიც აჩვენებს ქიმიის და მათემატიკის სიმბოლოებს"
     width="1260"
     height="750"
