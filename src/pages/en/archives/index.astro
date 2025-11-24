@@ -48,12 +48,13 @@ const months = [
               {/* Year Label (Sticky or absolute for style) */}
               <span class="absolute top-2 -left-[9px] h-4 w-4 rounded-full border-4 border-background bg-accent" />
 
-              <h3 class="mb-8 flex items-center gap-2 text-3xl font-bold text-foreground">
+              {/* WCAG AA Fix: Changed h3 to h2 for proper heading hierarchy (h1 > h2 > h3) */}
+              <h2 class="mb-8 flex items-center gap-2 text-3xl font-bold text-foreground">
                 {year}
                 <span class="rounded-full bg-muted px-2 py-1 text-xs font-medium text-text-secondary">
                   {yearGroup.length}
                 </span>
-              </h3>
+              </h2>
 
               <div class="space-y-8">
                 {Object.entries(
@@ -70,7 +71,8 @@ const months = [
                         <span class="font-bold text-text-secondary">
                           {months[Number(month) - 1]}
                         </span>
-                        <span class="text-xs text-text-secondary/60">
+                        {/* WCAG AA Fix: Removed /60 opacity - text-secondary is already distinct */}
+                        <span class="text-xs text-text-secondary">
                           {monthGroup.length}{" "}
                           {monthGroup.length === 1 ? "post" : "posts"}
                         </span>
@@ -100,6 +102,7 @@ const months = [
                                 timezone={data.timezone}
                                 slug={getLastPathSegment(slug)}
                                 wordCount={wordCount}
+                                variant="h3"
                               />
                             );
                           })}

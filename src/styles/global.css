@@ -53,7 +53,8 @@ html[data-theme="dark"] {
   --accent: #4da6ff;
   --muted: #1e1e1e;
   --border: #2d2d2d;
-  --text-secondary: #a3a3a3;
+  /* WCAG AA Fix: Lightened from #a3a3a3 to #b3b3b3 for better contrast (4.5:1 ratio) */
+  --text-secondary: #b3b3b3;
   --code-bg: #2a2a2a;
 
   color-scheme: dark;
