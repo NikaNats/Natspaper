@@ -13,29 +13,39 @@
  */
 
 import type { APIRoute } from "astro";
+import { PostRepository } from "@/utils/post/repository";
+import { getLastPathSegment } from "@/utils/core/slugify";
 
-export const GET: APIRoute = async ({ request }) => {
-  const url = new URL(request.url);
-  const pathname = url.pathname;
-
-  // Check if the request ends with .md
-  if (pathname.endsWith(".md")) {
-    // Remove .md extension to get the slug
-    const slug = pathname.replace(/\.md$/, "");
-
-    // Return a permanent redirect to the proper slug-based URL
-    return new Response(null, {
-      status: 301,
-      headers: {
-        Location: slug,
-      },
-    });
-  }
-
-  return new Response("Not Found", { status: 404 });
-};
-
+/**
+ * Generate static paths for ALL posts to ensure the .md redirect works.
+ * In output: 'static', we must explicitly define every path we want to catch.
+ */
 export async function getStaticPaths() {
-  // Return empty array - this will be handled dynamically
-  return [];
+  // 1. Get all English posts
+  const posts = await PostRepository.getByLocale("en");
+
+  // 2. Map them to the [...file] param
+  return posts.map(post => {
+    // Extract clean slug (e.g., "my-post")
+    const slug = getLastPathSegment(post.slug);
+    return {
+      params: {
+        // This creates the path /en/posts/my-post.md
+        file: slug,
+      },
+    };
+  });
 }
+
+export const GET: APIRoute = async ({ params }) => {
+  // Construct the destination URL (remove .md)
+  // Since we generated the path based on the slug, we know where it goes.
+  const cleanSlug = params.file;
+
+  return new Response(null, {
+    status: 301,
+    headers: {
+      Location: `/en/posts/${cleanSlug}`,
+    },
+  });
+};

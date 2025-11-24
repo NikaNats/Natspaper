@@ -12,34 +12,35 @@
  */
 
 import type { APIRoute } from "astro";
-
-export const GET: APIRoute = async ({ request }) => {
-  const url = new URL(request.url);
-  const pathname = url.pathname;
-
-  // Check if the request ends with .md (markdown file)
-  if (pathname.endsWith(".md")) {
-    // Remove .md extension to get the clean slug
-    const cleanPath = pathname.replace(/\.md$/, "");
-
-    // Return a permanent redirect to the proper slug-based URL
-    return new Response(null, {
-      status: 301,
-      headers: {
-        Location: cleanPath,
-      },
-    });
-  }
-
-  // For non-markdown requests, return 404
-  return new Response("Not Found", { status: 404 });
-};
+import { PostRepository } from "@/utils/post/repository";
+import { getLastPathSegment } from "@/utils/core/slugify";
 
 export async function getStaticPaths() {
-  // Return all possible .md variants to handle markdown requests
-  // This prevents Astro from trying to match them against other routes
-  const mdVariants = [
-    { params: { catch: "how-to-add-latex-equations-in-blog-posts.md" } },
-  ];
-  return mdVariants;
+  const posts = await PostRepository.getByLocale("ka");
+
+  // Generate paths for both specific .md catch-alls AND generic catch-alls if needed
+  const paths = posts.map(post => {
+    const slug = getLastPathSegment(post.slug);
+    return {
+      params: {
+        // Matches /ka/posts/my-post.md
+        catch: `${slug}.md`,
+      },
+    };
+  });
+
+  return paths;
 }
+
+export const GET: APIRoute = async ({ params }) => {
+  // Extract the slug from "my-post.md"
+  const catchPath = params.catch || "";
+  const cleanSlug = catchPath.replace(/\.md$/, "");
+
+  return new Response(null, {
+    status: 301,
+    headers: {
+      Location: `/ka/posts/${cleanSlug}`,
+    },
+  });
+};
