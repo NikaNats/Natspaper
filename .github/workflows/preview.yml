@@ -164,11 +164,14 @@ jobs:
         run: pnpm install --global vercel@latest
 
       - name: Pull Vercel Environment
-        run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel pull --yes --environment=preview
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
 
       - name: Build Project
-        run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel build
         env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           # Use generic preview URL - Vercel will replace with actual deployment URL
           SITE_WEBSITE: https://preview.natspaper.dev
           PUBLIC_SENTRY_ENVIRONMENT: preview
@@ -216,7 +219,7 @@ jobs:
           echo "Deploying preview..."
 
           # Deploy and capture both stdout and URL
-          DEPLOY_OUTPUT=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }} 2>&1)
+          DEPLOY_OUTPUT=$(vercel deploy --prebuilt 2>&1)
           echo "$DEPLOY_OUTPUT"
 
           # Extract the preview URL (last HTTPS URL in output)
@@ -230,6 +233,8 @@ jobs:
 
           echo "url=$PREVIEW_URL" >> $GITHUB_OUTPUT
           echo "✅ Preview deployed to: $PREVIEW_URL"
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
 
       - name: Comment Preview URL on PR
         if: github.event_name == 'pull_request'

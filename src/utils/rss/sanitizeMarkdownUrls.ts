@@ -7,6 +7,7 @@
  * - data: protocol attacks
  * - Event handler attributes in HTML
  * - Data attributes that could contain scripts
+ * - ReDoS (Regex Denial of Service) via input length capping
  */
 
 /**
@@ -20,6 +21,13 @@ const SAFE_PROTOCOLS = new Set([
   "ftp:",
   "ftps:",
 ]);
+
+/**
+ * Maximum safe length for input to prevent Regex Denial of Service (ReDoS).
+ * 4096 characters is sufficient for any reasonable RSS description/snippet.
+ * Processing inputs larger than this with complex regex can cause CPU spikes.
+ */
+const MAX_INPUT_LENGTH = 4096;
 
 /**
  * Test if a URL is safe
@@ -51,12 +59,24 @@ function isSafeUrl(url: string): boolean {
 /**
  * Sanitize URLs in markdown links
  * Replaces unsafe URLs with safe fallback
+ *
+ * @param markdown - The input markdown string
+ * @returns Sanitized string
  */
 export function sanitizeMarkdownUrls(markdown: string): string {
+  // SECURITY: ReDoS Protection
+  // If input is too long, truncate it before regex processing.
+  // This renders catastrophic backtracking attacks mathematically impossible
+  // to sustain for significant duration.
+  const safeInput =
+    markdown.length > MAX_INPUT_LENGTH
+      ? markdown.slice(0, MAX_INPUT_LENGTH)
+      : markdown;
+
   // Match markdown links: [text](url)
   const linkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
 
-  return markdown.replaceAll(linkRegex, (_match, text, url) => {
+  return safeInput.replaceAll(linkRegex, (_match, text, url) => {
     const trimmed = url.trim();
 
     if (!isSafeUrl(trimmed)) {
