@@ -1,208 +1,72 @@
+/* src/styles/typography.css */
 @plugin "@tailwindcss/typography";
 
 @layer base {
-  /**
-   * Typography System
-   * Foundation: Inter (Sans) + JetBrains Mono (Code)
-   * Metrics: 16-18px base, 1.6 line-height, WCAG AA+ Contrast
-   */
-
+  /* Main Prose Wrapper */
   .app-prose {
-    /* Base Inheritance - Sets defaults for all children (DRY) */
     @apply prose prose-neutral dark:prose-invert;
     @apply text-foreground marker:text-accent;
-
     font-family: var(--font-inter), sans-serif;
     line-height: 1.6;
-    max-width: 65ch; /* optimal reading length */
+    max-width: 65ch;
 
-    /* --- HEADINGS --- */
-    /* Shared logic for all headings to ensure visual rhythm */
-    h1,
-    h2,
-    h3,
-    h4,
-    h5,
-    h6,
-    th {
+    /* Headings */
+    h1, h2, h3, h4, h5, h6, th {
       @apply relative scroll-mt-20 font-bold text-foreground;
       letter-spacing: -0.02em;
       line-height: 1.2;
     }
+    h1 { @apply mb-6 text-4xl; letter-spacing: -0.5px; }
+    h2 { @apply mt-10 mb-5 text-3xl; }
+    h3 { @apply mt-8 mb-4 text-2xl; }
+    h4 { @apply mt-6 mb-3 text-xl; }
 
-    h1 {
-      @apply mb-6 text-4xl;
-      letter-spacing: -0.5px;
-    }
-    h2 {
-      @apply mt-10 mb-5 text-3xl;
-    } /* generous top margin for cognitive load */
-    h3 {
-      @apply mt-8 mb-4 text-2xl;
-    }
-    h4 {
-      @apply mt-6 mb-3 text-xl;
-    }
-
-    /* --- BODY CONTENT --- */
-    p {
-      @apply mb-5 font-normal;
-    }
-
-    strong {
-      @apply font-semibold text-foreground;
-    }
-
-    /* Links: Dashed underline for semantic clarity, high contrast */
+    /* Content */
+    p { @apply mb-5 font-normal; }
+    strong { @apply font-semibold text-foreground; }
+    
     a {
       @apply break-words text-accent decoration-dashed underline-offset-4 transition-colors hover:text-accent/80 focus-visible:rounded-sm focus-visible:outline-accent;
     }
 
-    /* Lists: Fixes newline bug via list-outside + padding */
-    ul,
-    ol {
-      @apply my-6 list-outside;
-    }
-    li {
-      @apply pl-1.5;
-    }
+    ul, ol { @apply my-6 ml-5 list-outside; }
+    li { @apply pl-1.5; }
 
-    /* --- MEDIA & BLOCKS --- */
-    /* Tables: Academic styling */
+    /* Media & Blocks */
     table {
       @apply my-6 w-full border-collapse text-left;
-
-      th,
-      td {
-        @apply border border-border p-3 align-top;
-      }
-      th {
-        @apply bg-muted/30 font-semibold;
-      }
+      th, td { @apply border border-border p-3 align-top; }
+      th { @apply bg-muted/30 font-semibold; }
     }
 
-    /* Quotes: Visual distinction */
-    blockquote {
-      @apply my-6 border-l-4 border-accent/40 pl-4 italic opacity-90;
-    }
+    blockquote { @apply my-6 border-l-4 border-accent/40 pl-4 italic opacity-90; }
+    figcaption { @apply mt-2 text-center text-sm text-text-secondary italic; }
 
-    figcaption {
-      @apply mt-2 text-center text-sm text-text-secondary italic;
-    }
-
-    /* --- CODE --- */
-    /* Inline Code */
+    /* Code */
     :not(pre) > code {
       @apply rounded bg-muted px-1.5 py-0.5 text-[0.9em] text-foreground before:hidden after:hidden;
       font-family: var(--font-jetbrains-mono), monospace;
     }
-
-    /* Preformatted Blocks */
     pre {
       @apply my-6 overflow-x-auto rounded-lg border border-border p-4;
       font-family: var(--font-jetbrains-mono), monospace;
     }
 
-    /* Math / Katex */
-    .katex,
-    .katex-display {
-      @apply text-foreground;
-    }
+    /* Math */
+    .katex, .katex-display { @apply text-foreground; }
 
-    /* Responsive Images/Code: Break out of container on mobile */
+    /* Mobile Overrides */
     @media (max-width: 640px) {
-      figure,
-      .astro-code,
-      pre,
-      table {
-        @apply -mx-4 w-[calc(100%+2rem)] rounded-none border-x-0;
-      }
-      img {
-        @apply rounded-none;
-      }
+      figure, .astro-code, pre, table { @apply -mx-4 w-[calc(100%+2rem)] rounded-none border-x-0; }
+      img { @apply rounded-none; }
     }
   }
-}
-
-/**
- * COMPONENT: Profile / Hero
- * Centralized layout for biography sections
- */
-.profile {
-  @apply flex min-h-screen flex-col items-center justify-center p-8 text-center;
-}
-
-.profile-inner {
-  @apply flex max-w-prose flex-col items-center gap-6;
-}
-
-.profile img {
-  @apply h-40 w-40 rounded-full border-2 border-border object-cover;
-}
-
-.profile h1 {
-  @apply m-0 text-4xl leading-tight font-bold text-foreground;
-  font-family: var(--font-inter), sans-serif;
-}
-
-.profile-bio {
-  @apply max-w-full text-base leading-relaxed text-text-secondary;
-  font-family: var(--font-inter), sans-serif;
-}
-
-/* 
- * UTILITY: Main Heading
- * Fluid typography using clamp for smooth scaling across viewports 
- * (Replaces 3 separate media queries)
- */
-.main-heading {
-  @apply leading-tight font-bold;
-  font-family: var(--font-inter), sans-serif;
-  font-size: clamp(1.5rem, 4vw + 1rem, 3rem); /* 24px -> 48px fluid */
-  letter-spacing: -0.03em;
-}
-
-/**
- * COMPONENT: Social Icons
- */
-.social-icons {
-  @apply my-4 flex flex-wrap justify-center gap-4;
-}
-
-.social-icons a {
-  @apply flex h-10 w-10 items-center justify-center rounded-full border border-transparent text-foreground transition-all hover:-translate-y-0.5 hover:border-accent hover:bg-muted;
-}
-
-.social-icons svg {
-  @apply h-6 w-6 stroke-current stroke-2;
-  fill: none;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-/**
- * COMPONENT: Newsbox
- * Highlighted box for announcements
- */
-.newsbox {
-  @apply mx-auto my-6 w-full max-w-[600px] rounded-lg border-2 p-5;
-  /* Custom brand colors retained, simplified usage */
-  border-color: #d6694e;
-  background-color: rgba(214, 105, 78, 0.08);
-}
-
-.newsbox-title {
-  @apply mb-3 text-xl font-bold text-foreground;
-}
-
-.newsbox-line {
-  @apply mb-2 text-left text-[0.95rem] leading-relaxed text-foreground last:mb-0;
-}
-
-.newsbox-line-date {
-  @apply mr-2 font-semibold;
-}
-
-.newsbox-line a {
-  @apply underline decoration-dashed hover:decoration-solid;
+  
+  /* Utility: Fluid Heading */
+  .main-heading {
+    @apply leading-tight font-bold;
+    font-family: var(--font-inter), sans-serif;
+    font-size: clamp(1.5rem, 4vw + 1rem, 3rem);
+    letter-spacing: -0.03em;
+  }
 }

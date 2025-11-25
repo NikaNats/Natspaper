@@ -1,0 +1,46 @@
+/* src/styles/features.css */
+@layer components {
+  /* Profile / Hero Section */
+  .profile {
+    @apply flex min-h-screen flex-col items-center justify-center p-8 text-center;
+  }
+  .profile-inner {
+    @apply flex max-w-prose flex-col items-center gap-6;
+  }
+  .profile img {
+    @apply h-40 w-40 rounded-full border-2 border-border object-cover;
+  }
+  .profile h1 {
+    @apply m-0 text-4xl leading-tight font-bold text-foreground;
+    font-family: var(--font-inter), sans-serif;
+  }
+  .profile-bio {
+    @apply max-w-full text-base leading-relaxed text-text-secondary;
+    font-family: var(--font-inter), sans-serif;
+  }
+
+  /* Social Icons */
+  .social-icons {
+    @apply my-4 flex flex-wrap justify-center gap-4;
+  }
+  .social-icons a {
+    @apply flex h-10 w-10 items-center justify-center rounded-full border border-transparent text-foreground transition-all hover:-translate-y-0.5 hover:border-accent hover:bg-muted;
+  }
+  .social-icons svg {
+    @apply h-6 w-6 stroke-current stroke-2;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  /* Newsbox */
+  .newsbox {
+    @apply mx-auto my-6 w-full max-w-[600px] rounded-lg border-2 p-5;
+    border-color: #d6694e;
+    background-color: rgba(214, 105, 78, 0.08);
+  }
+  .newsbox-title { @apply mb-3 text-xl font-bold text-foreground; }
+  .newsbox-line { @apply mb-2 text-left text-[0.95rem] leading-relaxed text-foreground last:mb-0; }
+  .newsbox-line-date { @apply mr-2 font-semibold; }
+  .newsbox-line a { @apply underline decoration-dashed hover:decoration-solid; }
+}

@@ -1,64 +1,31 @@
-/**
- * Component-Specific Styles
- * Refactored for: SOLID, DRY, Performance & Maintainability
- */
-
+/* src/styles/components.css */
 @layer components {
-  /* --- LAYOUT & STRUCTURE --- */
-
-  header {
-    /* Stacking Context: Keeps header above main content */
-    @apply relative z-50 w-full bg-transparent transition-colors duration-300;
+  /* Layout */
+  header { @apply relative z-50 w-full bg-transparent transition-colors duration-300; }
+  main { 
+    @apply relative z-0 mx-auto w-full flex-1 px-4;
+    max-width: var(--main-width);
   }
+  main > * + * { @apply mt-8; }
 
-  main {
-    /* 
-       View Transition Fix: z-0 creates a new stacking context.
-       max-w is handled via utility to avoid mixing CSS vars manually when possible.
-    */
-    @apply relative z-0 mx-auto w-full max-w-[var(--main-width)] flex-1 px-4;
-  }
-
-  /* Global Vertical Rhythm (Lobotomized Owl Selector) */
-  main > * + * {
-    @apply mt-8;
-  }
-
-  /* --- INTERACTIVE CARDS & POSTS --- */
-
+  /* Post Cards */
   .post-entry {
     @apply relative border-l-4 border-transparent pl-4 transition-all duration-200;
-
-    /* Nesting reduces repetition (DRY) */
-    &:is(:hover, :focus-within) {
-      @apply rounded-r-md border-accent bg-muted;
-    }
+    &:is(:hover, :focus-within) { @apply rounded-r-md border-accent bg-muted; }
   }
 
-  /* Variant: Summary Card */
   .post-summary-item {
     @apply transition-all duration-200;
-
-    & .post-entry {
-      @apply border-l-0;
-    }
-
-    &:is(:hover, :focus-within) .post-entry {
-      @apply rounded-lg;
-    }
+    & .post-entry { @apply border-l-0; }
+    &:is(:hover, :focus-within) .post-entry { @apply rounded-lg; }
   }
 
-  /* Variant: Featured Card */
   .post-featured-card {
     @apply transition-all duration-300;
-
-    &:hover {
-      @apply shadow-xl shadow-accent/10;
-    }
+    &:hover { @apply shadow-xl shadow-accent/10; }
   }
 
-  /* --- TYPOGRAPHY & META --- */
-
+  /* Post Meta */
   .post-hero-title {
     @apply relative z-10 text-center font-bold text-foreground;
     font-family: var(--font-inter), sans-serif;
@@ -67,121 +34,56 @@
     letter-spacing: -0.02em;
     text-wrap: balance;
   }
+  .post-hero-meta { @apply mt-4 flex flex-wrap items-center justify-between gap-4 border-b border-dashed border-border pb-4; }
+  .metadata { @apply flex items-center gap-3 text-sm font-medium text-text-secondary; }
 
-  .post-hero-meta {
-    @apply mt-4 flex flex-wrap items-center justify-between gap-4 border-b border-dashed border-border pb-4;
-  }
-
-  .metadata {
-    @apply flex items-center gap-3 text-sm font-medium text-text-secondary;
-  }
-
-  /* --- NAVIGATION & TAGS --- */
-
+  /* Navigation */
   .pagination {
     @apply my-12 flex list-none justify-center gap-4 p-0;
-
-    & a,
-    & span {
-      @apply rounded-md border border-border px-4 py-2 text-sm transition-colors;
-    }
-
-    & a:hover {
-      @apply border-accent bg-muted text-accent;
-    }
-
-    & .active {
-      @apply border-accent bg-accent font-medium text-background;
-    }
+    & a, & span { @apply rounded-md border border-border px-4 py-2 text-sm transition-colors; }
+    & a:hover { @apply border-accent bg-muted text-accent; }
+    & .active { @apply border-accent bg-accent font-medium text-background; }
   }
+  .active-nav { @apply font-medium text-accent underline decoration-wavy decoration-2 underline-offset-4; }
 
+  /* Elements */
   .tag {
     @apply mr-2 mb-2 inline-flex items-center rounded-full border border-transparent bg-muted px-3 py-1 text-sm text-foreground transition-colors;
-
-    &:hover {
-      @apply border-accent/20 bg-accent/10 text-accent;
-    }
+    &:hover { @apply border-accent/20 bg-accent/10 text-accent; }
   }
-
-  /* --- UTILITIES & STATES --- */
-
-  .posts-container {
-    @apply grid gap-6;
-  }
-
+  .posts-container { @apply grid gap-6; }
   .posts-empty {
     @apply rounded-lg border-2 border-dashed border-border/40 p-8 text-center;
-
-    & h3 {
-      @apply mb-2 text-xl font-bold text-foreground;
-    }
-    & p {
-      @apply text-text-secondary;
-    }
+    & h3 { @apply mb-2 text-xl font-bold text-foreground; }
+    & p { @apply text-text-secondary; }
   }
-
   .search-input {
     @apply w-full rounded-lg border border-border bg-background px-4 py-3 text-base text-foreground transition-all;
-
-    &:focus {
-      @apply border-accent ring-2 ring-accent/20 outline-none;
-    }
+    &:focus { @apply border-accent ring-2 ring-accent/20 outline-none; }
   }
-
-  .active-nav {
-    @apply font-medium text-accent underline decoration-wavy decoration-2 underline-offset-4;
-  }
-
   .astro-code {
     @apply my-6 overflow-x-auto rounded-lg border border-border/50;
     scrollbar-width: thin;
-
-    &::-webkit-scrollbar {
-      @apply h-2;
-    }
-    &::-webkit-scrollbar-thumb {
-      @apply rounded-full bg-muted;
-    }
+    &::-webkit-scrollbar { @apply h-2; }
+    &::-webkit-scrollbar-thumb { @apply rounded-full bg-muted; }
   }
-
-  .visually-hidden {
-    @apply sr-only;
-  }
+  .visually-hidden { @apply sr-only; }
 }
 
-/* --- MOBILE OVERLAYS --- */
-/* Moved logic to Tailwind classes to reduce custom CSS bulk */
-
+/* Mobile Menu Overlay */
 @media (max-width: 640px) {
   #mobile-menu-overlay {
-    /* Fixed position covering entire viewport with hardware acceleration */
+    /* Fixed syntax: z-[9999] */
     @apply fixed inset-0 z-[9999] flex flex-col items-center justify-center gap-8 bg-background p-4 opacity-100 transition-opacity duration-300;
     will-change: opacity, transform;
-
-    &.hidden {
-      @apply pointer-events-none hidden opacity-0;
-    }
-
-    & ul {
-      @apply flex w-full flex-col items-center gap-6;
-    }
-
-    & a {
-      @apply block py-2 text-2xl font-medium;
-    }
+    &.hidden { @apply pointer-events-none hidden opacity-0; }
+    & ul { @apply flex w-full flex-col items-center gap-6; }
+    & a { @apply block py-2 text-2xl font-medium; }
   }
-
-  #menu-close-btn {
-    @apply absolute top-6 right-6 z-[10000] p-2;
+  #menu-close-btn { 
+    /* Fixed syntax: z-[10000] */
+    @apply absolute top-6 right-6 z-[10000] p-2; 
   }
-
-  /* Pagination specific override for mobile touch targets */
-  .pagination a,
-  .pagination span {
-    @apply px-4 py-3 text-base;
-  }
-
-  body.menu-open {
-    @apply overflow-hidden;
-  }
+  .pagination a, .pagination span { @apply px-4 py-3 text-base; }
+  body.menu-open { @apply overflow-hidden; }
 }

@@ -1,10 +1,11 @@
-/* ==========================================================================
-   GLOBAL STYLESHEET (Refactored for Tailwind v4 & Clean Code)
-   ========================================================================== */
-
+/* src/styles/global.css */
 @import "tailwindcss";
-@import "./typography.css";
-@import "./components.css";
+
+/* Domain Imports */
+@import "./base.css";       /* Resets & Global Elements */
+@import "./typography.css"; /* Fonts & Prose */
+@import "./components.css"; /* Reusable UI Components */
+@import "./features.css";   /* Specific Page Sections (Profile, Newsbox) */
 
 /* Define custom variant for cleaner HTML selection */
 @custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
@@ -24,12 +25,12 @@
   --animate-duration-slow: 500ms;
 }
 
-/* --- DESIGN TOKENS --- */
+/* --- DESIGN TOKENS (Single Source of Truth) --- */
 :root {
   /* Layout Tokens */
   --gap: 24px;
   --nav-width: 1024px;
-  --main-width: 720px; /* Or 45rem / 65ch */
+  --main-width: 720px;
   --header-height: 64px;
   --radius: 8px;
 
@@ -53,131 +54,9 @@ html[data-theme="dark"] {
   --accent: #4da6ff;
   --muted: #1e1e1e;
   --border: #2d2d2d;
-  /* WCAG AA Fix: Lightened from #a3a3a3 to #b3b3b3 for better contrast (4.5:1 ratio) */
+  /* WCAG AA Fix: Lightened for better contrast */
   --text-secondary: #b3b3b3;
   --code-bg: #2a2a2a;
 
   color-scheme: dark;
-}
-
-/* --- BASE LAYER --- */
-@layer base {
-  html {
-    @apply scroll-smooth bg-background;
-
-    /* Font Stack: System + Inter + Georgian */
-    font-family: var(--font-inter), var(--font-georgian), system-ui, sans-serif;
-
-    /* Mobile-First Sizing */
-    font-size: 16px;
-
-    /* UI Stability */
-    scrollbar-gutter: stable;
-    scroll-padding-top: var(--header-height);
-
-    @media (min-width: 768px) {
-      font-size: 18px;
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      scroll-behavior: auto;
-    }
-  }
-
-  body {
-    @apply flex min-h-svh flex-col font-sans text-foreground antialiased;
-    line-height: 1.6;
-    letter-spacing: 0.01em;
-
-    /* Smooth Theme Transition */
-    transition:
-      background-color 0.3s ease,
-      color 0.3s ease;
-  }
-
-  /* Semantic Content Layout */
-  section,
-  footer {
-    @apply mx-auto w-full px-4;
-    max-width: var(--main-width);
-  }
-
-  /* Global Resets & Utilities */
-  * {
-    @apply border-border;
-
-    /* Scrollbar Styling (Firefox support + Custom Webkit) */
-    scrollbar-width: thin;
-    scrollbar-color: var(--muted) transparent;
-  }
-
-  :focus-visible {
-    @apply outline-2 outline-offset-2 outline-accent;
-  }
-
-  /* Interactive Elements */
-  button {
-    @apply cursor-pointer touch-manipulation;
-
-    &:active,
-    &[role="button"]:active {
-      transform: scale(0.98);
-    }
-  }
-
-  /* Enhanced Links */
-  a:not(.no-underline) {
-    text-decoration: underline 1px;
-    text-underline-offset: 0.25em;
-    text-decoration-color: var(--accent);
-    transition:
-      text-decoration-color 0.2s ease,
-      text-decoration-thickness 0.2s ease;
-
-    &:is(:hover, :focus-visible) {
-      text-decoration-thickness: 2px;
-    }
-  }
-}
-
-/* --- CUSTOM UTILITIES --- */
-@utility max-w-app {
-  @apply max-w-2xl;
-}
-
-/* --- PRINT STYLES --- */
-@media print {
-  /* Hide interactive/nav elements */
-  header,
-  footer,
-  button,
-  .no-print {
-    display: none !important;
-  }
-
-  body {
-    @apply bg-white text-black;
-  }
-
-  html {
-    font-size: 12pt;
-  }
-
-  /* Expand links for paper reading */
-  a {
-    text-decoration: none;
-    color: black;
-
-    &[href^="http"]:after {
-      content: " (" attr(href) ")";
-      @apply text-xs text-gray-600;
-    }
-  }
-
-  /* Preserve Code formatting */
-  pre,
-  code {
-    @apply border border-gray-300 whitespace-pre-wrap;
-    page-break-inside: avoid;
-  }
 }
