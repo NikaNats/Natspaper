@@ -164,12 +164,12 @@ jobs:
         run: pnpm install --global vercel@latest
 
       - name: Pull Vercel Environment
-        run: vercel pull --yes --environment=preview
+        run: vercel pull --yes --environment=preview --token=$VERCEL_TOKEN
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
 
       - name: Build Project
-        run: vercel build
+        run: vercel build --token=$VERCEL_TOKEN
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           # Use generic preview URL - Vercel will replace with actual deployment URL
@@ -219,7 +219,7 @@ jobs:
           echo "Deploying preview..."
 
           # Deploy and capture both stdout and URL
-          DEPLOY_OUTPUT=$(vercel deploy --prebuilt 2>&1)
+          DEPLOY_OUTPUT=$(vercel deploy --prebuilt --token=$VERCEL_TOKEN 2>&1)
           echo "$DEPLOY_OUTPUT"
 
           # Extract the preview URL (last HTTPS URL in output)

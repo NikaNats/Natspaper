@@ -64,13 +64,16 @@ jobs:
           cache: pnpm
           cache-dependency-path: pnpm-lock.yaml
 
-      # SECURITY FIX: Use env var instead of --token flag
-      - run: npx vercel --cwd . pull --yes --environment=production
+      # 1. Install Vercel CLI globally first to avoid npx noise/issues
+      - run: pnpm install --global vercel@latest
+
+      # 2. Pull with explicit token reference (Bash variable)
+      - run: vercel pull --yes --environment=production --token=$VERCEL_TOKEN
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
 
-      # SECURITY FIX: Use env var instead of --token flag
-      - run: npx vercel --cwd . build --prod
+      # 3. Build with explicit token reference
+      - run: vercel build --prod --token=$VERCEL_TOKEN
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
 
@@ -109,6 +112,9 @@ jobs:
           name: vercel-build
           path: .vercel/output
 
+      # Install CLI again (new runner)
+      - run: pnpm install --global vercel@latest
+
       - name: Get build size
         id: size
         run: |
@@ -126,8 +132,9 @@ jobs:
       # SECURITY FIX: Use env var instead of --token flag
       - name: Deploy to Production
         id: deploy
+        # Explicitly pass token as bash variable
         run: |
-          url=$(npx vercel --cwd . deploy --prebuilt --prod)
+          url=$(vercel deploy --prebuilt --prod --token=$VERCEL_TOKEN)
           echo "url=$url" >> $GITHUB_OUTPUT
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
