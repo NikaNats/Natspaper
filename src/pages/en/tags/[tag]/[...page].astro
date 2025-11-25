@@ -47,7 +47,7 @@ const { page, tagName } = Astro.props;
     >
       {`Tag:${tag}`}
     </h1>
-    <ul>
+    <ul class="space-y-6">
       {
         page.data
           .filter(item => item !== undefined)

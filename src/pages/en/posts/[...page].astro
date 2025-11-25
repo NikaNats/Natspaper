@@ -23,7 +23,7 @@ const { page } = Astro.props;
   <Header />
   <Main pageTitle="Posts" pageDesc="All the articles I've posted.">
     <div class="grid gap-6">
-      <ul class="space-y-0">
+      <ul class="space-y-6">
         {
           page.data.map(({ data, slug, body }) => {
             // Calculate word count for reading time
