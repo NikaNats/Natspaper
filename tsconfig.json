@@ -1,15 +1,14 @@
 {
   "extends": "astro/tsconfigs/strict",
   "include": [".astro/types.d.ts", "pagefind.d.ts", "**/*"],
-  "exclude": ["dist", "public/pagefind", "coverage"],
+  "exclude": ["dist", "public/pagefind", "coverage", ".astro"],
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"],
-      "@tests/*": ["./tests/*"]
+      "@/*": ["src/*"],
+      "@tests/*": ["tests/*"]
     },
-    "jsx": "react-jsx",
-    "jsxImportSource": "react",
+    "verbatimModuleSyntax": true,
     "noImplicitAny": true,
     "strictNullChecks": true,
     "noUncheckedIndexedAccess": true

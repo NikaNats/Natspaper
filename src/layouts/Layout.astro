@@ -1,7 +1,8 @@
 ---
 // REFACTORED: The Layout component is now a clean, high-level conductor.
 import { ClientRouter } from "astro:transitions";
-import { PUBLIC_GOOGLE_SITE_VERIFICATION } from "astro:env/client";
+// FIX: Remove broken import from astro:env/client
+// import { PUBLIC_GOOGLE_SITE_VERIFICATION } from "astro:env/client";
 import { Font } from "astro:assets";
 import { SITE, FEATURES } from "@/config";
 import "@/styles/global.css";
@@ -15,6 +16,10 @@ import Seo from "@/components/features/Seo.astro";
 import StructuredData from "@/components/features/StructuredData.astro";
 import ThemeManager from "@/components/features/ThemeManager.astro";
 import Analytics from "@/components/features/Analytics.astro";
+
+// FIX: Access the environment variable directly
+const PUBLIC_GOOGLE_SITE_VERIFICATION = import.meta.env
+  .PUBLIC_GOOGLE_SITE_VERIFICATION;
 
 // The props interface remains the same, as it's the public API for the layout.
 export interface Props {

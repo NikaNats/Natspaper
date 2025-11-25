@@ -5,7 +5,11 @@ import { slugifyStr } from "../core/slugify";
 // Encapsulate sorting/filtering logic here
 export const PostRepository = {
   getAll: async (): Promise<CollectionEntry<"blog">[]> => {
-    return await getCollection("blog", ({ data }) => !data.draft);
+    // FIX: Explicitly type the destructured 'data' property
+    return await getCollection(
+      "blog",
+      ({ data }: CollectionEntry<"blog">) => !data.draft
+    );
   },
 
   getSorted: async (): Promise<CollectionEntry<"blog">[]> => {
@@ -25,7 +29,8 @@ export const PostRepository = {
   getByTag: async (tag: string): Promise<CollectionEntry<"blog">[]> => {
     const posts = await PostRepository.getSorted();
     return posts.filter(post =>
-      post.data.tags.map(t => slugifyStr(t)).includes(tag)
+      // FIX: Explicitly type the 't' parameter
+      post.data.tags.map((t: string) => slugifyStr(t)).includes(tag)
     );
   },
 
