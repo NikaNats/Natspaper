@@ -8,13 +8,14 @@ import Socials from "@/components/features/Socials.astro";
 import Hr from "@/components/ui/Hr.astro";
 import FeaturedPostCard from "@/components/post/FeaturedPostCard.astro";
 // getSortedPosts is handled by contentRepo; remove redundant import
-import { SOCIALS } from "@/data/socials";
+import { getSocials } from "@/data/socials";
 import { SITE } from "@/config";
 import profilePic from "@/assets/images/me.jpeg";
 
 // Get posts only for the Georgian language using the centralized repository
 const sortedPosts = await PostRepository.getByLocale("ka");
 const featuredPosts = sortedPosts.filter(({ data }) => data.featured);
+const socials = getSocials();
 ---
 
 <Layout>
@@ -108,9 +109,9 @@ const featuredPosts = sortedPosts.filter(({ data }) => data.featured);
         </div>
         {
           // only display if at least one social link is enabled
-          SOCIALS.length > 0 && (
+          socials.length > 0 && (
             <div class="mt-4 flex flex-col justify-center gap-4 sm:flex-row sm:items-center">
-              <Socials links={SOCIALS} />
+              <Socials links={socials} />
             </div>
           )
         }

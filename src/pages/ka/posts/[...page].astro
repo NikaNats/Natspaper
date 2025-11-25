@@ -8,11 +8,11 @@ import Footer from "@/components/layout/Footer.astro";
 import PostSummaryCard from "@/components/post/PostSummaryCard.astro";
 import Pagination from "@/components/ui/Pagination.astro";
 import { PostRepository } from "@/utils/post/repository";
-import { SITE } from "@/config";
+import { SITE, FEATURES } from "@/config";
 
 export const getStaticPaths = (async ({ paginate }) => {
   const posts = await PostRepository.getByLocale("ka");
-  return paginate(posts, { pageSize: SITE.postPerPage });
+  return paginate(posts, { pageSize: FEATURES.postPerPage });
 }) satisfies GetStaticPaths;
 
 const { page } = Astro.props;

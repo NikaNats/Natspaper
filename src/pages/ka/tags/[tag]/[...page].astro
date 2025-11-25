@@ -9,7 +9,7 @@ import Footer from "@/components/layout/Footer.astro";
 import PostSummaryCard from "@/components/post/PostSummaryCard.astro";
 import Pagination from "@/components/ui/Pagination.astro";
 import { getUniqueTags, getPostsByTag } from "@/utils/post";
-import { SITE } from "@/config";
+import { SITE, FEATURES } from "@/config";
 
 export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
   const posts = await PostRepository.getByLocale("ka");
@@ -22,7 +22,7 @@ export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
     return paginate(tagPosts, {
       params: { tag },
       props: { tagName },
-      pageSize: SITE.postPerPage,
+      pageSize: FEATURES.postPerPage,
     });
   });
 }

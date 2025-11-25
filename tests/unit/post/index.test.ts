@@ -954,16 +954,16 @@ Web performance optimization is an ongoing process that requires monitoring, tes
     });
 
     it("should generate dynamic OG image when enabled", () => {
-      // This test assumes SITE.dynamicOgImage is true
+      // This test assumes FEATURES.dynamicOgImage is true
       const result = resolveOgImageUrl(undefined, 'test-post', siteUrl);
 
-      // The actual result depends on SITE.dynamicOgImage setting
+      // The actual result depends on FEATURES.dynamicOgImage setting
       // If enabled, it should be /posts/test-post/index.png
       expect(result).toMatch(/^https:\/\/natspaper\.vercel\.app\/(posts\/test-post\/index\.png)?$/);
     });
 
     it("should return undefined when no OG image is available", () => {
-      // Mock SITE.dynamicOgImage as false if possible, or test the undefined case
+      // Mock FEATURES.dynamicOgImage as false if possible, or test the undefined case
       const result = resolveOgImageUrl(undefined, 'test-post', siteUrl);
 
       // This might return the dynamic image or undefined depending on config

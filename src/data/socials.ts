@@ -1,4 +1,7 @@
+import { SOCIALS } from "@/config";
 import type { SvgComponent } from "astro/types";
+
+// Import all icons dynamically or explicitly
 import IconMail from "@/assets/icons/IconMail.svg";
 import IconGitHub from "@/assets/icons/IconGitHub.svg";
 import IconBrandX from "@/assets/icons/IconBrandX.svg";
@@ -9,50 +12,27 @@ import IconTelegram from "@/assets/icons/IconTelegram.svg";
 import IconPinterest from "@/assets/icons/IconPinterest.svg";
 import IconRss from "@/assets/icons/IconRss.svg";
 
-// REFACTORED: This module no longer depends on the global SITE config.
-// It is now a pure, self-contained data module.
+const iconMap: Record<string, SvgComponent> = {
+  IconMail,
+  IconGitHub,
+  IconBrandX,
+  IconLinkedin,
+  IconWhatsapp,
+  IconFacebook,
+  IconTelegram,
+  IconPinterest,
+  IconRss,
+};
 
-interface Social {
-  name: string;
-  href: string;
-  linkTitle: (siteTitle: string) => string; // The title is now a function.
-  icon: SvgComponent;
-}
+export const getSocials = () => {
+  return SOCIALS.filter(s => s.active).map(s => ({
+    ...s,
+    linkTitle: s.linkTitle || `${s.name}`,
+    icon: iconMap[s.icon] || IconMail, // Fallback icon
+  }));
+};
 
-export const SOCIALS: Social[] = [
-  {
-    name: "GitHub",
-    href: "https://github.com/NikaNats",
-    linkTitle: siteTitle => `${siteTitle} on GitHub`,
-    icon: IconGitHub,
-  },
-  {
-    name: "X",
-    href: "https://x.com/NNats8",
-    linkTitle: siteTitle => `${siteTitle} on X`,
-    icon: IconBrandX,
-  },
-  {
-    name: "LinkedIn",
-    href: "https://www.linkedin.com/in/nika-natsvlishvili/",
-    linkTitle: siteTitle => `${siteTitle} on LinkedIn`,
-    icon: IconLinkedin,
-  },
-  {
-    name: "Mail",
-    href: "mailto:nika.nacvlishvili1@gmail.com",
-    linkTitle: siteTitle => `Send an email to ${siteTitle}`,
-    icon: IconMail,
-  },
-  {
-    name: "RSS",
-    href: "/rss.xml",
-    linkTitle: () => "RSS Feed",
-    icon: IconRss,
-  },
-] as const;
-
-export const SHARE_LINKS: Social[] = [
+export const SHARE_LINKS = [
   {
     name: "WhatsApp",
     href: "https://wa.me/?text=",

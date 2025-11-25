@@ -1,6 +1,6 @@
 import rss from "@astrojs/rss";
 import type { APIRoute } from "astro";
-import { SITE } from "@/config";
+import { SITE, FEATURES } from "@/config";
 import { SUPPORTED_LANGS, type Lang } from "@/i18n/config"; // SSOT
 import { PostRepository } from "@/utils/post/repository";
 import {
@@ -14,7 +14,7 @@ export const GET: APIRoute = async ({ params, site }) => {
   const posts = await PostRepository.getByLocale(locale);
 
   // REFACTORED: Use the global setting variable instead of magic number 50
-  const recentPosts = posts.slice(0, SITE.rssLimit);
+  const recentPosts = posts.slice(0, FEATURES.rssLimit);
 
   return rss({
     title: `${SITE.title} - ${locale.toUpperCase()}`,

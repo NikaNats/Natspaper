@@ -14,6 +14,8 @@ import { ConcurrencyLimiter } from "@/utils/core/concurrencyLimiter";
 vi.mock("@/config", () => ({
   SITE: {
     timezone: "America/New_York", // Use a timezone that has DST for testing
+  },
+  FEATURES: {
     scheduledPostMargin: 15 * 60 * 1000, // 15 minutes
   },
 }));

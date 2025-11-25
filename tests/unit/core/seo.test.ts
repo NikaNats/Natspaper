@@ -121,7 +121,7 @@ describe('SEO Utilities', () => {
     });
 
     it('should generate dynamic OG image when enabled and no explicit image provided', () => {
-      // This depends on SITE.dynamicOgImage being true
+      // This depends on FEATURES.dynamicOgImage being true
       const result = resolveOgImageUrl(undefined, 'test-post', siteUrl);
 
       // Should return the dynamic OG image path
@@ -130,7 +130,7 @@ describe('SEO Utilities', () => {
 
     it('should return undefined when no OG image is available and dynamic is disabled', () => {
       // This test assumes the function handles the case properly
-      // The actual behavior depends on SITE.dynamicOgImage
+      // The actual behavior depends on FEATURES.dynamicOgImage
       const result = resolveOgImageUrl(undefined, 'test-post', siteUrl);
 
       expect(result).toBeDefined(); // Either dynamic image or undefined

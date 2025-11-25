@@ -3,7 +3,7 @@ import sentry from "@sentry/astro";
 import Sonda from "sonda/astro";
 import expressiveCode from "astro-expressive-code";
 import { envValidationIntegration } from "../src/integrations/envValidation";
-import { SITE } from "../src/config";
+import { FEATURES } from "../src/config";
 
 const isProduction = process.env.NODE_ENV === 'production';
 
@@ -12,7 +12,7 @@ export function getIntegrations() {
     envValidationIntegration(),
     sitemap({
       // Filter configuration - excludes archive pages if showArchives is false
-      filter: page => SITE.showArchives || !page.endsWith("/archives"),
+      filter: page => FEATURES.showArchives || !page.endsWith("/archives"),
 
       // Internationalization support for multi-language sitemaps
       // Automatically generates alternate language links (hreflang)

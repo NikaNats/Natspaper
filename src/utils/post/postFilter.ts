@@ -2,7 +2,7 @@ import type { CollectionEntry } from "astro:content";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
-import { SITE } from "@/config";
+import { SITE, FEATURES } from "@/config";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -57,7 +57,7 @@ const postFilter = ({ data }: CollectionEntry<"blog">) => {
   // Apply scheduled post margin: posts can appear slightly before their scheduled time
   // This allows building and caching before the exact publish moment
   const now = Date.now();
-  const marginMs = SITE.scheduledPostMargin;
+  const marginMs = FEATURES.scheduledPostMargin;
   const publishTimeWithMargin = publishUtcMs - marginMs;
 
   return now > publishTimeWithMargin;

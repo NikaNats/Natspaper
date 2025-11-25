@@ -12,6 +12,9 @@ vi.mock("@/config", () => ({
     dynamicOgImage: true,
     title: "Test Site",
   },
+  FEATURES: {
+    dynamicOgImage: true,
+  },
 }));
 
 describe("postHelpers", () => {

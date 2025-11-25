@@ -1,5 +1,5 @@
 import type { CollectionEntry } from "astro:content";
-import { SITE } from "@/config";
+import { FEATURES } from "@/config";
 
 /**
  * Resolve the final OG image URL for a blog post.
@@ -24,7 +24,7 @@ import { SITE } from "@/config";
  * // Returns: "https://example.com/images/og.png"
  *
  * @example
- * // Dynamic OG image (if SITE.dynamicOgImage is true)
+ * // Dynamic OG image (if FEATURES.dynamicOgImage is true)
  * resolveOgImageUrl(undefined, "my-post", "https://example.com")
  * // Returns: "https://example.com/posts/my-post/index.png"
  */
@@ -46,7 +46,7 @@ export function resolveOgImageUrl(
   }
 
   // Priority 3: Dynamic OG image (if enabled and no explicit image provided)
-  if (!ogImageUrl && SITE.dynamicOgImage) {
+  if (!ogImageUrl && FEATURES.dynamicOgImage) {
     ogImageUrl = `/posts/${slug}/index.png`;
   }
 

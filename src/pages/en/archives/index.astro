@@ -7,10 +7,10 @@ import Header from "@/components/layout/Header.astro";
 import Footer from "@/components/layout/Footer.astro";
 import PostSummaryCard from "@/components/post/PostSummaryCard.astro";
 import getPostsByGroupCondition from "@/utils/post/getPostsByGroupCondition";
-import { SITE } from "@/config";
+import { SITE, FEATURES } from "@/config";
 
 // Redirect to 404 page if `showArchives` config is false
-if (!SITE.showArchives) {
+if (!FEATURES.showArchives) {
   return Astro.redirect("/404");
 }
 

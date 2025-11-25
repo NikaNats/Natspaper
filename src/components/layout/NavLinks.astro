@@ -2,10 +2,10 @@
 // This component has no HTML output. It only prepares data and logic.
 
 // 1. Import the navigation links from a single source of truth
-import { NAV_LINKS } from "@/data/navigation";
+import { NAVIGATION } from "@/config";
 
 // Re-export the data so existing consumers still work.
-export const navLinks = NAV_LINKS;
+export const navLinks = NAVIGATION;
 
 // 2. The isActive logic is now self-contained here.
 export function isActive(

@@ -1,9 +1,9 @@
 ---
 import { isActive } from "./NavLinks.astro";
-import { NAV_LINKS } from "@/data/navigation";
+import { NAVIGATION } from "@/config";
 import LinkButton from "../ui/LinkButton.astro";
 import IconArchive from "@/assets/icons/IconArchive.svg";
-import { SITE } from "@/config";
+import { FEATURES } from "@/config";
 import LanguagePicker from "../features/LanguagePicker.astro";
 import IconMoon from "@/assets/icons/IconMoon.svg";
 import IconSunHigh from "@/assets/icons/IconSunHigh.svg";
@@ -21,7 +21,7 @@ const { t } = getI18n(locale);
 >
   {/* Dynamically render main nav links from configuration */}
   {
-    NAV_LINKS.filter(link => link.href !== "/archives").map(link => (
+    NAVIGATION.filter(link => link.href !== "/archives").map(link => (
       <li>
         <a
           href={`/${locale}${link.href}`}
@@ -36,7 +36,7 @@ const { t } = getI18n(locale);
     ))
   }
   {
-    SITE.showArchives && (
+    FEATURES.showArchives && (
       <li>
         <LinkButton
           href={`/${locale}/archives`}
@@ -60,7 +60,7 @@ const { t } = getI18n(locale);
     )
   }
   {
-    SITE.lightAndDarkMode && (
+    FEATURES.lightAndDarkMode && (
       <li>
         <button
           id="theme-btn"

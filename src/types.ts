@@ -1,33 +1,38 @@
-export type Site = {
+export type SiteConfig = {
   website: string;
   author: string;
+  profile: string;
   desc: string;
   title: string;
   ogImage: string;
+  lang: string;
+  dir: "ltr" | "rtl";
+  timezone: string;
+};
+
+export type FeaturesConfig = {
   lightAndDarkMode: boolean;
   postPerPage: number;
+  postPerIndex: number;
+  rssLimit: number;
   scheduledPostMargin: number;
-  showArchives?: boolean;
+  showArchives: boolean;
+  showBackButton: boolean;
+  scrollSmooth: boolean;
+  readingTimeWPM: number;
+  backToTopThreshold: number;
+  dynamicOgImage: boolean;
   editPost: {
     enabled: boolean;
     text: string;
     url: string;
   };
-  profile?: string;
-  scrollSmooth: boolean;
-  dir: "ltr" | "rtl";
-  lang: string;
-  readingTimeWPM: number;
-  rssLimit: number;
-  dynamicOgImage: boolean;
-  timezone: string;
-  showBackButton?: boolean;
-  backToTopThreshold?: number;
 };
 
-export type SocialObjects = {
+export type SocialLink = {
   name: string;
   href: string;
+  icon: string;
   active: boolean;
-  linkTitle: string;
+  linkTitle?: string; // Optional override
 };

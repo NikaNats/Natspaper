@@ -3,7 +3,7 @@
 import { ClientRouter } from "astro:transitions";
 import { PUBLIC_GOOGLE_SITE_VERIFICATION } from "astro:env/client";
 import { Font } from "astro:assets";
-import { SITE } from "@/config";
+import { SITE, FEATURES } from "@/config";
 import "@/styles/global.css";
 
 // PERFORMANCE FIX: Removed manual @fontsource imports.
@@ -38,7 +38,7 @@ const {
   canonicalURL = new URL(Astro.url.pathname, Astro.url),
   pubDatetime,
   modDatetime,
-  scrollSmooth = SITE.scrollSmooth,
+  scrollSmooth = FEATURES.scrollSmooth,
 } = Astro.props;
 
 // The logic to build the structured data remains here, in the "smart" component.

@@ -1,6 +1,6 @@
 ---
 // src/components/Search.astro
-import { SITE } from "@/config";
+import { FEATURES } from "@/config";
 
 export interface Props {
   locale: "en" | "ka";
@@ -8,7 +8,7 @@ export interface Props {
 
 const { locale } = Astro.props;
 
-const backUrl = SITE.showBackButton ? `/${locale}/search` : `/${locale}/`;
+const backUrl = FEATURES.showBackButton ? `/${locale}/search` : `/${locale}/`;
 ---
 
 <link href="/pagefind/pagefind-ui.css" rel="stylesheet" />

@@ -4,7 +4,7 @@ import { PostRepository } from "@/utils/post/repository";
 import { getLastPathSegment } from "@/utils/core/slugify";
 import { generateOgImageForPost } from "@/utils/og";
 import { ogImageLimiter } from "@/utils/core";
-import { SITE } from "@/config";
+import { FEATURES } from "@/config";
 
 /**
  * Generate static OG image routes for blog posts.
@@ -15,7 +15,7 @@ import { SITE } from "@/config";
  * - Each image generation includes explicit memory cleanup
  */
 export async function getStaticPaths() {
-  if (!SITE.dynamicOgImage) {
+  if (!FEATURES.dynamicOgImage) {
     return [];
   }
 
@@ -43,7 +43,7 @@ export async function getStaticPaths() {
  * - Build failures in CI/CD pipelines
  */
 export const GET: APIRoute = async ({ props }) => {
-  if (!SITE.dynamicOgImage) {
+  if (!FEATURES.dynamicOgImage) {
     return new Response(null, {
       status: 404,
       statusText: "Not found",
