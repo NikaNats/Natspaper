@@ -1,47 +1,73 @@
+// ec.config.mjs
 import { defineEcConfig } from "astro-expressive-code";
 import { pluginLineNumbers } from "@expressive-code/plugin-line-numbers";
 import { pluginCollapsibleSections } from "@expressive-code/plugin-collapsible-sections";
 
 export default defineEcConfig({
-  // თემები: შეგიძლიათ აირჩიოთ ნებისმიერი VS Code თემა
-  // აქ ვიყენებთ პოპულარულ დუეტს: Dark და Light რეჟიმებისთვის
-  themes: ["one-dark-pro", "github-light"],
+  // "Github Dark Dimmed" fits your academic/clean aesthetic better than "One Dark"
+  themes: ["github-dark-dimmed", "github-light"],
 
-  // პლაგინების ჩართვა
-  plugins: [
-    pluginLineNumbers(), // ხაზების ნომრები
-    pluginCollapsibleSections(), // კოდის სექციების ჩაკეცვა
-  ],
+  plugins: [pluginLineNumbers(), pluginCollapsibleSections()],
 
-  // სტილების მორგება (Style Overrides)
   styleOverrides: {
-    // კოდის ბლოკის დიზაინი
-    // borderRadius: '0.5rem', // მომრგვალებული კუთხეები
-    // borderWidth: '1px',
-    // borderColor: ({ theme }) => theme.name.includes('dark') ? '#333' : '#ddd',
+    // Clean, subtle borders using transparency for better blending
+    borderRadius: "0.5rem",
+    borderWidth: "1px",
+    borderColor: ({ theme }) =>
+      theme.name.includes("dark")
+        ? "rgba(255, 255, 255, 0.1)"
+        : "rgba(0, 0, 0, 0.1)",
 
-    // // ჩარჩოს (Frame) დიზაინი
-    // frames: {
-    //   shadowColor: '#00000033', // ჩრდილი
-    //   editorActiveTabBackground: ({ theme }) => theme.name.includes('dark') ? '#282a36' : '#fff',
-    // },
+    // More breathing room for readability
+    codePaddingBlock: "1.25rem",
+    codePaddingInline: "1.5rem",
 
-    // ფონტის ოჯახი - JetBrains Mono კოდისთვის
+    // Remove default shadows for a flat, academic look
+    frames: {
+      shadowColor: "transparent",
+      frameBoxShadowCssValue: "none",
+    },
+
+    // Use your site's JetBrains Mono variable
     codeFontFamily:
-      'var(--font-jetbrains-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
+      "var(--font-jetbrains-mono), ui-monospace, SFMono-Regular, Menlo, monospace",
+    codeFontSize: "0.875rem", // 14px
+    codeLineHeight: "1.7", // High readability
 
-    // ხაზების ნომრების დიზაინი
+    // Subtle line numbers (not distracting)
     lineNumbers: {
       foreground: ({ theme }) =>
-        theme.name.includes("dark") ? "#6272a4" : "#bbb",
+        theme.name.includes("dark")
+          ? "rgba(255, 255, 255, 0.2)"
+          : "rgba(0, 0, 0, 0.2)",
+      background: "transparent",
     },
+
+    // Selection/Highlight colors
+    textMarkers: {
+      defaultChroma: "45", // Slightly more vibrant highlights
+      backgroundOpacity: "0.15",
+      borderOpacity: "0.5",
+    },
+
+    // Minimal Scrollbars (Invisible until hover)
+    scrollbarThumbColor: ({ theme }) =>
+      theme.name.includes("dark")
+        ? "rgba(255, 255, 255, 0.1)"
+        : "rgba(0, 0, 0, 0.1)",
+    scrollbarThumbHoverColor: ({ theme }) =>
+      theme.name.includes("dark")
+        ? "rgba(255, 255, 255, 0.3)"
+        : "rgba(0, 0, 0, 0.3)",
   },
 
-  // ნაგულისხმევი პარამეტრები ყველა ბლოკისთვის
   defaultProps: {
-    // მაგალითად: სიტყვების ავტომატური გადატანა (Word Wrap)
-    wrap: true,
-    // ხაზების ნომრები ჩართული იყოს ყველგან (შეგიძლიათ გათიშოთ false-ით)
-    showLineNumbers: true,
+    wrap: true, // Prevent horizontal scroll on mobile
+    showLineNumbers: true, // Academic standard
+    frame: "none", // We use your custom filename transformer instead
   },
+
+  // Ensure accessibility standards
+  minSyntaxHighlightingColorContrast: 5,
+  useDarkModeMediaQuery: false, // Astro handles the class switching
 });
