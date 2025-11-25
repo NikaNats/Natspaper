@@ -1,17 +1,22 @@
 ---
+import { PostRepository } from "@/utils/post/repository";
 import Main from "@/layouts/Main.astro";
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/layout/Header.astro";
 import Footer from "@/components/layout/Footer.astro";
 import { getUniqueTags, getPostsByTag } from "@/utils/post";
 import { SITE } from "@/config";
+import { SUPPORTED_LANGS, type Lang, DEFAULT_LANG } from "@/i18n/config";
 
-import { PostRepository } from "@/utils/post/repository";
-const posts = await PostRepository.getByLocale("ka");
+const currentLocale = (
+  SUPPORTED_LANGS.includes(Astro.currentLocale as Lang)
+    ? Astro.currentLocale
+    : DEFAULT_LANG
+) as Lang;
 
-// 1. Get tags and calculate counts
-// We map over the unique tags and use your existing utility to find the count
-const tags = getUniqueTags(posts, Astro.currentLocale as "en" | "ka")
+const posts = await PostRepository.getByLocale(currentLocale);
+
+const tags = getUniqueTags(posts, currentLocale)
   .map(tagItem => {
     const count = getPostsByTag(posts, tagItem.tag).length;
     return {
@@ -19,33 +24,36 @@ const tags = getUniqueTags(posts, Astro.currentLocale as "en" | "ka")
       count,
     };
   })
-  .sort((a, b) => b.count - a.count); // Sort by popularity (descending)
+  .sort((a, b) => b.count - a.count);
 ---
 
 <Layout title={`თეგები | ${SITE.title}`}>
   <Header />
   <Main
     pageTitle="თემები"
-    pageDesc="სტატიების დათვალიერება თემისა და კატეგორიის მიხედვით."
+    pageDesc="იხილეთ სტატიები თემებისა და კატეგორიების მიხედვით."
   >
-    <!-- 2. The Taxonomy Cloud -->
-    <!-- max-w-3xl ensures the cloud doesn't get too wide and hard to read -->
     <ul class="mx-auto mt-8 flex max-w-3xl flex-wrap gap-3">
       {
         tags.map(({ tag, tagName, count }) => (
           <li>
             <a
-              href={`/${Astro.currentLocale}/tags/${tag}/`}
-              transition:name={tag}
-              class="group flex items-center justify-between gap-3 rounded-full border border-border/50 bg-muted/10 px-5 py-3 text-base no-underline transition-all duration-300 hover:scale-105 hover:border-accent hover:bg-accent/5"
+              href={`/${currentLocale}/tags/${tag}/`}
+              transition:name={`tag-${tag}`}
+              aria-label={`${tagName}: ${count} სტატია`}
+              class="group flex items-center justify-between gap-3 rounded-full border border-transparent bg-muted px-5 py-3 text-base whitespace-nowrap no-underline transition-all duration-300 hover:scale-105 hover:border-accent hover:bg-accent/10"
             >
               <span class="font-medium text-foreground transition-colors group-hover:text-accent">
-                <span class="mr-0.5 text-accent/50">#</span>
+                <span class="mr-0.5 text-accent/50" aria-hidden="true">
+                  #
+                </span>
                 {tagName}
               </span>
 
-              {/* The Counter Badge */}
-              <span class="flex h-5 min-w-5 items-center justify-center rounded-full border border-border bg-background px-1.5 font-mono text-xs text-text-secondary transition-colors group-hover:border-accent/30 group-hover:text-accent">
+              <span
+                aria-hidden="true"
+                class="flex h-5 min-w-5 translate-y-0.5 items-center justify-center rounded-full border border-border bg-background px-1.5 font-mono text-xs leading-none text-text-secondary transition-colors group-hover:border-accent/30 group-hover:text-accent"
+              >
                 {count}
               </span>
             </a>
