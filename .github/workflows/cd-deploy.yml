@@ -1,9 +1,5 @@
 name: Production Deployment
 
-env:
-  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-
 on:
   push:
     branches: [master]
@@ -13,170 +9,80 @@ concurrency:
   group: production
   cancel-in-progress: false
 
+env:
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+  VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+
 jobs:
-  quality:
-    name: Quality Checks
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 10
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: pnpm
-          cache-dependency-path: pnpm-lock.yaml
-
-      - run: pnpm install --frozen-lockfile --prefer-offline
-      - run: pnpm run lint
-      - run: pnpm run format:check
-
-  test:
-    name: Tests
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 10
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: pnpm
-          cache-dependency-path: pnpm-lock.yaml
-
-      - run: pnpm install --frozen-lockfile --prefer-offline
-      - run: pnpm test:run
-
-  build:
-    name: Build
-    needs: [quality, test]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 10
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: pnpm
-          cache-dependency-path: pnpm-lock.yaml
-
-      # 1. Install Vercel CLI globally first to avoid npx noise/issues
-      - run: pnpm install --global vercel@latest
-
-      # 2. Pull with explicit token reference (Bash variable)
-      - run: vercel pull --yes --environment=production --token=$VERCEL_TOKEN
-        env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-
-      # 3. Build with explicit token reference
-      - run: vercel build --prod --token=$VERCEL_TOKEN
-        env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-
-      - name: Get build size
-        id: size
-        run: |
-          size_kb=$(du -sk .vercel/output | cut -f1)
-          size_mb=$(awk "BEGIN {printf \"%.1f\", $size_kb/1024}")
-          echo "mb=$size_mb" >> $GITHUB_OUTPUT
-
-          # Find largest files
-          echo "### 📦 Build: ${size_mb}MB" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          find .vercel/output -type f -exec du -h {} + 2>/dev/null | 
-            sort -rh | head -5 | 
-            awk '{printf "- %s - `%s`\n", $1, $2}' >> $GITHUB_STEP_SUMMARY
-
-      - name: Upload build artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: vercel-build
-          path: .vercel/output
-          retention-days: 1
-
   deploy:
-    name: Deploy
-    needs: build
+    name: Deploy to Production
     runs-on: ubuntu-latest
     environment:
       name: production
       url: https://natspaper.vercel.app
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
         with:
-          name: vercel-build
-          path: .vercel/output
+          version: 10
 
-      # Install CLI again (new runner)
-      - run: pnpm install --global vercel@latest
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
 
-      - name: Get build size
-        id: size
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run checks
         run: |
-          size_kb=$(du -sk .vercel/output | cut -f1)
-          size_mb=$(awk "BEGIN {printf \"%.1f\", $size_kb/1024}")
-          echo "mb=$size_mb" >> $GITHUB_OUTPUT
+          pnpm run lint
+          pnpm run format:check
+          pnpm test:run
 
-          # Find largest files
-          echo "### 📦 Build: ${size_mb}MB" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          find .vercel/output -type f -exec du -h {} + 2>/dev/null | 
-            sort -rh | head -5 | 
-            awk '{printf "- %s - `%s`\n", $1, $2}' >> $GITHUB_STEP_SUMMARY
+      - name: Install Vercel CLI
+        run: pnpm install --global vercel@latest
 
-      # SECURITY FIX: Use env var instead of --token flag
-      - name: Deploy to Production
+      - name: Pull Vercel environment
+        run: vercel pull --yes --environment=production --token=$VERCEL_TOKEN
+
+      - name: Build project
+        run: vercel build --prod --token=$VERCEL_TOKEN
+
+      - name: Deploy to Vercel
         id: deploy
-        # Explicitly pass token as bash variable
         run: |
           url=$(vercel deploy --prebuilt --prod --token=$VERCEL_TOKEN)
           echo "url=$url" >> $GITHUB_OUTPUT
-        env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
 
-      - name: Summary
+      - name: Verify deployment
         run: |
-          echo "### ✅ Deployed to Production" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "- URL: ${{ steps.deploy.outputs.url }}" >> $GITHUB_STEP_SUMMARY
-          echo "- Build: ${{ steps.size.outputs.mb }}MB" >> $GITHUB_STEP_SUMMARY
-          echo "- Commit: \`${GITHUB_SHA:0:7}\`" >> $GITHUB_STEP_SUMMARY
+          echo "Waiting for deployment to be ready..."
+          sleep 10
 
-      - name: Performance metrics
-        run: |
-          echo "### 📊 Build Metrics" >> $GITHUB_STEP_SUMMARY
-          echo "- Node modules: $(du -sh node_modules | cut -f1)" >> $GITHUB_STEP_SUMMARY
-
-          # Warn on size increases
-          if [ "${{ steps.size.outputs.mb }}" -gt 50 ]; then
-            echo "⚠️ Build size exceeds 50MB" >> $GITHUB_STEP_SUMMARY
-          fi
-
-  verify:
-    name: Verify
-    needs: deploy
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check deployment
-        run: |
           BASE_URL="https://natspaper.vercel.app/en"
-
-          echo "🔍 Running health checks for $BASE_URL..."
 
           for page in "/" "/posts" "/tags" "/archives" "/search"; do
             status=$(curl -s -L -w "%{http_code}" -o /dev/null "$BASE_URL$page")
             if [ "$status" = "200" ]; then
-              echo "✅ $page"
+              echo "✅ $page - OK"
             else
-              echo "❌ $page returned $status"
+              echo "❌ $page - Failed ($status)"
               exit 1
             fi
           done
 
-          echo ""
-          echo "### ✅ All pages verified" >> $GITHUB_STEP_SUMMARY
+      - name: Deployment summary
+        if: always()
+        run: |
+          echo "### 🚀 Production Deployment" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **URL**: ${{ steps.deploy.outputs.url }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit**: \`${GITHUB_SHA:0:7}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Status**: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
