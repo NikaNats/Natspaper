@@ -96,14 +96,14 @@ const transitionClasses = "transition-all duration-300 ease-in-out";
       <!-- Tags -->
       {
         visibleTags.length > 0 && (
-          <div class="mt-4 flex flex-wrap gap-2">
+          <div class="mt-4 flex flex-wrap items-center gap-2">
             {visibleTags.map(tag => (
               <span class="rounded-full bg-accent/10 px-2.5 py-1 text-xs font-medium text-accent transition-colors group-hover:bg-accent/20">
                 #{tag}
               </span>
             ))}
             {hiddenTagsCount > 0 && (
-              <span class="self-center text-xs text-text-secondary">
+              <span class="text-xs text-text-secondary">
                 +{hiddenTagsCount}
               </span>
             )}
