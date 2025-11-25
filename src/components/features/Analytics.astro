@@ -1,25 +1,63 @@
 ---
-// This component initializes all analytics and error tracking.
+// src/components/features/Analytics.astro
+import VercelAnalytics from '@vercel/analytics/astro';
+import SpeedInsights from '@vercel/speed-insights/astro';
+
+const isDev = import.meta.env.DEV;
 ---
 
-<!-- Vercel Web Analytics & Speed Insights -->
+<!--
+  ============================================================
+  VERCEL ANALYTICS & SPEED INSIGHTS CONFIGURATION
+  ============================================================
+
+  Best Practices implemented:
+  1. Cost Control: Ignore localhost events to save Hobby Tier quota
+  2. Privacy: Redact sensitive URLs
+  3. Performance: Use 'beforeSend' to filter at the source
+-->
+
 <script is:inline>
-  // Set up beforeSend callback before analytics script loads
-  // This filters localhost traffic and sensitive pages
-  window.webAnalyticsBeforeSend = function (event) {
-    // Ignore all events from localhost to avoid wasting quota during development
-    if (window.location.hostname === "localhost") {
+  // WEB ANALYTICS: 50k events/month limit (Hobby)
+  window.webAnalyticsBeforeSend = function(event) {
+    // 1. Ignore localhost (save quota)
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
       return null;
     }
-
-    // Ignore tracking for the Sentry test page
-    if (event.url && event.url.includes("/sentry-test")) {
+    // 2. Filter sensitive routes
+    if (event.url.includes('/private') || event.url.includes('/drafts')) {
       return null;
     }
-
-    // Track the event normally
     return event;
-  };
+  }
+
+  // SPEED INSIGHTS: 10k data points/month limit (Hobby)
+  window.speedInsightsBeforeSend = function(data) {
+    // 1. Ignore localhost
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+      return null;
+    }
+    return data;
+  }
 </script>
 
-<!-- Sentry Error Tracking is now handled by sentry.client.config.ts -->
+<!--
+  Analytics Component
+  - debug: Logs events to console in Dev mode
+  - mode: 'production' ensures data is sent correctly on Vercel
+-->
+<VercelAnalytics
+  mode={isDev ? 'development' : 'production'}
+  debug={isDev}
+/>
+
+<!--
+  SpeedInsights Component
+  - sampleRate: 1.0 = 100% of users.
+    ⚠️ If you exceed 10k views/month, lower this to 0.5 or 0.1
+    to stay within free tier limits.
+-->
+<SpeedInsights
+  debug={isDev}
+  sampleRate={1.0}
+/>

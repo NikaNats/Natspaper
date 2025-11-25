@@ -28,15 +28,16 @@
     "test:all": "pnpm test:run && pnpm test:e2e"
   },
   "dependencies": {
-    "@astrojs/rss": "^4.0.13",
+    "@astrojs/rss": "^4.0.14",
     "@astrojs/sitemap": "^3.6.0",
+    "@astrojs/vercel": "^9.0.1",
     "@expressive-code/plugin-collapsible-sections": "^0.41.3",
     "@expressive-code/plugin-line-numbers": "^0.41.3",
     "@fontsource/inter": "^5.2.8",
     "@fontsource/jetbrains-mono": "^5.2.8",
     "@fontsource/noto-sans-georgian": "^5.2.8",
     "@resvg/resvg-js": "^2.6.2",
-    "@sentry/astro": "^10.25.0",
+    "@sentry/astro": "^10.27.0",
     "@tailwindcss/vite": "^4.1.17",
     "@vercel/analytics": "^1.5.0",
     "@vercel/speed-insights": "^1.2.0",
@@ -57,13 +58,13 @@
   "devDependencies": {
     "@astrojs/check": "^0.9.5",
     "@pagefind/default-ui": "^1.4.0",
-    "@playwright/test": "^1.56.1",
+    "@playwright/test": "^1.57.0",
     "@shikijs/transformers": "^3.15.0",
     "@tailwindcss/typography": "^0.5.19",
     "@types/lodash.kebabcase": "^4.1.9",
-    "@typescript-eslint/parser": "^8.46.4",
-    "@vitest/coverage-v8": "4.0.8",
-    "@vitest/ui": "^4.0.8",
+    "@typescript-eslint/parser": "^8.48.0",
+    "@vitest/coverage-v8": "4.0.14",
+    "@vitest/ui": "^4.0.14",
     "cross-env": "^10.1.0",
     "eslint": "^9.39.1",
     "eslint-plugin-astro": "^1.5.0",
@@ -75,7 +76,7 @@
     "prettier-plugin-tailwindcss": "^0.7.1",
     "sonda": "^0.10.0",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.46.4",
-    "vitest": "^4.0.8"
+    "typescript-eslint": "^8.48.0",
+    "vitest": "^4.0.14"
   }
 }

@@ -10,6 +10,7 @@ import remarkCollapse from "remark-collapse";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 import { remarkModifiedTime } from "./src/lib/remark/remark-modified-time.mjs";
+import vercel from "@astrojs/vercel";
 
 const siteUrl = process.env.SITE_WEBSITE || SITE.website;
 
@@ -35,6 +36,17 @@ export default defineConfig({
   },
   vite: getViteConfig(),
   env: getEnvSchema(),
+  adapter: vercel({
+    webAnalytics: {
+      enabled: false,
+    },
+    imageService: true,
+    imagesConfig: {
+      // Limits strictly for free tier safety
+      sizes: [320, 640, 1280],
+      domains: [], // Add external domains if you fetch images from elsewhere
+    },
+  }),
   experimental: {
     preserveScriptOrder: true,
     contentIntellisense: true,
