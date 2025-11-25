@@ -44,7 +44,7 @@ const months = [
         )
           .sort(([yearA], [yearB]) => Number(yearB) - Number(yearA))
           .map(([year, yearGroup]) => (
-            <div class="relative border-l-2 border-dashed border-border/50 pt-2 pl-8">
+            <div class="relative border-l-2 border-dashed border-border/50 pt-2 pl-12">
               {/* Year Label (Sticky or absolute for style) */}
               <span class="absolute top-2 -left-[9px] h-4 w-4 rounded-full border-4 border-background bg-accent" />
 
@@ -67,7 +67,7 @@ const months = [
                   .map(([month, monthGroup]) => (
                     <div class="grid grid-cols-1 gap-4 sm:grid-cols-[100px_1fr] sm:gap-8">
                       {/* Month Label */}
-                      <div class="flex flex-row items-baseline gap-2 text-lg sm:flex-col sm:items-end sm:gap-0 sm:text-right">
+                      <div class="flex flex-row items-baseline gap-2 pl-3 text-lg sm:flex-col sm:items-end sm:gap-0 sm:pl-0 sm:text-right">
                         <span class="font-bold text-text-secondary">
                           {months[Number(month) - 1]}
                         </span>
