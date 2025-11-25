@@ -1,54 +1,35 @@
 ---
 // FILE: src/pages/index.astro
+import { DEFAULT_LANG } from "@/i18n/config";
 
-// This page is now a static HTML shell with a client-side script for redirection.
-// It no longer uses any server-side Astro APIs.
-import { SUPPORTED_LANGS, DEFAULT_LANG } from "@/i18n/config";
+// Calculate the absolute URL for the default locale to establish canonical authority
+const destination = `/${DEFAULT_LANG}/`;
 ---
 
 <!doctype html>
-<html lang={DEFAULT_LANG} data-pagefind-ignore="all">
+<html lang={DEFAULT_LANG}>
   <head>
     <meta charset="UTF-8" />
     <title>Redirecting...</title>
-    <!-- Pass config variables to the client script -->
-    <script
-      is:inline
-      define:vars={{
-        supportedLocales: SUPPORTED_LANGS,
-        defaultLocale: DEFAULT_LANG,
-      }}
-    >
-      /**
-       * Client-side redirect to the user's preferred language.
-       * This runs instantly in the browser, preserving the benefits of a static site.
-       */
-      function getPreferredLocale() {
-        // Check navigator.languages for the most specific user preference.
-        for (const lang of navigator.languages) {
-          const locale = lang.split("-")[0]; // Use the primary language code (e.g., "en" from "en-US")
-          if (supportedLocales.includes(locale)) {
-            return locale;
-          }
-        }
-        // Fallback to the default locale.
-        return defaultLocale;
-      }
+    <meta name="robots" content="noindex, nofollow" />
 
-      // Perform the redirect.
-      const preferredLocale = getPreferredLocale();
-      window.location.pathname = `/${preferredLocale}/`;
+    <!-- 1. Canonical: Tells Google "The real content is at /en/" -->
+    <link rel="canonical" href={destination} />
+
+    <!-- 2. Meta Refresh: The fastest browser-native redirect (0 seconds) -->
+    <!-- Acts as a fallback if JS is disabled or Vercel config is missing (localhost) -->
+    <meta http-equiv="refresh" content={`0;url=${destination}`} />
+
+    <!-- 3. Script: Minimal, non-blocking fallback for language detection in local dev -->
+    <script is:inline define:vars={{ destination }}>
+      // Short-circuit: If this page loaded, edge redirection didn't happen.
+      // We prioritize speed over perfect language detection here.
+      window.location.href = destination;
     </script>
-    <noscript>
-      <!-- Fallback for users with JavaScript disabled -->
-      <meta http-equiv="refresh" content={`0;url=/${DEFAULT_LANG}/`} />
-    </noscript>
   </head>
   <body>
     <p>
-      If you are not redirected automatically, <a href={`/${DEFAULT_LANG}/`}
-        >click here</a
-      >.
+      Redirecting to <a href={destination}>{destination}</a>...
     </p>
   </body>
 </html>

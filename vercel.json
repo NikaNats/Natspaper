@@ -1,4 +1,23 @@
 {
+  "redirects": [
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "header",
+          "key": "Accept-Language",
+          "value": "(?i)ka"
+        }
+      ],
+      "destination": "/ka/",
+      "permanent": false
+    },
+    {
+      "source": "/",
+      "destination": "/en/",
+      "permanent": false
+    }
+  ],
   "headers": [
     {
       "source": "/(.*)",

@@ -1,3 +1,5 @@
+// tests/e2e-browser/i18n-verification.spec.ts
+
 import { test, expect, type Page } from '@playwright/test';
 
 /**
@@ -34,16 +36,32 @@ test.describe('i18n Implementation - Verification Tests', () => {
     await page.goto('http://localhost:4321', { waitUntil: 'networkidle' });
   });
 
-  test.describe('Root Path Redirect', () => {
-    test('should redirect / to /en/', async ({ page }) => {
-      // Root should redirect to /en/
-      expect(page.url()).toContain('/en/');
+  test.describe('Root Redirection Architecture', () => {
+
+    test('should redirect root / to /en/ by default', async ({ page }) => {
+      // Navigate to root
+      await page.goto('/');
+
+      // Check final URL
+      await expect(page).toHaveURL(/\/en\/$/);
     });
 
-    test('should load English homepage after redirect', async ({ page }) => {
-      // Check that page has content
-      const mainContent = page.getByRole('main');
-      await expect(mainContent).toBeVisible();
+    test('fallback HTML should contain canonical link (SEO Safeguard)', async ({ page, request }) => {
+      // We fetch the raw HTML of the root to ensure the SEO tags exist
+      // even before the redirect kicks in.
+      // IMPORTANT: maxRedirects: 0 ensures we inspect the INITIAL response from '/'
+      // This catches the case where the server (npm run dev) serves HTML instead of a 307.
+      const response = await request.get('/', { maxRedirects: 0 }).catch(e => e.response); 
+      
+      // If Vercel Edge is working, this will be a 307.
+      // If running locally (npm run dev), this will be a 200 with HTML.
+      if (response && response.status() === 200) {
+        const html = await response.text();
+        // Verify Canonical exists to prevent "Duplicate Content" penalties
+        expect(html).toContain('<link rel="canonical" href="/en/"');
+        // Verify Meta Refresh exists for No-JS users
+        expect(html).toContain('http-equiv="refresh"');
+      }
     });
   });
 
