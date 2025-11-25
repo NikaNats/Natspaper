@@ -11,36 +11,69 @@
     max-width: 65ch;
 
     /* Headings */
-    h1, h2, h3, h4, h5, h6, th {
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    th {
       @apply relative scroll-mt-20 font-bold text-foreground;
       letter-spacing: -0.02em;
       line-height: 1.2;
     }
-    h1 { @apply mb-6 text-4xl; letter-spacing: -0.5px; }
-    h2 { @apply mt-10 mb-5 text-3xl; }
-    h3 { @apply mt-8 mb-4 text-2xl; }
-    h4 { @apply mt-6 mb-3 text-xl; }
+    h1 {
+      @apply mb-6 text-4xl;
+      letter-spacing: -0.5px;
+    }
+    h2 {
+      @apply mt-10 mb-5 text-3xl;
+    }
+    h3 {
+      @apply mt-8 mb-4 text-2xl;
+    }
+    h4 {
+      @apply mt-6 mb-3 text-xl;
+    }
 
     /* Content */
-    p { @apply mb-5 font-normal; }
-    strong { @apply font-semibold text-foreground; }
-    
+    p {
+      @apply mb-5 font-normal;
+    }
+    strong {
+      @apply font-semibold text-foreground;
+    }
+
     a {
       @apply break-words text-accent decoration-dashed underline-offset-4 transition-colors hover:text-accent/80 focus-visible:rounded-sm focus-visible:outline-accent;
     }
 
-    ul, ol { @apply my-6 ml-5 list-outside; }
-    li { @apply pl-1.5; }
+    ul,
+    ol {
+      @apply my-6 ml-5 list-outside;
+    }
+    li {
+      @apply pl-1.5;
+    }
 
     /* Media & Blocks */
     table {
       @apply my-6 w-full border-collapse text-left;
-      th, td { @apply border border-border p-3 align-top; }
-      th { @apply bg-muted/30 font-semibold; }
+      th,
+      td {
+        @apply border border-border p-3 align-top;
+      }
+      th {
+        @apply bg-muted/30 font-semibold;
+      }
     }
 
-    blockquote { @apply my-6 border-l-4 border-accent/40 pl-4 italic opacity-90; }
-    figcaption { @apply mt-2 text-center text-sm text-text-secondary italic; }
+    blockquote {
+      @apply my-6 border-l-4 border-accent/40 pl-4 italic opacity-90;
+    }
+    figcaption {
+      @apply mt-2 text-center text-sm text-text-secondary italic;
+    }
 
     /* Code */
     :not(pre) > code {
@@ -53,15 +86,25 @@
     }
 
     /* Math */
-    .katex, .katex-display { @apply text-foreground; }
+    .katex,
+    .katex-display {
+      @apply text-foreground;
+    }
 
     /* Mobile Overrides */
     @media (max-width: 640px) {
-      figure, .astro-code, pre, table { @apply -mx-4 w-[calc(100%+2rem)] rounded-none border-x-0; }
-      img { @apply rounded-none; }
+      figure,
+      .astro-code,
+      pre,
+      table {
+        @apply -mx-4 w-[calc(100%+2rem)] rounded-none border-x-0;
+      }
+      img {
+        @apply rounded-none;
+      }
     }
   }
-  
+
   /* Utility: Fluid Heading */
   .main-heading {
     @apply leading-tight font-bold;

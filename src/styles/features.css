@@ -39,8 +39,16 @@
     border-color: #d6694e;
     background-color: rgba(214, 105, 78, 0.08);
   }
-  .newsbox-title { @apply mb-3 text-xl font-bold text-foreground; }
-  .newsbox-line { @apply mb-2 text-left text-[0.95rem] leading-relaxed text-foreground last:mb-0; }
-  .newsbox-line-date { @apply mr-2 font-semibold; }
-  .newsbox-line a { @apply underline decoration-dashed hover:decoration-solid; }
+  .newsbox-title {
+    @apply mb-3 text-xl font-bold text-foreground;
+  }
+  .newsbox-line {
+    @apply mb-2 text-left text-[0.95rem] leading-relaxed text-foreground last:mb-0;
+  }
+  .newsbox-line-date {
+    @apply mr-2 font-semibold;
+  }
+  .newsbox-line a {
+    @apply underline decoration-dashed hover:decoration-solid;
+  }
 }

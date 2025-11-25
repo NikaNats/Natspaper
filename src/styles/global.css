@@ -2,10 +2,10 @@
 @import "tailwindcss";
 
 /* Domain Imports */
-@import "./base.css";       /* Resets & Global Elements */
+@import "./base.css"; /* Resets & Global Elements */
 @import "./typography.css"; /* Fonts & Prose */
 @import "./components.css"; /* Reusable UI Components */
-@import "./features.css";   /* Specific Page Sections (Profile, Newsbox) */
+@import "./features.css"; /* Specific Page Sections (Profile, Newsbox) */
 
 /* Define custom variant for cleaner HTML selection */
 @custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));

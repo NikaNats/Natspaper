@@ -20,10 +20,13 @@
     @apply flex min-h-svh flex-col font-sans text-foreground antialiased;
     line-height: 1.6;
     letter-spacing: 0.01em;
-    transition: background-color 0.3s ease, color 0.3s ease;
+    transition:
+      background-color 0.3s ease,
+      color 0.3s ease;
   }
 
-  section, footer {
+  section,
+  footer {
     @apply mx-auto w-full px-4;
     max-width: var(--main-width);
   }
@@ -41,7 +44,10 @@
 
   button {
     @apply cursor-pointer touch-manipulation;
-    &:active, &[role="button"]:active { transform: scale(0.98); }
+    &:active,
+    &[role="button"]:active {
+      transform: scale(0.98);
+    }
   }
 
   /* Enhanced Links */
@@ -49,7 +55,9 @@
     text-decoration: underline 1px;
     text-underline-offset: 0.25em;
     text-decoration-color: var(--accent);
-    transition: text-decoration-color 0.2s ease, text-decoration-thickness 0.2s ease;
+    transition:
+      text-decoration-color 0.2s ease,
+      text-decoration-thickness 0.2s ease;
 
     &:is(:hover, :focus-visible) {
       text-decoration-thickness: 2px;
@@ -65,10 +73,29 @@
 
 /* --- PRINT STYLES --- */
 @media print {
-  header, footer, button, .no-print { display: none !important; }
-  body { @apply bg-white text-black; }
-  html { font-size: 12pt; }
-  a { text-decoration: none; color: black; }
-  a[href^="http"]:after { content: " (" attr(href) ")"; @apply text-xs text-gray-600; }
-  pre, code { @apply border border-gray-300 whitespace-pre-wrap; page-break-inside: avoid; }
+  header,
+  footer,
+  button,
+  .no-print {
+    display: none !important;
+  }
+  body {
+    @apply bg-white text-black;
+  }
+  html {
+    font-size: 12pt;
+  }
+  a {
+    text-decoration: none;
+    color: black;
+  }
+  a[href^="http"]:after {
+    content: " (" attr(href) ")";
+    @apply text-xs text-gray-600;
+  }
+  pre,
+  code {
+    @apply border border-gray-300 whitespace-pre-wrap;
+    page-break-inside: avoid;
+  }
 }
