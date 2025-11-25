@@ -24,6 +24,16 @@ export const SITE: SiteConfig = {
   ogImage: "astropaper-og.jpg", // Default OpenGraph image in /public
 };
 
+// CONFIG VALIDATION: Ensure timezone is valid to prevent build crashes in dayjs
+try {
+  Intl.DateTimeFormat(undefined, { timeZone: SITE.timezone });
+} catch (e) {
+  throw new Error(
+    `❌ Invalid timezone configuration: "${SITE.timezone}".\n` +
+      `Please check 'timezone' in src/config.ts. It must be a valid IANA timezone string (e.g., "America/New_York", "Asia/Tbilisi").`
+  );
+}
+
 // 2. Feature Flags & Behavior
 export const FEATURES: FeaturesConfig = {
   // UI/UX Toggles
