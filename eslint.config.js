@@ -29,6 +29,7 @@ export default [
     ignores: [
       "dist/**",
       ".astro",
+      ".vercel/**",
       "public/pagefind/**",
       "scripts/**",
       "node_modules/**",

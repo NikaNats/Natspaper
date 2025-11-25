@@ -1,7 +1,7 @@
 ---
 // src/components/features/Analytics.astro
-import VercelAnalytics from '@vercel/analytics/astro';
-import SpeedInsights from '@vercel/speed-insights/astro';
+import VercelAnalytics from "@vercel/analytics/astro";
+import SpeedInsights from "@vercel/speed-insights/astro";
 
 const isDev = import.meta.env.DEV;
 ---
@@ -16,29 +16,34 @@ const isDev = import.meta.env.DEV;
   2. Privacy: Redact sensitive URLs
   3. Performance: Use 'beforeSend' to filter at the source
 -->
-
 <script is:inline>
   // WEB ANALYTICS: 50k events/month limit (Hobby)
-  window.webAnalyticsBeforeSend = function(event) {
+  window.webAnalyticsBeforeSend = function (event) {
     // 1. Ignore localhost (save quota)
-    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+    if (
+      window.location.hostname === "localhost" ||
+      window.location.hostname === "127.0.0.1"
+    ) {
       return null;
     }
     // 2. Filter sensitive routes
-    if (event.url.includes('/private') || event.url.includes('/drafts')) {
+    if (event.url.includes("/private") || event.url.includes("/drafts")) {
       return null;
     }
     return event;
-  }
+  };
 
   // SPEED INSIGHTS: 10k data points/month limit (Hobby)
-  window.speedInsightsBeforeSend = function(data) {
+  window.speedInsightsBeforeSend = function (data) {
     // 1. Ignore localhost
-    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+    if (
+      window.location.hostname === "localhost" ||
+      window.location.hostname === "127.0.0.1"
+    ) {
       return null;
     }
     return data;
-  }
+  };
 </script>
 
 <!--
@@ -46,10 +51,7 @@ const isDev = import.meta.env.DEV;
   - debug: Logs events to console in Dev mode
   - mode: 'production' ensures data is sent correctly on Vercel
 -->
-<VercelAnalytics
-  mode={isDev ? 'development' : 'production'}
-  debug={isDev}
-/>
+<VercelAnalytics mode={isDev ? "development" : "production"} debug={isDev} />
 
 <!--
   SpeedInsights Component
@@ -57,7 +59,4 @@ const isDev = import.meta.env.DEV;
     ⚠️ If you exceed 10k views/month, lower this to 0.5 or 0.1
     to stay within free tier limits.
 -->
-<SpeedInsights
-  debug={isDev}
-  sampleRate={1.0}
-/>
+<SpeedInsights debug={isDev} sampleRate={1.0} />
