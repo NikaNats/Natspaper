@@ -31,7 +31,7 @@ const { tags, showEditPost, editPostConfig, post, prevPost, nextPost, tTag } =
 
 // FIX: Relaxed type definition to accept both CollectionEntry and NavigationPost
 const getPostHref = (p: { id: string }) =>
-  `/${Astro.currentLocale}/posts/${String(p.id).split("/").slice(-1)[0]}`;
+  `/${Astro.currentLocale}/posts/${(String(p.id).split("/").pop() ?? "").replace(/\.(md|mdx)$/, "")}`;
 
 // Shared Tailwind Classes (DRY)
 const navLinkClasses =
