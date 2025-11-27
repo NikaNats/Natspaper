@@ -4,6 +4,7 @@ import Tag from "./Tag.astro";
 import ShareLinks from "@/components/features/ShareLinks.astro";
 import EditPost from "@/components/features/EditPost.astro";
 import BackToTopButton from "@/components/features/BackToTopButton.astro";
+import Comments from "@/components/features/Comments.astro";
 import IconHash from "@/assets/icons/IconHash.svg";
 import IconChevronLeft from "@/assets/icons/IconChevronLeft.svg";
 import IconChevronRight from "@/assets/icons/IconChevronRight.svg";
@@ -24,10 +25,19 @@ export interface Props {
   prevPost?: NavigationPost | null;
   nextPost?: NavigationPost | null;
   tTag: (tag: string) => string;
+  locale?: string;
 }
 
-const { tags, showEditPost, editPostConfig, post, prevPost, nextPost, tTag } =
-  Astro.props;
+const {
+  tags,
+  showEditPost,
+  editPostConfig,
+  post,
+  prevPost,
+  nextPost,
+  tTag,
+  locale,
+} = Astro.props;
 
 // FIX: Relaxed type definition to accept both CollectionEntry and NavigationPost
 const getPostHref = (p: { id: string }) =>
@@ -121,4 +131,29 @@ const navDecorationClasses =
       )
     }
   </nav>
+
+  <!-- Comments Section -->
+  <section class="mt-16" aria-labelledby="comments-heading">
+    <h2
+      id="comments-heading"
+      class="mb-8 flex items-center gap-2 pl-1 text-xs font-bold tracking-widest text-text-secondary uppercase opacity-75"
+    >
+      <svg
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        class="size-3.5 opacity-60"
+        ><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path
+          d="M5 9l14 0"></path><path d="M5 15l14 0"></path><path d="M11 4l-4 16"
+        ></path><path d="M17 4l-4 16"></path></svg
+      >
+      <span>Discussion</span>
+    </h2>
+    <Comments locale={locale} />
+  </section>
 </footer>

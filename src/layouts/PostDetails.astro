@@ -15,6 +15,7 @@ import Footer from "@/components/layout/Footer.astro";
 import PostHero from "@/components/post/PostHero.astro";
 import PostContent from "@/components/post/PostContent.astro";
 import PostFooter from "@/components/post/PostFooter.astro";
+// Comments component is now imported inside PostFooter
 
 // PERFORMANCE FIX: Import CSS directly to bundle it.
 // This eliminates the network chain and prevents layout shifts.
@@ -106,6 +107,7 @@ const copyrightText = `Copyright © ${currentYear} • ${t("footer.copyright")}`
       {prevPost}
       {nextPost}
       {tTag}
+      locale={Astro.currentLocale}
     />
   </main>
 

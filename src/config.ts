@@ -1,4 +1,9 @@
-import type { SiteConfig, FeaturesConfig, SocialLink } from "./types";
+import type {
+  SiteConfig,
+  FeaturesConfig,
+  SocialLink,
+  GiscusConfig,
+} from "./types";
 
 /**
  * MASTER CONFIGURATION
@@ -103,3 +108,20 @@ export const NAVIGATION = [
   { href: "/tags", text: "nav.tags" },
   { href: "/archives", text: "nav.archives" },
 ];
+
+// 5. Giscus Comments Configuration
+// Get your values from https://giscus.app/
+export const GISCUS: GiscusConfig = {
+  enabled: true,
+  // Default to empty string so Boolean() checks fail gracefully if env is missing
+  repo: import.meta.env.PUBLIC_GISCUS_REPO || "",
+  repoId: import.meta.env.PUBLIC_GISCUS_REPO_ID || "",
+  category: import.meta.env.PUBLIC_GISCUS_CATEGORY || "",
+  categoryId: import.meta.env.PUBLIC_GISCUS_CATEGORY_ID || "",
+  mapping: "pathname",
+  reactionsEnabled: true,
+  emitMetadata: false,
+  inputPosition: "top",
+  lang: "en",
+  loading: "lazy",
+};

@@ -57,6 +57,29 @@ export function getEnvSchema() {
         context: "client",
         optional: true, // Optional: for client-side error tracking
       }),
+
+      // Giscus Comments Configuration
+      // Get these values from https://giscus.app/
+      PUBLIC_GISCUS_REPO: envField.string({
+        access: "public",
+        context: "client",
+        optional: true,
+      }),
+      PUBLIC_GISCUS_REPO_ID: envField.string({
+        access: "public",
+        context: "client",
+        optional: true,
+      }),
+      PUBLIC_GISCUS_CATEGORY: envField.string({
+        access: "public",
+        context: "client",
+        optional: true,
+      }),
+      PUBLIC_GISCUS_CATEGORY_ID: envField.string({
+        access: "public",
+        context: "client",
+        optional: true,
+      }),
     },
   };
 }

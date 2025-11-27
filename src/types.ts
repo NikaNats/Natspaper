@@ -36,3 +36,17 @@ export type SocialLink = {
   active: boolean;
   linkTitle?: string; // Optional override
 };
+
+export type GiscusConfig = {
+  enabled: boolean;
+  repo: string;
+  repoId: string;
+  category: string;
+  categoryId: string;
+  mapping: "pathname" | "url" | "title" | "og:title";
+  reactionsEnabled: boolean;
+  emitMetadata: boolean;
+  inputPosition: "top" | "bottom";
+  lang: string;
+  loading: "lazy" | "eager";
+};
