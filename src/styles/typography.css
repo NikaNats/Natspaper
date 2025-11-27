@@ -50,7 +50,7 @@
 
     ul,
     ol {
-      @apply my-6 ml-5 list-outside;
+      @apply my-6 list-outside;
     }
     li {
       @apply pl-1.5;
