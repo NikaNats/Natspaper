@@ -29,8 +29,11 @@
     @apply flex min-h-svh flex-col font-sans text-foreground antialiased;
     line-height: 1.6;
     letter-spacing: 0.01em;
-    /* Ensure body also doesn't trigger horizontal scroll */
-    overflow-x: hidden;
+    /* 
+       FIX: Removed overflow-x: hidden from body. 
+       This restores the correct scroll context for position: sticky elements (like the TOC),
+       allowing them to stick to the viewport instead of the body element.
+    */
     width: 100%;
 
     transition:
