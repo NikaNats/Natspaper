@@ -16,11 +16,9 @@ import PostHero from "@/components/post/PostHero.astro";
 import PostContent from "@/components/post/PostContent.astro";
 import PostFooter from "@/components/post/PostFooter.astro";
 import TableOfContents from "@/components/post/TableOfContents.astro";
-import MobileTableOfContents from "@/components/post/MobileTableOfContents.astro";
-// Comments component is now imported inside PostFooter
+// REMOVED: MobileTableOfContents - TOC now only on desktop sidebar
 
-// PERFORMANCE FIX: Import CSS directly to bundle it.
-// This eliminates the network chain and prevents layout shifts.
+// PERFORMANCE: Bundle critical CSS for math rendering
 import "katex/dist/katex.min.css";
 
 export interface Props {
@@ -70,25 +68,24 @@ const copyrightText = `Copyright © ${currentYear} • ${t("footer.copyright")}`
   ogImage={ogImage}
   scrollSmooth
 >
-  <!-- 
-    PERFORMANCE FIX: 
-    Removed manual <link> tag for KaTeX. 
-    The styles are now bundled in the critical CSS.
-  -->
-
   <Header />
 
-  <!-- 
-    LAYOUT REFACTOR: 
-    Changed from centered max-w-3xl to a wider max-w-6xl container 
-    to accommodate the sidebar without squishing the content.
-    Mobile: Simplified margins (mt-6) for quick content access
-    Desktop: Activated Flexbox and wider margins (mt-12) on lg screens
+  <!--
+  RESPONSIVE LAYOUT ARCHITECTURE:
+  1. Base: Single column, fluid width, standard padding (px-4).
+  2. lg (Desktop): Flex row, sidebar sticky on left, content on right.
+  3. Max-width: Increased to 6xl to accommodate sidebar + content comfortably.
   -->
+
   <div
     class="mx-auto mt-6 w-full max-w-6xl px-4 lg:mt-12 lg:flex lg:items-start lg:gap-12"
   >
-    <!-- LEFT RAIL: Table of Contents (Sticky) - Desktop Only -->
+    <!--
+    DESKTOP SIDEBAR (TOC):
+    - Hidden on mobile.
+    - Sticky on desktop to follow user reading.
+    - shrink-0 prevents it from getting crushed by large content.
+    -->
     <aside
       class="order-1 hidden lg:sticky lg:top-28 lg:block lg:w-64 lg:shrink-0"
       aria-hidden="true"
@@ -96,8 +93,13 @@ const copyrightText = `Copyright © ${currentYear} • ${t("footer.copyright")}`
       <TableOfContents {headings} />
     </aside>
 
-    <!-- MAIN CONTENT COLUMN -->
-    <!-- Added min-w-0 to prevent flex child overflow issues -->
+    <!--
+    MAIN CONTENT AREA:
+    - min-w-0: CRITICAL CSS FIX. Prevents flex items from overflowing
+      when they contain wide children (like code blocks or tables).
+      Without this, <pre> tags push the layout width out on mobile/tablet.
+    - flex-1: Takes remaining space on desktop.
+    -->
     <main
       id="main-content"
       class="order-2 mx-auto w-full max-w-3xl min-w-0 flex-1 lg:mx-0"
@@ -110,9 +112,6 @@ const copyrightText = `Copyright © ${currentYear} • ${t("footer.copyright")}`
         {timezone}
         {readingTimeText}
       />
-
-      <!-- MOBILE TOC: Collapsible, only visible on screens smaller than lg -->
-      <MobileTableOfContents {headings} />
 
       <PostContent>
         <Content />

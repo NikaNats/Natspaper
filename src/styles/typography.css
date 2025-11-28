@@ -7,8 +7,8 @@
     @apply prose prose-neutral dark:prose-invert;
     @apply text-foreground marker:text-accent;
     font-family: var(--font-inter), sans-serif;
-    line-height: 1.6;
-    max-width: 65ch;
+    line-height: 1.7; /* Slightly increased for better readability */
+    max-width: 65ch; /* Optimal reading line length */
 
     /* Headings */
     h1,
@@ -23,17 +23,17 @@
       line-height: 1.2;
     }
     h1 {
-      @apply mb-6 text-4xl;
+      @apply mb-6 text-3xl sm:text-4xl;
       letter-spacing: -0.5px;
-    }
+    } /* Responsive size */
     h2 {
-      @apply mt-10 mb-5 text-3xl;
+      @apply mt-10 mb-5 text-2xl sm:text-3xl;
     }
     h3 {
-      @apply mt-8 mb-4 text-2xl;
+      @apply mt-8 mb-4 text-xl sm:text-2xl;
     }
     h4 {
-      @apply mt-6 mb-3 text-xl;
+      @apply mt-6 mb-3 text-lg sm:text-xl;
     }
 
     /* Content */
@@ -56,7 +56,7 @@
       @apply pl-1.5;
     }
 
-    /* Media & Blocks */
+    /* Tables */
     table {
       @apply my-6 w-full border-collapse text-left;
       th,
@@ -91,9 +91,13 @@
       @apply text-foreground;
     }
 
-    /* Mobile Overrides */
+    /* 
+      MOBILE OPTIMIZATIONS 
+      These rules allow "bleeding" content to the edge on mobile screens (<640px)
+      to maximize usage of the limited horizontal space for complex elements.
+    */
     @media (max-width: 640px) {
-      /* Slightly reduce heading sizes on mobile to prevent wrapping */
+      /* Fluid heading sizes */
       h1 {
         @apply mb-4 text-3xl;
       }
@@ -107,7 +111,12 @@
         @apply mt-4 mb-2 text-lg;
       }
 
-      /* Let code blocks, tables, and media bleed to edge for more space */
+      /* 
+        Bleed Effect:
+        -mx-4 pulls the element to the screen edge (counteracting parent padding).
+        w-[calc(100%+2rem)] ensures it fills that new space.
+        rounded-none removes corners that look weird at screen edges.
+      */
       figure,
       .astro-code,
       pre,
@@ -115,12 +124,11 @@
         @apply -mx-4 w-[calc(100%+2rem)] rounded-none border-x-0;
       }
 
-      /* Ensure images don't look boxed in */
       img {
         @apply rounded-none;
       }
 
-      /* Improve table readability on small screens */
+      /* Compact table for mobile */
       table {
         th,
         td {
@@ -130,11 +138,11 @@
     }
   }
 
-  /* Utility: Fluid Heading */
   .main-heading {
     @apply leading-tight font-bold;
     font-family: var(--font-inter), sans-serif;
-    font-size: clamp(1.5rem, 4vw + 1rem, 3rem);
+    /* Fluid typography scaling */
+    font-size: clamp(1.75rem, 5vw, 3rem);
     letter-spacing: -0.03em;
   }
 }

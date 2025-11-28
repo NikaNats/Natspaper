@@ -5,8 +5,9 @@ import { getEnvSchema } from "./config/env";
 import { SITE } from "./src/config";
 // NEW: Import directly from i18n config to avoid circular dependencies with src/config
 import { DEFAULT_LANG, SUPPORTED_LANGS } from "./src/i18n/config";
-import remarkToc from "remark-toc";
-import remarkCollapse from "remark-collapse";
+// Disabled: remarkToc and remarkCollapse - using desktop sidebar TOC instead
+// import remarkToc from "remark-toc";
+// import remarkCollapse from "remark-collapse";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 import { remarkModifiedTime } from "./src/lib/remark/remark-modified-time.mjs";
@@ -29,8 +30,9 @@ export default defineConfig({
     remarkPlugins: [
       remarkModifiedTime,
       remarkMath,
-      [remarkToc, { heading: "(table of contents|შინაარსის ცხრილი)" }],
-      [remarkCollapse, { test: "(Table of contents|შინაარსის ცხრილი)" }],
+      // Disabled inline markdown TOC - using desktop sidebar TOC instead
+      // [remarkToc, { heading: "(table of contents|შინაარსის ცხრილი)" }],
+      // [remarkCollapse, { test: "(Table of contents|შინაარსის ცხრილი)" }],
     ],
     rehypePlugins: [rehypeKatex],
   },

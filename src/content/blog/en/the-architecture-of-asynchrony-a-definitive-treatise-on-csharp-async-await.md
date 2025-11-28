@@ -18,8 +18,6 @@ However, the simplicity of the syntax—sprinkling a few keywords onto a method 
 
 This article serves as a comprehensive treatise on the subject. We will traverse the stack from high-level syntax down to the bare metal of the Network Interface Card (NIC), demystifying the state machine, the nature of `Task`, and the crucial distinction between I/O-bound and CPU-bound execution.
 
-## Table of Contents
-
 ## Part 1: The Historical Context
 
 To understand the elegance of `async`/`await`, one must appreciate the chaos that preceded it. The fundamental problem of synchronous code is **blocking**. In a synchronous model, a thread must pause its execution while waiting for external operations (latency) to complete. Given that threads are expensive resources (consuming approximately **1MB of stack space** plus kernel overhead), blocking them to wait for network packets or disk rotation is a gross inefficiency that leads to "thread pool starvation."

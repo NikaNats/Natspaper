@@ -29,7 +29,7 @@ export class HeadingLinks implements Feature {
   public init(): void {
     const headings = Array.from(
       document.querySelectorAll(
-        "h2:not(.has-heading-link), h3:not(.has-heading-link), h4:not(.has-heading-link), h5:not(.has-heading-link), h6:not(.has-heading-link)"
+        "h2:not(.has-heading-link):not([id='table-of-contents']), h3:not(.has-heading-link):not([id='table-of-contents']), h4:not(.has-heading-link):not([id='table-of-contents']), h5:not(.has-heading-link):not([id='table-of-contents']), h6:not(.has-heading-link):not([id='table-of-contents'])"
       )
     );
 

@@ -1,6 +1,4 @@
 ---
-// REFACTORED: MobileMenu.astro handles all mobile menu interactions and overlay.
-
 import IconX from "@/assets/icons/IconX.svg";
 import IconMenuDeep from "@/assets/icons/IconMenuDeep.svg";
 import NavMenu from "./NavMenu.astro";
@@ -10,77 +8,141 @@ const { currentPath, locale, otherLanguageLinks } = Astro.props;
 const { t } = getI18n(locale as Lang);
 ---
 
-<!-- Mobile Menu Button (Hamburger) -->
-<button
-  id="menu-btn"
-  class="rounded-md p-2 text-foreground transition-colors hover:text-accent focus:outline-none sm:hidden"
-  aria-label={t("nav.openMenu")}
-  aria-expanded="false"
-  aria-controls="mobile-menu-overlay"
->
-  <IconMenuDeep id="menu-icon" class="size-6" />
-</button>
-
-<!-- Full-screen overlay -->
-<div
-  id="mobile-menu-overlay"
-  class="fixed inset-0 z-50 hidden flex-col items-center justify-center gap-6 bg-background sm:relative sm:top-0 sm:z-auto sm:flex sm:flex-row sm:border-none sm:bg-transparent sm:p-0 sm:shadow-none"
-  role="dialog"
-  aria-modal="true"
-  aria-label={t("nav.mainMenu")}
->
-  <!-- Dedicated Close Button -->
+<mobile-menu>
+  <!-- Toggle Button -->
   <button
-    id="menu-close-btn"
-    class="absolute top-4 right-4 rounded-md p-2 text-foreground transition-colors hover:text-accent focus:outline-none sm:hidden"
-    aria-label={t("nav.closeMenu")}
+    id="menu-btn"
+    class="relative z-50 rounded-md p-2 text-foreground transition-colors hover:bg-muted hover:text-accent focus:outline-none sm:hidden"
+    aria-label={t("nav.openMenu")}
+    aria-expanded="false"
+    aria-controls="mobile-menu-overlay"
   >
-    <IconX class="size-6" />
+    <IconMenuDeep class="size-7" />
   </button>
 
-  <!-- Menu Items -->
-  <NavMenu
-    currentPath={currentPath}
-    locale={locale}
-    otherLanguageLinks={otherLanguageLinks}
-  />
-</div>
+  <!-- 
+    Overlay / Menu Container 
+    - Using data-state="closed|open" for reliable styling
+    - visibility:hidden ensures it cannot block clicks when closed
+  -->
+  <div
+    id="mobile-menu-overlay"
+    data-state="closed"
+    class="fixed inset-0 z-100 flex flex-col items-center justify-center bg-background/95 p-4 backdrop-blur-sm transition-all duration-300 sm:static sm:z-auto sm:flex-row sm:bg-transparent sm:p-0 sm:backdrop-blur-none"
+    role="dialog"
+    aria-modal="true"
+    aria-label={t("nav.mainMenu")}
+  >
+    <!-- Close Button (Inside Overlay) -->
+    <button
+      id="menu-close-btn"
+      class="absolute top-6 right-6 rounded-md p-2 text-foreground transition-colors hover:bg-muted hover:text-accent focus:outline-none sm:hidden"
+      aria-label={t("nav.closeMenu")}
+    >
+      <IconX class="size-8" />
+    </button>
 
-<script lang="ts" is:inline>
-  function setupNavigation() {
-    const menuOpenBtn = document.querySelector("#menu-btn");
-    const menuCloseBtn = document.querySelector("#menu-close-btn");
-    const menuOverlay = document.querySelector("#mobile-menu-overlay");
+    <!-- Content -->
+    <div class="flex flex-col items-center gap-8 sm:flex-row sm:gap-4">
+      <NavMenu
+        currentPath={currentPath}
+        locale={locale}
+        otherLanguageLinks={otherLanguageLinks}
+      />
+    </div>
+  </div>
+</mobile-menu>
 
-    if (!menuOpenBtn || !menuCloseBtn || !menuOverlay) return;
-
-    const openMenu = () => {
-      menuOverlay.classList.remove("hidden");
-      menuOverlay.classList.add("flex");
-      menuOpenBtn.setAttribute("aria-expanded", "true");
-      document.body.classList.add("menu-open"); // Prevent body scroll
-    };
-
-    const closeMenu = () => {
-      menuOverlay.classList.add("hidden");
-      menuOverlay.classList.remove("flex");
-      menuOpenBtn.setAttribute("aria-expanded", "false");
-      document.body.classList.remove("menu-open"); // Allow body scroll
-    };
-
-    menuOpenBtn.addEventListener("click", openMenu);
-    menuCloseBtn.addEventListener("click", closeMenu);
-
-    // Close menu when a navigation link is clicked (for single-page feel)
-    const navLinks = menuOverlay.querySelectorAll("a");
-    navLinks.forEach(link => {
-      link.addEventListener("click", closeMenu);
-    });
+<style>
+  /* Mobile Styles (Default) */
+  #mobile-menu-overlay[data-state="closed"] {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateY(10px);
   }
 
-  // Initialize on page load
-  setupNavigation();
+  #mobile-menu-overlay[data-state="open"] {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: translateY(0);
+  }
 
-  // Reinitialize on view transitions
-  document.addEventListener("astro:after-swap", setupNavigation);
+  /* Desktop Reset (Override mobile styles) */
+  @media (min-width: 640px) {
+    #mobile-menu-overlay[data-state] {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      transform: none;
+      position: static;
+      display: flex;
+    }
+  }
+</style>
+
+<script>
+  // Define custom element to encapsulate logic naturally
+  class MobileMenu extends HTMLElement {
+    constructor() {
+      super();
+      // Wait for children to be parsed
+      this.init();
+    }
+
+    init() {
+      const openBtn = this.querySelector("#menu-btn");
+      const closeBtn = this.querySelector("#menu-close-btn");
+      const overlay = this.querySelector("#mobile-menu-overlay");
+      const links = this.querySelectorAll("a");
+
+      if (!openBtn || !closeBtn || !overlay) return;
+
+      const toggleMenu = (isOpen: boolean) => {
+        const state = isOpen ? "open" : "closed";
+        overlay.setAttribute("data-state", state);
+        openBtn.setAttribute("aria-expanded", isOpen.toString());
+
+        // Lock body scroll prevents background scrolling
+        if (isOpen) {
+          document.body.style.overflow = "hidden";
+        } else {
+          document.body.style.overflow = "";
+        }
+      };
+
+      // Event Listeners
+      openBtn.addEventListener("click", e => {
+        e.stopPropagation();
+        toggleMenu(true);
+      });
+
+      closeBtn.addEventListener("click", e => {
+        e.stopPropagation();
+        toggleMenu(false);
+      });
+
+      // Close when clicking any link (SPA feel)
+      links.forEach(link => {
+        link.addEventListener("click", () => toggleMenu(false));
+      });
+
+      // Close on Escape key
+      document.addEventListener("keydown", e => {
+        if (
+          e.key === "Escape" &&
+          overlay.getAttribute("data-state") === "open"
+        ) {
+          toggleMenu(false);
+        }
+      });
+    }
+  }
+
+  // Register the component immediately
+  // Checking strictly if it's already defined avoids HMR errors in dev
+  if (!customElements.get("mobile-menu")) {
+    customElements.define("mobile-menu", MobileMenu);
+  }
 </script>

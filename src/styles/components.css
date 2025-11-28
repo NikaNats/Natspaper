@@ -111,31 +111,10 @@
   }
 }
 
-/* Mobile Menu Overlay */
+/* Keep only global mobile overrides if needed */
 @media (max-width: 640px) {
-  #mobile-menu-overlay {
-    /* Fixed syntax: z-[9999] */
-    @apply fixed inset-0 z-[9999] flex flex-col items-center justify-center gap-8 bg-background p-4 opacity-100 transition-opacity duration-300;
-    will-change: opacity, transform;
-    &.hidden {
-      @apply pointer-events-none hidden opacity-0;
-    }
-    & ul {
-      @apply flex w-full flex-col items-center gap-6;
-    }
-    & a {
-      @apply block py-2 text-2xl font-medium;
-    }
-  }
-  #menu-close-btn {
-    /* Fixed syntax: z-[10000] */
-    @apply absolute top-6 right-6 z-[10000] p-2;
-  }
   .pagination a,
   .pagination span {
     @apply px-4 py-3 text-base;
-  }
-  body.menu-open {
-    @apply overflow-hidden;
   }
 }

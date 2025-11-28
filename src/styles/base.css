@@ -4,8 +4,16 @@
     @apply scroll-smooth bg-background;
     font-family: var(--font-inter), var(--font-georgian), system-ui, sans-serif;
     font-size: 16px;
+
+    /* 
+      STABILITY FIX: 
+      Stable scrollbar gutter prevents layout shift when content height changes.
+      overflow-x: hidden on html prevents horizontal scrollbars from rogue animations/elements.
+    */
     scrollbar-gutter: stable;
-    /* FIX: Account for the header height + breathing room for better UX */
+    overflow-x: hidden;
+
+    /* UX: Offset scroll position for sticky headers */
     scroll-padding-top: calc(var(--header-height) + 1.5rem);
 
     @media (min-width: 768px) {
@@ -21,6 +29,10 @@
     @apply flex min-h-svh flex-col font-sans text-foreground antialiased;
     line-height: 1.6;
     letter-spacing: 0.01em;
+    /* Ensure body also doesn't trigger horizontal scroll */
+    overflow-x: hidden;
+    width: 100%;
+
     transition:
       background-color 0.3s ease,
       color 0.3s ease;
@@ -49,6 +61,11 @@
     &[role="button"]:active {
       transform: scale(0.98);
     }
+  }
+
+  /* Utility for locking scroll when mobile menu is open */
+  body.overflow-hidden {
+    overflow: hidden !important;
   }
 
   /* Enhanced Links */
