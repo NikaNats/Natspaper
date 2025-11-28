@@ -61,14 +61,20 @@
   section.layout-wide,
   footer.layout-wide {
     max-width: var(--layout-wide-width, 90rem);
-    padding-inline: var(--layout-padding-fluid, clamp(1rem, 0.5rem + 3vw, 6rem));
+    padding-inline: var(
+      --layout-padding-fluid,
+      clamp(1rem, 0.5rem + 3vw, 6rem)
+    );
   }
 
   /* Full-width layout with fluid padding */
   section.layout-full,
   footer.layout-full {
     max-width: 100%;
-    padding-inline: var(--layout-padding-fluid, clamp(1rem, 0.5rem + 3vw, 6rem));
+    padding-inline: var(
+      --layout-padding-fluid,
+      clamp(1rem, 0.5rem + 3vw, 6rem)
+    );
   }
 
   /* Global Resets */

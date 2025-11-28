@@ -69,16 +69,46 @@ export default {
        * Format: [min, preferred, max]
        */
       fontSize: {
-        "fluid-xs": ["clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem)", { lineHeight: "1.5" }],
-        "fluid-sm": ["clamp(0.875rem, 0.8rem + 0.35vw, 1rem)", { lineHeight: "1.5" }],
-        "fluid-base": ["clamp(1rem, 0.9rem + 0.5vw, 1.125rem)", { lineHeight: "1.6" }],
-        "fluid-lg": ["clamp(1.125rem, 1rem + 0.625vw, 1.25rem)", { lineHeight: "1.5" }],
-        "fluid-xl": ["clamp(1.25rem, 1.1rem + 0.75vw, 1.5rem)", { lineHeight: "1.4" }],
-        "fluid-2xl": ["clamp(1.5rem, 1.25rem + 1.25vw, 2rem)", { lineHeight: "1.3" }],
-        "fluid-3xl": ["clamp(1.875rem, 1.5rem + 1.875vw, 2.5rem)", { lineHeight: "1.2" }],
-        "fluid-4xl": ["clamp(2.25rem, 1.75rem + 2.5vw, 3.5rem)", { lineHeight: "1.15" }],
-        "fluid-5xl": ["clamp(3rem, 2.25rem + 3.75vw, 4.5rem)", { lineHeight: "1.1" }],
-        "fluid-6xl": ["clamp(3.75rem, 2.75rem + 5vw, 6rem)", { lineHeight: "1.05" }],
+        "fluid-xs": [
+          "clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem)",
+          { lineHeight: "1.5" },
+        ],
+        "fluid-sm": [
+          "clamp(0.875rem, 0.8rem + 0.35vw, 1rem)",
+          { lineHeight: "1.5" },
+        ],
+        "fluid-base": [
+          "clamp(1rem, 0.9rem + 0.5vw, 1.125rem)",
+          { lineHeight: "1.6" },
+        ],
+        "fluid-lg": [
+          "clamp(1.125rem, 1rem + 0.625vw, 1.25rem)",
+          { lineHeight: "1.5" },
+        ],
+        "fluid-xl": [
+          "clamp(1.25rem, 1.1rem + 0.75vw, 1.5rem)",
+          { lineHeight: "1.4" },
+        ],
+        "fluid-2xl": [
+          "clamp(1.5rem, 1.25rem + 1.25vw, 2rem)",
+          { lineHeight: "1.3" },
+        ],
+        "fluid-3xl": [
+          "clamp(1.875rem, 1.5rem + 1.875vw, 2.5rem)",
+          { lineHeight: "1.2" },
+        ],
+        "fluid-4xl": [
+          "clamp(2.25rem, 1.75rem + 2.5vw, 3.5rem)",
+          { lineHeight: "1.15" },
+        ],
+        "fluid-5xl": [
+          "clamp(3rem, 2.25rem + 3.75vw, 4.5rem)",
+          { lineHeight: "1.1" },
+        ],
+        "fluid-6xl": [
+          "clamp(3.75rem, 2.75rem + 5vw, 6rem)",
+          { lineHeight: "1.05" },
+        ],
       },
       /**
        * Font Family Configuration

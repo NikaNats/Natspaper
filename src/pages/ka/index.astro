@@ -1,13 +1,12 @@
 ---
 import { PostRepository } from "@/utils/post/repository";
-import { Picture } from "astro:assets";
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/layout/Header.astro";
 import Footer from "@/components/layout/Footer.astro";
+import Hero from "@/components/features/Hero.astro";
 import Socials from "@/components/features/Socials.astro";
 import Hr from "@/components/ui/Hr.astro";
 import FeaturedPostCard from "@/components/post/FeaturedPostCard.astro";
-// getSortedPosts is handled by contentRepo; remove redundant import
 import { getSocials } from "@/data/socials";
 import { SITE } from "@/config";
 import profilePic from "@/assets/images/me.jpeg";
@@ -16,6 +15,25 @@ import profilePic from "@/assets/images/me.jpeg";
 const sortedPosts = await PostRepository.getByLocale("ka");
 const featuredPosts = sortedPosts.filter(({ data }) => data.featured);
 const socials = getSocials();
+
+// Georgian Hero content
+const heroContent = {
+  tagline: ".NET დეველოპერი  |  პროგრამული ინჟინერი",
+  description:
+    "მიკროსერვისების არქიტექტურაში სპეციალიზირებული .NET დეველოპერი და პროგრამული ინჟინერი",
+  techStack: [".NET Core", "Microservices", "AI/ML", "TypeScript", "Astro"],
+  additionalContent: [
+    `ყოველდღიური მიღწევები მოიცავს საკრედიტო რეპორტირების სისტემის
+    მიგრაციას მონოლიტიდან მიკროსერვისებზე <span class="highlight">40% შესრულების გაუმჯობესება</span>,
+    ქართულენოვანი AI ასისტენტის არქიტექტურას, რომელმაც მოიპოვა <span class="highlight">ჟიური Prize Award-ი</span>
+    GAIA Hackathon-ზე, და საწარმო-კლასის სისტემებზე, როგორიცაა
+    <a href="https://github.com/NikaNats">Blogify API</a> და fintech მიკროსერვისების ეკოსისტემები.`,
+    `მიზნად ისახავს მაგისტრის ხარისხის მიღებას მონაცემთა მეცნიერების
+    ფაკულტეტზე საქართველოს ეროვნული უნივერსიტეტში, ხოლო პრაქტიკულად
+    მუშაობს .NET პროგრამული ინჟინერად Credo Bank-ში. მოგვწერეთ <a href="mailto:nika.nacvlishvili1@gmail.com">ელ-ფოსტით</a>
+    .NET, მიკროსერვისებების ან AI/ML ინტეგრაციის შესახებ განსახილველი საკითხების შესაფერი.`,
+  ],
+};
 ---
 
 <Layout>
@@ -23,100 +41,25 @@ const socials = getSocials();
   <main
     id="main-content"
     data-layout="index"
-    class="mx-auto flex w-full max-w-app flex-col items-center justify-center px-4 pb-12"
+    class="mx-auto flex h-svh w-full max-w-app flex-col items-center justify-center px-4"
   >
-    <!-- VISUAL FIX: Added background gradient blob to match English version -->
-    <div
-      class="pointer-events-none fixed inset-0 -z-10 flex items-center justify-center"
+    <Hero
+      name={SITE.author}
+      tagline={heroContent.tagline}
+      description={heroContent.description}
+      additionalContent={heroContent.additionalContent}
+      profileImage={profilePic}
+      profileAlt={`${SITE.author}-ის პროფილის ფოტო`}
+      techStack={heroContent.techStack}
     >
-      <div class="h-[500px] w-[500px] rounded-full bg-accent/10 blur-[120px]">
-      </div>
-    </div>
-    <section id="hero" class="py-8">
-      <div class="flex flex-col items-center justify-center gap-4 text-center">
-        <!-- PERFORMANCE: Image optimization
-             - Use Astro's Picture component for multiple format support (AVIF, WebP)
-             - Automatically serves best format for each browser for superior compression
-             - Set both width/height to prevent layout shift
-             - Use eager loading for above-fold image
-             - Inline placeholder to prevent FOUC
-        -->
-        <!-- VISUAL FIX: Updated Picture styling with shadow and ring to match English version -->
-        <!-- Also added fetchpriority="high" for LCP optimization -->
-        <Picture
-          src={profilePic}
-          formats={["avif", "webp"]}
-          widths={[160, 320]}
-          sizes="160px"
-          alt="პროფილი"
-          title="პროფილი"
-          width={160}
-          height={160}
-          class="rounded-full shadow-[0_0_60px_-15px_var(--color-accent)] ring-2 ring-accent/50"
-          loading="eager"
-          fetchpriority="high"
-          decoding="sync"
-        />
-        <h1 class="main-heading mb-4 inline-block sm:mb-8">
-          {SITE.author}
-        </h1>
-        <!-- VISUAL FIX: Updated typography classes for role description -->
-        <p
-          class="mb-6 bg-linear-to-r from-accent to-purple-400 bg-clip-text text-xl font-bold text-transparent sm:text-2xl"
-        >
-          .NET დეველოპერი | პროგრამული ინჟინერი
-        </p>
-        <p class="max-w-2xl">
-          მიკროსერვისების არქიტექტურაში სპეციალიზირებული .NET დეველოპერი და
-          პროგრამული ინჟინერი
-        </p>
-        <p class="mt-2 max-w-2xl leading-relaxed">
-          ყოველდღიური მიღწევები მოიცავს საკრედიტო რეპორტირების სისტემის
-          მიგრაციას მონოლიტიდან მიკროსერვისებზე <span
-            class="rounded border border-accent/20 bg-accent/10 px-1.5 py-0.5 font-mono text-sm text-accent"
-            >40% შესრულების გაუმჯობესება</span
-          >, ქართულენოვანი AI ასისტენტის არქიტექტურას, რომელმაც მოიპოვა <span
-            class="rounded border border-accent/20 bg-accent/10 px-1.5 py-0.5 font-mono text-sm text-accent"
-            >ჟიური Prize Award-ი</span
-          > GAIA Hackathon-ზე, და საწარმო-კლასის სისტემებზე, როგორიცაა
-          <a
-            href="https://github.com/NikaNats"
-            class="underline decoration-dashed underline-offset-4 hover:text-accent"
-            >Blogify API</a
-          > და fintech მიკროსერვისების ეკოსისტემები.
-        </p>
-        <p class="mt-2 max-w-2xl">
-          მიზნად ისახავს მაგისტრის ხარისხის მიღებას მონაცემთა მეცნიერების
-          ფაკულტეტზე საქართველოს ეროვნული უნივერსიტეტში, ხოლო პრაქტიკულად
-          მუშაობს .NET პროგრამული ინჟინერად Credo Bank-ში. მოგვწერეთ <a
-            href="mailto:nika.nacvlishvili1@gmail.com"
-            class="underline decoration-dashed underline-offset-4 hover:text-accent"
-            >ელ-ფოსტით</a
-          > .NET, მიკროსერვისებების ან AI/ML ინტეგრაციის შესახებ განსახილველი საკითხების
-          შესაფერი.
-        </p>
-        <!-- VISUAL FIX: Added Tech Stack Pills section to match English version -->
-        <div class="my-6 flex flex-wrap justify-center gap-2">
-          {
-            [".NET Core", "Microservices", "AI/ML", "TypeScript", "Astro"].map(
-              tech => (
-                <span class="cursor-default rounded-full border border-accent/20 bg-accent/5 px-3 py-1 text-xs font-medium text-foreground transition-all hover:-translate-y-0.5 hover:border-accent/50 hover:bg-accent/10 hover:text-accent">
-                  {tech}
-                </span>
-              )
-            )
-          }
-        </div>
-        {
-          // only display if at least one social link is enabled
-          socials.length > 0 && (
-            <div class="mt-4 flex flex-col justify-center gap-4 sm:flex-row sm:items-center">
-              <Socials links={socials} />
-            </div>
-          )
-        }
-      </div>
-    </section>
+      {
+        socials.length > 0 && (
+          <div slot="socials">
+            <Socials links={socials} />
+          </div>
+        )
+      }
+    </Hero>
 
     <Hr />
 

@@ -71,9 +71,9 @@ const backUrl = FEATURES.showBackButton ? Astro.url.pathname : "/";
  * has breathing room on small screens without explicit breakpoints.
  */
 const widthConfig: Record<WidthMode, string> = {
-  narrow: "min(100% - 2rem, 48rem)",   // 768px max, 1rem edge padding
-  wide: "min(100% - 2rem, 72rem)",     // 1152px max, 1rem edge padding  
-  full: "min(100% - 1rem, 100%)",      // Full width, 0.5rem edge padding
+  narrow: "min(100% - 2rem, 48rem)", // 768px max, 1rem edge padding
+  wide: "min(100% - 2rem, 72rem)", // 1152px max, 1rem edge padding
+  full: "min(100% - 1rem, 100%)", // Full width, 0.5rem edge padding
 };
 
 const maxWidth = widthConfig[width];
@@ -88,7 +88,7 @@ const maxWidth = widthConfig[width];
 >
   <!-- Full-bleed hero slot - breaks out of content constraints -->
   <slot name="hero" />
-  
+
   <div class="main-content">
     {
       "titleTransition" in props ? (
