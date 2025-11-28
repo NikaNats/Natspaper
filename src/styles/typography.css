@@ -93,14 +93,39 @@
 
     /* Mobile Overrides */
     @media (max-width: 640px) {
+      /* Slightly reduce heading sizes on mobile to prevent wrapping */
+      h1 {
+        @apply mb-4 text-3xl;
+      }
+      h2 {
+        @apply mt-8 mb-4 text-2xl;
+      }
+      h3 {
+        @apply mt-6 mb-3 text-xl;
+      }
+      h4 {
+        @apply mt-4 mb-2 text-lg;
+      }
+
+      /* Let code blocks, tables, and media bleed to edge for more space */
       figure,
       .astro-code,
       pre,
       table {
         @apply -mx-4 w-[calc(100%+2rem)] rounded-none border-x-0;
       }
+
+      /* Ensure images don't look boxed in */
       img {
         @apply rounded-none;
+      }
+
+      /* Improve table readability on small screens */
+      table {
+        th,
+        td {
+          @apply p-2 text-xs;
+        }
       }
     }
   }

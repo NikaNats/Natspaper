@@ -16,6 +16,7 @@ import PostHero from "@/components/post/PostHero.astro";
 import PostContent from "@/components/post/PostContent.astro";
 import PostFooter from "@/components/post/PostFooter.astro";
 import TableOfContents from "@/components/post/TableOfContents.astro";
+import MobileTableOfContents from "@/components/post/MobileTableOfContents.astro";
 // Comments component is now imported inside PostFooter
 
 // PERFORMANCE FIX: Import CSS directly to bundle it.
@@ -81,9 +82,13 @@ const copyrightText = `Copyright © ${currentYear} • ${t("footer.copyright")}`
     LAYOUT REFACTOR: 
     Changed from centered max-w-3xl to a wider max-w-6xl container 
     to accommodate the sidebar without squishing the content.
+    Mobile: Simplified margins (mt-6) for quick content access
+    Desktop: Activated Flexbox and wider margins (mt-12) on lg screens
   -->
-  <div class="mx-auto w-full max-w-6xl px-4 lg:flex lg:items-start lg:gap-12">
-    <!-- LEFT RAIL: Table of Contents (Sticky) -->
+  <div
+    class="mx-auto mt-6 w-full max-w-6xl px-4 lg:mt-12 lg:flex lg:items-start lg:gap-12"
+  >
+    <!-- LEFT RAIL: Table of Contents (Sticky) - Desktop Only -->
     <aside
       class="order-1 hidden lg:sticky lg:top-28 lg:block lg:w-64 lg:shrink-0"
       aria-hidden="true"
@@ -105,6 +110,9 @@ const copyrightText = `Copyright © ${currentYear} • ${t("footer.copyright")}`
         {timezone}
         {readingTimeText}
       />
+
+      <!-- MOBILE TOC: Collapsible, only visible on screens smaller than lg -->
+      <MobileTableOfContents {headings} />
 
       <PostContent>
         <Content />

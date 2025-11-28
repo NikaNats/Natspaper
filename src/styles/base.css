@@ -5,7 +5,8 @@
     font-family: var(--font-inter), var(--font-georgian), system-ui, sans-serif;
     font-size: 16px;
     scrollbar-gutter: stable;
-    scroll-padding-top: var(--header-height);
+    /* FIX: Account for the header height + breathing room for better UX */
+    scroll-padding-top: calc(var(--header-height) + 1.5rem);
 
     @media (min-width: 768px) {
       font-size: 18px;
