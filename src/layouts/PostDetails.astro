@@ -85,10 +85,12 @@ const copyrightText = `Copyright © ${currentYear} • ${t("footer.copyright")}`
     - Sticky within its container to follow user reading.
     -->
     <aside
-      class="hidden xl:block absolute right-full top-0 mr-12 w-64 h-full"
+      class="absolute top-0 right-full mr-12 hidden h-full w-64 xl:block"
       aria-hidden="true"
     >
-      <div class="sticky top-28 opacity-70 hover:opacity-100 transition-opacity">
+      <div
+        class="sticky top-28 opacity-70 transition-opacity hover:opacity-100"
+      >
         <TableOfContents {headings} />
       </div>
     </aside>
@@ -100,11 +102,7 @@ const copyrightText = `Copyright © ${currentYear} • ${t("footer.copyright")}`
       Without this, <pre> tags push the layout width out on mobile/tablet.
     - Takes full width of the max-w-3xl container.
     -->
-    <main
-      id="main-content"
-      class="mx-auto w-full min-w-0"
-      data-pagefind-body
-    >
+    <main id="main-content" class="mx-auto w-full min-w-0" data-pagefind-body>
       <PostHero
         {title}
         {pubDatetime}
