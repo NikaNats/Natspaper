@@ -8,9 +8,25 @@
     @apply text-foreground marker:text-accent;
     font-family: var(--font-inter), sans-serif;
     line-height: 1.7; /* Slightly increased for better readability */
-    max-width: 65ch; /* Optimal reading line length */
+    /**
+     * Optimal Line Length for Readability
+     * ====================================
+     * 65ch ensures 65-75 characters per line across all viewport sizes.
+     * This remains constant even as container width expands on 4K displays.
+     * Use max-width: none on parent containers if you need full-bleed content.
+     */
+    max-width: 65ch;
+    width: 100%;
 
-    /* Headings */
+    /**
+     * Fluid Heading Typography
+     * ========================
+     * Using clamp() for smooth scaling from 320px to 4K (2560px).
+     * Formula: clamp(min, preferred, max)
+     * - min: Smallest readable size on mobile
+     * - preferred: Fluid scaling based on viewport
+     * - max: Largest size to prevent oversized headings on 4K
+     */
     h1,
     h2,
     h3,
@@ -21,19 +37,38 @@
       @apply relative scroll-mt-20 font-bold text-foreground;
       letter-spacing: -0.02em;
       line-height: 1.2;
+      text-wrap: balance; /* Modern CSS for better heading line breaks */
     }
     h1 {
-      @apply mb-6 text-3xl sm:text-4xl;
-      letter-spacing: -0.5px;
-    } /* Responsive size */
+      @apply mb-6;
+      /* Scales: 1.75rem (28px) → 3rem (48px) based on viewport */
+      font-size: clamp(1.75rem, 1.25rem + 2.5vw, 3rem);
+      letter-spacing: -0.03em;
+    }
     h2 {
-      @apply mt-10 mb-5 text-2xl sm:text-3xl;
+      @apply mt-10 mb-5;
+      /* Scales: 1.5rem (24px) → 2.25rem (36px) */
+      font-size: clamp(1.5rem, 1.15rem + 1.75vw, 2.25rem);
     }
     h3 {
-      @apply mt-8 mb-4 text-xl sm:text-2xl;
+      @apply mt-8 mb-4;
+      /* Scales: 1.25rem (20px) → 1.875rem (30px) */
+      font-size: clamp(1.25rem, 1rem + 1.25vw, 1.875rem);
     }
     h4 {
-      @apply mt-6 mb-3 text-lg sm:text-xl;
+      @apply mt-6 mb-3;
+      /* Scales: 1.125rem (18px) → 1.5rem (24px) */
+      font-size: clamp(1.125rem, 0.95rem + 0.875vw, 1.5rem);
+    }
+    h5 {
+      @apply mt-5 mb-2;
+      /* Scales: 1rem (16px) → 1.25rem (20px) */
+      font-size: clamp(1rem, 0.9rem + 0.5vw, 1.25rem);
+    }
+    h6 {
+      @apply mt-4 mb-2;
+      /* Scales: 0.875rem (14px) → 1.125rem (18px) */
+      font-size: clamp(0.875rem, 0.8rem + 0.375vw, 1.125rem);
     }
 
     /* Content */
@@ -45,7 +80,7 @@
     }
 
     a {
-      @apply break-words text-accent decoration-dashed underline-offset-4 transition-colors hover:text-accent/80 focus-visible:rounded-sm focus-visible:outline-accent;
+      @apply wrap-break-word text-accent decoration-dashed underline-offset-4 transition-colors hover:text-accent/80 focus-visible:rounded-sm focus-visible:outline-accent;
     }
 
     ul,
@@ -95,33 +130,36 @@
       MOBILE OPTIMIZATIONS 
       These rules allow "bleeding" content to the edge on mobile screens (<640px)
       to maximize usage of the limited horizontal space for complex elements.
+      Note: Heading sizes now use clamp() for fluid scaling, so no font-size overrides needed.
     */
     @media (max-width: 640px) {
-      /* Fluid heading sizes */
+      /* Tighter spacing on mobile */
       h1 {
-        @apply mb-4 text-3xl;
+        @apply mb-4;
       }
       h2 {
-        @apply mt-8 mb-4 text-2xl;
+        @apply mt-8 mb-4;
       }
       h3 {
-        @apply mt-6 mb-3 text-xl;
+        @apply mt-6 mb-3;
       }
       h4 {
-        @apply mt-4 mb-2 text-lg;
+        @apply mt-4 mb-2;
       }
 
       /* 
         Bleed Effect:
-        -mx-4 pulls the element to the screen edge (counteracting parent padding).
-        w-[calc(100%+2rem)] ensures it fills that new space.
-        rounded-none removes corners that look weird at screen edges.
+        Uses fluid padding variable to calculate proper negative margin.
+        This ensures bleed works correctly across all viewport sizes.
       */
       figure,
       .astro-code,
       pre,
       table {
-        @apply -mx-4 w-[calc(100%+2rem)] rounded-none border-x-0;
+        --bleed-margin: calc(var(--layout-padding-fluid, 1rem) * -1);
+        margin-inline: var(--bleed-margin);
+        width: calc(100% + var(--layout-padding-fluid, 1rem) * 2);
+        @apply rounded-none border-x-0;
       }
 
       img {
@@ -141,8 +179,31 @@
   .main-heading {
     @apply leading-tight font-bold;
     font-family: var(--font-inter), sans-serif;
-    /* Fluid typography scaling */
-    font-size: clamp(1.75rem, 5vw, 3rem);
+    /**
+     * Enhanced Fluid Typography for Main Headings
+     * ============================================
+     * Scales smoothly from 320px mobile to 4K (2560px+)
+     * min: 1.75rem (28px) - Readable on smallest screens
+     * max: 4rem (64px) - Impactful on 4K without overwhelming
+     * preferred: 1.25rem + 3.5vw - Smooth transition curve
+     */
+    font-size: clamp(1.75rem, 1.25rem + 3.5vw, 4rem);
     letter-spacing: -0.03em;
+    text-wrap: balance;
+  }
+
+  /**
+   * Utility Classes for Fluid Typography
+   * =====================================
+   * Use these to ensure readable line lengths in flexible containers
+   */
+  .readable-width {
+    max-width: 65ch;
+    width: 100%;
+  }
+
+  .wide-readable-width {
+    max-width: 75ch;
+    width: 100%;
   }
 }

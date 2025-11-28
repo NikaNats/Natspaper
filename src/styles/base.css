@@ -30,21 +30,45 @@
     line-height: 1.6;
     letter-spacing: 0.01em;
     /* 
-       FIX: Removed overflow-x: hidden from body. 
-       This restores the correct scroll context for position: sticky elements (like the TOC),
-       allowing them to stick to the viewport instead of the body element.
+       Overflow handling:
+       - overflow-x: clip prevents horizontal scroll from rogue elements
+       - Using 'clip' instead of 'hidden' preserves sticky positioning
+       - Width 100% ensures full viewport coverage
     */
     width: 100%;
+    overflow-x: clip;
 
     transition:
       background-color 0.3s ease,
       color 0.3s ease;
   }
 
+  /**
+   * Fluid Layout Container System
+   * =============================
+   * Content areas use the original --main-width for readability by default.
+   * The fluid padding scales from mobile to 4K while keeping content centered.
+   * Use .layout-wide or .layout-full classes to opt-out for specific sections.
+   */
   section,
   footer {
     @apply mx-auto w-full px-4;
+    /* Default to the original readable content width */
     max-width: var(--main-width);
+  }
+
+  /* Opt-in wider layout for sections that need it */
+  section.layout-wide,
+  footer.layout-wide {
+    max-width: var(--layout-wide-width, 90rem);
+    padding-inline: var(--layout-padding-fluid, clamp(1rem, 0.5rem + 3vw, 6rem));
+  }
+
+  /* Full-width layout with fluid padding */
+  section.layout-full,
+  footer.layout-full {
+    max-width: 100%;
+    padding-inline: var(--layout-padding-fluid, clamp(1rem, 0.5rem + 3vw, 6rem));
   }
 
   /* Global Resets */
@@ -89,7 +113,7 @@
 /* --- UTILITIES --- */
 /* Correct Tailwind v4 syntax for defining a custom utility */
 @utility max-w-app {
-  max-width: 42rem; /* equivalent to max-w-2xl */
+  max-width: 768px; /* 732px inner width after px-4 (18px * 2) padding */
 }
 
 /* --- PRINT STYLES --- */

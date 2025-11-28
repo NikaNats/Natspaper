@@ -4,6 +4,28 @@ export default {
   content: ["./src/**/*.{astro,html,js,jsx,md,mdx,svelte,ts,tsx,vue}"],
   darkMode: ["selector", "[data-theme='dark']"],
   theme: {
+    /**
+     * Responsive Breakpoints for Extreme Scales
+     * ==========================================
+     * xs:  375px  - Modern mobile minimum (iPhone SE+)
+     * sm:  640px  - Small tablets
+     * md:  768px  - Tablets
+     * lg:  1024px - Laptops
+     * xl:  1280px - Desktop
+     * 2xl: 1536px - Large desktop
+     * 3xl: 1920px - Full HD Desktop
+     * 4xl: 2560px - Ultrawide/4K displays
+     */
+    screens: {
+      xs: "375px",
+      sm: "640px",
+      md: "768px",
+      lg: "1024px",
+      xl: "1280px",
+      "2xl": "1536px",
+      "3xl": "1920px",
+      "4xl": "2560px",
+    },
     extend: {
       colors: {
         background: "var(--color-background)",
@@ -15,6 +37,48 @@ export default {
       },
       boxShadow: {
         sm: "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
+      },
+      /**
+       * Extended Spacing Scale for Large Screens
+       * =========================================
+       * Generous whitespace utilities for 4K and ultrawide displays
+       */
+      spacing: {
+        "18": "4.5rem",
+        "22": "5.5rem",
+        "26": "6.5rem",
+        "30": "7.5rem",
+        "34": "8.5rem",
+        "38": "9.5rem",
+        "42": "10.5rem",
+        "46": "11.5rem",
+        "50": "12.5rem",
+        "54": "13.5rem",
+        "58": "14.5rem",
+        "62": "15.5rem",
+        "66": "16.5rem",
+        "70": "17.5rem",
+        "screen-5": "5vw",
+        "screen-10": "10vw",
+        "screen-15": "15vw",
+      },
+      /**
+       * Fluid Font Size Utilities using clamp()
+       * =======================================
+       * Scales smoothly from 320px to 2560px viewport width
+       * Format: [min, preferred, max]
+       */
+      fontSize: {
+        "fluid-xs": ["clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem)", { lineHeight: "1.5" }],
+        "fluid-sm": ["clamp(0.875rem, 0.8rem + 0.35vw, 1rem)", { lineHeight: "1.5" }],
+        "fluid-base": ["clamp(1rem, 0.9rem + 0.5vw, 1.125rem)", { lineHeight: "1.6" }],
+        "fluid-lg": ["clamp(1.125rem, 1rem + 0.625vw, 1.25rem)", { lineHeight: "1.5" }],
+        "fluid-xl": ["clamp(1.25rem, 1.1rem + 0.75vw, 1.5rem)", { lineHeight: "1.4" }],
+        "fluid-2xl": ["clamp(1.5rem, 1.25rem + 1.25vw, 2rem)", { lineHeight: "1.3" }],
+        "fluid-3xl": ["clamp(1.875rem, 1.5rem + 1.875vw, 2.5rem)", { lineHeight: "1.2" }],
+        "fluid-4xl": ["clamp(2.25rem, 1.75rem + 2.5vw, 3.5rem)", { lineHeight: "1.15" }],
+        "fluid-5xl": ["clamp(3rem, 2.25rem + 3.75vw, 4.5rem)", { lineHeight: "1.1" }],
+        "fluid-6xl": ["clamp(3.75rem, 2.75rem + 5vw, 6rem)", { lineHeight: "1.05" }],
       },
       /**
        * Font Family Configuration

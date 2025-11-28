@@ -8,11 +8,18 @@ const { currentPath, locale, otherLanguageLinks } = Astro.props;
 const { t } = getI18n(locale as Lang);
 ---
 
+<!-- 
+  Mobile Menu Breakpoint Configuration
+  ====================================
+  The menu switches from hamburger to desktop at the 'md' breakpoint (768px).
+  To change this, update all 'md:' prefixes below to your preferred breakpoint.
+  Available options: sm (640px), md (768px), lg (1024px)
+-->
 <mobile-menu>
-  <!-- Toggle Button -->
+  <!-- Toggle Button - Hidden on md+ screens -->
   <button
     id="menu-btn"
-    class="relative z-50 rounded-md p-2 text-foreground transition-colors hover:bg-muted hover:text-accent focus:outline-none sm:hidden"
+    class="relative z-50 rounded-md p-2 text-foreground transition-colors hover:bg-muted hover:text-accent focus:outline-none md:hidden"
     aria-label={t("nav.openMenu")}
     aria-expanded="false"
     aria-controls="mobile-menu-overlay"
@@ -24,26 +31,27 @@ const { t } = getI18n(locale as Lang);
     Overlay / Menu Container 
     - Using data-state="closed|open" for reliable styling
     - visibility:hidden ensures it cannot block clicks when closed
+    - Breakpoint: md (768px) - hamburger below, desktop menu above
   -->
   <div
     id="mobile-menu-overlay"
     data-state="closed"
-    class="fixed inset-0 z-100 flex flex-col items-center justify-center bg-background/95 p-4 backdrop-blur-sm transition-all duration-300 sm:static sm:z-auto sm:flex-row sm:bg-transparent sm:p-0 sm:backdrop-blur-none"
+    class="fixed inset-0 z-100 flex flex-col items-center justify-center bg-background/95 p-4 backdrop-blur-sm transition-all duration-300 md:static md:z-auto md:flex-row md:bg-transparent md:p-0 md:backdrop-blur-none"
     role="dialog"
     aria-modal="true"
     aria-label={t("nav.mainMenu")}
   >
-    <!-- Close Button (Inside Overlay) -->
+    <!-- Close Button (Inside Overlay) - Hidden on md+ screens -->
     <button
       id="menu-close-btn"
-      class="absolute top-6 right-6 rounded-md p-2 text-foreground transition-colors hover:bg-muted hover:text-accent focus:outline-none sm:hidden"
+      class="absolute top-6 right-6 rounded-md p-2 text-foreground transition-colors hover:bg-muted hover:text-accent focus:outline-none md:hidden"
       aria-label={t("nav.closeMenu")}
     >
       <IconX class="size-8" />
     </button>
 
     <!-- Content -->
-    <div class="flex flex-col items-center gap-8 sm:flex-row sm:gap-4">
+    <div class="flex flex-col items-center gap-8 md:flex-row md:gap-4">
       <NavMenu
         currentPath={currentPath}
         locale={locale}
@@ -69,8 +77,12 @@ const { t } = getI18n(locale as Lang);
     transform: translateY(0);
   }
 
-  /* Desktop Reset (Override mobile styles) */
-  @media (min-width: 640px) {
+  /**
+   * Desktop Reset (Override mobile styles)
+   * Breakpoint: 768px (md) - configurable by changing this value
+   * Available options: 640px (sm), 768px (md), 1024px (lg)
+   */
+  @media (min-width: 768px) {
     #mobile-menu-overlay[data-state] {
       opacity: 1;
       visibility: visible;

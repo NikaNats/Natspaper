@@ -7,6 +7,8 @@ import { FEATURES } from "@/config";
  * Provides a consistent page shell with:
  * - Dynamic title with optional transition animations
  * - Optional page description
+ * - Configurable width modes (narrow, wide, full)
+ * - Full-bleed hero section slot
  * - Main content area via <slot />
  *
  * This is a partial layout designed to be wrapped by the base Layout.astro
@@ -18,21 +20,35 @@ import { FEATURES } from "@/config";
  * import Main from '@/layouts/Main.astro';
  *
  * <Layout title="My Page">
- *   <Main pageTitle="Welcome" pageDesc="Welcome to my page">
+ *   <Main pageTitle="Welcome" pageDesc="Welcome to my page" width="wide">
+ *     <div slot="hero">Full-bleed hero content</div>
  *     <p>Page content here</p>
  *   </Main>
  * </Layout>
  * ```
  */
 
-interface StringTitleProp {
+/**
+ * Width Modes:
+ * - narrow: 42rem (672px) - Default, optimal for reading prose
+ * - wide: 72rem (1152px) - For dashboards, galleries, multi-column layouts
+ * - full: 100% - Full viewport width with fluid edge padding
+ */
+type WidthMode = "narrow" | "wide" | "full";
+
+interface BaseProps {
+  /** Width mode for the main content area */
+  width?: WidthMode;
+}
+
+interface StringTitleProp extends BaseProps {
   /** Page title as a simple string */
   pageTitle: string;
   /** Optional page description */
   pageDesc?: string;
 }
 
-interface ArrayTitleProp {
+interface ArrayTitleProp extends BaseProps {
   /** Page title split into two parts for transition animation */
   pageTitle: [string, string];
   /** Transition name for View Transitions API */
@@ -44,36 +60,78 @@ interface ArrayTitleProp {
 export type Props = StringTitleProp | ArrayTitleProp;
 
 const { props } = Astro;
+const { width = "narrow" } = props;
 
 const backUrl = FEATURES.showBackButton ? Astro.url.pathname : "/";
+
+/**
+ * Width configuration using min() for automatic mobile padding
+ * Formula: min(100% - edge-padding, max-width)
+ * This eliminates the need for media queries - content automatically
+ * has breathing room on small screens without explicit breakpoints.
+ */
+const widthConfig: Record<WidthMode, string> = {
+  narrow: "min(100% - 2rem, 48rem)",   // 768px max, 1rem edge padding
+  wide: "min(100% - 2rem, 72rem)",     // 1152px max, 1rem edge padding  
+  full: "min(100% - 1rem, 100%)",      // Full width, 0.5rem edge padding
+};
+
+const maxWidth = widthConfig[width];
 ---
 
 <main
   data-backUrl={backUrl}
+  data-width={width}
   id="main-content"
-  class="mx-auto w-full max-w-app px-4 py-6 pb-12"
+  class="main-layout"
+  style={`--main-max-width: ${maxWidth};`}
 >
-  {
-    "titleTransition" in props ? (
-      <h1 class="main-heading mb-6">
-        {props.pageTitle[0]}
-        <span transition:name={props.titleTransition}>
-          {props.pageTitle[1]}
-        </span>
-      </h1>
-    ) : (
-      <h1 class="main-heading mb-6">{props.pageTitle}</h1>
-    )
-  }
-  {
-    props.pageDesc && (
-      <p class="mb-8 text-lg leading-relaxed text-text-secondary">
-        {props.pageDesc}
-      </p>
-    )
-  }
-  <slot />
+  <!-- Full-bleed hero slot - breaks out of content constraints -->
+  <slot name="hero" />
+  
+  <div class="main-content">
+    {
+      "titleTransition" in props ? (
+        <h1 class="main-heading mb-6">
+          {props.pageTitle[0]}
+          <span transition:name={props.titleTransition}>
+            {props.pageTitle[1]}
+          </span>
+        </h1>
+      ) : (
+        <h1 class="main-heading mb-6">{props.pageTitle}</h1>
+      )
+    }
+    {
+      props.pageDesc && (
+        <p class="mb-8 text-lg leading-relaxed text-text-secondary">
+          {props.pageDesc}
+        </p>
+      )
+    }
+    <slot />
+  </div>
 </main>
+
+<style>
+  .main-layout {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    padding-block: 1.5rem 3rem;
+  }
+
+  .main-content {
+    width: var(--main-max-width);
+    margin-inline: auto;
+  }
+
+  /* Full-bleed hero slot styling */
+  .main-layout :global([slot="hero"]) {
+    width: 100%;
+    margin-bottom: var(--space-fluid-lg, 2rem);
+  }
+</style>
 
 <script>
   document.addEventListener("astro:page-load", () => {
