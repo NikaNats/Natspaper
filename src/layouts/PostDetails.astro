@@ -73,24 +73,24 @@ const copyrightText = `Copyright © ${currentYear} • ${t("footer.copyright")}`
   <!--
   RESPONSIVE LAYOUT ARCHITECTURE:
   1. Base: Single column, fluid width, standard padding (px-4).
-  2. lg (Desktop): Flex row, sidebar sticky on left, content on right.
-  3. Max-width: Increased to 6xl to accommodate sidebar + content comfortably.
+  2. xl (Desktop): Absolute positioned sidebar to the left of centered content.
+  3. Max-width: 3xl to match header width and center content perfectly.
   -->
 
-  <div
-    class="mx-auto mt-6 w-full max-w-6xl px-4 lg:mt-12 lg:flex lg:items-start lg:gap-12"
-  >
+  <div class="relative mx-auto mt-8 w-full max-w-3xl px-4 lg:mt-12">
     <!--
     DESKTOP SIDEBAR (TOC):
-    - Hidden on mobile.
-    - Sticky on desktop to follow user reading.
-    - shrink-0 prevents it from getting crushed by large content.
+    - Hidden on mobile/tablet.
+    - Absolute positioned to the left of the main container.
+    - Sticky within its container to follow user reading.
     -->
     <aside
-      class="order-1 hidden lg:sticky lg:top-28 lg:block lg:w-64 lg:shrink-0"
+      class="hidden xl:block absolute right-full top-0 mr-12 w-64 h-full"
       aria-hidden="true"
     >
-      <TableOfContents {headings} />
+      <div class="sticky top-28 opacity-70 hover:opacity-100 transition-opacity">
+        <TableOfContents {headings} />
+      </div>
     </aside>
 
     <!--
@@ -98,11 +98,11 @@ const copyrightText = `Copyright © ${currentYear} • ${t("footer.copyright")}`
     - min-w-0: CRITICAL CSS FIX. Prevents flex items from overflowing
       when they contain wide children (like code blocks or tables).
       Without this, <pre> tags push the layout width out on mobile/tablet.
-    - flex-1: Takes remaining space on desktop.
+    - Takes full width of the max-w-3xl container.
     -->
     <main
       id="main-content"
-      class="order-2 mx-auto w-full max-w-3xl min-w-0 flex-1 lg:mx-0"
+      class="mx-auto w-full min-w-0"
       data-pagefind-body
     >
       <PostHero
