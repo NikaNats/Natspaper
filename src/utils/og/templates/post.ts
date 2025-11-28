@@ -3,9 +3,58 @@ import { html } from "satori-html";
 import { SITE } from "@/config";
 import type { CollectionEntry } from "astro:content";
 
+// ============================================================================
+// 1. MODULE-LEVEL CACHE (The Fix)
+// ============================================================================
+// We cache the PROMISE, not just the buffer. This prevents "race conditions"
+// where 5 posts start generating simultaneously and all 5 trigger a fetch
+// before the first one finishes.
+let fontPromise: Promise<ArrayBuffer> | null = null;
+
+const FONT_URL =
+  "https://cdn.jsdelivr.net/npm/@fontsource/inter@5.2.8/files/inter-latin-700-normal.woff";
+
+/**
+ * Singleton Font Loader
+ * Ensures we only hit the CDN once per build, regardless of post count.
+ */
+async function loadFont(): Promise<ArrayBuffer> {
+  // Return existing promise if fetch is already in progress or completed
+  if (fontPromise) {
+    return fontPromise;
+  }
+
+  // Initialize the fetch (Lazy Loading)
+  fontPromise = fetch(FONT_URL)
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(
+          `Failed to fetch font: ${response.status} ${response.statusText}`
+        );
+      }
+      return response.arrayBuffer();
+    })
+    .catch(err => {
+      // Critical: If fetch fails, clear cache so we can retry on next attempt
+      // Otherwise, the build stays broken for all subsequent posts.
+      fontPromise = null;
+      throw err;
+    });
+
+  return fontPromise;
+}
+
+// ============================================================================
+// 2. MAIN GENERATOR
+// ============================================================================
+
 export default async function generatePostOgImage(
   post: CollectionEntry<"blog">
 ) {
+  // Load font from cache (or fetch if first time)
+  // This is now safe to call 1000 times in a loop.
+  const fontBuffer = await loadFont();
+
   const markup = html`<div
     style="background-color: #fefbfb; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;"
   >
@@ -42,16 +91,6 @@ export default async function generatePostOgImage(
       </div>
     </div>
   </div>`;
-
-  // Load Inter 700 font from Fontsource CDN (same source that Astro's Fonts API uses)
-  // This provides the same font that's configured in astro.config.ts
-  // Using WOFF format instead of WOFF2 because Satori's font parser (opentype.js)
-  // can read WOFF (Web Open Font Format), which wraps TrueType data.
-  // WOFF2 is more compressed but incompatible with opentype.js.
-  const fontResponse = await fetch(
-    "https://cdn.jsdelivr.net/npm/@fontsource/inter@5.2.8/files/inter-latin-700-normal.woff"
-  );
-  const fontBuffer = await fontResponse.arrayBuffer();
 
   return satori(markup, {
     width: 1200,
