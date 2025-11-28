@@ -1,0 +1,149 @@
+---
+// src/components/post/TableOfContents.astro
+// Left-rail, sticky Table of Contents with ScrollSpy functionality
+// Uses IntersectionObserver for performant scroll tracking
+
+import type { MarkdownHeading } from "astro";
+
+export interface Props {
+  headings: MarkdownHeading[];
+}
+
+const { headings } = Astro.props;
+
+// Filter: Only top-level headings (h2, h3) to keep the sidebar clean
+const toc = headings.filter(h => h.depth >= 2 && h.depth <= 3);
+---
+
+{
+  toc.length > 0 && (
+    <nav
+      class="toc-nav opacity-0 transition-opacity duration-500"
+      aria-label="Table of Contents"
+    >
+      <h2 class="mb-4 text-xs font-bold tracking-widest text-text-secondary uppercase opacity-60">
+        On this page
+      </h2>
+      <ul class="relative flex flex-col gap-1 border-l border-border/40 text-sm">
+        {/* Animated Active Marker */}
+        <div
+          id="toc-indicator"
+          class="absolute top-0 -left-1 h-6 w-1 rounded-full bg-accent opacity-0 transition-all duration-300 ease-out"
+        />
+
+        {toc.map(heading => (
+          <li class:list={[{ "ml-3": heading.depth === 3 }]}>
+            <a
+              href={`#${heading.slug}`}
+              class:list={[
+                // Layout & Typography
+                "toc-link block py-1.5 pr-2 pl-4 leading-tight transition-colors duration-200",
+                "no-underline", // Explicitly remove global underline style
+                // Default State
+                "text-text-secondary hover:text-foreground",
+                // Hierarchy adjustments
+                heading.depth === 3 ? "text-xs" : "text-sm",
+              ]}
+            >
+              {heading.text}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  )
+}
+
+<script>
+  /**
+   * Fluent ScrollSpy Implementation
+   * Uses IntersectionObserver for high performance (no scroll event listeners)
+   * Ensures TOC works perfectly with Astro View Transitions
+   */
+  function initTOC() {
+    const nav = document.querySelector(".toc-nav");
+    const links = document.querySelectorAll(".toc-link");
+    const indicator = document.getElementById("toc-indicator");
+
+    if (!nav || !links.length || !indicator) return;
+
+    // Fade in navigation once JS is ready
+    nav.classList.remove("opacity-0");
+
+    const observer = new IntersectionObserver(
+      entries => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            updateActiveLink(entry.target.id);
+          }
+        });
+      },
+      {
+        rootMargin: "-10% 0px -80% 0px", // Trigger when element is near top of viewport
+        threshold: 0,
+      }
+    );
+
+    // Observe all content headings
+    document.querySelectorAll("h2, h3, h4").forEach(h => observer.observe(h));
+
+    function updateActiveLink(id: string) {
+      if (!id) return;
+
+      // 1. Update text colors and styles
+      links.forEach(link => {
+        const isMatch = link.getAttribute("href") === `#${id}`;
+
+        // Toggle active classes
+        link.classList.toggle("text-accent", isMatch);
+        link.classList.toggle("font-medium", isMatch);
+
+        // Toggle inactive classes
+        link.classList.toggle("text-text-secondary", !isMatch);
+        link.classList.toggle("hover:text-foreground", !isMatch);
+
+        // 2. Move the indicator
+        if (isMatch && indicator) {
+          const listItem = link.closest("li");
+          if (listItem instanceof HTMLElement) {
+            indicator.style.opacity = "1";
+            indicator.style.top = `${listItem.offsetTop}px`;
+            indicator.style.height = `${link.getBoundingClientRect().height}px`;
+          }
+        }
+      });
+    }
+  }
+
+  // Run on initial page load and after View Transitions
+  document.addEventListener("astro:page-load", initTOC);
+</script>
+
+<style>
+  /* Custom scrollbar for TOC if it gets too long */
+  .toc-nav {
+    max-height: calc(100vh - 150px);
+    overflow-y: auto;
+    scrollbar-width: thin;
+  }
+
+  .toc-nav::-webkit-scrollbar {
+    width: 0.5rem;
+  }
+
+  .toc-nav::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .toc-nav::-webkit-scrollbar-thumb {
+    background: var(--color-border);
+    opacity: 0.4;
+    border-radius: 9999px;
+    transition: background-color 200ms;
+  }
+
+  .toc-nav::-webkit-scrollbar-thumb:hover {
+    background: var(--color-border);
+    opacity: 1;
+  }
+</style>

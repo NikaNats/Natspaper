@@ -15,6 +15,7 @@ import Footer from "@/components/layout/Footer.astro";
 import PostHero from "@/components/post/PostHero.astro";
 import PostContent from "@/components/post/PostContent.astro";
 import PostFooter from "@/components/post/PostFooter.astro";
+import TableOfContents from "@/components/post/TableOfContents.astro";
 // Comments component is now imported inside PostFooter
 
 // PERFORMANCE FIX: Import CSS directly to bundle it.
@@ -39,7 +40,7 @@ const {
   tags,
   hideEditPost,
 } = post.data;
-const { Content } = await render(post);
+const { Content, headings } = await render(post);
 
 // 1. Data Preparation
 const { t, tTag } = getI18n(Astro.currentLocale as "en" | "ka" | undefined);
@@ -76,40 +77,51 @@ const copyrightText = `Copyright © ${currentYear} • ${t("footer.copyright")}`
 
   <Header />
 
-  <main
-    id="main-content"
-    class:list={[
-      "mx-auto w-full max-w-3xl px-4",
-      { "mt-12": !FEATURES.showBackButton },
-    ]}
-    data-pagefind-body
-  >
-    <!-- Single Responsibility: This component only renders the Hero -->
-    <PostHero
-      {title}
-      {pubDatetime}
-      {modDatetime}
-      {timezone}
-      {readingTimeText}
-    />
+  <!-- 
+    LAYOUT REFACTOR: 
+    Changed from centered max-w-3xl to a wider max-w-6xl container 
+    to accommodate the sidebar without squishing the content.
+  -->
+  <div class="mx-auto w-full max-w-6xl px-4 lg:flex lg:items-start lg:gap-12">
+    <!-- LEFT RAIL: Table of Contents (Sticky) -->
+    <aside
+      class="order-1 hidden lg:sticky lg:top-28 lg:block lg:w-64 lg:shrink-0"
+      aria-hidden="true"
+    >
+      <TableOfContents {headings} />
+    </aside>
 
-    <!-- Article Content -->
-    <PostContent>
-      <Content />
-    </PostContent>
+    <!-- MAIN CONTENT COLUMN -->
+    <!-- Added min-w-0 to prevent flex child overflow issues -->
+    <main
+      id="main-content"
+      class="order-2 mx-auto w-full max-w-3xl min-w-0 flex-1 lg:mx-0"
+      data-pagefind-body
+    >
+      <PostHero
+        {title}
+        {pubDatetime}
+        {modDatetime}
+        {timezone}
+        {readingTimeText}
+      />
 
-    <!-- Single Responsibility: This component handles meta/sharing/navigation -->
-    <PostFooter
-      {tags}
-      {showEditPost}
-      {editPostConfig}
-      {post}
-      {prevPost}
-      {nextPost}
-      {tTag}
-      locale={Astro.currentLocale}
-    />
-  </main>
+      <PostContent>
+        <Content />
+      </PostContent>
+
+      <PostFooter
+        {tags}
+        {showEditPost}
+        {editPostConfig}
+        {post}
+        {prevPost}
+        {nextPost}
+        {tTag}
+        locale={Astro.currentLocale}
+      />
+    </main>
+  </div>
 
   <Footer {copyrightText} />
 </Layout>
