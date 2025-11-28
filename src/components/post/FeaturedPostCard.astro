@@ -1,4 +1,25 @@
 ---
+/**
+ * Robust Featured Post Card Component
+ * ====================================
+ * A premium, fully responsive featured post card with elastic scaling.
+ *
+ * Features:
+ * - CSS Container Queries for true component-level responsiveness
+ * - Fluid typography using clamp() for smooth scaling (capped at 1280px)
+ * - Elastic spacing that scales proportionally
+ * - Gradient overlays and decorative elements
+ * - GPU-accelerated hover animations with reduced motion support
+ * - Semantic HTML with proper ARIA labels
+ * - RTL support via logical properties
+ *
+ * @example
+ * <FeaturedPostCard
+ *   href="/posts/my-post"
+ *   frontmatter={{ title: "My Post", description: "...", pubDatetime: new Date() }}
+ *   body="Post content for reading time..."
+ * />
+ */
 import type { CollectionEntry } from "astro:content";
 import type { HTMLAttributes } from "astro/types";
 import { slugifyStr } from "@/utils/core";
@@ -23,93 +44,491 @@ const {
   tags = [],
 } = frontmatter;
 
-// KISS & Performance: Avoid expensive split operations. Check existence or let util handle it.
+// Computed values
 const readingTimeText = body ? getReadingTimeDisplay(body) : undefined;
 
-// Logic: Pre-calculate tag data to keep template clean
-const MAX_TAGS = 2;
+// Limit visible tags for clean UI
+const MAX_TAGS = 3;
 const visibleTags = tags.slice(0, MAX_TAGS);
 const hiddenTagsCount = tags.length - MAX_TAGS;
-
-// Styles: Extracted common transition classes for DRY
-const transitionClasses = "transition-all duration-300 ease-in-out";
 ---
 
 <li
-  class:list={["featured-post-item", className]}
-  data-testid="post-card"
+  class:list={["featured-card", className]}
+  data-testid="featured-post-card"
   {...rest}
 >
   <a
-    href={href}
-    class="group block focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent focus-visible:outline-dashed"
+    {href}
+    class="featured-card__link"
     aria-label={`Read featured post: ${title}`}
   >
-    <article
-      class:list={[
-        "relative rounded-lg border-2 border-accent/30 p-6",
-        "bg-linear-to-br from-muted/50 via-background to-background",
-        "group-hover:border-accent/60 group-hover:shadow-lg group-hover:shadow-accent/10",
-        transitionClasses,
-      ]}
-    >
-      <!-- Decorative Corner -->
+    <article class="featured-card__article">
+      {/* Decorative gradient orbs */}
       <div
-        class:list={[
-          "absolute top-0 right-0 h-16 w-16 rounded-bl-lg bg-accent/5 opacity-0",
-          "group-hover:opacity-100",
-          transitionClasses,
-        ]}
+        class="featured-card__orb featured-card__orb--primary"
+        aria-hidden="true"
+      >
+      </div>
+      <div
+        class="featured-card__orb featured-card__orb--secondary"
         aria-hidden="true"
       >
       </div>
 
-      <!-- Badge -->
-      <div
-        class="mb-3 inline-flex items-center gap-1 rounded-full bg-accent/10 px-3 py-1 text-xs font-semibold text-accent"
-      >
-        <span aria-hidden="true">⭐</span>
-        <span>Featured</span>
+      {/* Featured ribbon */}
+      <div class="featured-card__ribbon">
+        <span class="featured-card__ribbon-icon" aria-hidden="true">⭐</span>
+        <span class="featured-card__ribbon-text">Featured</span>
       </div>
 
-      <!-- Title -->
-      <h3
-        class="text-xl font-bold text-foreground transition-colors duration-200 group-hover:text-accent"
-        style={{ viewTransitionName: slugifyStr(title) }}
-      >
-        {title}
-      </h3>
+      {/* Content wrapper */}
+      <div class="featured-card__content">
+        {/* Title */}
+        <h3
+          class="featured-card__title"
+          style={{ viewTransitionName: slugifyStr(title) }}
+        >
+          {title}
+        </h3>
 
-      <!-- Metadata -->
-      <div
-        class="mt-4 flex flex-wrap items-center gap-4 text-sm text-text-secondary"
-      >
-        <Datetime {pubDatetime} {modDatetime} {timezone} />
-        {readingTimeText && <ReadingTime text={readingTimeText} size="sm" />}
+        {/* Metadata Row */}
+        <div class="featured-card__meta">
+          <Datetime {pubDatetime} {modDatetime} {timezone} />
+          {readingTimeText && <ReadingTime text={readingTimeText} size="sm" />}
+        </div>
+
+        {/* Description */}
+        <p class="featured-card__description">
+          {description}
+        </p>
+
+        {/* Tags */}
+        {
+          visibleTags.length > 0 && (
+            <div class="featured-card__tags" role="list" aria-label="Post tags">
+              {visibleTags.map((tag: string) => (
+                <span class="featured-card__tag" role="listitem">
+                  #{tag}
+                </span>
+              ))}
+              {hiddenTagsCount > 0 && (
+                <span class="featured-card__tag-overflow">
+                  +{hiddenTagsCount}
+                </span>
+              )}
+            </div>
+          )
+        }
+
+        {/* Read more indicator */}
+        <div class="featured-card__cta">
+          <span class="featured-card__cta-text">Read article</span>
+          <svg
+            class="featured-card__cta-arrow"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M5 12h14"></path>
+            <path d="m12 5 7 7-7 7"></path>
+          </svg>
+        </div>
       </div>
-
-      <!-- Excerpt -->
-      <p class="mt-4 line-clamp-3 leading-relaxed text-foreground">
-        {description}
-      </p>
-
-      <!-- Tags -->
-      {
-        visibleTags.length > 0 && (
-          <div class="mt-4 flex flex-wrap items-center gap-2">
-            {visibleTags.map((tag: string) => (
-              <span class="rounded-full bg-accent/10 px-2.5 py-1 text-xs font-medium text-accent transition-colors group-hover:bg-accent/20">
-                #{tag}
-              </span>
-            ))}
-            {hiddenTagsCount > 0 && (
-              <span class="text-xs text-text-secondary">
-                +{hiddenTagsCount}
-              </span>
-            )}
-          </div>
-        )
-      }
     </article>
   </a>
 </li>
+
+<style>
+  /* ==========================================================================
+     ROBUST FEATURED CARD - Fluid Responsive Design
+     ==========================================================================
+     Premium card design with:
+     - Container queries for component-level breakpoints
+     - Fluid typography with clamp() capped at 1280px
+     - Logical properties for RTL support
+     - GPU-accelerated animations
+     - Graceful degradation
+     ========================================================================== */
+
+  .featured-card {
+    /* Container query context */
+    container-type: inline-size;
+    container-name: featured-card;
+
+    /* Reset list styling */
+    list-style: none;
+  }
+
+  .featured-card__link {
+    display: block;
+    text-decoration: none;
+    outline: none;
+    border-radius: 1rem;
+
+    /* Focus state */
+    &:focus-visible {
+      outline: 2px dashed var(--color-accent);
+      outline-offset: 4px;
+    }
+  }
+
+  .featured-card__article {
+    /* Fluid padding - scales 320px → 1280px */
+    --card-padding-inline: clamp(1.25rem, 1rem + 1.25vw, 2rem);
+    --card-padding-block: clamp(1.5rem, 1.25rem + 1vw, 2.25rem);
+
+    position: relative;
+    overflow: hidden;
+    padding-inline: var(--card-padding-inline);
+    padding-block: var(--card-padding-block);
+    border-radius: 1rem;
+
+    /* Premium border treatment */
+    border: 2px solid color-mix(in srgb, var(--color-accent) 30%, transparent);
+
+    /* Layered background */
+    background:
+      linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--color-accent) 5%, transparent) 0%,
+        transparent 50%,
+        color-mix(in srgb, var(--color-accent) 3%, transparent) 100%
+      ),
+      color-mix(in srgb, var(--color-muted) 40%, transparent);
+
+    /* GPU-accelerated transforms */
+    transform: translateZ(0);
+    will-change: transform, box-shadow, border-color;
+
+    /* Smooth transitions */
+    transition:
+      border-color 0.3s ease,
+      box-shadow 0.3s ease,
+      transform 0.3s ease;
+  }
+
+  /* Hover & Focus States */
+  .featured-card__link:hover .featured-card__article,
+  .featured-card__link:focus-visible .featured-card__article {
+    border-color: color-mix(in srgb, var(--color-accent) 60%, transparent);
+    box-shadow:
+      0 8px 32px -8px color-mix(in srgb, var(--color-accent) 20%, transparent),
+      0 4px 16px -4px color-mix(in srgb, var(--color-accent) 10%, transparent);
+    transform: translateY(-4px) translateZ(0);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .featured-card__article {
+      transition: none;
+      will-change: auto;
+    }
+    .featured-card__link:hover .featured-card__article {
+      transform: none;
+    }
+  }
+
+  /* ==========================================================================
+     DECORATIVE ELEMENTS
+     ========================================================================== */
+
+  .featured-card__orb {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    filter: blur(40px);
+  }
+
+  .featured-card__orb--primary {
+    inset-block-start: -20%;
+    inset-inline-end: -10%;
+    width: clamp(6rem, 4rem + 10vw, 12rem);
+    height: clamp(6rem, 4rem + 10vw, 12rem);
+    background: color-mix(in srgb, var(--color-accent) 20%, transparent);
+  }
+
+  .featured-card__orb--secondary {
+    inset-block-end: -15%;
+    inset-inline-start: -5%;
+    width: clamp(4rem, 3rem + 6vw, 8rem);
+    height: clamp(4rem, 3rem + 6vw, 8rem);
+    background: color-mix(in srgb, var(--color-accent) 15%, transparent);
+  }
+
+  .featured-card__link:hover .featured-card__orb,
+  .featured-card__link:focus-visible .featured-card__orb {
+    opacity: 1;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .featured-card__orb {
+      display: none;
+    }
+  }
+
+  /* ==========================================================================
+     FEATURED RIBBON
+     ========================================================================== */
+
+  .featured-card__ribbon {
+    display: inline-flex;
+    align-items: center;
+    gap: clamp(0.25rem, 0.2rem + 0.2vw, 0.375rem);
+    margin-block-end: clamp(0.75rem, 0.5rem + 0.5vw, 1rem);
+    padding-inline: clamp(0.625rem, 0.5rem + 0.375vw, 0.875rem);
+    padding-block: clamp(0.25rem, 0.2rem + 0.15vw, 0.375rem);
+    border-radius: 9999px;
+    background: color-mix(in srgb, var(--color-accent) 15%, transparent);
+    transition: background-color 0.2s ease;
+  }
+
+  .featured-card__link:hover .featured-card__ribbon,
+  .featured-card__link:focus-visible .featured-card__ribbon {
+    background: color-mix(in srgb, var(--color-accent) 25%, transparent);
+  }
+
+  .featured-card__ribbon-icon {
+    font-size: clamp(0.75rem, 0.625rem + 0.25vw, 0.875rem);
+  }
+
+  .featured-card__ribbon-text {
+    font-size: clamp(0.6875rem, 0.625rem + 0.125vw, 0.75rem);
+    font-weight: 700;
+    letter-spacing: 0.025em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+  }
+
+  /* ==========================================================================
+     CONTENT AREA
+     ========================================================================== */
+
+  .featured-card__content {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Title - Fluid typography */
+  .featured-card__title {
+    /* Fluid: 1.25rem → 1.625rem, capped at 1280px */
+    font-size: clamp(1.25rem, 1.125rem + 0.625vw, 1.625rem);
+    font-weight: 700;
+    line-height: 1.25;
+    color: var(--color-foreground);
+    margin: 0;
+    transition: color 0.2s ease;
+  }
+
+  .featured-card__link:hover .featured-card__title,
+  .featured-card__link:focus-visible .featured-card__title {
+    color: var(--color-accent);
+  }
+
+  /* Metadata Row */
+  .featured-card__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: clamp(0.75rem, 0.5rem + 0.5vw, 1rem);
+    margin-block-start: clamp(0.625rem, 0.5rem + 0.25vw, 0.875rem);
+    font-size: clamp(0.8125rem, 0.75rem + 0.125vw, 0.875rem);
+    color: var(--color-text-secondary);
+  }
+
+  /* Description - Fluid typography */
+  .featured-card__description {
+    /* Fluid: 0.9375rem → 1.0625rem */
+    font-size: clamp(0.9375rem, 0.875rem + 0.1875vw, 1.0625rem);
+    line-height: 1.65;
+    color: var(--color-foreground);
+    margin-block-start: clamp(0.75rem, 0.5rem + 0.5vw, 1rem);
+    margin-block-end: 0;
+
+    /* Limit to 3 lines */
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* ==========================================================================
+     TAGS
+     ========================================================================== */
+
+  .featured-card__tags {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: clamp(0.375rem, 0.25rem + 0.25vw, 0.5rem);
+    margin-block-start: clamp(0.875rem, 0.625rem + 0.5vw, 1.25rem);
+  }
+
+  .featured-card__tag {
+    padding-inline: clamp(0.5rem, 0.375rem + 0.25vw, 0.625rem);
+    padding-block: clamp(0.1875rem, 0.125rem + 0.125vw, 0.25rem);
+    border-radius: 9999px;
+    background: color-mix(in srgb, var(--color-accent) 10%, transparent);
+    font-size: clamp(0.6875rem, 0.625rem + 0.125vw, 0.75rem);
+    font-weight: 500;
+    color: var(--color-accent);
+    transition:
+      background-color 0.2s ease,
+      transform 0.2s ease;
+  }
+
+  .featured-card__link:hover .featured-card__tag,
+  .featured-card__link:focus-visible .featured-card__tag {
+    background: color-mix(in srgb, var(--color-accent) 20%, transparent);
+  }
+
+  .featured-card__tag-overflow {
+    font-size: clamp(0.6875rem, 0.625rem + 0.125vw, 0.75rem);
+    font-weight: 500;
+    color: var(--color-text-secondary);
+  }
+
+  /* ==========================================================================
+     CALL TO ACTION
+     ========================================================================== */
+
+  .featured-card__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: clamp(0.375rem, 0.25rem + 0.25vw, 0.5rem);
+    margin-block-start: clamp(1rem, 0.75rem + 0.5vw, 1.5rem);
+    padding-block-start: clamp(0.75rem, 0.5rem + 0.5vw, 1rem);
+    border-block-start: 1px solid
+      color-mix(in srgb, var(--color-border) 30%, transparent);
+  }
+
+  .featured-card__cta-text {
+    font-size: clamp(0.8125rem, 0.75rem + 0.125vw, 0.875rem);
+    font-weight: 600;
+    color: var(--color-accent);
+    opacity: 0.9;
+    transition: opacity 0.2s ease;
+  }
+
+  .featured-card__link:hover .featured-card__cta-text,
+  .featured-card__link:focus-visible .featured-card__cta-text {
+    opacity: 1;
+  }
+
+  .featured-card__cta-arrow {
+    width: clamp(1rem, 0.875rem + 0.25vw, 1.25rem);
+    height: clamp(1rem, 0.875rem + 0.25vw, 1.25rem);
+    color: var(--color-accent);
+    transition: transform 0.3s ease;
+  }
+
+  .featured-card__link:hover .featured-card__cta-arrow,
+  .featured-card__link:focus-visible .featured-card__cta-arrow {
+    transform: translateX(4px);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .featured-card__cta-arrow {
+      transition: none;
+    }
+    .featured-card__link:hover .featured-card__cta-arrow {
+      transform: none;
+    }
+  }
+
+  /* ==========================================================================
+     CONTAINER QUERIES - Component-level Responsiveness
+     ========================================================================== */
+
+  /* Narrow containers (< 280px) - ultra compact mode */
+  @container featured-card (max-width: 17.5rem) {
+    .featured-card__meta {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.25rem;
+    }
+
+    .featured-card__description {
+      -webkit-line-clamp: 2;
+    }
+
+    .featured-card__cta {
+      display: none;
+    }
+  }
+
+  /* Medium containers (≥ 400px) - comfortable layout */
+  @container featured-card (min-width: 25rem) {
+    .featured-card__article {
+      --card-padding-inline: clamp(1.5rem, 1.25rem + 0.75vw, 2.25rem);
+      --card-padding-block: clamp(1.75rem, 1.5rem + 0.625vw, 2.5rem);
+    }
+
+    .featured-card__title {
+      font-size: clamp(1.375rem, 1.25rem + 0.5vw, 1.75rem);
+    }
+
+    .featured-card__description {
+      -webkit-line-clamp: 4;
+    }
+  }
+
+  /* Wide containers (≥ 500px) - expanded layout */
+  @container featured-card (min-width: 31.25rem) {
+    .featured-card__article {
+      --card-padding-inline: clamp(1.75rem, 1.5rem + 0.5vw, 2.5rem);
+      --card-padding-block: clamp(2rem, 1.75rem + 0.5vw, 2.75rem);
+    }
+
+    .featured-card__title {
+      font-size: clamp(1.5rem, 1.375rem + 0.375vw, 1.875rem);
+    }
+  }
+
+  /* ==========================================================================
+     VIEWPORT FALLBACKS
+     ==========================================================================
+     For browsers without container query support
+     ========================================================================== */
+
+  @supports not (container-type: inline-size) {
+    @media (min-width: 25rem) {
+      .featured-card__article {
+        padding: 1.75rem 1.5rem;
+      }
+
+      .featured-card__title {
+        font-size: 1.5rem;
+      }
+    }
+
+    @media (min-width: 40rem) {
+      .featured-card__article {
+        padding: 2rem 2rem;
+      }
+
+      .featured-card__title {
+        font-size: 1.625rem;
+      }
+    }
+
+    @media (max-width: 17.5rem) {
+      .featured-card__meta {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.25rem;
+      }
+
+      .featured-card__cta {
+        display: none;
+      }
+    }
+  }
+</style>
