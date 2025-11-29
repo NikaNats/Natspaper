@@ -55,11 +55,11 @@ export function trackEvent(
   eventData?: Record<string, string | number | boolean>
 ): void {
   // Vercel Analytics custom events (if available)
-  if (typeof window !== "undefined" && window.va) {
+  if (typeof globalThis !== "undefined" && globalThis.va) {
     try {
       // Vercel Analytics track function
       // @see https://vercel.com/docs/analytics/custom-events
-      window.va("event", {
+      globalThis.va("event", {
         name: eventName,
         ...eventData,
       });

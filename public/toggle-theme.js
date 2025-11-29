@@ -13,7 +13,7 @@ const getThemePreference = () => {
       return savedTheme;
     }
   }
-  return window.matchMedia("(prefers-color-scheme: dark)").matches
+  return globalThis.matchMedia("(prefers-color-scheme: dark)").matches
     ? "dark"
     : "light";
 };
@@ -100,7 +100,7 @@ const attachToggleListener = () => {
 };
 
 // Listen for system theme changes
-const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+const mediaQuery = globalThis.matchMedia("(prefers-color-scheme: dark)");
 const handleSystemThemeChange = e => {
   // Only apply if user hasn't set a preference
   if (!localStorage.getItem(themeStorageKey)) {

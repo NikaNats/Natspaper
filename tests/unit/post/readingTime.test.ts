@@ -48,7 +48,7 @@ describe("Reading Time Calculator", () => {
 
       it("should calculate correct time for longer content", () => {
         // 400 words at 200 WPM = 2 minutes
-        const words = Array(400).fill("word").join(" ");
+        const words = new Array(400).fill("word").join(" ");
         const result = calculateReadingTime(words);
         expect(result.words).toBe(400);
         expect(result.minutes).toBe(2);
@@ -57,7 +57,7 @@ describe("Reading Time Calculator", () => {
 
       it("should round up to next minute", () => {
         // 250 words at 200 WPM = 1.25 min, rounds up to 2
-        const words = Array(250).fill("word").join(" ");
+        const words = new Array(250).fill("word").join(" ");
         const result = calculateReadingTime(words);
         expect(result.minutes).toBe(2);
       });
@@ -106,21 +106,21 @@ describe("Reading Time Calculator", () => {
     describe("Custom WPM", () => {
       it("should use custom words per minute", () => {
         // 100 words at 100 WPM = 1 minute
-        const words = Array(100).fill("word").join(" ");
+        const words = new Array(100).fill("word").join(" ");
         const result = calculateReadingTime(words, 100);
         expect(result.minutes).toBe(1);
       });
 
       it("should calculate faster reading speed", () => {
         // 400 words at 400 WPM = 1 minute
-        const words = Array(400).fill("word").join(" ");
+        const words = new Array(400).fill("word").join(" ");
         const result = calculateReadingTime(words, 400);
         expect(result.minutes).toBe(1);
       });
 
       it("should calculate slower reading speed", () => {
         // 200 words at 100 WPM = 2 minutes
-        const words = Array(200).fill("word").join(" ");
+        const words = new Array(200).fill("word").join(" ");
         const result = calculateReadingTime(words, 100);
         expect(result.minutes).toBe(2);
       });
@@ -174,7 +174,7 @@ const code = "example";
       });
 
       it("should format plural minutes correctly", () => {
-        const words = Array(600).fill("word").join(" ");
+        const words = new Array(600).fill("word").join(" ");
         const result = calculateReadingTime(words);
         expect(result.displayText).toBe("3 min read");
       });
@@ -215,7 +215,7 @@ const code = "example";
 
   describe("getReadingTimeDisplay()", () => {
     it("should return full format with word count by default", () => {
-      const words = Array(500).fill("word").join(" ");
+      const words = new Array(500).fill("word").join(" ");
       const result = getReadingTimeDisplay(words);
       expect(result).toMatch(/min read/);
       expect(result).toMatch(/words/);
@@ -223,7 +223,7 @@ const code = "example";
     });
 
     it("should return simple format without word count", () => {
-      const words = Array(500).fill("word").join(" ");
+      const words = new Array(500).fill("word").join(" ");
       const result = getReadingTimeDisplay(words, false);
       expect(result).toMatch(/min read/);
       expect(result).not.toMatch(/words/);
