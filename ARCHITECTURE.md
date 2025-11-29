@@ -260,6 +260,108 @@ export function getIntegrations() {
 
 ---
 
+## Locale-Aware Routing (DRY Page Architecture)
+
+### Overview
+
+To maintain the **DRY (Don't Repeat Yourself) principle**, all locale-specific pages use **dynamic routing** through `src/pages/[locale]/`.
+
+### Before (Duplicated Pages)
+
+```
+src/pages/
+├── en/
+│   ├── index.astro           # Duplicated
+│   ├── archives/index.astro  # Duplicated
+│   ├── tags/index.astro      # Duplicated
+│   └── posts/[slug].astro    # Duplicated
+└── ka/
+    ├── index.astro           # Duplicated
+    ├── archives/index.astro  # Duplicated
+    ├── tags/index.astro      # Duplicated
+    └── posts/[slug].astro    # Duplicated
+```
+
+**Problems:**
+
+- Code duplication violates DRY principle
+- Changes to Archives layout required editing 2 files
+- Harder to maintain consistency
+- Increased file count and complexity
+
+### After (Dynamic Routing)
+
+```
+src/pages/
+├── [locale]/
+│   ├── index.astro                 # Handles /en and /ka
+│   ├── archives/index.astro        # Handles /en/archives and /ka/archives
+│   ├── tags/index.astro            # Handles /en/tags and /ka/tags
+│   ├── tags/[tag]/[...page].astro  # Handles tag pagination
+│   ├── posts/
+│   │   ├── [slug].astro            # Handles all posts
+│   │   ├── [...page].astro         # Handles pagination
+│   │   ├── [...file].md.ts         # Handles .md redirects
+│   │   ├── [...catch].ts           # Handles 404s
+│   │   └── [slug].png.ts           # Handles OG images
+│   └── search/index.astro          # Handles search
+└── [other top-level routes]
+```
+
+### Implementation Pattern
+
+**Single dynamic page replaces duplicates:**
+
+```astro
+---
+import type { GetStaticPaths } from "astro";
+import { SUPPORTED_LANGS, DEFAULT_LANG } from "@/i18n/config";
+import type { Lang } from "@/i18n";
+
+// 1. Generate paths for all supported locales
+export const getStaticPaths = (() => {
+  return SUPPORTED_LANGS.map(locale => ({
+    params: { locale },
+  }));
+}) satisfies GetStaticPaths;
+
+// 2. Extract locale from URL parameters
+const locale = (
+  SUPPORTED_LANGS.includes(Astro.params.locale as Lang)
+    ? Astro.params.locale
+    : DEFAULT_LANG
+) as Lang;
+
+// 3. Use locale-aware queries and content
+const posts = await PostRepository.getByLocale(locale);
+
+// 4. Define localized content
+const contentByLocale: Record<Lang, object> = {
+  en: {
+    /* English content */
+  },
+  ka: {
+    /* Georgian content */
+  },
+};
+
+const content = contentByLocale[locale];
+---
+
+<!-- Render page with locale-aware content -->
+```
+
+### Benefits
+
+✅ **No Code Duplication** - Single page handles all locales  
+✅ **Easy Maintenance** - Fix Archives layout in one place  
+✅ **Consistent Behavior** - All locales use identical logic  
+✅ **Scalable** - Adding new locales requires no new pages  
+✅ **Type-Safe** - TypeScript ensures all locales are defined  
+✅ **Testable** - Single source to test
+
+---
+
 ## Data Flow
 
 ### Content Collection Pipeline

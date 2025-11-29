@@ -10,34 +10,67 @@ import PostSummaryCard from "@/components/post/PostSummaryCard.astro";
 import Pagination from "@/components/ui/Pagination.astro";
 import { getUniqueTags, getPostsByTag } from "@/utils/post";
 import { SITE, FEATURES } from "@/config";
+import { SUPPORTED_LANGS } from "@/i18n/config";
+import type { Lang } from "@/i18n";
+
+// Localized page content
+const pageContentByLocale: Record<
+  Lang,
+  {
+    tagPrefix: string;
+    desc: (tagName: string) => string;
+    title: (tagName: string) => string;
+  }
+> = {
+  en: {
+    tagPrefix: "Tag:",
+    desc: (tagName: string) => `All the articles with the tag "${tagName}".`,
+    title: (tagName: string) => `Tag: ${tagName} | ${SITE.title}`,
+  },
+  ka: {
+    tagPrefix: "თეგი:",
+    desc: (tagName: string) => `ყველა სტატია თეგით "${tagName}".`,
+    title: (tagName: string) => `თეგი: ${tagName} | ${SITE.title}`,
+  },
+};
 
 export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
-  const posts = await PostRepository.getByLocale("en");
-  // Pass locale to get translated tag names
-  const tags = getUniqueTags(posts, "en");
+  const paths = [];
 
-  return tags.flatMap(({ tag, tagName }) => {
-    const tagPosts = getPostsByTag(posts, tag);
+  // Generate paths for all supported locales
+  for (const locale of SUPPORTED_LANGS) {
+    const posts = await PostRepository.getByLocale(locale as Lang);
+    // Pass locale to get translated tag names
+    const tags = getUniqueTags(posts, locale as Lang);
 
-    return paginate(tagPosts, {
-      params: { tag },
-      props: { tagName },
-      pageSize: FEATURES.postPerPage,
+    const localePaths = tags.flatMap(({ tag, tagName }) => {
+      const tagPosts = getPostsByTag(posts, tag);
+
+      return paginate(tagPosts, {
+        params: { locale, tag },
+        props: { tagName, locale },
+        pageSize: FEATURES.postPerPage,
+      });
     });
-  });
+
+    paths.push(...localePaths);
+  }
+
+  return paths;
 }
 
 const params = Astro.params;
 const { tag } = params;
-const { page, tagName } = Astro.props;
+const { page, tagName, locale } = Astro.props;
+const pageContent = pageContentByLocale[locale as Lang];
 ---
 
-<Layout title={`Tag: ${tagName} | ${SITE.title}`}>
+<Layout title={pageContent.title(tagName)}>
   <Header />
   <Main
-    pageTitle={[`Tag:`, `${tagName}`]}
+    pageTitle={[`${pageContent.tagPrefix}`, `${tagName}`]}
     titleTransition={tag}
-    pageDesc={`All the articles with the tag "${tagName}".`}
+    pageDesc={pageContent.desc(tagName)}
   >
     <h1
       slot="title"
@@ -45,7 +78,7 @@ const { page, tagName } = Astro.props;
       transition:name={tag}
       data-testid="tag-archive-title"
     >
-      {`Tag:${tag}`}
+      {`${pageContent.tagPrefix}${tag}`}
     </h1>
     <ul class="space-y-6">
       {

@@ -5,6 +5,8 @@ import { getLastPathSegment } from "@/utils/core/slugify";
 import { generateOgImageForPost } from "@/utils/og";
 import { ogImageLimiter } from "@/utils/core";
 import { FEATURES } from "@/config";
+import { SUPPORTED_LANGS } from "@/i18n/config";
+import type { Lang } from "@/i18n";
 
 /**
  * Generate static OG image routes for blog posts.
@@ -19,17 +21,24 @@ export async function getStaticPaths() {
     return [];
   }
 
-  const posts = (await PostRepository.getByLocale("ka")).filter(
-    ({ data }) => !data.ogImage
-  );
+  const paths = [];
 
-  return posts.map(post => {
-    const slug = getLastPathSegment(String(post.id));
-    return {
-      params: { slug },
-      props: post,
-    };
-  });
+  // Generate paths for all supported locales
+  for (const locale of SUPPORTED_LANGS) {
+    const posts = (await PostRepository.getByLocale(locale as Lang)).filter(
+      ({ data }) => !data.ogImage
+    );
+
+    for (const post of posts) {
+      const slug = getLastPathSegment(String(post.id));
+      paths.push({
+        params: { locale, slug },
+        props: post,
+      });
+    }
+  }
+
+  return paths;
 }
 
 /**

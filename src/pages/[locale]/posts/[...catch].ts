@@ -1,8 +1,8 @@
 /**
  * Catch-All Route for Post Requests
  *
- * This route catches all requests to `/posts/*` and handles special cases:
- * 1. Markdown file requests (e.g., `/posts/post-name.md`) → redirect to `/posts/post-name`
+ * This route catches all requests to `/{locale}/posts/*` and handles special cases:
+ * 1. Markdown file requests (e.g., `/{locale}/posts/post-name.md`) → redirect to `/{locale}/posts/post-name`
  * 2. Other requests → return 404
  *
  * This prevents 404 warnings from:

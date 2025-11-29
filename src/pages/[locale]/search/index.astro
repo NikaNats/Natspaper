@@ -1,0 +1,57 @@
+---
+import type { GetStaticPaths } from "astro";
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/layout/Header.astro";
+import Footer from "@/components/layout/Footer.astro";
+import Main from "@/layouts/Main.astro";
+import { SITE } from "@/config";
+import { SUPPORTED_LANGS, DEFAULT_LANG } from "@/i18n/config";
+import type { Lang } from "@/i18n";
+
+export const getStaticPaths = (() => {
+  return SUPPORTED_LANGS.map(locale => ({
+    params: { locale },
+  }));
+}) satisfies GetStaticPaths;
+
+// Extract and validate locale from URL params
+const locale = (
+  SUPPORTED_LANGS.includes(Astro.params.locale as Lang)
+    ? Astro.params.locale
+    : DEFAULT_LANG
+) as Lang;
+
+// Content localized by language
+const contentByLocale: Record<
+  Lang,
+  { title: string; pageTitle: string; pageDesc: string; message: string }
+> = {
+  en: {
+    title: `Search | ${SITE.title}`,
+    pageTitle: "Search",
+    pageDesc: "Search is temporarily disabled.",
+    message:
+      "This feature is currently under development and will be available soon.",
+  },
+  ka: {
+    title: `ძებნა | ${SITE.title}`,
+    pageTitle: "ძებნა",
+    pageDesc: "ძებნა დროებით გამორთული است.",
+    message:
+      "ეს ფუნქცია ამჟამად განვითარების ეტაპზე არის და მალე ხელმისაწვდომი იქნება.",
+  },
+};
+
+const content = contentByLocale[locale];
+---
+
+<Layout title={content.title}>
+  <Header />
+  <Main pageTitle={content.pageTitle} pageDesc={content.pageDesc}>
+    {/* <SearchComponent locale={locale} /> */}
+    <p>
+      {content.message}
+    </p>
+  </Main>
+  <Footer />
+</Layout>

@@ -9,19 +9,58 @@ import PostSummaryCard from "@/components/post/PostSummaryCard.astro";
 import Pagination from "@/components/ui/Pagination.astro";
 import { PostRepository } from "@/utils/post/repository";
 import { SITE, FEATURES } from "@/config";
+import { SUPPORTED_LANGS, DEFAULT_LANG } from "@/i18n/config";
+import type { Lang } from "@/i18n";
 
 export const getStaticPaths = (async ({ paginate }) => {
-  // Centralized locale logic – use PostRepository
-  const posts = await PostRepository.getByLocale("en");
-  return paginate(posts, { pageSize: FEATURES.postPerPage });
+  const paths = [];
+
+  // Generate paths for all supported locales
+  for (const locale of SUPPORTED_LANGS) {
+    const posts = await PostRepository.getByLocale(locale);
+    // Pass locale as params to paginate so it's included in all paginated routes
+    const paginatedPages = paginate(posts, {
+      params: { locale },
+      pageSize: FEATURES.postPerPage,
+    });
+
+    // Each paginated page already has locale in params
+    paths.push(...paginatedPages);
+  }
+
+  return paths;
 }) satisfies GetStaticPaths;
 
 const { page } = Astro.props;
+const locale = (Astro.params.locale as Lang) || DEFAULT_LANG;
+
+// Localized content
+const pageContentByLocale: Record<
+  Lang,
+  { title: string; pageTitle: string; pageDesc: string }
+> = {
+  en: {
+    title: `Posts | ${SITE.title}`,
+    pageTitle: "Posts",
+    pageDesc: "All the articles I've posted.",
+  },
+  ka: {
+    title: `პოსტები | ${SITE.title}`,
+    pageTitle: "პოსტები",
+    pageDesc: "ყველა სტატია რომელიც მე დავაპოსტე.",
+  },
+};
+
+const pageContent = pageContentByLocale[locale];
 ---
 
-<Layout title={`Posts | ${SITE.title}`}>
+<Layout title={pageContent.title}>
   <Header />
-  <Main pageTitle="Posts" pageDesc="All the articles I've posted." width="wide">
+  <Main
+    pageTitle={pageContent.pageTitle}
+    pageDesc={pageContent.pageDesc}
+    width="wide"
+  >
     {
       /* 
       Responsive Post Grid:

@@ -1,7 +1,7 @@
 ---
 /**
- * 404 Error Page (Georgian)
- * =========================
+ * 404 Error Page (Locale-aware)
+ * =============================
  * AVAILABILITY: This page is statically generated (prerender = true by default
  * in static output mode) so it's served instantly from the Edge CDN without
  * spinning up a serverless function.
@@ -9,19 +9,75 @@
  * Provides helpful navigation options to reduce user frustration and keep them
  * on the site rather than bouncing.
  */
+import type { GetStaticPaths } from "astro";
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/layout/Header.astro";
 import Footer from "@/components/layout/Footer.astro";
 import LinkButton from "@/components/ui/LinkButton.astro";
 import { SITE } from "@/config";
+import { SUPPORTED_LANGS, DEFAULT_LANG } from "@/i18n/config";
+import type { Lang } from "@/i18n";
+
+export const getStaticPaths = (() => {
+  return SUPPORTED_LANGS.map(locale => ({
+    params: { locale },
+  }));
+}) satisfies GetStaticPaths;
+
+// Extract and validate locale from URL params
+const locale = (
+  SUPPORTED_LANGS.includes(Astro.params.locale as Lang)
+    ? Astro.params.locale
+    : DEFAULT_LANG
+) as Lang;
 
 // Ensure static generation for Edge availability
 export const prerender = true;
+
+// Content localized by language
+const contentByLocale: Record<
+  Lang,
+  {
+    title: string;
+    heading: string;
+    subheading: string;
+    tryText: string;
+    homepage: string;
+    search: string;
+    browse: string;
+    archives: string;
+  }
+> = {
+  en: {
+    title: `404 Not Found | ${SITE.title}`,
+    heading: "404",
+    subheading: "Page Not Found",
+    tryText: "Try one of these instead:",
+    homepage: "Go to Homepage",
+    search: "Search Articles",
+    browse: "Browse All Posts",
+    archives: "View Archives",
+  },
+  ka: {
+    title: `404 ვერ მოიძებნა | ${SITE.title}`,
+    heading: "404",
+    subheading: "გვერდი ვერ მოიძებნა",
+    tryText: "სცადეთ ერთი ამ ვარიანტებიდან:",
+    homepage: "მთავარ გვერდზე",
+    search: "სტატიების ძებნა",
+    browse: "ყველა პოსტის დათვალიერება",
+    archives: "არქივის ნახვა",
+  },
+};
+
+const content = contentByLocale[locale];
 ---
 
 <Layout
-  title={`404 ვერ მოიძებნა | ${SITE.title}`}
-  description="გვერდი, რომელსაც ეძებთ, არ არსებობს. სცადეთ ძებნა ან დაათვალიერეთ არქივი."
+  title={content.title}
+  description={locale === "en"
+    ? "The page you're looking for doesn't exist. Try searching or browsing our archives."
+    : "თქვენ ის გვერდი არ მოიძებნა. სცადეთ ძებნა ან თქვენი არქივების დათვალიერება."}
 >
   <Header />
 
@@ -30,25 +86,32 @@ export const prerender = true;
     class="mx-auto flex max-w-3xl flex-1 flex-col items-center justify-center px-4 py-12"
   >
     <div class="mb-8 flex flex-col items-center justify-center text-center">
-      <h1 class="text-fluid-6xl font-bold text-accent">404</h1>
+      <h1 class="text-fluid-6xl font-bold text-accent">{content.heading}</h1>
       <span aria-hidden="true" class="text-xl">¯\_(ツ)_/¯</span>
-      <p class="mt-4 text-2xl sm:text-3xl">გვერდი ვერ მოიძებნა</p>
+      <p class="mt-4 text-2xl sm:text-3xl">{content.subheading}</p>
       <p class="mt-2 text-text-secondary">
-        გვერდი, რომელსაც ეძებთ, არ არსებობს ან გადატანილია.
+        {
+          locale === "en"
+            ? "The page you're looking for doesn't exist or has been moved."
+            : "ის გვერდი, რომელსაც ეძებთ, არ არსებობს ან გადატანილი აქვს."
+        }
       </p>
     </div>
 
     <!-- Helpful Navigation Options -->
-    <nav aria-label="სასარგებლო ბმულები" class="w-full max-w-md">
+    <nav
+      aria-label={locale === "en" ? "Helpful links" : "სასარგებლო ბმულები"}
+      class="w-full max-w-md"
+    >
       <p
         class="mb-4 text-center text-sm font-medium tracking-wide text-text-secondary uppercase"
       >
-        სცადეთ ერთ-ერთი ეს:
+        {content.tryText}
       </p>
       <ul class="flex flex-col gap-3">
         <li>
           <LinkButton
-            href="/ka/"
+            href={`/${locale}/`}
             class="flex w-full items-center justify-center gap-2 rounded-lg border border-border bg-muted px-4 py-3 transition-colors hover:border-accent hover:bg-accent/10"
           >
             <svg
@@ -64,12 +127,12 @@ export const prerender = true;
               <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
               <polyline points="9 22 9 12 15 12 15 22"></polyline>
             </svg>
-            მთავარ გვერდზე გადასვლა
+            {content.homepage}
           </LinkButton>
         </li>
         <li>
           <LinkButton
-            href="/ka/search/"
+            href={`/${locale}/search/`}
             class="flex w-full items-center justify-center gap-2 rounded-lg border border-border bg-muted px-4 py-3 transition-colors hover:border-accent hover:bg-accent/10"
           >
             <svg
@@ -85,12 +148,12 @@ export const prerender = true;
               <circle cx="11" cy="11" r="8"></circle>
               <path d="m21 21-4.3-4.3"></path>
             </svg>
-            სტატიების ძებნა
+            {content.search}
           </LinkButton>
         </li>
         <li>
           <LinkButton
-            href="/ka/posts/"
+            href={`/${locale}/posts/`}
             class="flex w-full items-center justify-center gap-2 rounded-lg border border-border bg-muted px-4 py-3 transition-colors hover:border-accent hover:bg-accent/10"
           >
             <svg
@@ -107,12 +170,12 @@ export const prerender = true;
                 d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"
               ></path>
             </svg>
-            ყველა პოსტის ნახვა
+            {content.browse}
           </LinkButton>
         </li>
         <li>
           <LinkButton
-            href="/ka/archives/"
+            href={`/${locale}/archives/`}
             class="flex w-full items-center justify-center gap-2 rounded-lg border border-border bg-muted px-4 py-3 transition-colors hover:border-accent hover:bg-accent/10"
           >
             <svg
@@ -129,7 +192,7 @@ export const prerender = true;
               <path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"></path>
               <path d="M10 12h4"></path>
             </svg>
-            არქივის ნახვა
+            {content.archives}
           </LinkButton>
         </li>
       </ul>

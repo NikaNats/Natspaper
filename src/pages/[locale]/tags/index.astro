@@ -1,4 +1,5 @@
 ---
+import type { GetStaticPaths } from "astro";
 import { PostRepository } from "@/utils/post/repository";
 import Main from "@/layouts/Main.astro";
 import Layout from "@/layouts/Layout.astro";
@@ -6,18 +7,25 @@ import Header from "@/components/layout/Header.astro";
 import Footer from "@/components/layout/Footer.astro";
 import { getUniqueTags, getPostsByTag } from "@/utils/post";
 import { SITE } from "@/config";
-import { SUPPORTED_LANGS, type Lang, DEFAULT_LANG } from "@/i18n/config";
+import { SUPPORTED_LANGS, DEFAULT_LANG } from "@/i18n/config";
+import type { Lang } from "@/i18n";
 
-// Robust locale detection
-const currentLocale = (
-  SUPPORTED_LANGS.includes(Astro.currentLocale as Lang)
-    ? Astro.currentLocale
+export const getStaticPaths = (() => {
+  return SUPPORTED_LANGS.map(locale => ({
+    params: { locale },
+  }));
+}) satisfies GetStaticPaths;
+
+// Extract and validate locale from URL params
+const locale = (
+  SUPPORTED_LANGS.includes(Astro.params.locale as Lang)
+    ? Astro.params.locale
     : DEFAULT_LANG
 ) as Lang;
 
-const posts = await PostRepository.getByLocale(currentLocale);
+const posts = await PostRepository.getByLocale(locale);
 
-const tags = getUniqueTags(posts, currentLocale)
+const tags = getUniqueTags(posts, locale)
   .map(tagItem => {
     const count = getPostsByTag(posts, tagItem.tag).length;
     return {
@@ -26,22 +34,46 @@ const tags = getUniqueTags(posts, currentLocale)
     };
   })
   .sort((a, b) => b.count - a.count);
+
+// Page content localized by language
+const pageContentByLocale: Record<
+  Lang,
+  {
+    title: string;
+    pageTitle: string;
+    pageDesc: string;
+    ariaLabelTemplate: (count: number, tagName: string) => string;
+  }
+> = {
+  en: {
+    title: `Tags | ${SITE.title}`,
+    pageTitle: "Topics",
+    pageDesc: "Browse articles by subject matter and category.",
+    ariaLabelTemplate: (count, tagName) =>
+      `View ${count} posts tagged with ${tagName}`,
+  },
+  ka: {
+    title: `თეგები | ${SITE.title}`,
+    pageTitle: "თემები",
+    pageDesc: "იხილეთ სტატიები თემებისა და კატეგორიების მიხედვით.",
+    ariaLabelTemplate: (count, tagName) => `${tagName}: ${count} სტატია`,
+  },
+};
+
+const pageContent = pageContentByLocale[locale];
 ---
 
-<Layout title={`Tags | ${SITE.title}`}>
+<Layout title={pageContent.title}>
   <Header />
-  <Main
-    pageTitle="Topics"
-    pageDesc="Browse articles by subject matter and category."
-  >
+  <Main pageTitle={pageContent.pageTitle} pageDesc={pageContent.pageDesc}>
     <ul class="mx-auto mt-8 flex max-w-3xl flex-wrap gap-3">
       {
         tags.map(({ tag, tagName, count }) => (
           <li>
             <a
-              href={`/${currentLocale}/tags/${tag}/`}
+              href={`/${locale}/tags/${tag}/`}
               transition:name={`tag-${tag}`}
-              aria-label={`View ${count} posts tagged with ${tagName}`}
+              aria-label={pageContent.ariaLabelTemplate(count, tagName)}
               class="group flex items-center justify-between gap-3 rounded-full border border-transparent bg-muted px-5 py-3 text-base whitespace-nowrap no-underline transition-all duration-300 hover:scale-105 hover:border-accent hover:bg-accent/10"
             >
               <span class="font-medium text-foreground transition-colors group-hover:text-accent">

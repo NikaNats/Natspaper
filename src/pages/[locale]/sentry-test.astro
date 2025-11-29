@@ -1,5 +1,13 @@
 ---
+import type { GetStaticPaths } from "astro";
 import Layout from "@/layouts/Layout.astro";
+import { SUPPORTED_LANGS } from "@/i18n/config";
+
+export const getStaticPaths = (() => {
+  return SUPPORTED_LANGS.map(locale => ({
+    params: { locale },
+  }));
+}) satisfies GetStaticPaths;
 ---
 
 <Layout title="Sentry Test Page">

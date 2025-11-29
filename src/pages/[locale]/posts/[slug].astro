@@ -1,0 +1,43 @@
+---
+import { type CollectionEntry } from "astro:content";
+import { getLastPathSegment } from "@/utils/core/slugify";
+import PostDetails from "@/layouts/PostDetails.astro";
+import { SUPPORTED_LANGS, DEFAULT_LANG } from "@/i18n/config";
+import type { Lang } from "@/i18n";
+
+export interface Props {
+  post: CollectionEntry<"blog">;
+}
+
+export async function getStaticPaths() {
+  const { PostRepository } = await import("@/utils/post/repository");
+  const postResult: Array<{
+    params: { locale: string; slug: string };
+    props: { post: CollectionEntry<"blog"> };
+  }> = [];
+
+  // Generate paths for all supported locales
+  for (const locale of SUPPORTED_LANGS) {
+    const posts = await PostRepository.getByLocale(locale);
+
+    // Add only the clean slug paths (catch route handles .md redirects)
+    for (const post of posts) {
+      postResult.push({
+        params: { locale, slug: getLastPathSegment(post.slug) },
+        props: { post },
+      });
+    }
+  }
+
+  return postResult;
+}
+
+const { post } = Astro.props;
+const locale = (Astro.params.locale as Lang) || DEFAULT_LANG;
+
+const sortedPosts = await (
+  await import("@/utils/post/repository")
+).PostRepository.getByLocale(locale);
+---
+
+<PostDetails post={post} posts={sortedPosts} />

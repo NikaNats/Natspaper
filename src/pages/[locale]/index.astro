@@ -1,0 +1,150 @@
+---
+import type { GetStaticPaths } from "astro";
+import { PostRepository } from "@/utils/post/repository";
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/layout/Header.astro";
+import Footer from "@/components/layout/Footer.astro";
+import Hero from "@/components/features/Hero.astro";
+import Socials from "@/components/features/Socials.astro";
+import Hr from "@/components/ui/Hr.astro";
+import FeaturedPostCard from "@/components/post/FeaturedPostCard.astro";
+import { getSocials } from "@/data/socials";
+import { SITE } from "@/config";
+import { getI18n, type Lang } from "@/i18n";
+import { SUPPORTED_LANGS, DEFAULT_LANG } from "@/i18n/config";
+import profilePic from "@/assets/images/me.jpeg";
+
+export const getStaticPaths = (() => {
+  return SUPPORTED_LANGS.map(locale => ({
+    params: { locale },
+  }));
+}) satisfies GetStaticPaths;
+
+// Extract and validate locale from URL params
+const locale = (
+  SUPPORTED_LANGS.includes(Astro.params.locale as Lang)
+    ? Astro.params.locale
+    : DEFAULT_LANG
+) as Lang;
+
+// Get translations for current locale
+const { t } = getI18n(locale);
+
+// Get posts only for the current language using the centralized repository
+const sortedPosts = await PostRepository.getByLocale(locale);
+const featuredPosts = sortedPosts.filter(({ data }) => data.featured);
+const socials = getSocials();
+
+// Hero content - localized based on locale
+const heroContentByLocale: Record<
+  Lang,
+  {
+    tagline: string;
+    techStack: string[];
+    additionalContent: string[];
+    description?: string;
+  }
+> = {
+  en: {
+    tagline: ".NET Developer  |  Software Engineer",
+    techStack: [".NET Core", "Microservices", "AI/ML", "TypeScript", "Astro"],
+    additionalContent: [
+      `Recent highlights include leading the migration of a credit reporting
+      system from monolith to microservices
+      <span class="highlight">40% perf boost</span>, architecting a Georgian-language AI assistant that won the
+      <span class="highlight">Jury's Favorite Award</span>
+      at GAIA Hackathon, and designing enterprise-grade systems like <a
+        href="https://github.com/NikaNats">Blogify API</a> and fintech microservices ecosystems.`,
+      `Currently pursuing a Master's in Data Science at Georgian National
+      University while working as a .NET Software Engineer at Credo Bank.
+      Reach out by <a href="mailto:nika.nacvlishvili1@gmail.com">sending an email</a> to discuss .NET, microservices, or AI/ML integration.`,
+    ],
+  },
+  ka: {
+    tagline: ".NET დეველოპერი  |  პროგრამული ინჟინერი",
+    description:
+      "მიკროსერვისების არქიტექტურაში სპეციალიზირებული .NET დეველოპერი და პროგრამული ინჟინერი",
+    techStack: [".NET Core", "Microservices", "AI/ML", "TypeScript", "Astro"],
+    additionalContent: [
+      `ყოველდღიური მიღწევები მოიცავს საკრედიტო რეპორტირების სისტემის
+      მიგრაციას მონოლიტიდან მიკროსერვისებზე <span class="highlight">40% შესრულების გაუმჯობესება</span>,
+      ქართულენოვანი AI ასისტენტის არქიტექტურას, რომელმაც მოიპოვა <span class="highlight">ჟიური Prize Award-ი</span>
+      GAIA Hackathon-ზე, და საწარმო-კლასის სისტემებზე, როგორიცაა
+      <a href="https://github.com/NikaNats">Blogify API</a> და fintech მიკროსერვისების ეკოსისტემები.`,
+      `მიზნად ისახავს მაგისტრის ხარისხის მიღებას მონაცემთა მეცნიერების
+      ფაკულტეტზე საქართველოს ეროვნული უნივერსიტეტში, ხოლო პრაქტიკულად
+      მუშაობს .NET პროგრამული ინჟინერად Credo Bank-ში. მოგვწერეთ <a href="mailto:nika.nacvlishvili1@gmail.com">ელ-ფოსტით</a>
+      .NET, მიკროსერვისებების ან AI/ML ინტეგრაციის შესახებ განსახილველი საკითხების შესაფერი.`,
+    ],
+  },
+};
+
+const heroContent = heroContentByLocale[
+  locale
+] as (typeof heroContentByLocale)["en"];
+---
+
+<Layout>
+  <Header />
+  <main
+    id="main-content"
+    data-layout="index"
+    class="mx-auto flex h-svh w-full max-w-app flex-col items-center justify-center px-4"
+  >
+    <Hero
+      name={SITE.author}
+      tagline={heroContent.tagline}
+      description={SITE.desc}
+      additionalContent={heroContent.additionalContent}
+      profileImage={profilePic}
+      profileAlt={locale === "en"
+        ? `${SITE.author}'s profile photo`
+        : `${SITE.author}-ის პროფილის ფოტო`}
+      techStack={heroContent.techStack}
+    >
+      {
+        socials.length > 0 && (
+          <div slot="socials">
+            <Socials links={socials} />
+          </div>
+        )
+      }
+    </Hero>
+
+    <Hr />
+
+    {
+      featuredPosts.length > 0 && (
+        <>
+          <Hr />
+          <section id="featured-posts" class="py-8">
+            <h2 class="mb-6 text-2xl font-bold">{t("hero.featuredPosts")}</h2>
+            <ul class="grid gap-4 sm:grid-cols-2">
+              {featuredPosts.map(({ data, id, body }) => (
+                <FeaturedPostCard
+                  href={`/${locale}/posts/${id}`}
+                  frontmatter={data}
+                  body={body}
+                />
+              ))}
+            </ul>
+          </section>
+        </>
+      )
+    }
+  </main>
+  <Footer />
+</Layout>
+
+<script>
+  document.addEventListener("astro:page-load", () => {
+    const indexLayout = (document.querySelector("#main-content") as HTMLElement)
+      ?.dataset?.layout;
+    if (indexLayout) {
+      // Get locale from current URL path
+      const pathParts = window.location.pathname.split("/").filter(Boolean);
+      const locale = pathParts[0] || "en";
+      sessionStorage.setItem("backUrl", `/${locale}/`);
+    }
+  });
+</script>
