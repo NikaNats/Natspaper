@@ -39,7 +39,7 @@
   .post-featured-card {
     @apply transition-all duration-300;
     &:hover {
-      @apply shadow-xl shadow-accent/10;
+      @apply mouse:shadow-xl mouse:shadow-accent/10;
     }
   }
 

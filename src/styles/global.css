@@ -10,6 +10,10 @@
 /* Define custom variant for cleaner HTML selection */
 @custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
 
+/* ✅ ADD THIS NEW VARIANT: */
+/* Only apply styles when the primary input mechanism can hover (i.e., a mouse) */
+@custom-variant mouse (@media (hover: hover));
+
 /* Map CSS Variables to Tailwind Utility Classes */
 @theme inline {
   --color-background: var(--background);
