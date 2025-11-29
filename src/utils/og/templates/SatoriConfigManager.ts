@@ -19,7 +19,7 @@ export interface SatoriConfig {
 }
 
 export class SatoriConfigManager {
-  private defaultConfig: Omit<SatoriConfig, "fonts"> = {
+  private readonly defaultConfig: Omit<SatoriConfig, "fonts"> = {
     width: 1200,
     height: 630,
     embedFont: true,

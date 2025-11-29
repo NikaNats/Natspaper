@@ -13,7 +13,7 @@ function toKebabCase(str: string): string {
     .replace(/[\s_]+/g, "-") // spaces/underscores → hyphen
     .replace(/[^\w-]/g, "") // remove non-word chars (except hyphen)
     .replace(/-+/g, "-") // collapse consecutive hyphens
-    .replace(/^-|-$/g, "") // trim leading/trailing hyphens
+    .replace(/^-+|-+$/g, "") // trim leading/trailing hyphens
     .toLowerCase();
 }
 

@@ -21,7 +21,7 @@ export const defaultTemplate: OgTemplate = {
 };
 
 export class OgTemplateRenderer {
-  private template: OgTemplate;
+  private readonly template: OgTemplate;
 
   constructor(template: OgTemplate = defaultTemplate) {
     this.template = template;

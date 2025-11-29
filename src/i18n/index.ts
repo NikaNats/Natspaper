@@ -105,6 +105,6 @@ export function isValidLanguage(lang: unknown): lang is Lang {
 }
 
 export function getCurrentLocale(pathname: string): Lang | undefined {
-  const firstSegment = pathname.split("/").filter(Boolean)[0];
+  const firstSegment = pathname.split("/").find(Boolean);
   return isValidLanguage(firstSegment) ? firstSegment : undefined;
 }

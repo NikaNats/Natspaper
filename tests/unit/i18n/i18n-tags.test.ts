@@ -203,9 +203,10 @@ import { assertDefined } from '../../test-utils';
       const tags = ['docs'];
       const tagsCopy = [...tags];
       
-      tags.map(tag => ({ slug: tag, name: getI18n('en').tTag(tag) }));
+      const result = tags.map(tag => ({ slug: tag, name: getI18n('en').tTag(tag) }));
       
       expect(tags).toEqual(tagsCopy);
+      expect(result.length).toBe(1);
     });
   });
 });

@@ -8,7 +8,7 @@ import type { OgImageGenerator, OgImageOptions } from "./OgImageGenerator";
 import { SiteOgImageGenerator } from "./SiteOgImageGenerator";
 
 export class OgImageManager {
-  private generators: Map<string, OgImageGenerator> = new Map();
+  private readonly generators: Map<string, OgImageGenerator> = new Map();
 
   constructor() {
     // Register all available generators

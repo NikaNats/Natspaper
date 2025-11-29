@@ -328,10 +328,11 @@ test.describe("Accessibility - Keyboard Navigation", () => {
 
     // Should have some visible focus indicator
     expect(activeElement).toBeTruthy();
-    const hasVisibleFocus =
-      (activeElement?.outline && activeElement.outline !== "none") ||
-      (activeElement?.boxShadow && activeElement.boxShadow !== "none") ||
-      (activeElement?.border && !activeElement.border.includes("0px"));
+    
+    const hasOutline = activeElement?.outline && activeElement.outline !== "none";
+    const hasBoxShadow = activeElement?.boxShadow && activeElement.boxShadow !== "none";
+    const hasBorder = activeElement?.border && !activeElement.border.includes("0px");
+    const hasVisibleFocus = hasOutline || hasBoxShadow || hasBorder;
 
     expect(hasVisibleFocus).toBeTruthy();
   });

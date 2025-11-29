@@ -28,7 +28,7 @@ import { ProgressBar } from "./progressBar";
 import { HeadingLinks } from "./headingLinks";
 
 class FeatureManager {
-  private features: Feature[] = [];
+  private readonly features: Feature[] = [];
 
   constructor() {
     // The list of all features to manage. Open for extension!

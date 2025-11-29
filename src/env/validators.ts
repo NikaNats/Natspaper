@@ -27,8 +27,8 @@ export const isNumberInRange =
   (min: number, max: number): ValidatorFn =>
   (value, name) => {
     if (value === undefined) return null;
-    const num = parseFloat(value);
-    return isNaN(num) || num < min || num > max
+    const num = Number.parseFloat(value);
+    return Number.isNaN(num) || num < min || num > max
       ? `${name} must be a number between ${min} and ${max}, but got "${value}".`
       : null;
   };

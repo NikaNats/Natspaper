@@ -11,7 +11,7 @@ import type { OgImageGenerator, OgImageOptions } from "./OgImageGenerator";
 import { OgTemplateRenderer } from "./OgTemplateRenderer";
 
 export class SiteOgImageGenerator implements OgImageGenerator {
-  private templateRenderer: OgTemplateRenderer;
+  private readonly templateRenderer: OgTemplateRenderer;
 
   constructor() {
     this.templateRenderer = new OgTemplateRenderer();
