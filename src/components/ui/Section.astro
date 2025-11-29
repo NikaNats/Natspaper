@@ -1,0 +1,91 @@
+---
+/**
+ * Section Component - Semantic Container
+ * =======================================
+ * A flexible section wrapper with consistent spacing and optional titles.
+ * Provides semantic structure for page regions.
+ *
+ * DESIGN PATTERN: Open/Closed Principle
+ * - Extend via props (spacing, titles)
+ * - Closed for modification (consistent structure)
+ *
+ * EXTENSIBILITY:
+ * - Used for Featured Posts, Archives, Tag Clouds, Newsletter signup
+ * - Consistent spacing and heading hierarchy across all sections
+ *
+ * @example
+ * ```astro
+ * <Section title="Featured Posts" spacing="lg">
+ *   <Grid cols="2">
+ *     {posts.map(p => <PostCard {...p} />)}
+ *   </Grid>
+ * </Section>
+ * ```
+ */
+
+export interface Props {
+  /** Section heading text */
+  title?: string;
+  /** Section description/subtitle */
+  description?: string;
+  /** Heading level for accessibility */
+  headingLevel?: "h2" | "h3" | "h4";
+  /** Vertical spacing preset */
+  spacing?: "none" | "sm" | "md" | "lg" | "xl";
+  /** Additional CSS classes */
+  class?: string;
+  /** ID for anchor linking */
+  id?: string;
+  /** View transition name for title */
+  titleTransition?: string;
+}
+
+const {
+  title,
+  description,
+  headingLevel = "h2",
+  spacing = "md",
+  class: className = "",
+  id,
+  titleTransition,
+} = Astro.props;
+
+const Heading = headingLevel;
+
+// Spacing mappings (block padding)
+const spacingClasses: Record<NonNullable<Props["spacing"]>, string> = {
+  none: "py-0",
+  sm: "py-4",
+  md: "py-6 md:py-8",
+  lg: "py-8 md:py-12",
+  xl: "py-12 md:py-16",
+};
+---
+
+<section
+  id={id}
+  class:list={["section", spacingClasses[spacing], className]}
+  aria-labelledby={title ? `${id || "section"}-heading` : undefined}
+>
+  {
+    (title || description) && (
+      <header class="section-header mb-6">
+        {title && (
+          <Heading
+            id={`${id || "section"}-heading`}
+            class="text-xl font-bold text-foreground md:text-2xl"
+            transition:name={titleTransition}
+          >
+            {title}
+          </Heading>
+        )}
+        {description && <p class="mt-2 text-text-secondary">{description}</p>}
+      </header>
+    )
+  }
+
+  <slot />
+
+  {/* Optional footer slot for "View All" links, etc. */}
+  <slot name="footer" />
+</section>

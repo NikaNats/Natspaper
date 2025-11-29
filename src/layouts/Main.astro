@@ -9,10 +9,25 @@ import { FEATURES } from "@/config";
  * - Optional page description
  * - Configurable width modes (narrow, wide, full)
  * - Full-bleed hero section slot
+ * - Sidebar slot for secondary navigation/widgets
+ * - Before/after content slots for flexible content injection
  * - Main content area via <slot />
+ *
+ * DESIGN PATTERN: Open/Closed Principle
+ * - Open for extension via named slots
+ * - Closed for modification of core layout behavior
  *
  * This is a partial layout designed to be wrapped by the base Layout.astro
  * for a complete page template.
+ *
+ * AVAILABLE SLOTS:
+ * - hero: Full-bleed content above the main area
+ * - sidebar: Right-aligned sidebar content (TOC, related posts, etc.)
+ * - before-title: Content before the page title
+ * - after-title: Content after the title, before description
+ * - before-content: Content before main slot
+ * - after-content: Content after main slot (comments, related posts)
+ * - (default): Main page content
  *
  * @example
  * ```astro
@@ -22,6 +37,8 @@ import { FEATURES } from "@/config";
  * <Layout title="My Page">
  *   <Main pageTitle="Welcome" pageDesc="Welcome to my page" width="wide">
  *     <div slot="hero">Full-bleed hero content</div>
+ *     <aside slot="sidebar">Table of Contents</aside>
+ *     <div slot="after-content">Comments section</div>
  *     <p>Page content here</p>
  *   </Main>
  * </Layout>
@@ -36,9 +53,20 @@ import { FEATURES } from "@/config";
  */
 type WidthMode = "narrow" | "wide" | "full";
 
+/**
+ * Layout Modes:
+ * - default: Single column centered layout
+ * - with-sidebar: Two column layout with sidebar on the right
+ */
+type LayoutMode = "default" | "with-sidebar";
+
 interface BaseProps {
   /** Width mode for the main content area */
   width?: WidthMode;
+  /** Layout mode for sidebar support */
+  layout?: LayoutMode;
+  /** Hide the page title (useful for custom hero sections) */
+  hideTitle?: boolean;
 }
 
 interface StringTitleProp extends BaseProps {
@@ -60,9 +88,10 @@ interface ArrayTitleProp extends BaseProps {
 export type Props = StringTitleProp | ArrayTitleProp;
 
 const { props } = Astro;
-const { width = "narrow" } = props;
+const { width = "narrow", layout = "default", hideTitle = false } = props;
 
 const backUrl = FEATURES.showBackButton ? Astro.url.pathname : "/";
+const hasSidebar = Astro.slots.has("sidebar");
 
 /**
  * Width configuration using min() for automatic mobile padding
@@ -77,39 +106,69 @@ const widthConfig: Record<WidthMode, string> = {
 };
 
 const maxWidth = widthConfig[width];
+const layoutClass =
+  hasSidebar || layout === "with-sidebar" ? "with-sidebar" : "";
 ---
 
 <main
   data-backUrl={backUrl}
   data-width={width}
+  data-layout={layout}
   id="main-content"
-  class="main-layout"
+  class:list={["main-layout", layoutClass]}
   style={`--main-max-width: ${maxWidth};`}
 >
   <!-- Full-bleed hero slot - breaks out of content constraints -->
   <slot name="hero" />
 
-  <div class="main-content">
+  <div class="main-wrapper">
+    <div class="main-content">
+      <!-- Before title slot (breadcrumbs, back links, etc.) -->
+      <slot name="before-title" />
+
+      {
+        !hideTitle &&
+          ("titleTransition" in props ? (
+            <h1 class="main-heading mb-6">
+              {props.pageTitle[0]}
+              <span transition:name={props.titleTransition}>
+                {props.pageTitle[1]}
+              </span>
+            </h1>
+          ) : (
+            <h1 class="main-heading mb-6">{props.pageTitle}</h1>
+          ))
+      }
+
+      <!-- After title slot (metadata, reading time, etc.) -->
+      <slot name="after-title" />
+
+      {
+        props.pageDesc && (
+          <p class="mb-8 text-lg leading-relaxed text-text-secondary">
+            {props.pageDesc}
+          </p>
+        )
+      }
+
+      <!-- Before content slot (author info, share buttons, etc.) -->
+      <slot name="before-content" />
+
+      <!-- Main content slot -->
+      <slot />
+
+      <!-- After content slot (comments, related posts, etc.) -->
+      <slot name="after-content" />
+    </div>
+
+    <!-- Sidebar slot for secondary content -->
     {
-      "titleTransition" in props ? (
-        <h1 class="main-heading mb-6">
-          {props.pageTitle[0]}
-          <span transition:name={props.titleTransition}>
-            {props.pageTitle[1]}
-          </span>
-        </h1>
-      ) : (
-        <h1 class="main-heading mb-6">{props.pageTitle}</h1>
+      hasSidebar && (
+        <aside class="main-sidebar">
+          <slot name="sidebar" />
+        </aside>
       )
     }
-    {
-      props.pageDesc && (
-        <p class="mb-8 text-lg leading-relaxed text-text-secondary">
-          {props.pageDesc}
-        </p>
-      )
-    }
-    <slot />
   </div>
 </main>
 
@@ -121,15 +180,75 @@ const maxWidth = widthConfig[width];
     padding-block: 1.5rem 3rem;
   }
 
-  .main-content {
+  .main-wrapper {
+    display: flex;
     width: var(--main-max-width);
     margin-inline: auto;
+    gap: 2rem;
+  }
+
+  .main-content {
+    flex: 1;
+    min-width: 0; /* Prevent flex item overflow */
+  }
+
+  /* Sidebar styling */
+  .main-sidebar {
+    display: none;
+    width: 16rem;
+    flex-shrink: 0;
+    position: sticky;
+    top: 6rem;
+    height: fit-content;
+    max-height: calc(100vh - 8rem);
+    overflow-y: auto;
+  }
+
+  /* Show sidebar on larger screens when in sidebar mode */
+  .with-sidebar .main-sidebar {
+    display: block;
+  }
+
+  /* Hide sidebar on mobile even in sidebar mode */
+  @media (max-width: 1024px) {
+    .main-wrapper {
+      flex-direction: column;
+    }
+
+    .main-sidebar {
+      display: none;
+    }
+
+    /* Show mobile version of sidebar content at bottom */
+    .with-sidebar .main-content :global([slot="sidebar"]) {
+      display: block;
+      width: 100%;
+      margin-top: 2rem;
+    }
+  }
+
+  @media (min-width: 1025px) {
+    .with-sidebar .main-sidebar {
+      display: block;
+    }
   }
 
   /* Full-bleed hero slot styling */
   .main-layout :global([slot="hero"]) {
     width: 100%;
     margin-bottom: var(--space-fluid-lg, 2rem);
+  }
+
+  /* After content slot styling */
+  .main-content :global([slot="after-content"]) {
+    margin-top: var(--space-fluid-lg, 2rem);
+    padding-top: var(--space-fluid-md, 1.5rem);
+    border-top: 1px solid var(--border-color, hsl(0 0% 90%));
+  }
+
+  /* Before title slot styling */
+  .main-content :global([slot="before-title"]) {
+    margin-bottom: var(--space-fluid-sm, 1rem);
   }
 </style>
 

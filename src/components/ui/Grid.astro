@@ -1,0 +1,95 @@
+---
+/**
+ * Grid Component - Dumb/Presentational
+ * =====================================
+ * A flexible, responsive grid container that handles layout only.
+ * Follows Open/Closed Principle - extend via props, don't modify.
+ *
+ * DESIGN PATTERN: Composition over Inheritance
+ * - This component handles ONLY layout (grid)
+ * - Content is passed via slots (composition)
+ * - Smart components fetch data, then compose with this Grid
+ *
+ * EXTENSIBILITY:
+ * - Add new column configurations without modifying core logic
+ * - Works for Posts, Tags, Archives, or any future collection
+ *
+ * @example
+ * ```astro
+ * <Grid cols="responsive">
+ *   {posts.map(post => <PostCard {...post} />)}
+ * </Grid>
+ * ```
+ */
+
+type ColsVariant = "1" | "2" | "3" | "4" | "responsive" | "auto-fill";
+type GapVariant = "none" | "sm" | "md" | "lg" | "xl";
+type ElementVariant = "div" | "ul" | "ol" | "section";
+
+export interface Props {
+  /**
+   * Column configuration presets
+   * - "1": Single column (articles, forms)
+   * - "2": Two columns (sidebars, comparisons)
+   * - "3": Three columns (galleries)
+   * - "4": Four columns (icon grids)
+   * - "responsive": Auto-scales from 1 → 2 → 3 columns based on viewport
+   * - "auto-fill": CSS Grid auto-fill for dynamic item counts
+   */
+  cols?: ColsVariant;
+  /** Gap size preset */
+  gap?: GapVariant;
+  /** HTML element to render (semantic flexibility) */
+  as?: ElementVariant;
+  /** Additional CSS classes */
+  class?: string;
+  /** Accessible label for the grid */
+  "aria-label"?: string;
+}
+
+const {
+  cols = "responsive",
+  gap = "md",
+  as: Element = "div",
+  class: className = "",
+  "aria-label": ariaLabel,
+} = Astro.props;
+
+// Gap size mappings
+const gapClasses: Record<GapVariant, string> = {
+  none: "gap-0",
+  sm: "gap-2",
+  md: "gap-4 md:gap-6",
+  lg: "gap-6 md:gap-8",
+  xl: "gap-8 md:gap-10",
+};
+
+// Column configuration mappings
+const colClasses: Record<ColsVariant, string> = {
+  "1": "grid-cols-1",
+  "2": "grid-cols-1 sm:grid-cols-2",
+  "3": "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3",
+  "4": "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4",
+  responsive: "grid-cols-1 3xl:grid-cols-2 4xl:grid-cols-3",
+  "auto-fill": "grid-auto-fill",
+};
+
+// Get classes with explicit type assertions
+const colClass = colClasses[cols as ColsVariant];
+const gapClass = gapClasses[gap as GapVariant];
+---
+
+<Element
+  class:list={["grid", colClass, gapClass, className]}
+  role={Element === "ul" || Element === "ol" ? "list" : undefined}
+  aria-label={ariaLabel}
+>
+  <slot />
+</Element>
+
+<style>
+  /* Auto-fill grid for dynamic item counts */
+  .grid-auto-fill {
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+  }
+</style>
