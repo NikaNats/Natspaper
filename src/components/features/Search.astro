@@ -11,9 +11,11 @@ const { locale } = Astro.props;
 const backUrl = FEATURES.showBackButton ? `/${locale}/search` : `/${locale}/`;
 ---
 
-<link href="/pagefind/pagefind-ui.css" rel="stylesheet" />
-<script src="/pagefind/pagefind-ui.js" is:inline></script>
-
+<!--
+  PERFORMANCE OPTIMIZATION: Pagefind CSS/JS loading
+  - CSS is loaded via JS to avoid render-blocking
+  - UI initializes only when component is visible or on user interaction
+-->
 <div
   id="search"
   transition:persist
@@ -25,10 +27,38 @@ const backUrl = FEATURES.showBackButton ? `/${locale}/search` : `/${locale}/`;
 
 <script is:inline>
   let searchInstance = null;
+  let pagefindLoaded = false;
 
-  function initSearch() {
+  /**
+   * PERFORMANCE: Lazy load Pagefind CSS and JS
+   * Only loads when the search page is visited, reducing initial bundle
+   */
+  function loadPagefindAssets() {
+    if (pagefindLoaded) return Promise.resolve();
+    pagefindLoaded = true;
+
+    return new Promise((resolve, reject) => {
+      // Load CSS (non-blocking)
+      const link = document.createElement("link");
+      link.rel = "stylesheet";
+      link.href = "/pagefind/pagefind-ui.css";
+      document.head.appendChild(link);
+
+      // Load JS
+      const script = document.createElement("script");
+      script.src = "/pagefind/pagefind-ui.js";
+      script.onload = resolve;
+      script.onerror = reject;
+      document.head.appendChild(script);
+    });
+  }
+
+  async function initSearch() {
     const searchEl = document.querySelector("#search");
     if (!searchEl) return;
+
+    // Load Pagefind assets first
+    await loadPagefindAssets();
 
     // Your existing cleanup logic is perfect.
     if (searchInstance && typeof searchInstance.destroy === "function") {

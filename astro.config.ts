@@ -18,6 +18,16 @@ const siteUrl = process.env.SITE_WEBSITE || SITE.website;
 export default defineConfig({
   site: siteUrl,
   output: "static",
+  // PERFORMANCE: Enable HTML compression (already default, but explicit)
+  compressHTML: true,
+  // PERFORMANCE: Prefetch configuration for faster navigation
+  prefetch: {
+    // Prefetch on hover for instant-feeling navigation
+    defaultStrategy: "hover",
+    // Only prefetch links with data-astro-prefetch attribute
+    // (ClientRouter already prefetches all links by default)
+    prefetchAll: false,
+  },
   i18n: {
     defaultLocale: DEFAULT_LANG,
     locales: [...SUPPORTED_LANGS], // Spread to ensure mutability if needed by Astro types
@@ -38,6 +48,12 @@ export default defineConfig({
   },
   vite: getViteConfig(),
   env: getEnvSchema(),
+  // PERFORMANCE: Build optimizations
+  build: {
+    // Inline small stylesheets (<4kb) to reduce HTTP requests
+    // Larger stylesheets are kept external for better caching
+    inlineStylesheets: "auto",
+  },
   adapter: vercel({
     webAnalytics: {
       enabled: false,
