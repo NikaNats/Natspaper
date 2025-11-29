@@ -8,6 +8,7 @@ import LanguagePicker from "../features/LanguagePicker.astro";
 import IconMoon from "@/assets/icons/IconMoon.svg";
 import IconSunHigh from "@/assets/icons/IconSunHigh.svg";
 import { getI18n } from "@/i18n";
+import type { UIKey } from "@/i18n/dictionaries/ui";
 
 const { currentPath, locale, otherLanguageLinks } = Astro.props;
 const { t } = getI18n(locale);
@@ -30,7 +31,7 @@ const { t } = getI18n(locale);
           }}
           class="flex h-8 items-center rounded px-2 font-sans text-sm font-medium text-foreground no-underline transition-colors hover:text-accent focus:outline-none"
         >
-          {t(link.text)} {/* Use i18n key from config */}
+          {t(link.text as UIKey)} {/* Use i18n key from config */}
         </a>
       </li>
     ))

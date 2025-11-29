@@ -1,5 +1,18 @@
 ---
+/**
+ * SEO Component
+ * =============
+ * Handles all SEO-related meta tags including:
+ * - Title and description
+ * - Canonical URL (self-referencing for current locale)
+ * - Hreflang tags for language alternates
+ * - Open Graph (og:locale, og:title, og:description, og:image)
+ * - Twitter Card meta tags
+ * - Article timestamps
+ */
 import { SITE } from "@/config";
+import { SUPPORTED_LANGS, LOCALE_CODES, type Lang } from "@/i18n/config";
+import { getRelativeLocaleUrl } from "astro:i18n";
 
 export interface Props {
   title?: string;
@@ -22,25 +35,83 @@ const {
 // Use site defaults as fallbacks
 const title = pageTitle ? `${pageTitle} | ${SITE.title}` : SITE.title;
 const description = pageDescription ?? SITE.desc;
+
+// Determine current locale with fallback
+const currentLocale = (Astro.currentLocale as Lang) ?? "en";
+
+// Build canonical URL for current page (self-referencing)
 const canonicalURL =
-  pageCanonicalURL ?? new URL(Astro.url.pathname, Astro.site);
+  pageCanonicalURL ?? new URL(Astro.url.pathname, Astro.site).href;
 
 // Construct the final OG image URL
 const socialImageURL = new URL(pageOgImage ?? SITE.ogImage, Astro.url.origin)
   .href;
+
+// Build og:locale value (e.g., "en_US", "ka_GE")
+const ogLocale = LOCALE_CODES[currentLocale]?.replace("-", "_") ?? "en_US";
+
+/**
+ * Generate hreflang alternate URLs for all supported languages
+ * Each page should point to its counterpart in other languages
+ */
+function getHreflangAlternates(): Array<{ lang: string; href: string }> {
+  const pathname = Astro.url.pathname;
+  // Extract path segment after locale (e.g., "/en/posts/my-post" -> "/posts/my-post")
+  const pathWithoutLocale = pathname.replace(
+    new RegExp(`^/(${SUPPORTED_LANGS.join("|")})`),
+    ""
+  );
+
+  return SUPPORTED_LANGS.map(lang => ({
+    lang: LOCALE_CODES[lang] ?? lang,
+    href: new URL(getRelativeLocaleUrl(lang, pathWithoutLocale), Astro.site)
+      .href,
+  }));
+}
+
+const hreflangAlternates = getHreflangAlternates();
 ---
 
 <!-- General Meta Tags -->
 <title>{title}</title>
 <meta name="title" content={title} />
 <meta name="description" content={description} />
+
+<!-- Canonical URL (self-referencing for current locale) -->
 <link rel="canonical" href={canonicalURL} />
 
+<!-- Hreflang Tags for Language Alternates -->
+{
+  hreflangAlternates.map(({ lang, href }) => (
+    <link rel="alternate" hreflang={lang} href={href} />
+  ))
+}
+<!-- x-default points to the default language version -->
+<link
+  rel="alternate"
+  hreflang="x-default"
+  href={new URL(
+    getRelativeLocaleUrl("en", Astro.url.pathname.replace(/^\/(en|ka)/, "")),
+    Astro.site
+  ).href}
+/>
+
 <!-- Open Graph / Facebook -->
+<meta property="og:type" content="website" />
+<meta property="og:locale" content={ogLocale} />
+{
+  SUPPORTED_LANGS.filter(lang => lang !== currentLocale).map(lang => (
+    <meta
+      property="og:locale:alternate"
+      content={LOCALE_CODES[lang]?.replace("-", "_") ?? lang}
+    />
+  ))
+}
 <meta property="og:title" content={title} />
 <meta property="og:description" content={description} />
 <meta property="og:url" content={canonicalURL} />
 <meta property="og:image" content={socialImageURL} />
+<meta property="og:site_name" content={SITE.title} />
 
 <!-- Article Timestamps -->
 {

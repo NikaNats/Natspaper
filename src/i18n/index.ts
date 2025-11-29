@@ -1,39 +1,90 @@
 import { defaultLang, languages, supportedLangs } from "./config";
 import type { Lang } from "./config";
 export type { Lang };
-import { ui } from "./dictionaries/ui";
+import { ui, type UIKey } from "./dictionaries/ui";
 import { tagTranslations } from "./dictionaries/tags";
 
 /**
- * Creates a generic translator function for a given dictionary.
- * This function encapsulates the fallback logic (current lang -> default lang -> key).
- * This is a pure, reusable helper that follows the SRP.
+ * Type-safe translation function type
+ * Returns exact string type for known keys
  */
-function createTranslator(
-  locale: Lang,
-  dictionary: Record<string, Record<string, string>>
-) {
-  return function t(key: string): string {
-    return dictionary[locale]?.[key] || dictionary[defaultLang]?.[key] || key;
+type TranslationFunction = {
+  (key: UIKey): string;
+  /**
+   * Template replacement for pagination patterns like "Page {current} of {total}"
+   */
+  (key: UIKey, replacements: Record<string, string | number>): string;
+};
+
+/**
+ * Creates a strongly-typed translator function for UI strings.
+ * Provides fallback logic: current lang -> default lang -> key itself
+ */
+function createUITranslator(locale: Lang): TranslationFunction {
+  return function t(
+    key: UIKey,
+    replacements?: Record<string, string | number>
+  ): string {
+    // Type-safe lookup with fallback chain
+    const translation: string =
+      ui[locale]?.[key] ?? ui[defaultLang]?.[key] ?? key;
+
+    // Handle template replacements like "Page {current} of {total}"
+    if (replacements) {
+      let result = translation;
+      for (const [placeholder, value] of Object.entries(replacements)) {
+        result = result.replace(
+          new RegExp(`\\{${placeholder}\\}`, "g"),
+          String(value)
+        );
+      }
+      return result;
+    }
+
+    return translation;
   };
+}
+
+/**
+ * Creates a generic translator function for tag dictionaries.
+ * This function encapsulates the fallback logic (current lang -> default lang -> key).
+ */
+function createTagTranslator(locale: Lang): (tag: string) => string {
+  return function tTag(tag: string): string {
+    const dict = tagTranslations as Record<string, Record<string, string>>;
+    return dict[locale]?.[tag] ?? dict[defaultLang]?.[tag] ?? tag;
+  };
+}
+
+/**
+ * I18n helper result type for strong typing
+ */
+export interface I18nHelpers {
+  /** Strongly-typed translator for UI strings */
+  t: TranslationFunction;
+  /** Translator for tag names */
+  tTag: (tag: string) => string;
+  /** The current language code */
+  lang: Lang;
 }
 
 /**
  * Returns a set of i18n helpers for a given locale.
  * This is the main function you will use in your components.
+ *
+ * @example
+ * ```astro
+ * const { t, tTag, lang } = getI18n(Astro.currentLocale as Lang);
+ * // t('nav.home') -> "Home" or "მთავარი"
+ * // t('pagination.pageOf', { current: 1, total: 5 }) -> "Page 1 of 5"
+ * ```
  */
-export function getI18n(locale: Lang | undefined) {
+export function getI18n(locale: Lang | undefined): I18nHelpers {
   const lang = locale && supportedLangs.includes(locale) ? locale : defaultLang;
 
   return {
-    /** Translator for UI strings */
-    t: createTranslator(lang, ui as Record<string, Record<string, string>>),
-    /** Translator for tag names */
-    tTag: createTranslator(
-      lang,
-      tagTranslations as Record<string, Record<string, string>>
-    ),
-    /** The current language code */
+    t: createUITranslator(lang),
+    tTag: createTagTranslator(lang),
     lang,
   };
 }

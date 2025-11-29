@@ -9,6 +9,7 @@ import IconHash from "@/assets/icons/IconHash.svg";
 import IconChevronLeft from "@/assets/icons/IconChevronLeft.svg";
 import IconChevronRight from "@/assets/icons/IconChevronRight.svg";
 import { slugifyStr } from "@/utils/core";
+import { getI18n, type Lang } from "@/i18n";
 import type { CollectionEntry } from "astro:content";
 
 export interface NavigationPost {
@@ -39,6 +40,9 @@ const {
   locale,
 } = Astro.props;
 
+// Get translations for current locale
+const { t } = getI18n(Astro.currentLocale as Lang);
+
 // FIX: Relaxed type definition to accept both CollectionEntry and NavigationPost
 const getPostHref = (p: { id: string }) =>
   `/${Astro.currentLocale}/posts/${(String(p.id).split("/").pop() ?? "").replace(/\.(md|mdx)$/, "")}`;
@@ -56,9 +60,10 @@ const navDecorationClasses =
   <!-- Topics -->
   {
     tags.length > 0 && (
-      <nav aria-label="Topics" class="mb-12 space-y-3">
+      <nav aria-label={t("a11y.postTags")} class="mb-12 space-y-3">
         <div class="flex items-center gap-2 pl-1 text-xs font-bold tracking-widest text-text-secondary uppercase opacity-75">
-          <IconHash class="size-3.5 opacity-60" /> <span>Topics</span>
+          <IconHash class="size-3.5 opacity-60" />{" "}
+          <span>{t("tags.topics")}</span>
         </div>
         <ul class="flex flex-wrap gap-2">
           {tags.map(tag => (
@@ -92,7 +97,7 @@ const navDecorationClasses =
   <!-- Navigation -->
   <nav
     class="grid grid-cols-1 gap-6 sm:grid-cols-2"
-    aria-label="Post Navigation"
+    aria-label={t("a11y.postNavigation")}
   >
     {/* Previous Post */}
     {
@@ -101,7 +106,7 @@ const navDecorationClasses =
           <span class={`${navDecorationClasses} left-0`} />
           <span class="mb-1 flex items-center gap-2 text-xs font-bold tracking-wider text-text-secondary uppercase group-hover:text-accent">
             <IconChevronLeft class="size-3 transition-transform group-hover:-translate-x-1" />{" "}
-            Previous Article
+            {t("nav.previousArticle")}
           </span>
           <span class="line-clamp-2 font-medium text-foreground group-hover:text-accent">
             {prevPost.title}
@@ -121,7 +126,7 @@ const navDecorationClasses =
         >
           <span class={`${navDecorationClasses} right-0`} />
           <span class="mb-1 flex items-center gap-2 text-xs font-bold tracking-wider text-text-secondary uppercase group-hover:text-accent">
-            Next Article{" "}
+            {t("nav.nextArticle")}{" "}
             <IconChevronRight class="size-3 transition-transform group-hover:translate-x-1" />
           </span>
           <span class="line-clamp-2 font-medium text-foreground group-hover:text-accent">
@@ -152,7 +157,7 @@ const navDecorationClasses =
           d="M5 9l14 0"></path><path d="M5 15l14 0"></path><path d="M11 4l-4 16"
         ></path><path d="M17 4l-4 16"></path></svg
       >
-      <span>Discussion</span>
+      <span>{t("comments.discussion")}</span>
     </h2>
     <Comments locale={locale} />
   </section>

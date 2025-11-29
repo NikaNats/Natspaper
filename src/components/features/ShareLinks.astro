@@ -1,15 +1,17 @@
 ---
 import { SHARE_LINKS } from "@/data/socials";
 import LinkButton from "../ui/LinkButton.astro";
+import { getI18n, type Lang } from "@/i18n";
 
 const URL = Astro.url;
+const { t } = getI18n(Astro.currentLocale as Lang);
 ---
 
 {
   SHARE_LINKS.length > 0 && (
     <div class="flex flex-col items-center justify-center gap-2 sm:items-start">
       <span class="text-xs font-medium tracking-wider text-text-secondary uppercase opacity-80">
-        Share this post:
+        {t("post.shareThisPost")}
       </span>
       <div class="flex flex-wrap justify-center gap-1 sm:justify-start">
         {SHARE_LINKS.map(social => {

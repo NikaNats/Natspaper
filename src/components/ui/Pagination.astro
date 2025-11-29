@@ -1,8 +1,9 @@
 ---
-// REFACTORED: Removed Astro-specific dependencies - now a pure presentational component.
+// REFACTORED: Now uses i18n for all UI text
 import IconArrowLeft from "@/assets/icons/IconArrowLeft.svg";
 import IconArrowRight from "@/assets/icons/IconArrowRight.svg";
 import LinkButton from "./LinkButton.astro";
+import { getI18n, type Lang } from "@/i18n";
 
 // REFACTORED: The component now depends on a simple, abstract interface, not Astro's Page object.
 export interface Props {
@@ -20,6 +21,9 @@ const {
   nextUrl,
   class: className,
 } = Astro.props;
+
+// Get translations for current locale
+const { t } = getI18n(Astro.currentLocale as Lang);
 ---
 
 {
@@ -36,23 +40,23 @@ const {
       <LinkButton
         href={prevUrl}
         class:list={["select-none", { "opacity-50": !prevUrl }]}
-        ariaLabel="Previous Page"
+        ariaLabel={t("pagination.previousPage")}
       >
         <IconArrowLeft class="inline-block rtl:rotate-180" />
-        Prev
+        {t("pagination.prev")}
       </LinkButton>
 
       {/* IMPROVED UX: The text is now more descriptive and accessible. */}
       <span class="text-sm text-text-secondary">
-        Page {currentPage} of {totalPages}
+        {t("pagination.pageOf", { current: currentPage, total: totalPages })}
       </span>
 
       <LinkButton
         href={nextUrl}
         class:list={["select-none", { "opacity-50": !nextUrl }]}
-        ariaLabel="Next Page"
+        ariaLabel={t("pagination.nextPage")}
       >
-        Next
+        {t("pagination.next").replace("→", "").trim()}
         <IconArrowRight class="inline-block rtl:rotate-180" />
       </LinkButton>
     </nav>

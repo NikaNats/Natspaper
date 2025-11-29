@@ -6,6 +6,7 @@ import { ClientRouter } from "astro:transitions";
 import { Font } from "astro:assets";
 import { SITE, FEATURES } from "@/config";
 import "@/styles/global.css";
+import { getI18n, type Lang } from "@/i18n";
 
 // PERFORMANCE FIX: Removed manual @fontsource imports.
 // These are handled by 'experimental.fonts' in astro.config.ts.
@@ -20,6 +21,9 @@ import Analytics from "@/components/features/Analytics.astro";
 // FIX: Access the environment variable directly
 const PUBLIC_GOOGLE_SITE_VERIFICATION = import.meta.env
   .PUBLIC_GOOGLE_SITE_VERIFICATION;
+
+// Get translations for current locale
+const { t } = getI18n(Astro.currentLocale as Lang);
 
 // The props interface remains the same, as it's the public API for the layout.
 export interface Props {
@@ -124,7 +128,7 @@ const structuredData = {
 
   <body>
     <!-- WCAG 2.4.1: Skip to Main Content link for keyboard navigation -->
-    <a href="#main-content" class="skip-link"> Skip to main content </a>
+    <a href="#main-content" class="skip-link"> {t("nav.skipToContent")} </a>
 
     <slot />
 

@@ -11,6 +11,7 @@
  * - Optimized hover/focus states with reduced motion support
  * - Semantic HTML with proper heading hierarchy
  * - Accessible: proper focus states, ARIA labels
+ * - i18n: All UI strings are translated
  *
  * @example
  * <PostSummaryCard
@@ -24,6 +25,7 @@ import { slugifyStr } from "@/utils/core";
 import { calculateReadingTimeFromWords, formatReadingTime } from "@/utils/post";
 import Datetime from "./Datetime.astro";
 import ReadingTime from "./ReadingTime.astro";
+import { getI18n, type Lang } from "@/i18n";
 
 export interface Props {
   title: string;
@@ -50,6 +52,9 @@ const {
   tags = [],
   featured = false,
 } = Astro.props;
+
+// Get translations for current locale
+const { t } = getI18n(Astro.currentLocale as Lang);
 
 // Polymorphic Heading for semantic flexibility
 const Heading = variant;
@@ -80,7 +85,7 @@ const hiddenTagsCount = tags.length - MAX_TAGS;
         featured && (
           <div class="post-card__badge">
             <span aria-hidden="true">✨</span>
-            <span>Featured</span>
+            <span>{t("post.featured")}</span>
           </div>
         )
       }
