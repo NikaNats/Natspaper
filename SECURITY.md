@@ -45,7 +45,6 @@ frame-ancestors 'none';
 | Google Fonts      | `fonts.googleapis.com`           | CSP-restricted                      |
 | Sentry Monitoring | `https://o*.ingest.de.sentry.io` | CSP-restricted to specific endpoint |
 | KaTeX Math        | Bundled locally                  | No external dependency              |
-| Pagefind Search   | Self-hosted                      | No external dependency              |
 
 ### Input Handling
 

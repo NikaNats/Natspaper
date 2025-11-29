@@ -49,7 +49,6 @@ export interface FeatureDefinition {
  */
 export type FeatureKey =
   | "darkMode"
-  | "search"
   | "comments"
   | "newsletter"
   | "relatedPosts"
@@ -72,11 +71,6 @@ export const FeatureRegistry: Record<FeatureKey, FeatureDefinition> = {
     description: "Light/Dark mode toggle",
     defaultEnabled: FEATURES.lightAndDarkMode,
     envKey: "PUBLIC_FEATURE_DARK_MODE",
-  },
-  search: {
-    description: "Full-text search via Pagefind",
-    defaultEnabled: true,
-    envKey: "PUBLIC_FEATURE_SEARCH",
   },
   comments: {
     description: "Giscus comment system",

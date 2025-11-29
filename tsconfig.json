@@ -1,14 +1,7 @@
 {
   "extends": "astro/tsconfigs/strict",
-  "include": [".astro/types.d.ts", "pagefind.d.ts", "**/*"],
-  "exclude": [
-    "dist",
-    "public/pagefind",
-    "coverage",
-    ".astro",
-    ".sonda",
-    "node_modules"
-  ],
+  "include": [".astro/types.d.ts", "**/*"],
+  "exclude": ["dist", "coverage", ".astro", ".sonda", "node_modules"],
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {

@@ -157,23 +157,6 @@ class AnalyticsService {
   }
 
   /**
-   * Track search event
-   *
-   * @param searchQuery - Search query string
-   * @param resultCount - Number of search results (optional)
-   */
-  public trackSearch(searchQuery: string, resultCount?: number): void {
-    provider.track({
-      name: "search",
-      params: {
-        search_term: searchQuery,
-        language: this.locale,
-        ...(resultCount !== undefined && { result_count: resultCount }),
-      },
-    });
-  }
-
-  /**
    * Track tag exploration
    *
    * @param tagName - Name of the tag
@@ -215,7 +198,6 @@ class AnalyticsService {
     if (pathWithoutLocale.includes("/posts/")) return "blog";
     if (pathWithoutLocale.includes("/tags/")) return "tags";
     if (pathWithoutLocale.includes("/archives/")) return "archives";
-    if (pathWithoutLocale.includes("/search/")) return "search";
     return "home";
   }
 }
@@ -240,8 +222,6 @@ export const trackTimeOnPage = (pagePath: string, timeSeconds: number) =>
   analyticsService.trackTimeOnPage(pagePath, timeSeconds);
 export const trackLanguageSwitch = (fromLanguage: string, toLanguage: string) =>
   analyticsService.trackLanguageSwitch(fromLanguage, toLanguage);
-export const trackSearch = (searchQuery: string, resultCount?: number) =>
-  analyticsService.trackSearch(searchQuery, resultCount);
 export const trackTagView = (tagName: string) =>
   analyticsService.trackTagView(tagName);
 export const setUserLanguageProperty = (locale: string) =>

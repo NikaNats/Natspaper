@@ -32,16 +32,15 @@ This project is built on three pillars: performance, quality, and experience.
 
 ## Features at a Glance
 
-| Feature                         | Description                                                                                               |
-| :------------------------------ | :-------------------------------------------------------------------------------------------------------- |
-| **⚡️ Instant Performance**     | Statically-generated HTML with Astro. No server, no database, no lag.                                     |
-| **✍️ Flawless LaTeX Rendering** | Server-side KaTeX rendering for beautiful, accessible math equations (`$E=mc^2$`).                        |
-| **🎨 FOUC-Free Dark Mode**      | Automatic theme detection with persistence. A critical inline script prevents any "flash" on page load.   |
-| **🌐 Advanced i18n Support**    | SEO-friendly routing for multiple languages (`/en/`, `/ka/`) with automatic browser language detection.   |
-| **🖼️ Dynamic OG Images**        | Automatically generates beautiful social media preview cards for every post, enhancing shareability.      |
-| **🔒 Hardened Security**        | Strict Content Security Policy (CSP) and other security headers configured for production environments.   |
-| **🔍 Blazing-Fast Search**      | Client-side full-text search powered by Pagefind, delivering instant results without a server round-trip. |
-| **✅ Comprehensive Testing**    | Unit, integration, and E2E tests with Vitest and Playwright ensure exceptional code quality.              |
+| Feature                         | Description                                                                                             |
+| :------------------------------ | :------------------------------------------------------------------------------------------------------ |
+| **⚡️ Instant Performance**     | Statically-generated HTML with Astro. No server, no database, no lag.                                   |
+| **✍️ Flawless LaTeX Rendering** | Server-side KaTeX rendering for beautiful, accessible math equations (`$E=mc^2$`).                      |
+| **🎨 FOUC-Free Dark Mode**      | Automatic theme detection with persistence. A critical inline script prevents any "flash" on page load. |
+| **🌐 Advanced i18n Support**    | SEO-friendly routing for multiple languages (`/en/`, `/ka/`) with automatic browser language detection. |
+| **🖼️ Dynamic OG Images**        | Automatically generates beautiful social media preview cards for every post, enhancing shareability.    |
+| **🔒 Hardened Security**        | Strict Content Security Policy (CSP) and other security headers configured for production environments. |
+| **✅ Comprehensive Testing**    | Unit, integration, and E2E tests with Vitest and Playwright ensure exceptional code quality.            |
 
 ## 🚀 Getting Started
 

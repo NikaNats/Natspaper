@@ -43,7 +43,6 @@ const contentByLocale: Record<
     subheading: string;
     tryText: string;
     homepage: string;
-    search: string;
     browse: string;
     archives: string;
   }
@@ -54,7 +53,6 @@ const contentByLocale: Record<
     subheading: "Page Not Found",
     tryText: "Try one of these instead:",
     homepage: "Go to Homepage",
-    search: "Search Articles",
     browse: "Browse All Posts",
     archives: "View Archives",
   },
@@ -64,7 +62,6 @@ const contentByLocale: Record<
     subheading: "გვერდი ვერ მოიძებნა",
     tryText: "სცადეთ ერთი ამ ვარიანტებიდან:",
     homepage: "მთავარ გვერდზე",
-    search: "სტატიების ძებნა",
     browse: "ყველა პოსტის დათვალიერება",
     archives: "არქივის ნახვა",
   },
@@ -128,27 +125,6 @@ const content = contentByLocale[locale];
               <polyline points="9 22 9 12 15 12 15 22"></polyline>
             </svg>
             {content.homepage}
-          </LinkButton>
-        </li>
-        <li>
-          <LinkButton
-            href={`/${locale}/search/`}
-            class="flex w-full items-center justify-center gap-2 rounded-lg border border-border bg-muted px-4 py-3 transition-colors hover:border-accent hover:bg-accent/10"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              class="h-5 w-5"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <circle cx="11" cy="11" r="8"></circle>
-              <path d="m21 21-4.3-4.3"></path>
-            </svg>
-            {content.search}
           </LinkButton>
         </li>
         <li>

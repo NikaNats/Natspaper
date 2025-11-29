@@ -6,7 +6,6 @@
  * 2. Other requests → return 404
  *
  * This prevents 404 warnings from:
- * - Pagefind search indexing that might try to access markdown files
  * - External tools or crawlers that reference the original file names
  * - Search engines attempting to index raw markdown
  */

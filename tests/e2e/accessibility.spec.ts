@@ -169,43 +169,6 @@ test.describe("Accessibility - Individual Post", () => {
   });
 });
 
-test.describe("Accessibility - Search Page", () => {
-  test("should have accessible search input", async ({ page }) => {
-    await page.goto("/en/search");
-    await page.waitForLoadState("networkidle");
-    await page.waitForSelector(".pagefind-ui", { timeout: 10000 });
-
-    const accessibilityScanResults = await new AxeBuilder({ page })
-      .include('[data-testid="search-container"]')
-      .analyze();
-
-    const criticalViolations = accessibilityScanResults.violations.filter(
-      violation => violation.impact === "critical"
-    );
-
-    expect(criticalViolations).toHaveLength(0);
-  });
-
-  test("should have accessible form elements", async ({ page }) => {
-    await page.goto("/en/search");
-    await page.waitForLoadState("networkidle");
-    await page.waitForSelector(".pagefind-ui", { timeout: 10000 });
-
-    const accessibilityScanResults = await new AxeBuilder({ page })
-      .withRules(["label", "autocomplete-valid"])
-      .analyze();
-
-    // Filter out any violations that are from third-party Pagefind
-    const ourViolations = accessibilityScanResults.violations.filter(
-      violation => !violation.nodes.some(node => 
-        node.html.includes("pagefind")
-      )
-    );
-
-    expect(ourViolations).toHaveLength(0);
-  });
-});
-
 test.describe("Accessibility - Dark Mode", () => {
   test("should have accessible color contrast in dark mode", async ({
     page,

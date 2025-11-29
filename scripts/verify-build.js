@@ -55,7 +55,6 @@ const REQUIRED_ASSET_DIRS = [
 // Optional but important files
 const IMPORTANT_ARTIFACTS = [
   "dist/en/rss.xml",
-  "dist/pagefind/pagefind.js", // Search index
 ];
 
 console.log("🔍 Verifying build artifacts...\n");

@@ -9,7 +9,6 @@
     "build:prod": "cross-env NODE_ENV=production astro check && astro build && npm run verify-build",
     "preview": "cross-env NODE_ENV=production astro preview",
     "verify-build": "node scripts/verify-build.js",
-    "copy-pagefind": "node scripts/copy-pagefind.js",
     "sync": "astro sync",
     "astro": "astro",
     "format:check": "prettier --check .",
@@ -58,7 +57,6 @@
   "devDependencies": {
     "@astrojs/check": "^0.9.5",
     "@axe-core/playwright": "^4.11.0",
-    "@pagefind/default-ui": "^1.4.0",
     "@playwright/test": "^1.57.0",
     "@shikijs/transformers": "^3.15.0",
     "@tailwindcss/typography": "^0.5.19",
@@ -70,7 +68,6 @@
     "eslint-plugin-astro": "^1.5.0",
     "globals": "^16.5.0",
     "happy-dom": "^20.0.10",
-    "pagefind": "^1.4.0",
     "prettier": "^3.6.2",
     "prettier-plugin-astro": "^0.14.1",
     "prettier-plugin-tailwindcss": "^0.7.1",
