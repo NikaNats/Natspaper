@@ -1,5 +1,73 @@
 /* src/styles/components.css */
 @layer components {
+  /* ==========================================================================
+     SHARED INTERFACE UTILITIES
+     ==========================================================================
+     Reusable interaction patterns that ensure consistency across the design system.
+     Apply these to any interactive element for unified behavior.
+     ========================================================================== */
+
+  /**
+   * Interactive Focus Ring
+   * Standardized focus indicator for accessibility compliance.
+   * Use on: buttons, links, form inputs, cards.
+   */
+  .interactive-focus {
+    @apply focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none;
+  }
+
+  /**
+   * Card Hover Effect
+   * Subtle lift and shadow for interactive cards.
+   * Use on: post cards, feature cards, clickable containers.
+   */
+  .card-hover {
+    @apply transition-all duration-200;
+    &:hover {
+      @apply mouse:-translate-y-0.5 mouse:shadow-lg mouse:shadow-accent/5;
+    }
+  }
+
+  /**
+   * Interactive Surface
+   * Combined background, border, and hover state for clickable surfaces.
+   * Use on: dropdown items, menu items, list items.
+   */
+  .interactive-surface {
+    @apply transition-colors duration-150;
+    &:hover {
+      @apply bg-muted/50;
+    }
+    &:active {
+      @apply bg-muted;
+    }
+  }
+
+  /**
+   * Text Link Hover
+   * Standard text hover effect with accent underline.
+   * Use on: inline links, navigation items.
+   */
+  .text-link-hover {
+    @apply transition-colors duration-150;
+    &:hover {
+      @apply text-accent;
+    }
+  }
+
+  /**
+   * Button Press Effect
+   * Subtle scale on active/pressed state.
+   * Use on: buttons, icon buttons, toggles.
+   */
+  .button-press {
+    @apply transition-transform duration-100 active:scale-[0.98];
+  }
+
+  /* ==========================================================================
+     LAYOUT COMPONENTS
+     ========================================================================== */
+
   /* Layout */
   header {
     @apply relative z-50 w-full bg-transparent transition-colors duration-300;
@@ -17,6 +85,10 @@
   main > * + * {
     @apply mt-8;
   }
+
+  /* ==========================================================================
+     POST COMPONENTS
+     ========================================================================== */
 
   /* Post Cards */
   .post-entry {
@@ -59,6 +131,10 @@
     @apply flex items-center gap-3 text-sm font-medium text-text-secondary;
   }
 
+  /* ==========================================================================
+     NAVIGATION COMPONENTS
+     ========================================================================== */
+
   /* Navigation */
   .pagination {
     @apply my-12 flex list-none justify-center gap-4 p-0;
@@ -76,6 +152,10 @@
   .active-nav {
     @apply font-medium text-accent underline decoration-wavy decoration-2 underline-offset-4;
   }
+
+  /* ==========================================================================
+     UI ELEMENTS
+     ========================================================================== */
 
   /* Elements */
   .tag {

@@ -1,0 +1,88 @@
+---
+/**
+ * Container Component - Layout Primitive
+ * =======================================
+ * A centralized layout container that provides consistent max-widths,
+ * padding, and centering across all pages.
+ *
+ * DESIGN PATTERN: Atomic Design - Atom (Layout)
+ * - DRY: Replace repeated `max-w-3xl mx-auto px-4` patterns
+ * - Single source of truth: Change layout once, updates everywhere
+ * - Responsive: Fluid padding that scales with viewport
+ *
+ * SIZE PRESETS:
+ * - xs: 32rem (512px) - Tight content like forms
+ * - sm: 40rem (640px) - Narrow prose
+ * - md: 48rem (768px) - Default readable content
+ * - lg: 64rem (1024px) - Wide content
+ * - xl: 80rem (1280px) - Dashboard layouts
+ * - full: 100% - Edge-to-edge with fluid padding
+ *
+ * @example
+ * ```astro
+ * <Container size="md">
+ *   <h1>Page Title</h1>
+ *   <p>Content here...</p>
+ * </Container>
+ *
+ * <Container size="lg" padding="lg">
+ *   <Grid cols="3">...</Grid>
+ * </Container>
+ * ```
+ */
+
+export interface Props {
+  /** Max-width preset */
+  size?: "xs" | "sm" | "md" | "lg" | "xl" | "full";
+  /** Horizontal padding preset */
+  padding?: "none" | "sm" | "md" | "lg";
+  /** Center content horizontally */
+  center?: boolean;
+  /** HTML element to render */
+  as?: "div" | "section" | "article" | "main" | "aside";
+  /** Additional CSS classes */
+  class?: string;
+  /** HTML id */
+  id?: string;
+}
+
+const {
+  size = "md",
+  padding = "md",
+  center = true,
+  as: Element = "div",
+  class: className = "",
+  id,
+} = Astro.props;
+
+// Size mappings using CSS custom properties for consistency
+const sizeClasses: Record<NonNullable<Props["size"]>, string> = {
+  xs: "max-w-lg", // 32rem / 512px
+  sm: "max-w-xl", // 36rem / 576px
+  md: "max-w-3xl", // 48rem / 768px (matches --main-width)
+  lg: "max-w-5xl", // 64rem / 1024px
+  xl: "max-w-7xl", // 80rem / 1280px
+  full: "max-w-full", // 100%
+};
+
+// Padding mappings (fluid scaling)
+const paddingClasses: Record<NonNullable<Props["padding"]>, string> = {
+  none: "px-0",
+  sm: "px-3 sm:px-4",
+  md: "px-4 sm:px-6 lg:px-8",
+  lg: "px-6 sm:px-8 lg:px-12",
+};
+---
+
+<Element
+  id={id}
+  class:list={[
+    "w-full",
+    sizeClasses[size],
+    paddingClasses[padding],
+    center && "mx-auto",
+    className,
+  ]}
+>
+  <slot />
+</Element>

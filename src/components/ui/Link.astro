@@ -1,0 +1,155 @@
+---
+/**
+ * Link Atom - Design System Foundation
+ * =====================================
+ * A standardized link component that handles all anchor-related concerns:
+ * external links, hover states, and accessible indicators.
+ *
+ * DESIGN PATTERN: Atomic Design - Atom
+ * - Context agnostic: Works in nav, cards, prose, footers
+ * - Prop driven: Variants, underline behavior, external indicators
+ * - Accessible: Focus states, external link announcements
+ *
+ * FEATURES:
+ * - Auto-detects external links and adds security attributes
+ * - Optional external link indicator icon
+ * - Multiple underline behaviors
+ * - Color variants for different contexts
+ *
+ * @example
+ * ```astro
+ * <Link href="/about">Internal Link</Link>
+ * <Link href="https://github.com" external>GitHub</Link>
+ * <Link href="/posts" variant="muted" underline="hover">View Posts</Link>
+ * ```
+ */
+
+export interface Props {
+  /** Link destination */
+  href: string;
+  /** Color variant */
+  variant?: "default" | "accent" | "muted" | "inherit";
+  /** Underline behavior */
+  underline?: "always" | "hover" | "none";
+  /** Force external link treatment */
+  external?: boolean;
+  /** Show external link indicator icon */
+  showExternalIcon?: boolean;
+  /** Additional CSS classes */
+  class?: string;
+  /** Accessible label */
+  "aria-label"?: string;
+  /** HTML id */
+  id?: string;
+  /** Title tooltip */
+  title?: string;
+  /** Custom rel attribute (overrides auto-detection) */
+  rel?: string;
+  /** Open in new tab */
+  target?: "_blank" | "_self" | "_parent" | "_top";
+}
+
+const {
+  href,
+  variant = "default",
+  underline = "always",
+  external,
+  showExternalIcon = true,
+  class: className = "",
+  "aria-label": ariaLabel,
+  id,
+  title,
+  rel,
+  target,
+} = Astro.props;
+
+// Auto-detect external links
+function isExternalLink(): boolean {
+  if (external !== undefined) return external;
+  if (!href) return false;
+  try {
+    const url = new URL(href, Astro.url.origin);
+    return url.origin !== Astro.url.origin;
+  } catch {
+    return false;
+  }
+}
+
+const isExternal = isExternalLink();
+
+// Compute security attributes for external links
+function computeRel(): string | undefined {
+  if (rel) return rel;
+  if (isExternal) {
+    return "noopener noreferrer";
+  }
+  return undefined;
+}
+
+function computeTarget(): string | undefined {
+  if (target) return target;
+  if (isExternal) return "_blank";
+  return undefined;
+}
+
+// Variant styles
+const variantClasses: Record<NonNullable<Props["variant"]>, string> = {
+  default: "text-foreground hover:text-accent",
+  accent: "text-accent hover:text-accent/80",
+  muted: "text-text-secondary hover:text-foreground",
+  inherit: "text-inherit hover:text-accent",
+};
+
+// Underline styles
+const underlineClasses: Record<NonNullable<Props["underline"]>, string> = {
+  always:
+    "underline decoration-accent/50 underline-offset-2 hover:decoration-accent",
+  hover:
+    "no-underline hover:underline hover:decoration-accent hover:underline-offset-2",
+  none: "no-underline",
+};
+
+const computedRel = computeRel();
+const computedTarget = computeTarget();
+---
+
+<a
+  id={id}
+  href={href}
+  class:list={[
+    // Base styles
+    "inline-flex items-center gap-1",
+    "transition-colors duration-200",
+    "focus-visible:rounded-sm focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:outline-none",
+    // Variant
+    variantClasses[variant],
+    // Underline
+    underlineClasses[underline],
+    className,
+  ]}
+  rel={computedRel}
+  target={computedTarget}
+  aria-label={ariaLabel}
+  title={title}
+>
+  <slot />
+  {
+    isExternal && showExternalIcon && (
+      <svg
+        class="inline-block size-3.5 shrink-0 opacity-60"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+        <polyline points="15 3 21 3 21 9" />
+        <line x1="10" y1="14" x2="21" y2="3" />
+      </svg>
+    )
+  }
+  {isExternal && <span class="sr-only">(opens in new tab)</span>}
+</a>

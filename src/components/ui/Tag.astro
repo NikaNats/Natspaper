@@ -1,0 +1,191 @@
+---
+/**
+ * Tag Atom - Design System Foundation
+ * ====================================
+ * A reusable tag/pill component for categories, labels, and taxonomies.
+ *
+ * DESIGN PATTERN: Atomic Design - Atom
+ * - Context agnostic: Works in post cards, tag pages, filters
+ * - Prop driven: Size, variant, and interaction controlled via props
+ * - Accessible: Proper focus states, semantic markup
+ *
+ * VARIANTS:
+ * - default: Muted background, subtle appearance
+ * - accent: Accent-colored for emphasis
+ * - outline: Border only, transparent background
+ *
+ * SIZES:
+ * - xs: Inline metadata (post cards)
+ * - sm: Default tag size
+ * - md: Prominent tags (tag pages)
+ * - lg: Featured/hero tags
+ *
+ * @example
+ * ```astro
+ * <Tag>JavaScript</Tag>
+ * <Tag href="/tags/react" variant="accent" size="sm">React</Tag>
+ * <Tag variant="outline" size="xs" removable onRemove={...}>Filter</Tag>
+ * ```
+ */
+
+export interface Props {
+  /** Link destination (makes tag clickable) */
+  href?: string;
+  /** Visual variant */
+  variant?: "default" | "accent" | "outline";
+  /** Size preset */
+  size?: "xs" | "sm" | "md" | "lg";
+  /** Show hash icon prefix */
+  showHash?: boolean;
+  /** Tag count badge */
+  count?: number;
+  /** Additional CSS classes */
+  class?: string;
+  /** View transition name */
+  transitionName?: string;
+  /** Interactive hover effects */
+  interactive?: boolean;
+}
+
+const {
+  href,
+  variant = "default",
+  size = "sm",
+  showHash = false,
+  count,
+  class: className = "",
+  transitionName,
+  interactive = !!href,
+} = Astro.props;
+
+// Determine element type
+const Element = href ? "a" : "span";
+
+// Size mappings
+const sizeClasses: Record<
+  NonNullable<Props["size"]>,
+  {
+    wrapper: string;
+    text: string;
+    icon: string;
+    count: string;
+  }
+> = {
+  xs: {
+    wrapper: "px-1.5 py-0.5 gap-0.5",
+    text: "text-xs",
+    icon: "size-2.5",
+    count: "text-[10px] px-1",
+  },
+  sm: {
+    wrapper: "px-2.5 py-1 gap-1",
+    text: "text-xs",
+    icon: "size-3",
+    count: "text-xs px-1.5",
+  },
+  md: {
+    wrapper: "px-3.5 py-1.5 gap-1.5",
+    text: "text-sm",
+    icon: "size-4",
+    count: "text-xs px-2",
+  },
+  lg: {
+    wrapper: "px-4 py-2 gap-2",
+    text: "text-base",
+    icon: "size-5",
+    count: "text-sm px-2.5",
+  },
+};
+
+// Variant mappings
+const variantClasses: Record<
+  NonNullable<Props["variant"]>,
+  {
+    base: string;
+    hover: string;
+    focus: string;
+  }
+> = {
+  default: {
+    base: "bg-muted/50 text-text-secondary border-transparent",
+    hover: "hover:bg-accent/10 hover:text-accent hover:border-accent/20",
+    focus:
+      "focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/20",
+  },
+  accent: {
+    base: "bg-accent/10 text-accent border-accent/20",
+    hover: "hover:bg-accent/20 hover:border-accent/40",
+    focus: "focus-visible:ring-2 focus-visible:ring-accent/30",
+  },
+  outline: {
+    base: "bg-transparent text-text-secondary border-border",
+    hover: "hover:border-accent hover:text-accent hover:bg-accent/5",
+    focus:
+      "focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/20",
+  },
+};
+
+const currentSize = sizeClasses[size];
+const currentVariant = variantClasses[variant];
+---
+
+<Element
+  href={href}
+  class:list={[
+    // Base layout
+    "inline-flex items-center rounded-full border no-underline",
+    currentSize.wrapper,
+    currentSize.text,
+    // Variant colors
+    currentVariant.base,
+    // Interactive states
+    interactive && currentVariant.hover,
+    interactive && currentVariant.focus,
+    interactive && "cursor-pointer transition-all duration-200",
+    // Focus outline
+    "focus-visible:outline-none",
+    className,
+  ]}
+  transition:name={transitionName}
+>
+  {
+    showHash && (
+      <svg
+        class:list={[
+          "opacity-50 transition-opacity duration-200",
+          interactive && "group-hover:opacity-100",
+          currentSize.icon,
+        ]}
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <line x1="4" y1="9" x2="20" y2="9" />
+        <line x1="4" y1="15" x2="20" y2="15" />
+        <line x1="10" y1="3" x2="8" y2="21" />
+        <line x1="16" y1="3" x2="14" y2="21" />
+      </svg>
+    )
+  }
+
+  <span class="font-medium tracking-wide">
+    <slot />
+  </span>
+
+  {
+    count !== undefined && (
+      <span
+        class:list={[
+          "rounded-full bg-background/50 font-medium tabular-nums",
+          currentSize.count,
+        ]}
+      >
+        {count}
+      </span>
+    )
+  }
+</Element>

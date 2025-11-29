@@ -1,35 +1,77 @@
 /**
- * UI Component Library
- * ====================
- * Reusable, dumb/presentational components following SOLID principles.
+ * UI Component Library - Design System Exports
+ * =============================================
+ * Atomic Design-based component library following SOLID principles.
  *
- * DESIGN PHILOSOPHY:
- * - All components are "dumb" - they handle presentation only
- * - Data fetching happens in pages/smart components
- * - Components are composed together, not inherited
- * - Extensibility via props and slots, not modification
+ * COMPONENT CATEGORIES:
+ *
+ * ATOMS (Basic Building Blocks):
+ * - Button: Primary action element with variants
+ * - Link: Standardized anchor with external handling
+ * - Icon: Unified SVG icon system
+ * - Tag: Category/label pill component
+ *
+ * LAYOUT ATOMS:
+ * - Container: Centralized max-width/padding
+ * - Grid: Responsive grid system
+ * - Card: Flexible content container
+ * - Section: Semantic section wrapper
  *
  * USAGE:
  * ```astro
- * import { Grid, Card, Section } from '@/components/ui';
+ * import { Button, Link, Icon, Tag, Container, Grid, Card, Section } from '@/components/ui';
  *
- * <Section title="Latest Posts">
- *   <Grid cols="responsive">
- *     {posts.map(post => (
- *       <Card variant="elevated" interactive>
- *         <PostContent {...post} />
+ * <Container size="md">
+ *   <Section title="Featured">
+ *     <Grid cols="3">
+ *       <Card variant="elevated">
+ *         <Button variant="primary">Click Me</Button>
  *       </Card>
- *     ))}
- *   </Grid>
- * </Section>
+ *     </Grid>
+ *   </Section>
+ * </Container>
  * ```
  */
 
+// =============================================================================
+// ATOMS - Basic Building Blocks
+// =============================================================================
+
+export { default as Button } from "./Button.astro";
+export { default as Link } from "./Link.astro";
+export { default as Icon } from "./Icon.astro";
+export { default as Tag } from "./Tag.astro";
+
+// =============================================================================
+// LAYOUT ATOMS
+// =============================================================================
+
+export { default as Container } from "./Container.astro";
 export { default as Grid } from "./Grid.astro";
 export { default as Card } from "./Card.astro";
 export { default as Section } from "./Section.astro";
 
-// Re-export types for external use
+// =============================================================================
+// UTILITY COMPONENTS
+// =============================================================================
+
+export { default as Hr } from "./Hr.astro";
+export { default as LinkButton } from "./LinkButton.astro";
+export { default as BackButton } from "./BackButton.astro";
+export { default as Breadcrumb } from "./Breadcrumb.astro";
+export { default as LocaleBadge } from "./LocaleBadge.astro";
+export { default as Pagination } from "./Pagination.astro";
+export { default as ErrorBoundary } from "./ErrorBoundary.astro";
+
+// =============================================================================
+// TYPE EXPORTS
+// =============================================================================
+
+export type { Props as ButtonProps } from "./Button.astro";
+export type { Props as LinkProps } from "./Link.astro";
+export type { Props as IconProps, IconName } from "./Icon.astro";
+export type { Props as TagProps } from "./Tag.astro";
+export type { Props as ContainerProps } from "./Container.astro";
 export type { Props as GridProps } from "./Grid.astro";
 export type { Props as CardProps } from "./Card.astro";
 export type { Props as SectionProps } from "./Section.astro";

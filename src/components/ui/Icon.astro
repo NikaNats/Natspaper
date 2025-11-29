@@ -1,0 +1,136 @@
+---
+/**
+ * Icon Component - Design System Foundation
+ * ==========================================
+ * A unified icon system that dynamically loads SVG icons from the assets folder.
+ * Provides consistent sizing, coloring, and accessibility.
+ *
+ * DESIGN PATTERN: Atomic Design - Atom
+ * - Context agnostic: Works in buttons, nav, cards, anywhere
+ * - Prop driven: Size and color controlled via props or CSS
+ * - Accessible: aria-hidden by default, customizable labels
+ *
+ * ICON NAMING CONVENTION:
+ * - Icons are stored in src/assets/icons/Icon{Name}.svg
+ * - Use name prop without "Icon" prefix: name="ArrowLeft" → IconArrowLeft.svg
+ *
+ * SIZE PRESETS:
+ * - xs: 12px (inline text icons)
+ * - sm: 16px (buttons, compact UI)
+ * - md: 20px (default, most UI elements)
+ * - lg: 24px (headers, prominent icons)
+ * - xl: 32px (hero sections, empty states)
+ *
+ * @example
+ * ```astro
+ * <Icon name="ArrowLeft" size="md" />
+ * <Icon name="GitHub" class="text-accent" />
+ * <Icon name="Search" size="lg" aria-label="Search" />
+ * ```
+ */
+
+// Dynamic icon imports
+import IconArchive from "@/assets/icons/IconArchive.svg";
+import IconArrowLeft from "@/assets/icons/IconArrowLeft.svg";
+import IconArrowNarrowUp from "@/assets/icons/IconArrowNarrowUp.svg";
+import IconArrowRight from "@/assets/icons/IconArrowRight.svg";
+import IconBrandX from "@/assets/icons/IconBrandX.svg";
+import IconCalendar from "@/assets/icons/IconCalendar.svg";
+import IconChevronLeft from "@/assets/icons/IconChevronLeft.svg";
+import IconChevronRight from "@/assets/icons/IconChevronRight.svg";
+import IconClock from "@/assets/icons/IconClock.svg";
+import IconEdit from "@/assets/icons/IconEdit.svg";
+import IconFacebook from "@/assets/icons/IconFacebook.svg";
+import IconGitHub from "@/assets/icons/IconGitHub.svg";
+import IconHash from "@/assets/icons/IconHash.svg";
+import IconLinkedin from "@/assets/icons/IconLinkedin.svg";
+import IconMail from "@/assets/icons/IconMail.svg";
+import IconMenuDeep from "@/assets/icons/IconMenuDeep.svg";
+import IconMoon from "@/assets/icons/IconMoon.svg";
+import IconPinterest from "@/assets/icons/IconPinterest.svg";
+import IconRss from "@/assets/icons/IconRss.svg";
+import IconSearch from "@/assets/icons/IconSearch.svg";
+import IconSun from "@/assets/icons/IconSun.svg";
+import IconSunHigh from "@/assets/icons/IconSunHigh.svg";
+import IconTelegram from "@/assets/icons/IconTelegram.svg";
+import IconWhatsapp from "@/assets/icons/IconWhatsapp.svg";
+import IconX from "@/assets/icons/IconX.svg";
+
+// Icon registry
+const icons = {
+  Archive: IconArchive,
+  ArrowLeft: IconArrowLeft,
+  ArrowNarrowUp: IconArrowNarrowUp,
+  ArrowRight: IconArrowRight,
+  BrandX: IconBrandX,
+  Calendar: IconCalendar,
+  ChevronLeft: IconChevronLeft,
+  ChevronRight: IconChevronRight,
+  Clock: IconClock,
+  Edit: IconEdit,
+  Facebook: IconFacebook,
+  GitHub: IconGitHub,
+  Hash: IconHash,
+  Linkedin: IconLinkedin,
+  Mail: IconMail,
+  MenuDeep: IconMenuDeep,
+  Moon: IconMoon,
+  Pinterest: IconPinterest,
+  Rss: IconRss,
+  Search: IconSearch,
+  Sun: IconSun,
+  SunHigh: IconSunHigh,
+  Telegram: IconTelegram,
+  Whatsapp: IconWhatsapp,
+  X: IconX,
+} as const;
+
+export type IconName = keyof typeof icons;
+
+export interface Props {
+  /** Icon name (without "Icon" prefix) */
+  name: IconName;
+  /** Size preset */
+  size?: "xs" | "sm" | "md" | "lg" | "xl";
+  /** Additional CSS classes for custom sizing/coloring */
+  class?: string;
+  /** Accessible label (makes icon visible to screen readers) */
+  "aria-label"?: string;
+  /** Force aria-hidden state */
+  "aria-hidden"?: boolean;
+}
+
+const {
+  name,
+  size = "md",
+  class: className = "",
+  "aria-label": ariaLabel,
+  "aria-hidden": ariaHidden,
+} = Astro.props;
+
+// Size mappings
+const sizeClasses: Record<NonNullable<Props["size"]>, string> = {
+  xs: "size-3", // 12px
+  sm: "size-4", // 16px
+  md: "size-5", // 20px
+  lg: "size-6", // 24px
+  xl: "size-8", // 32px
+};
+
+// Get the icon component
+const IconComponent = icons[name];
+
+// Determine aria-hidden: true unless there's a label
+const isHidden = ariaHidden ?? !ariaLabel;
+---
+
+{
+  IconComponent && (
+    <IconComponent
+      class:list={["inline-block shrink-0", sizeClasses[size], className]}
+      aria-hidden={isHidden}
+      aria-label={ariaLabel}
+      role={ariaLabel ? "img" : undefined}
+    />
+  )
+}
