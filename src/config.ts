@@ -3,6 +3,7 @@ import type {
   FeaturesConfig,
   SocialLink,
   GiscusConfig,
+  NavigationItem,
 } from "./types";
 
 /**
@@ -103,7 +104,7 @@ export const SOCIALS: SocialLink[] = [
 
 // 4. Navigation Menu
 // Configures the main header menu
-export const NAVIGATION = [
+export const NAVIGATION: NavigationItem[] = [
   { href: "/posts", text: "nav.posts" },
   { href: "/tags", text: "nav.tags" },
   { href: "/archives", text: "nav.archives" },

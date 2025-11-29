@@ -1,5 +1,45 @@
 ---
-// This component contains all theme-related scripts and tags.
+/**
+ * ThemeManager Component
+ * ======================
+ * Handles dark/light mode with FOUC (Flash of Unstyled Content) prevention.
+ *
+ * ## Architecture Decision: Why Inline Scripts?
+ *
+ * We use `is:inline` scripts for theme detection because:
+ * 1. **Bundled scripts are deferred** - They execute after the DOM is painted,
+ *    which causes a visible flash when the theme doesn't match the default.
+ * 2. **Inline scripts execute synchronously** - They run before first paint,
+ *    allowing us to set the `data-theme` attribute before any styles are applied.
+ *
+ * ## How It Works:
+ *
+ * 1. `color-scheme: light dark` - Tells the browser to respect OS-level preferences
+ *    for form controls, scrollbars, and other native elements.
+ *
+ * 2. **Instant theme detection** (inline script):
+ *    - Checks localStorage for saved preference (user has toggled before)
+ *    - Falls back to `prefers-color-scheme` media query (OS preference)
+ *    - Sets `data-theme` attribute on `<html>` BEFORE first paint
+ *
+ * 3. **Theme toggle button** (deferred external script):
+ *    - Loaded from `/public/toggle-theme.js`
+ *    - Handles user interaction with the theme toggle
+ *    - Persists choice to localStorage
+ *
+ * ## CSS Integration:
+ *
+ * The theme is consumed via CSS custom properties in `global.css`:
+ * ```css
+ * html[data-theme="dark"] {
+ *   --background: #121212;
+ *   --foreground: #e0e0e0;
+ * }
+ * ```
+ *
+ * @see /public/toggle-theme.js - Theme toggle button logic
+ * @see src/styles/global.css - Theme color definitions
+ */
 ---
 
 <meta name="theme-color" content="" />
@@ -11,7 +51,11 @@
   }
 </style>
 
-<!-- Instant theme-setting script to prevent FOUC -->
+<!--
+  CRITICAL: This script MUST be inline to prevent FOUC.
+  It runs synchronously before first paint.
+  DO NOT convert to a bundled script.
+-->
 <script is:inline>
   (function () {
     // First, check if user has a saved theme preference
