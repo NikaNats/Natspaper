@@ -91,14 +91,70 @@
 
     /* Tables */
     table {
-      @apply my-6 w-full border-collapse text-left;
-      th,
-      td {
-        @apply border border-border p-3 align-top;
+      /* 
+       * 1. LAYOUT TRANSFORMATION
+       * Change from 'table' to 'block' to allow the container 
+       * to respect the parent's width constraints.
+       */
+      display: block;
+
+      /* 
+       * 2. SCROLL CONTAINMENT
+       * If content exceeds width, show scrollbar on the TABLE only,
+       * not the whole page.
+       */
+      overflow-x: auto;
+
+      /* 
+       * 3. UX OPTIMIZATION
+       * Prevent text from wrapping aggressively. This ensures the table
+       * keeps its shape and encourages the user to scroll, rather than
+       * seeing a tall, squashed table.
+       */
+      white-space: nowrap;
+
+      /* 
+       * 4. IOS NATIVE FEEL
+       * Enables momentum/inertial scrolling on iPhones/iPads.
+       * Without this, scrolling feels "sticky" and broken.
+       */
+      -webkit-overflow-scrolling: touch;
+
+      /* 
+       * 5. VISUAL RESET
+       * Ensure the block fills the available space.
+       */
+      width: 100%;
+      margin-top: 1.5rem;
+      margin-bottom: 1.5rem;
+      border-collapse: collapse;
+      text-align: left;
+
+      /* 
+       * 6. MOBILE BLEED INTEGRATION (Your Existing Logic)
+       * This logic now works safely because overflow-x handles the excess width.
+       */
+      @media (max-width: 640px) {
+        --bleed-margin: calc(var(--layout-padding-fluid, 1rem) * -1);
+
+        margin-left: var(--bleed-margin);
+        margin-right: var(--bleed-margin);
+
+        /* Recalculate width to account for the negative margins */
+        width: calc(100% + var(--layout-padding-fluid, 1rem) * 2);
+
+        border-radius: 0;
+        border-left: none;
+        border-right: none;
       }
-      th {
-        @apply bg-muted/30 font-semibold;
-      }
+    }
+
+    table th,
+    table td {
+      @apply border border-border p-3 align-top;
+    }
+    table th {
+      @apply bg-muted/30 font-semibold;
     }
 
     blockquote {
@@ -288,8 +344,7 @@
       */
       figure,
       .astro-code,
-      pre,
-      table {
+      pre {
         --bleed-margin: calc(var(--layout-padding-fluid, 1rem) * -1);
         margin-inline: var(--bleed-margin);
         width: calc(100% + var(--layout-padding-fluid, 1rem) * 2);
@@ -315,14 +370,6 @@
       figcaption {
         padding-inline: 0;
         font-size: 0.8125rem;
-      }
-
-      /* Compact table for mobile */
-      table {
-        th,
-        td {
-          @apply p-2 text-xs;
-        }
       }
     }
 
