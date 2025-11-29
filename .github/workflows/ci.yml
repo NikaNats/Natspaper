@@ -34,9 +34,12 @@ jobs:
 
       - name: Detect Changed Files
         id: changes
+        env:
+          BASE_REF: ${{ github.base_ref }}
         run: |
           # Detect what type of files changed
-          git diff --name-only origin/${{ github.base_ref }}...HEAD > changed_files.txt
+          # Using env var to prevent script injection via branch names
+          git diff --name-only "origin/${BASE_REF}...HEAD" > changed_files.txt
 
           # Check for code changes
           if grep -qE '\.(ts|tsx|js|jsx|astro|vue)$' changed_files.txt; then
@@ -327,12 +330,23 @@ jobs:
     timeout-minutes: 2
     steps:
       - name: Check Job Status
+        env:
+          CODE_QUALITY_RESULT: ${{ needs.code-quality.result }}
+          SECURITY_RESULT: ${{ needs.security-audit.result }}
+          UNIT_TESTS_RESULT: ${{ needs.unit-tests.result }}
+          BUILD_RESULT: ${{ needs.build-verification.result }}
+          E2E_RESULT: ${{ needs.e2e-tests.result }}
+          HEAD_REF: ${{ github.head_ref }}
+          BASE_REF: ${{ github.base_ref }}
+          REPO: ${{ github.repository }}
+          COMMIT_SHA: ${{ github.sha }}
+          ACTOR: ${{ github.actor }}
         run: |
-          CODE_QUALITY="${{ needs.code-quality.result }}"
-          SECURITY="${{ needs.security-audit.result }}"
-          UNIT_TESTS="${{ needs.unit-tests.result }}"
-          BUILD="${{ needs.build-verification.result }}"
-          E2E="${{ needs.e2e-tests.result }}"
+          CODE_QUALITY="$CODE_QUALITY_RESULT"
+          SECURITY="$SECURITY_RESULT"
+          UNIT_TESTS="$UNIT_TESTS_RESULT"
+          BUILD="$BUILD_RESULT"
+          E2E="$E2E_RESULT"
 
           {
             echo "### 🔍 CI Validation Summary"
@@ -353,10 +367,10 @@ jobs:
             
             echo ""
             echo "**PR Information:**"
-            echo "- Branch: \`${{ github.head_ref }}\`"
-            echo "- Target: \`${{ github.base_ref }}\`"
-            echo "- Commit: [\`${GITHUB_SHA:0:7}\`](https://github.com/${{ github.repository }}/commit/${{ github.sha }})"
-            echo "- Author: @${{ github.actor }}"
+            echo "- Branch: \`${HEAD_REF}\`"
+            echo "- Target: \`${BASE_REF}\`"
+            echo "- Commit: [\`${COMMIT_SHA:0:7}\`](https://github.com/${REPO}/commit/${COMMIT_SHA})"
+            echo "- Author: @${ACTOR}"
           } >> $GITHUB_STEP_SUMMARY
 
           # Fail if any required job failed
@@ -379,12 +393,18 @@ jobs:
     timeout-minutes: 1
     steps:
       - name: Verify All Jobs Succeeded
+        env:
+          CODE_QUALITY_RESULT: ${{ needs.code-quality.result }}
+          SECURITY_RESULT: ${{ needs.security-audit.result }}
+          UNIT_TESTS_RESULT: ${{ needs.unit-tests.result }}
+          BUILD_RESULT: ${{ needs.build-verification.result }}
+          E2E_RESULT: ${{ needs.e2e-tests.result }}
         run: |
-          if [ "${{ needs.code-quality.result }}" != "success" ] || \
-             [ "${{ needs.security-audit.result }}" != "success" ] || \
-             [ "${{ needs.unit-tests.result }}" != "success" ] || \
-             [ "${{ needs.build-verification.result }}" != "success" ] || \
-             ([ "${{ needs.e2e-tests.result }}" != "success" ] && [ "${{ needs.e2e-tests.result }}" != "skipped" ]); then
+          if [ "$CODE_QUALITY_RESULT" != "success" ] || \
+             [ "$SECURITY_RESULT" != "success" ] || \
+             [ "$UNIT_TESTS_RESULT" != "success" ] || \
+             [ "$BUILD_RESULT" != "success" ] || \
+             ([ "$E2E_RESULT" != "success" ] && [ "$E2E_RESULT" != "skipped" ]); then
             echo "::error::One or more required checks failed"
             exit 1
           fi
