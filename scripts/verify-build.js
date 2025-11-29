@@ -20,7 +20,7 @@ const REQUIRED_ARTIFACTS = [
   "dist/index.html", // Main page exists
   "dist/robots.txt", // SEO: robots.txt
   "dist/sitemap-index.xml", // SEO: sitemap
-  "dist/rss.xml", // RSS feed
+  "dist/en/rss.xml", // RSS feed (generated under locale path)
   "dist/en/404/index.html", // English error page
   "dist/ka/404/index.html", // Georgian error page
   // "public/pagefind", // Search index
@@ -29,7 +29,7 @@ const REQUIRED_ARTIFACTS = [
 
 // Optional but important files
 const IMPORTANT_ARTIFACTS = [
-  "dist/rss.xml",
+  "dist/en/rss.xml",
   // "public/pagefind/pagefind-modular-ui.js",
 ];
 
