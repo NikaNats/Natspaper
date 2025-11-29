@@ -57,6 +57,7 @@
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.5",
+    "@axe-core/playwright": "^4.11.0",
     "@pagefind/default-ui": "^1.4.0",
     "@playwright/test": "^1.57.0",
     "@shikijs/transformers": "^3.15.0",
