@@ -35,21 +35,7 @@
 
 import { DEFAULT_LANG } from "@/i18n/config";
 
-// Declare Vercel Analytics on globalThis
-declare global {
-  interface Window {
-    va?: (
-      event: "event" | "pageview" | "beforeSend",
-      properties?: unknown
-    ) => void;
-  }
-  var va:
-    | ((
-        event: "event" | "pageview" | "beforeSend",
-        properties?: unknown
-      ) => void)
-    | undefined;
-}
+// Types are declared in src/types/global.d.ts
 
 // Re-export types
 export interface AnalyticsEvent {

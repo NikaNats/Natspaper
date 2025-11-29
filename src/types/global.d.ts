@@ -9,8 +9,8 @@ declare global {
      * @see https://vercel.com/docs/analytics/custom-events
      */
     va?: (
-      command: "event" | "pageview",
-      payload?: Record<string, unknown>
+      command: "event" | "pageview" | "beforeSend",
+      payload?: unknown
     ) => void;
 
     /**
