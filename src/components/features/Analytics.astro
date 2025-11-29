@@ -1,5 +1,21 @@
 ---
-// src/components/features/Analytics.astro
+/**
+ * Analytics Component - GDPR/CCPA Compliant
+ *
+ * Uses Vercel Web Analytics which is privacy-compliant by design:
+ * - NO cookies used
+ * - NO personal data collected
+ * - Data is aggregated and anonymized
+ * - No consent banner required
+ *
+ * @see https://vercel.com/docs/analytics/privacy-and-compliance
+ *
+ * Features:
+ * - User opt-out via localStorage ('va-disable')
+ * - Sensitive URL filtering
+ * - Development mode detection
+ * - Cost optimization (localhost filtering)
+ */
 import VercelAnalytics from "@vercel/analytics/astro";
 import SpeedInsights from "@vercel/speed-insights/astro";
 
@@ -11,37 +27,84 @@ const isDev = import.meta.env.DEV;
   VERCEL ANALYTICS & SPEED INSIGHTS CONFIGURATION
   ============================================================
 
-  Best Practices implemented:
-  1. Cost Control: Ignore localhost events to save Hobby Tier quota
-  2. Privacy: Redact sensitive URLs
-  3. Performance: Use 'beforeSend' to filter at the source
+  GDPR/CCPA COMPLIANCE:
+  - Vercel Analytics is privacy-compliant by design
+  - No cookies, no personal identifiers
+  - No consent banner required
+  - Users can opt-out via localStorage
+
+  COST OPTIMIZATION (Hobby Tier: 50k events/month):
+  1. Ignore localhost events
+  2. Filter out sensitive/private routes
+  3. Allow user opt-out
+
+  @see https://vercel.com/docs/analytics/privacy-and-compliance
+  @see https://vercel.com/docs/analytics/redacting-sensitive-data
 -->
 <script is:inline>
-  // WEB ANALYTICS: 50k events/month limit (Hobby)
+  // WEB ANALYTICS: Privacy-first with user opt-out
   window.webAnalyticsBeforeSend = function (event) {
-    // 1. Ignore localhost (save quota)
+    // 1. RESPECT USER OPT-OUT
+    // Users can set localStorage.setItem('va-disable', 'true') to opt out
+    try {
+      if (localStorage.getItem("va-disable") === "true") {
+        return null;
+      }
+    } catch {
+      // localStorage may be unavailable (private browsing)
+    }
+
+    // 2. IGNORE LOCALHOST (save quota for production)
+    const hostname = window.location.hostname;
+    if (hostname === "localhost" || hostname === "127.0.0.1") {
+      return null;
+    }
+
+    // 3. FILTER SENSITIVE ROUTES
+    const url = event.url || "";
     if (
-      window.location.hostname === "localhost" ||
-      window.location.hostname === "127.0.0.1"
+      url.includes("/private") ||
+      url.includes("/drafts") ||
+      url.includes("/admin") ||
+      url.includes("/api/")
     ) {
       return null;
     }
-    // 2. Filter sensitive routes
-    if (event.url.includes("/private") || event.url.includes("/drafts")) {
-      return null;
+
+    // 4. REDACT SENSITIVE QUERY PARAMETERS
+    try {
+      const urlObj = new URL(event.url, window.location.origin);
+      const sensitiveParams = ["token", "secret", "key", "password", "email"];
+      sensitiveParams.forEach(function (param) {
+        if (urlObj.searchParams.has(param)) {
+          urlObj.searchParams.set(param, "[REDACTED]");
+        }
+      });
+      event.url = urlObj.pathname + urlObj.search;
+    } catch {
+      // URL parsing failed, use original
     }
+
     return event;
   };
 
-  // SPEED INSIGHTS: 10k data points/month limit (Hobby)
+  // SPEED INSIGHTS: Same privacy rules
   window.speedInsightsBeforeSend = function (data) {
-    // 1. Ignore localhost
-    if (
-      window.location.hostname === "localhost" ||
-      window.location.hostname === "127.0.0.1"
-    ) {
+    // 1. Respect user opt-out
+    try {
+      if (localStorage.getItem("va-disable") === "true") {
+        return null;
+      }
+    } catch {
+      // localStorage unavailable
+    }
+
+    // 2. Ignore localhost
+    const hostname = window.location.hostname;
+    if (hostname === "localhost" || hostname === "127.0.0.1") {
       return null;
     }
+
     return data;
   };
 </script>

@@ -1,235 +1,202 @@
-import { googleAnalyticsProvider as provider } from "./google-analytics.provider";
-import { DEFAULT_LANG } from "@/i18n/config";
-
 /**
- * Analytics Configuration and Helpers
- * Supports language-aware tracking for multilingual sites
+ * Analytics Module
  *
- * Features:
- * - Google Analytics 4 integration
- * - Language-specific event tracking
- * - Custom dimensions for language and site section
- * - Goal/conversion tracking
- * - Time on page tracking
- * - Debug mode support
+ * This module provides a unified interface for analytics tracking using Vercel Web Analytics.
+ *
+ * WHY VERCEL ANALYTICS ONLY (No Google Analytics):
+ * ================================================
+ * 1. GDPR/CCPA COMPLIANT BY DESIGN: Vercel Analytics doesn't use cookies or track personal data.
+ *    - No consent banner required
+ *    - No risk of privacy violations
+ *    - Data is aggregated and anonymized
+ *
+ * 2. COST EFFICIENT: Uses your Vercel free tier (50k events/month)
+ *    - No separate GA quota to manage
+ *    - Built into your hosting platform
+ *
+ * 3. SIMPLER ARCHITECTURE: No need for consent management
+ *    - Fewer moving parts
+ *    - Less code to maintain
+ *
+ * For custom event tracking, use Vercel's track() function.
+ * @see https://vercel.com/docs/analytics/custom-events
  *
  * Usage:
  * ```ts
- * import { analyticsService } from '@/utils/analytics';
+ * import { trackEvent, trackPageView } from '@/utils/analytics';
  *
- * // Initialize on page load
- * analyticsService.init('en');
+ * // Track custom events (uses Vercel custom events)
+ * trackEvent('button_click', { button_id: 'subscribe' });
  *
- * // Track page views
- * analyticsService.trackPageView('/en/posts', 'Blog Posts');
- *
- * // Track custom events
- * analyticsService.trackEvent('search_performed', { search_query: 'tutorial' });
- *
- * // Track goals
- * analyticsService.trackGoal('subscribe_to_rss', 1);
+ * // Track page views (automatic with Vercel Analytics)
+ * trackPageView('/blog/my-post', 'My Post Title');
  * ```
  */
 
-class AnalyticsService {
-  private locale: string = DEFAULT_LANG;
+import { DEFAULT_LANG } from "@/i18n/config";
 
-  /**
-   * Initialize Google Analytics with language tracking
-   * Call this from your main layout after page load
-   *
-   * @param locale - Current page locale (e.g., 'en', 'ka')
-   */
-  public init(locale: string = DEFAULT_LANG): void {
-    this.locale = locale;
-    provider.init(locale);
-    this.setUserLanguageProperty(locale);
-  }
+// Re-export types
+export interface AnalyticsEvent {
+  name: string;
+  params: Record<string, string | number | boolean>;
+}
 
-  /**
-   * Track page view with language information
-   *
-   * @param pagePath - URL path of the page
-   * @param pageTitle - Title of the page
-   */
-  public trackPageView(pagePath: string, pageTitle: string): void {
-    const siteSection = this.getSiteSection(pagePath);
-
-    provider.track({
-      name: "page_view",
-      params: {
-        page_path: pagePath,
-        page_title: pageTitle,
-        language: this.locale,
-        site_section: siteSection,
-      },
-    });
-  }
-
-  /**
-   * Track custom events with language context
-   *
-   * @param eventName - Name of the event
-   * @param eventData - Additional event parameters
-   */
-  public trackEvent(
-    eventName: string,
-    eventData?: Record<string, string | number | boolean>
-  ): void {
-    provider.track({
-      name: eventName,
-      params: {
-        language: this.locale,
-        event_category: "engagement",
+/**
+ * Track a custom event using Vercel Analytics
+ *
+ * Note: Vercel Analytics automatically tracks page views.
+ * Use this for custom events like button clicks, form submissions, etc.
+ *
+ * @param eventName - Name of the event (max 50 chars for Vercel)
+ * @param eventData - Additional event parameters (max 2 properties on free tier)
+ */
+export function trackEvent(
+  eventName: string,
+  eventData?: Record<string, string | number | boolean>
+): void {
+  // Vercel Analytics custom events (if available)
+  if (typeof window !== "undefined" && window.va) {
+    try {
+      // Vercel Analytics track function
+      // @see https://vercel.com/docs/analytics/custom-events
+      window.va("event", {
+        name: eventName,
         ...eventData,
-      },
-    });
-  }
-
-  /**
-   * Track goal/conversion event
-   *
-   * @param goalName - Name of the goal/conversion
-   * @param goalValue - Value of the conversion (default: 1)
-   */
-  public trackGoal(goalName: string, goalValue: number = 1): void {
-    provider.track({
-      name: "conversion",
-      params: {
-        conversion_name: goalName,
-        conversion_value: goalValue,
-        language: this.locale,
-        conversion_currency: "USD",
-      },
-    });
-  }
-
-  /**
-   * Track blog post view with language and post info
-   *
-   * @param postSlug - Unique identifier for the post
-   * @param postTitle - Title of the post
-   */
-  public trackPostView(postSlug: string, postTitle: string): void {
-    provider.track({
-      name: "post_view",
-      params: {
-        post_id: postSlug,
-        post_title: postTitle,
-        language: this.locale,
-        content_type: "blog_post",
-      },
-    });
-  }
-
-  /**
-   * Track time on page (call when user leaves page or after timeout)
-   *
-   * @param pagePath - URL path of the page
-   * @param timeSeconds - Time spent on page in seconds
-   */
-  public trackTimeOnPage(pagePath: string, timeSeconds: number): void {
-    provider.track({
-      name: "page_duration",
-      params: {
-        page_path: pagePath,
-        duration_seconds: timeSeconds,
-        language: this.locale,
-      },
-    });
-  }
-
-  /**
-   * Track language switch event
-   *
-   * @param fromLanguage - Language switched from
-   * @param toLanguage - Language switched to
-   */
-  public trackLanguageSwitch(fromLanguage: string, toLanguage: string): void {
-    provider.track({
-      name: "language_switch",
-      params: {
-        from_language: fromLanguage,
-        to_language: toLanguage,
-        event_category: "user_engagement",
-      },
-    });
-  }
-
-  /**
-   * Track tag exploration
-   *
-   * @param tagName - Name of the tag
-   */
-  public trackTagView(tagName: string): void {
-    provider.track({
-      name: "tag_explored",
-      params: {
-        tag_name: tagName,
-        language: this.locale,
-        tag_type: "blog_tag",
-      },
-    });
-  }
-
-  /**
-   * Set user properties that persist across sessions
-   *
-   * @param locale - User's language preference
-   */
-  private setUserLanguageProperty(locale: string): void {
-    provider.setUserProperty({
-      user_locale: locale,
-      user_language_preference: locale,
-    });
-  }
-
-  /**
-   * Determine site section from URL path
-   * @internal
-   */
-  private getSiteSection(pagePath: string): string {
-    // Remove locale prefix for matching
-    const pathWithoutLocale = pagePath.replace(
-      new RegExp(`^/${this.locale}`),
-      ""
-    );
-
-    if (pathWithoutLocale.includes("/posts/")) return "blog";
-    if (pathWithoutLocale.includes("/tags/")) return "tags";
-    if (pathWithoutLocale.includes("/archives/")) return "archives";
-    return "home";
+      });
+    } catch {
+      // Silently fail - analytics should never break the app
+    }
   }
 }
 
-// Export a single, singleton instance of the service
-export const analyticsService = new AnalyticsService();
+/**
+ * Track page view
+ *
+ * Note: Vercel Analytics automatically tracks page views, including client-side navigations.
+ * This function is provided for explicit tracking when needed (e.g., virtual page views).
+ *
+ * @param pagePath - URL path of the page
+ * @param pageTitle - Title of the page (optional)
+ */
+export function trackPageView(pagePath: string, pageTitle?: string): void {
+  // Vercel Analytics handles page views automatically
+  // This function is a no-op but kept for API compatibility
 
-// Legacy exports for backward compatibility
-export const initializeAnalytics = (locale: string) =>
-  analyticsService.init(locale);
-export const trackPageView = (pagePath: string, pageTitle: string) =>
-  analyticsService.trackPageView(pagePath, pageTitle);
-export const trackEvent = (
-  eventName: string,
-  eventData?: Record<string, string | number | boolean>
-) => analyticsService.trackEvent(eventName, eventData);
-export const trackGoal = (goalName: string, goalValue?: number) =>
-  analyticsService.trackGoal(goalName, goalValue);
-export const trackPostView = (postSlug: string, postTitle: string) =>
-  analyticsService.trackPostView(postSlug, postTitle);
-export const trackTimeOnPage = (pagePath: string, timeSeconds: number) =>
-  analyticsService.trackTimeOnPage(pagePath, timeSeconds);
-export const trackLanguageSwitch = (fromLanguage: string, toLanguage: string) =>
-  analyticsService.trackLanguageSwitch(fromLanguage, toLanguage);
-export const trackTagView = (tagName: string) =>
-  analyticsService.trackTagView(tagName);
-export const setUserLanguageProperty = (locale: string) =>
-  analyticsService["setUserLanguageProperty"](locale);
+  // For debugging in development
+  if (import.meta.env.DEV) {
+    // eslint-disable-next-line no-console
+    console.debug(
+      `📊 Page view: ${pagePath}`,
+      pageTitle ? `"${pageTitle}"` : ""
+    );
+  }
+}
 
-// Type exports
-export type { AnalyticsEvent } from "./provider";
-export { ANALYTICS_CONFIG } from "./google-analytics.provider";
+/**
+ * Initialize analytics
+ *
+ * Note: Vercel Analytics initializes automatically via the @vercel/analytics component.
+ * This function is kept for backward compatibility but is essentially a no-op.
+ *
+ * @param locale - Current page locale
+ */
+export function initializeAnalytics(locale: string = DEFAULT_LANG): void {
+  // Vercel Analytics initializes automatically
+  // This is a no-op for backward compatibility
 
-// Type definitions are now in src/types/global.d.ts
-// This prevents duplicate declarations and ensures single source of truth
+  if (import.meta.env.DEV) {
+    // eslint-disable-next-line no-console
+    console.debug(`📊 Analytics ready for locale: ${locale}`);
+  }
+}
+
+/**
+ * Track goal/conversion event
+ *
+ * @param goalName - Name of the goal/conversion
+ * @param goalValue - Value of the conversion (default: 1)
+ */
+export function trackGoal(goalName: string, goalValue: number = 1): void {
+  trackEvent("conversion", {
+    conversion_name: goalName,
+    conversion_value: goalValue,
+  });
+}
+
+/**
+ * Track blog post view
+ *
+ * @param postSlug - Unique identifier for the post
+ * @param postTitle - Title of the post
+ */
+export function trackPostView(postSlug: string, postTitle: string): void {
+  trackEvent("post_view", {
+    post_id: postSlug,
+    post_title: postTitle,
+  });
+}
+
+/**
+ * Track time on page
+ *
+ * @param pagePath - URL path of the page
+ * @param timeSeconds - Time spent on page in seconds
+ */
+export function trackTimeOnPage(pagePath: string, timeSeconds: number): void {
+  trackEvent("page_duration", {
+    page_path: pagePath,
+    duration_seconds: timeSeconds,
+  });
+}
+
+/**
+ * Track language switch
+ *
+ * @param fromLanguage - Language switched from
+ * @param toLanguage - Language switched to
+ */
+export function trackLanguageSwitch(
+  fromLanguage: string,
+  toLanguage: string
+): void {
+  trackEvent("language_switch", {
+    from_language: fromLanguage,
+    to_language: toLanguage,
+  });
+}
+
+/**
+ * Track tag view
+ *
+ * @param tagName - Name of the tag
+ */
+export function trackTagView(tagName: string): void {
+  trackEvent("tag_explored", {
+    tag_name: tagName,
+  });
+}
+
+/**
+ * Set user language property
+ *
+ * Note: Vercel Analytics doesn't support persistent user properties.
+ * This is kept for API compatibility but is a no-op.
+ *
+ * @param _locale - User's language preference
+ */
+export function setUserLanguageProperty(_locale: string): void {
+  // Vercel Analytics doesn't have persistent user properties
+  // Language is captured automatically via Accept-Language header
+}
+
+// Legacy service export for backward compatibility
+export const analyticsService = {
+  init: initializeAnalytics,
+  trackPageView,
+  trackEvent,
+  trackGoal,
+  trackPostView,
+  trackTimeOnPage,
+  trackLanguageSwitch,
+  trackTagView,
+};
