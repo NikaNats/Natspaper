@@ -14,8 +14,9 @@ import { SITE } from "@/config";
     class="mx-auto flex max-w-app flex-1 items-center justify-center"
   >
     <div class="mb-14 flex flex-col items-center justify-center">
-      <h1 class="text-9xl font-bold text-accent">404</h1>
-      <span aria-hidden="true">¯\_(ツ)_/¯</span>
+      <!-- CHANGED: Applied same fluid typography fix for consistency across languages -->
+      <h1 class="text-fluid-6xl font-bold text-accent">404</h1>
+      <span aria-hidden="true" class="text-xl">¯\_(ツ)_/¯</span>
       <p class="mt-4 text-2xl sm:text-3xl">გვერდი ვერ მოიძებნა</p>
       <LinkButton
         href="/ka/"
