@@ -1,4 +1,4 @@
-import { getEnv } from "@/env";
+import { type EnvSchema, getEnv } from "@/env";
 import { SENTRY_CONFIG_SCHEMA } from "./sentry.schema";
 import type { SentryConfig } from "./config";
 
@@ -19,7 +19,7 @@ export function buildSentryConfig(context: Context): SentryConfig {
 
     // Find the first available environment variable
     for (const name of envVarNames) {
-      value = getEnv(name as keyof import("@/env").EnvSchema);
+      value = getEnv(name as keyof EnvSchema);
       if (value) break;
     }
 

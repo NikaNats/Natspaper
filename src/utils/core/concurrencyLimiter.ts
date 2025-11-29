@@ -72,7 +72,7 @@ export class ConcurrencyLimiter {
         // Run the queued function, which will recursively process more queued items
         fn().catch(error => {
           // Log errors from queued operations
-          // eslint-disable-next-line no-console
+
           console.error("[ConcurrencyLimiter] Queued operation failed:", error);
         });
       }

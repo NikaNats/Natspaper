@@ -56,12 +56,3 @@ export function getCurrentLocale(pathname: string): Lang | undefined {
   const firstSegment = pathname.split("/").filter(Boolean)[0];
   return isValidLanguage(firstSegment) ? firstSegment : undefined;
 }
-
-// --- Legacy Compatibility (will be removed in future versions) ---
-
-/**
- * @deprecated Use getI18n() instead. This function is kept for backward compatibility.
- */
-export function useTranslations(lang: Lang = defaultLang) {
-  return createTranslator(lang, ui as Record<string, Record<string, string>>);
-}

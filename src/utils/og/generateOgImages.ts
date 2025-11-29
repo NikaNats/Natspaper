@@ -14,7 +14,6 @@ function cleanupResvg(resvg: Resvg | null): void {
         // @ts-expect-error Resvg.free() is not typed
         resvg.free();
       } catch (freeError) {
-        // eslint-disable-next-line no-console
         console.warn(
           `[OG Image] Failed to free Resvg: ${
             freeError instanceof Error ? freeError.message : String(freeError)
@@ -23,7 +22,6 @@ function cleanupResvg(resvg: Resvg | null): void {
       }
     }
   } catch (cleanupError) {
-    // eslint-disable-next-line no-console
     console.warn(
       `[OG Image] Unexpected error during Resvg cleanup: ${
         cleanupError instanceof Error
@@ -75,7 +73,7 @@ function svgBufferToPngBuffer(svg: string): Uint8Array {
     return new Uint8Array(buffer);
   } catch (error) {
     // Log rendering errors but continue with cleanup
-    // eslint-disable-next-line no-console
+
     console.error(
       `[OG Image] Resvg rendering error: ${
         error instanceof Error ? error.message : String(error)
@@ -127,18 +125,16 @@ export async function generateOgImageForPost(
     const errorMessage = error instanceof Error ? error.message : String(error);
     const errorStack = error instanceof Error ? error.stack : "";
 
-    // eslint-disable-next-line no-console
     console.warn(
       `[OG Image] Failed to generate OG for post "${post.id}":`,
       errorMessage
     );
     if (errorStack) {
-      // eslint-disable-next-line no-console
       console.warn(`[OG Image] Stack trace:`, errorStack);
     }
 
     // Log that we're falling back to prevent confusion about missing images
-    // eslint-disable-next-line no-console
+
     console.warn(
       `[OG Image] Using 1x1 fallback image for "${post.id}". ` +
         `This post will need a custom OG image or proper fonts to render correctly.`

@@ -38,11 +38,9 @@ export const envValidationIntegration = (): AstroIntegration => {
 
         // 4. Handle side effects (logging and exiting)
         if (errors.length > 0) {
-          // eslint-disable-next-line no-console
           console.error(output);
           process.exit(1);
         } else {
-          // eslint-disable-next-line no-console
           console.warn(output);
         }
       },

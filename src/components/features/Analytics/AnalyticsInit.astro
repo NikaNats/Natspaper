@@ -85,7 +85,6 @@ const { locale = getCurrentLocale(Astro.url.pathname) || "en" } = Astro.props;
       );
     } catch (error) {
       if (import.meta.env.DEV) {
-        // eslint-disable-next-line no-console
         console.error("Analytics initialization failed:", error);
       }
     }

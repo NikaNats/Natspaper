@@ -8,8 +8,6 @@
  * ```
  */
 
-/* eslint-disable no-console */
-
 // --- Rendering Strategies ---
 
 // This interface defines the "contract" for any style we might add in the future.

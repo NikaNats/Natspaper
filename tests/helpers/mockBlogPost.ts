@@ -11,17 +11,6 @@ import type { CollectionEntry } from "astro:content";
  * @param overrides - Optional overrides for any fields
  * @returns A fully typed CollectionEntry<'blog'> object
  */
-/**
- * Creates a properly typed mock CollectionEntry<'blog'> for testing.
- * This eliminates the need for `as unknown as CollectionEntry<'blog'>` casts.
- *
- * @param id - The post ID
- * @param pubDate - Publication date
- * @param modDate - Optional modification date
- * @param published - Whether the post is published (default: true)
- * @param overrides - Optional overrides for any fields
- * @returns A fully typed CollectionEntry<'blog'> object
- */
 export function createMockBlogPost(
   id: string,
   pubDate: Date,
@@ -47,8 +36,8 @@ export function createMockBlogPost(
     ...overrides?.data,
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { data, ...otherOverrides } = overrides || {};
+  // Extract data from overrides, spread remaining properties
+  const { data: _dataOverride, ...otherOverrides } = overrides || {};
 
   return {
     id,

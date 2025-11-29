@@ -35,7 +35,6 @@ async function loadFont(): Promise<ArrayBuffer> {
 
     return fontBuffer;
   } catch (error) {
-    // eslint-disable-next-line no-console
     console.error("❌ [OG Image] Failed to load local font:", error);
     throw error;
   }

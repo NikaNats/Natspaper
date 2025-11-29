@@ -76,7 +76,6 @@ import Layout from "@/layouts/Layout.astro";
       const statusOutput = document.getElementById("status-output");
 
       if (!statusDiv || !statusOutput) {
-        // eslint-disable-next-line no-console
         console.error("Status elements not found");
         return;
       }
@@ -98,7 +97,6 @@ import Layout from "@/layouts/Layout.astro";
         // eslint-disable-next-line no-console
         console.log("✅ Sentry is enabled and ready!");
       } else {
-        // eslint-disable-next-line no-console
         console.warn(
           "⚠️ Sentry is not configured. Add PUBLIC_SENTRY_DSN to .env"
         );

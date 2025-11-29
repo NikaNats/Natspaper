@@ -54,7 +54,6 @@
 
     // The central error handling logic
     const handleError = (error: unknown, context: string) => {
-      // eslint-disable-next-line no-console
       console.error(`[ErrorBoundary/${context}]`, error);
 
       // Sentry reporting logic remains the same, but simplified

@@ -1,16 +1,45 @@
 {
   "extends": "astro/tsconfigs/strict",
   "include": [".astro/types.d.ts", "pagefind.d.ts", "**/*"],
-  "exclude": ["dist", "public/pagefind", "coverage", ".astro"],
+  "exclude": [
+    "dist",
+    "public/pagefind",
+    "coverage",
+    ".astro",
+    ".sonda",
+    "node_modules"
+  ],
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"],
       "@tests/*": ["tests/*"]
     },
+
+    // --- Type Safety (Strict) ---
     "verbatimModuleSyntax": true,
     "noImplicitAny": true,
     "strictNullChecks": true,
-    "noUncheckedIndexedAccess": true
+    "noUncheckedIndexedAccess": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "exactOptionalPropertyTypes": false,
+
+    // --- Module Resolution ---
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+
+    // --- Astro & JSX Support ---
+    "jsx": "preserve",
+    "jsxImportSource": "astro",
+
+    // --- Interop ---
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+
+    // --- Output ---
+    "skipLibCheck": true
   }
 }
