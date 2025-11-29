@@ -30,7 +30,7 @@
   /* Layout Tokens */
   --gap: 24px;
   --nav-width: 1024px;
-  --main-width: 768px;
+  --main-width: 720px;
   --header-height: 64px;
   --radius: 8px;
 
@@ -46,7 +46,10 @@
    */
   --layout-gap-fluid: clamp(1rem, 0.5rem + 2vw, 3rem);
   --layout-padding-fluid: clamp(1rem, 0.5rem + 3vw, 6rem);
-  --layout-content-width: min(65ch, 100% - var(--layout-padding-fluid) * 2);
+  --layout-content-width: min(
+    var(--main-width),
+    100% - var(--layout-padding-fluid) * 2
+  );
   --layout-wide-width: min(90rem, 100% - var(--layout-padding-fluid) * 2);
   --layout-full-width: 100%;
 

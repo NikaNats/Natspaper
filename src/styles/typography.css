@@ -9,13 +9,11 @@
     font-family: var(--font-inter), sans-serif;
     line-height: 1.7; /* Slightly increased for better readability */
     /**
-     * Optimal Line Length for Readability
-     * ====================================
-     * 65ch ensures 65-75 characters per line across all viewport sizes.
-     * This remains constant even as container width expands on 4K displays.
-     * Use max-width: none on parent containers if you need full-bleed content.
+     * Width is controlled by parent container (720px in PostDetails)
+     * Override Tailwind prose default max-width: 65ch
+     * Using !important to ensure override takes precedence
      */
-    max-width: 65ch;
+    max-width: none !important;
     width: 100%;
 
     /**
@@ -193,17 +191,17 @@
   }
 
   /**
-   * Utility Classes for Fluid Typography
-   * =====================================
-   * Use these to ensure readable line lengths in flexible containers
+   * Utility Classes for Fixed Width Typography
+   * ============================================
+   * Use these to ensure consistent readable line lengths
    */
   .readable-width {
-    max-width: 65ch;
+    max-width: var(--main-width, 720px);
     width: 100%;
   }
 
   .wide-readable-width {
-    max-width: 75ch;
+    max-width: 840px;
     width: 100%;
   }
 }

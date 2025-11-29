@@ -71,38 +71,36 @@ const copyrightText = `Copyright © ${currentYear} • ${t("footer.copyright")}`
   <Header />
 
   <!--
-  RESPONSIVE LAYOUT ARCHITECTURE:
-  1. Base: Single column, fluid width, standard padding (px-4).
-  2. xl (Desktop): Absolute positioned sidebar to the left of centered content.
-  3. Max-width: 3xl to match header width and center content perfectly.
+  RESPONSIVE ARTICLE LAYOUT - Centering Strategy
+  ================================================
+  Uses a three-layer centering approach for optimal readability:
+  
+  1. OUTER WRAPPER (.article-layout)
+     - Container queries for component-level responsiveness
+     - Fluid horizontal padding that scales with viewport
+     - Centers the entire article block
+  
+  2. CONTENT CONTAINER (.article-container)
+     - Fixed 720px width for optimal line length
+     - Centered within the outer wrapper
+     - Responsive vertical spacing
+  
+  3. DESKTOP SIDEBAR (TOC)
+     - Positioned outside content flow on xl+ screens
+     - Sticky positioning for scroll-following
+     - Hidden on mobile/tablet for cleaner mobile experience
   -->
 
-  <div class="relative mx-auto mt-8 w-full max-w-3xl px-4 lg:mt-12">
-    <!--
-    DESKTOP SIDEBAR (TOC):
-    - Hidden on mobile/tablet.
-    - Absolute positioned to the left of the main container.
-    - Sticky within its container to follow user reading.
-    -->
-    <aside
-      class="absolute top-0 right-full mr-12 hidden h-full w-64 xl:block"
-      aria-hidden="true"
-    >
-      <div
-        class="sticky top-28 opacity-70 transition-opacity hover:opacity-100"
-      >
+  <div class="article-layout">
+    <!-- Desktop Sidebar (TOC) -->
+    <aside class="article-sidebar" aria-label="Table of contents">
+      <div class="article-sidebar__inner">
         <TableOfContents {headings} />
       </div>
     </aside>
 
-    <!--
-    MAIN CONTENT AREA:
-    - min-w-0: CRITICAL CSS FIX. Prevents flex items from overflowing
-      when they contain wide children (like code blocks or tables).
-      Without this, <pre> tags push the layout width out on mobile/tablet.
-    - Takes full width of the max-w-3xl container.
-    -->
-    <main id="main-content" class="mx-auto w-full min-w-0" data-pagefind-body>
+    <!-- Main Article Content -->
+    <main id="main-content" class="article-container" data-pagefind-body>
       <PostHero
         {title}
         {pubDatetime}
@@ -130,6 +128,108 @@ const copyrightText = `Copyright © ${currentYear} • ${t("footer.copyright")}`
 
   <Footer {copyrightText} />
 </Layout>
+
+<style>
+  /* ==========================================================================
+     RESPONSIVE ARTICLE LAYOUT - Simple Centering Strategy
+     ==========================================================================
+     Clean, simple layout that:
+     - Centers content at fixed 720px width
+     - Uses absolute positioning for sidebar
+     - Works consistently across all resolutions
+     ========================================================================== */
+
+  .article-layout {
+    /* Layout positioning - centered container */
+    position: relative;
+    width: 100%;
+    max-width: calc(var(--main-width) + 2rem); /* 720px content + padding */
+    margin-inline: auto;
+    padding-inline: 1rem;
+    padding-block: 2rem 3rem;
+  }
+
+  /* Remove padding once we have enough space for full width */
+  @media (min-width: 752px) {
+    .article-layout {
+      max-width: var(--main-width);
+      padding-inline: 0;
+    }
+  }
+
+  /* ==========================================================================
+     MAIN CONTENT CONTAINER
+     ========================================================================== */
+
+  .article-container {
+    /* Full width within the centered container */
+    width: 100%;
+
+    /* Critical: Prevent overflow from wide children (code blocks, tables) */
+    min-width: 0;
+  }
+
+  /* ==========================================================================
+     DESKTOP SIDEBAR (Table of Contents)
+     ========================================================================== */
+
+  .article-sidebar {
+    /* Hidden by default on mobile/tablet */
+    display: none;
+  }
+
+  .article-sidebar__inner {
+    /* Sticky positioning */
+    position: sticky;
+    top: calc(var(--header-height, 64px) + 1.5rem);
+
+    /* Visual styling */
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
+  }
+
+  .article-sidebar__inner:hover {
+    opacity: 1;
+  }
+
+  /* ==========================================================================
+     DESKTOP LAYOUT - Absolute Positioned Sidebar
+     ==========================================================================
+     Uses absolute positioning to place sidebar outside content flow.
+     This keeps main content perfectly centered regardless of sidebar.
+     ========================================================================== */
+
+  @media (min-width: 80rem) {
+    .article-sidebar {
+      /* Absolute position to the left of centered content */
+      display: block;
+      position: absolute;
+      top: 2rem;
+      right: 100%;
+      width: 14rem;
+      height: 100%;
+      margin-right: 3rem;
+    }
+  }
+
+  /* Extra wide screens - Larger sidebar */
+  @media (min-width: 100rem) {
+    .article-sidebar {
+      width: 16rem;
+      margin-right: 4rem;
+    }
+  }
+
+  /* ==========================================================================
+     REDUCED MOTION
+     ========================================================================== */
+
+  @media (prefers-reduced-motion: reduce) {
+    .article-sidebar__inner {
+      transition: none;
+    }
+  }
+</style>
 
 <script>
   import { featureManager } from "@/utils/features/FeatureManager";

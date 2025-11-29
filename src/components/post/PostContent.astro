@@ -1,11 +1,129 @@
 ---
-
+/**
+ * Responsive Post Content Component
+ * ==================================
+ * Article content wrapper with optimal reading experience.
+ *
+ * Features:
+ * - Container queries for component-level responsiveness
+ * - Width controlled by parent (720px from PostDetails.astro)
+ * - Fluid spacing that scales with container
+ * - Full-bleed support for images and code blocks on mobile
+ * - Proper heading hierarchy and accessible structure
+ */
 ---
 
-<article
-  id="article"
-  class="app-prose mx-auto max-w-none prose-headings:text-center prose-img:rounded-xl prose-img:shadow-sm"
-  data-testid="post-content"
->
+<article id="article" class="post-content app-prose" data-testid="post-content">
   <slot />
 </article>
+
+<style>
+  /* ==========================================================================
+     RESPONSIVE POST CONTENT - Centering Strategy
+     ==========================================================================
+     Provides optimal reading experience with:
+     - Container queries for responsive typography
+     - 720px width from parent container
+     - Fluid vertical rhythm
+     - Full-bleed elements on mobile
+     ========================================================================== */
+
+  .post-content {
+    /* Fluid spacing */
+    --content-gap: clamp(1.5rem, 1rem + 1.5vw, 2.5rem);
+
+    /* Layout - full width of parent (720px container) */
+    width: 100%;
+
+    /* Prevent overflow from code blocks and tables */
+    min-width: 0;
+    overflow-wrap: break-word;
+  }
+
+  /* Centered headings */
+  .post-content :global(h1),
+  .post-content :global(h2),
+  .post-content :global(h3),
+  .post-content :global(h4),
+  .post-content :global(h5),
+  .post-content :global(h6) {
+    text-align: center;
+  }
+
+  /* Rounded images with subtle shadow */
+  .post-content :global(img) {
+    border-radius: 0.75rem;
+    box-shadow:
+      0 4px 6px -1px rgb(0 0 0 / 0.1),
+      0 2px 4px -2px rgb(0 0 0 / 0.1);
+  }
+
+  /* ==========================================================================
+     CONTAINER QUERIES - Component-level Responsiveness
+     ========================================================================== */
+
+  /* Narrow containers (< 400px) - Mobile optimizations */
+  @container post-content (max-width: 25rem) {
+    .post-content {
+      --content-gap: 1rem;
+    }
+
+    /* Full-bleed for code blocks and figures on mobile */
+    .post-content :global(pre),
+    .post-content :global(figure),
+    .post-content :global(.astro-code),
+    .post-content :global(table) {
+      margin-inline: calc(var(--article-padding-inline, 1rem) * -1);
+      width: calc(100% + var(--article-padding-inline, 1rem) * 2);
+      border-radius: 0;
+      border-inline: none;
+    }
+
+    .post-content :global(img) {
+      border-radius: 0;
+    }
+  }
+
+  /* Wide containers (≥ 500px) - Enhanced spacing */
+  @container post-content (min-width: 31.25rem) {
+    .post-content {
+      --content-gap: clamp(1.75rem, 1.25rem + 1vw, 2.5rem);
+    }
+  }
+
+  /* Extra wide containers (≥ 700px) - Maximum breathing room */
+  @container post-content (min-width: 43.75rem) {
+    .post-content {
+      --content-gap: clamp(2rem, 1.5rem + 1vw, 3rem);
+    }
+
+    .post-content :global(img) {
+      border-radius: 1rem;
+    }
+  }
+
+  /* ==========================================================================
+     VIEWPORT FALLBACKS
+     ========================================================================== */
+
+  @supports not (container-type: inline-size) {
+    .post-content {
+      max-width: 720px;
+      margin-inline: auto;
+    }
+
+    @media (max-width: 640px) {
+      .post-content :global(pre),
+      .post-content :global(figure),
+      .post-content :global(table) {
+        margin-inline: -1rem;
+        width: calc(100% + 2rem);
+        border-radius: 0;
+      }
+
+      .post-content :global(img) {
+        border-radius: 0;
+      }
+    }
+  }
+</style>

@@ -4,9 +4,15 @@
   header {
     @apply relative z-50 w-full bg-transparent transition-colors duration-300;
   }
-  main {
+  main:not(.article-container) {
     @apply relative z-0 mx-auto w-full flex-1 px-4;
     max-width: var(--main-width);
+  }
+  /* Article container has its own layout in PostDetails.astro */
+  main.article-container {
+    @apply relative z-0 mx-auto w-full flex-1;
+    max-width: none;
+    padding-inline: 0;
   }
   main > * + * {
     @apply mt-8;
