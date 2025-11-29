@@ -24,7 +24,7 @@ const { t } = getI18n(locale as Lang);
     aria-expanded="false"
     aria-controls="mobile-menu-overlay"
   >
-    <IconMenuDeep class="size-7" />
+    <IconMenuDeep class="size-7" aria-hidden="true" />
   </button>
 
   <!-- 
@@ -47,7 +47,7 @@ const { t } = getI18n(locale as Lang);
       class="absolute top-6 right-6 rounded-md p-2 text-foreground transition-colors hover:bg-muted hover:text-accent focus:outline-none md:hidden"
       aria-label={t("nav.closeMenu")}
     >
-      <IconX class="size-8" />
+      <IconX class="size-8" aria-hidden="true" />
     </button>
 
     <!-- Content -->
@@ -104,12 +104,55 @@ const { t } = getI18n(locale as Lang);
     }
 
     init() {
-      const openBtn = this.querySelector("#menu-btn");
-      const closeBtn = this.querySelector("#menu-close-btn");
-      const overlay = this.querySelector("#mobile-menu-overlay");
+      const openBtn = this.querySelector(
+        "#menu-btn"
+      ) as HTMLButtonElement | null;
+      const closeBtn = this.querySelector(
+        "#menu-close-btn"
+      ) as HTMLButtonElement | null;
+      const overlay = this.querySelector(
+        "#mobile-menu-overlay"
+      ) as HTMLElement | null;
       const links = this.querySelectorAll("a");
 
       if (!openBtn || !closeBtn || !overlay) return;
+
+      // WCAG 2.1.2: Get all focusable elements for focus trapping
+      const getFocusableElements = (): HTMLElement[] => {
+        const focusable = overlay.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        );
+        return Array.from(focusable);
+      };
+
+      // WCAG 2.1.2: Trap focus within the menu when open
+      const handleTabKey = (e: KeyboardEvent) => {
+        if (e.key !== "Tab" || overlay.getAttribute("data-state") !== "open")
+          return;
+
+        const focusableElements = getFocusableElements();
+        if (focusableElements.length === 0) return;
+
+        const firstElement = focusableElements[0];
+        const lastElement = focusableElements[focusableElements.length - 1];
+
+        // Guard against undefined (should not happen but TypeScript requires it)
+        if (!firstElement || !lastElement) return;
+
+        if (e.shiftKey) {
+          // Shift+Tab: if on first element, go to last
+          if (document.activeElement === firstElement) {
+            e.preventDefault();
+            lastElement.focus();
+          }
+        } else {
+          // Tab: if on last element, go to first
+          if (document.activeElement === lastElement) {
+            e.preventDefault();
+            firstElement.focus();
+          }
+        }
+      };
 
       const toggleMenu = (isOpen: boolean) => {
         const state = isOpen ? "open" : "closed";
@@ -119,8 +162,12 @@ const { t } = getI18n(locale as Lang);
         // Lock body scroll prevents background scrolling
         if (isOpen) {
           document.body.style.overflow = "hidden";
+          // WCAG 2.4.3: Move focus to close button when menu opens
+          requestAnimationFrame(() => closeBtn.focus());
         } else {
           document.body.style.overflow = "";
+          // WCAG 2.4.3: Return focus to open button when menu closes
+          requestAnimationFrame(() => openBtn.focus());
         }
       };
 
@@ -149,6 +196,9 @@ const { t } = getI18n(locale as Lang);
           toggleMenu(false);
         }
       });
+
+      // WCAG 2.1.2: Add focus trap listener
+      document.addEventListener("keydown", handleTabKey);
     }
   }
 

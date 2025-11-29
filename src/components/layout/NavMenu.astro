@@ -53,7 +53,7 @@ const { t } = getI18n(locale);
           ariaLabel={t("nav.archives")}
           title={t("nav.archives")}
         >
-          <IconArchive class="size-5" />
+          <IconArchive class="size-5" aria-hidden="true" />
           <span class="sr-only">{t("nav.archives")}</span>
         </LinkButton>
       </li>
@@ -69,8 +69,8 @@ const { t } = getI18n(locale);
           aria-label="Toggle theme"
           aria-live="polite"
         >
-          <IconMoon class="hidden size-5 dark:block" />
-          <IconSunHigh class="size-5 dark:hidden" />
+          <IconMoon class="hidden size-5 dark:block" aria-hidden="true" />
+          <IconSunHigh class="size-5 dark:hidden" aria-hidden="true" />
         </button>
       </li>
     )

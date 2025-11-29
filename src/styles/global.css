@@ -71,7 +71,8 @@
   --accent: #0066ff;
   --muted: #f7f7f7;
   --border: #e0e0e0;
-  --text-secondary: #757575;
+  /* WCAG 1.4.3: Darkened from #757575 to #595959 for 4.5:1 contrast ratio */
+  --text-secondary: #595959;
   --code-bg: #f0f0f0;
 
   /* Native UI Adaptation */
