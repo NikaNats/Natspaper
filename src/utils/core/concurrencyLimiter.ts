@@ -1,3 +1,5 @@
+import { cpus } from "node:os";
+
 /**
  * Concurrency Limiter - Controls the maximum number of concurrent async operations.
  *
@@ -95,8 +97,43 @@ export class ConcurrencyLimiter {
 }
 
 /**
- * Global instance for OG image generation concurrency control.
- * Processes OG images serially (maxConcurrent=1) to prevent memory bloat.
- * This ensures that only one Resvg instance is active at a time.
+ * Calculate optimal concurrency for OG image generation.
+ *
+ * Strategy:
+ * - Use OG_IMAGE_CONCURRENCY env var if set (allows CI/CD tuning)
+ * - Otherwise, use half of available CPU cores (balances parallelism vs memory)
+ * - Minimum of 1, maximum of 8 (prevents excessive memory usage from Resvg)
+ *
+ * Each Resvg instance uses ~50-100MB of native memory, so we cap at 8
+ * to prevent OOM on systems with many cores but limited RAM.
+ *
+ * @returns Optimal concurrency value
  */
-export const ogImageLimiter = new ConcurrencyLimiter(1);
+function getOgImageConcurrency(): number {
+  // Allow override via environment variable for CI/CD tuning
+  const envConcurrency = process.env.OG_IMAGE_CONCURRENCY;
+  if (envConcurrency) {
+    const parsed = parseInt(envConcurrency, 10);
+    if (!isNaN(parsed) && parsed >= 1) {
+      return Math.min(parsed, 16); // Hard cap at 16 for safety
+    }
+  }
+
+  // Default: half of CPU cores, clamped between 1 and 8
+  const cpuCount = cpus().length;
+  const optimal = Math.max(1, Math.floor(cpuCount / 2));
+  return Math.min(optimal, 8);
+}
+
+/**
+ * Global instance for OG image generation concurrency control.
+ *
+ * Concurrency is determined by:
+ * 1. OG_IMAGE_CONCURRENCY environment variable (if set)
+ * 2. Half of available CPU cores (default)
+ * 3. Clamped between 1 and 8 to balance speed vs memory usage
+ *
+ * This allows parallel OG image generation while preventing memory bloat
+ * from too many concurrent Resvg instances.
+ */
+export const ogImageLimiter = new ConcurrencyLimiter(getOgImageConcurrency());

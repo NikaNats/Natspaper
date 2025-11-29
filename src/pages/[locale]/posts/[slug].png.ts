@@ -13,7 +13,7 @@ import type { Lang } from "@/i18n";
  * Optimizations:
  * - Filters only posts that need dynamic OG images (no custom image provided)
  * - Excludes draft posts from generation
- * - Processes images sequentially to prevent memory bloat from concurrent Resvg instances
+ * - Uses adaptive concurrency (configurable via OG_IMAGE_CONCURRENCY env var)
  * - Each image generation includes explicit memory cleanup
  */
 export async function getStaticPaths() {
@@ -45,8 +45,9 @@ export async function getStaticPaths() {
  * Serve dynamically generated OG image for a blog post.
  * Image is rendered from post metadata using Satori + Resvg.
  *
- * Concurrency control: OG image generation is serialized (max 1 concurrent)
- * to prevent memory bloat from concurrent Resvg instances. This prevents:
+ * Concurrency control: OG image generation uses adaptive concurrency
+ * (default: half of CPU cores, configurable via OG_IMAGE_CONCURRENCY env var)
+ * to balance build speed with memory safety. This prevents:
  * - Out-of-memory errors during builds with many posts
  * - Poor performance under concurrent load
  * - Build failures in CI/CD pipelines
