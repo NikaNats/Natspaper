@@ -14,7 +14,6 @@ export const ui = {
     "nav.posts": "Posts",
     "nav.tags": "Tags",
     "nav.archives": "Archives",
-    "nav.search": "Search",
     "nav.openMenu": "Open Menu",
     "nav.closeMenu": "Close Menu",
     "nav.mainMenu": "Main Menu",
@@ -23,9 +22,6 @@ export const ui = {
 
     // Footer
     "footer.copyright": "All rights reserved.",
-
-    // Search
-    "search.placeholder": "Search any article...",
 
     // Post
     "post.goBack": "Go back",
@@ -80,7 +76,6 @@ export const ui = {
     "nav.posts": "Posts",
     "nav.tags": "Tags",
     "nav.archives": "არქივი",
-    "nav.search": "ძებნა",
     "nav.openMenu": "მენიუს გახსნა",
     "nav.closeMenu": "მენიუს დახურვა",
     "nav.mainMenu": "მთავარი მენიუ",
@@ -89,9 +84,6 @@ export const ui = {
 
     // Footer
     "footer.copyright": "ყველა უფლება დაცულია.",
-
-    // Search
-    "search.placeholder": "მოძებნე სტატია...",
 
     // Post
     "post.goBack": "უკან დაბრუნება",

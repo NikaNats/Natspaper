@@ -68,7 +68,7 @@ jobs:
 
           BASE_URL="https://natspaper.vercel.app/en"
 
-          for page in "/" "/posts" "/tags" "/archives" "/search"; do
+          for page in "/" "/posts" "/tags" "/archives"; do
             status=$(curl -s -L -w "%{http_code}" -o /dev/null "$BASE_URL$page")
             if [ "$status" = "200" ]; then
               echo "✅ $page - OK"

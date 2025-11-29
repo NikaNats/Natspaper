@@ -67,7 +67,6 @@ export default [
       ".astro/**",
       ".vercel/**",
       ".sonda/**",
-      "public/pagefind/**",
       "scripts/**",
       "node_modules/**",
       "playwright-report/**",
