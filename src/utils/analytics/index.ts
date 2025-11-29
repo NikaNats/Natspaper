@@ -35,6 +35,16 @@
 
 import { DEFAULT_LANG } from "@/i18n/config";
 
+// Declare Vercel Analytics on globalThis
+declare global {
+  interface Window {
+    va?: (command: string, data: Record<string, unknown>) => void;
+  }
+  var va:
+    | ((command: string, data: Record<string, unknown>) => void)
+    | undefined;
+}
+
 // Re-export types
 export interface AnalyticsEvent {
   name: string;
@@ -59,7 +69,7 @@ export function trackEvent(
     try {
       // Vercel Analytics track function
       // @see https://vercel.com/docs/analytics/custom-events
-      globalThis.va("event", {
+      globalThis.va?.("event", {
         name: eventName,
         ...eventData,
       });
