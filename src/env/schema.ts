@@ -18,6 +18,12 @@ export interface EnvSchema {
 
   // ===== OPTIONAL: Analytics & SEO =====
   PUBLIC_GOOGLE_SITE_VERIFICATION?: string;
+
+  // ===== OPTIONAL: Giscus Comments =====
+  PUBLIC_GISCUS_REPO?: string;
+  PUBLIC_GISCUS_REPO_ID?: string;
+  PUBLIC_GISCUS_CATEGORY?: string;
+  PUBLIC_GISCUS_CATEGORY_ID?: string;
 }
 
 /**
@@ -90,6 +96,54 @@ export const ENV_DEFINITIONS = {
     context: "client" as const,
     description: "Google Search Console verification token",
     docs: "From: https://search.google.com/search-console",
+    validators: [],
+  },
+
+  // ================================================
+  // OPTIONAL: GISCUS COMMENTS
+  // ================================================
+
+  PUBLIC_GISCUS_REPO: {
+    type: "string" as const,
+    required: false,
+    access: "public" as const,
+    context: "client" as const,
+    description: "GitHub repository for Giscus comments (format: owner/repo)",
+    example: "NikaNats/Natspaper",
+    docs: "Get from: https://giscus.app/",
+    validators: [],
+  },
+
+  PUBLIC_GISCUS_REPO_ID: {
+    type: "string" as const,
+    required: false,
+    access: "public" as const,
+    context: "client" as const,
+    description: "GitHub repository ID for Giscus",
+    example: "R_kgDOKmL5Zg",
+    docs: "Get from: https://giscus.app/",
+    validators: [],
+  },
+
+  PUBLIC_GISCUS_CATEGORY: {
+    type: "string" as const,
+    required: false,
+    access: "public" as const,
+    context: "client" as const,
+    description: "Giscus discussion category name",
+    example: "Announcements",
+    docs: "Get from: https://giscus.app/",
+    validators: [],
+  },
+
+  PUBLIC_GISCUS_CATEGORY_ID: {
+    type: "string" as const,
+    required: false,
+    access: "public" as const,
+    context: "client" as const,
+    description: "Giscus discussion category ID",
+    example: "DIC_kwDOKmL5Zs4CZj7R",
+    docs: "Get from: https://giscus.app/",
     validators: [],
   },
 } as const;
