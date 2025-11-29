@@ -59,9 +59,7 @@ export { default as Hr } from "./Hr.astro";
 export { default as LinkButton } from "./LinkButton.astro";
 export { default as BackButton } from "./BackButton.astro";
 export { default as Breadcrumb } from "./Breadcrumb.astro";
-export { default as LocaleBadge } from "./LocaleBadge.astro";
 export { default as Pagination } from "./Pagination.astro";
-export { default as ErrorBoundary } from "./ErrorBoundary.astro";
 
 // =============================================================================
 // TYPE EXPORTS

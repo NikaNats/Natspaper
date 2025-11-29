@@ -59,7 +59,7 @@ describe('Tag Utilities', () => {
       const uniqueTags = getUniqueTags(posts);
 
       expect(uniqueTags).toHaveLength(1);
-      expect(uniqueTags[0]?.tag).toBe('tag-1'); // slugify converts to kebab-case
+      expect(uniqueTags[0]?.tag).toBe('tag-1'); // slugify converts letter→number to kebab-case
     });
 
     it('should sort tags alphabetically', () => {

@@ -10,7 +10,7 @@ import { DEFAULT_LANG, SUPPORTED_LANGS } from "./src/i18n/config";
 // import remarkCollapse from "remark-collapse";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
-import { remarkModifiedTime } from "./src/lib/remark/remark-modified-time.mjs";
+import { remarkModifiedTime } from "./src/lib/remark-modified-time.mjs";
 import vercel from "@astrojs/vercel";
 
 const siteUrl = process.env.SITE_WEBSITE || SITE.website;
