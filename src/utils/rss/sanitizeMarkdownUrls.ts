@@ -269,7 +269,7 @@ export function sanitizeMarkdownUrls(markdown: string): string {
   let result = safeInput;
 
   for (let i = links.length - 1; i >= 0; i--) {
-    const link = links[i];
+    const link = links[i]!;
     const trimmedUrl = link.url.trim();
 
     let replacement: string;

@@ -1,5 +1,5 @@
 import type { APIRoute } from "astro";
-import { type CollectionEntry } from "astro:content";
+import type { CollectionEntry } from "astro:content";
 import { PostRepository } from "@/utils/post/repository";
 import { getLastPathSegment } from "@/utils/core/slugify";
 import { generateOgImageForPost } from "@/utils/og";
@@ -60,7 +60,7 @@ export const GET: APIRoute = async ({ props }) => {
     });
   }
 
-  // Run OG generation with concurrency control (serial processing)
+  // Run OG generation with concurrency control (adaptive concurrency)
   const buffer = await ogImageLimiter.run(() =>
     generateOgImageForPost(props as CollectionEntry<"blog">)
   );
