@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { escapeHtml, sanitizeDescription } from '@/utils/rss';
+import { escapeHtml, sanitizeDescription, sanitizeMarkdownUrls } from '@/utils/rss';
 
 describe('RSS Feed Security - Integration Tests', () => {
   describe('HTML Escaping', () => {
@@ -238,6 +238,200 @@ describe('RSS Feed Security - Integration Tests', () => {
       
       expect(result).toContain('你好');
       expect(result).toContain('مرحبا');
+    });
+  });
+
+  describe('sanitizeMarkdownUrls - Robust Markdown Link Parsing', () => {
+    describe('Basic Link Handling', () => {
+      it('should parse simple markdown links', () => {
+        const input = 'Check [this link](https://example.com) out';
+        const result = sanitizeMarkdownUrls(input);
+        expect(result).toBe('Check [this link](https://example.com) out');
+      });
+
+      it('should handle multiple links', () => {
+        const input = '[Link 1](https://a.com) and [Link 2](https://b.com)';
+        const result = sanitizeMarkdownUrls(input);
+        expect(result).toBe('[Link 1](https://a.com) and [Link 2](https://b.com)');
+      });
+
+      it('should preserve text without links', () => {
+        const input = 'No links here, just text.';
+        const result = sanitizeMarkdownUrls(input);
+        expect(result).toBe(input);
+      });
+    });
+
+    describe('Nested Brackets in Link Text', () => {
+      it('should handle nested brackets in link text', () => {
+        const input = '[Click [here] for more](https://example.com)';
+        const result = sanitizeMarkdownUrls(input);
+        expect(result).toBe('[Click [here] for more](https://example.com)');
+      });
+
+      it('should handle deeply nested brackets', () => {
+        const input = '[Outer [Middle [Inner] text] end](https://example.com)';
+        const result = sanitizeMarkdownUrls(input);
+        expect(result).toBe('[Outer [Middle [Inner] text] end](https://example.com)');
+      });
+
+      it('should handle multiple nested bracket pairs', () => {
+        const input = '[First [a] and [b] section](https://example.com)';
+        const result = sanitizeMarkdownUrls(input);
+        expect(result).toBe('[First [a] and [b] section](https://example.com)');
+      });
+    });
+
+    describe('Parentheses in URLs (Wikipedia-style)', () => {
+      it('should handle parentheses in URLs', () => {
+        const input = '[Equation](https://en.wikipedia.org/wiki/Equation_(mathematics))';
+        const result = sanitizeMarkdownUrls(input);
+        expect(result).toBe('[Equation](https://en.wikipedia.org/wiki/Equation_(mathematics))');
+      });
+
+      it('should handle nested parentheses in URLs', () => {
+        const input = '[Topic](https://example.com/Page_(Section_(Subsection)))';
+        const result = sanitizeMarkdownUrls(input);
+        expect(result).toBe('[Topic](https://example.com/Page_(Section_(Subsection)))');
+      });
+
+      it('should handle multiple parentheses pairs in URL', () => {
+        const input = '[Link](https://example.com/A_(B)_C_(D))';
+        const result = sanitizeMarkdownUrls(input);
+        expect(result).toBe('[Link](https://example.com/A_(B)_C_(D))');
+      });
+    });
+
+    describe('Escaped Characters', () => {
+      it('should not match escaped opening bracket', () => {
+        const input = '\\[not a link](https://example.com)';
+        const result = sanitizeMarkdownUrls(input);
+        expect(result).toBe('\\[not a link](https://example.com)');
+      });
+
+      it('should handle escaped brackets within link text', () => {
+        const input = '[Text with \\] bracket](https://example.com)';
+        const result = sanitizeMarkdownUrls(input);
+        expect(result).toBe('[Text with \\] bracket](https://example.com)');
+      });
+
+      it('should handle escaped parens within URL', () => {
+        const input = '[Link](https://example.com/path\\)more)';
+        const result = sanitizeMarkdownUrls(input);
+        expect(result).toBe('[Link](https://example.com/path\\)more)');
+      });
+    });
+
+    describe('URL Safety Validation', () => {
+      it('should block javascript: URLs', () => {
+        const input = '[Click me](javascript:alert("XSS"))';
+        const result = sanitizeMarkdownUrls(input);
+        expect(result).toBe('[Click me](about:blank)');
+      });
+
+      it('should block data: URLs', () => {
+        const input = '[Click](data:text/html,<script>alert(1)</script>)';
+        const result = sanitizeMarkdownUrls(input);
+        expect(result).toBe('[Click](about:blank)');
+      });
+
+      it('should allow https: URLs', () => {
+        const input = '[Safe](https://example.com)';
+        const result = sanitizeMarkdownUrls(input);
+        expect(result).toBe('[Safe](https://example.com)');
+      });
+
+      it('should allow mailto: URLs', () => {
+        const input = '[Email](mailto:test@example.com)';
+        const result = sanitizeMarkdownUrls(input);
+        expect(result).toBe('[Email](mailto:test@example.com)');
+      });
+
+      it('should allow relative URLs', () => {
+        const input = '[Page](/about)';
+        const result = sanitizeMarkdownUrls(input);
+        expect(result).toBe('[Page](/about)');
+      });
+
+      it('should allow anchor URLs', () => {
+        const input = '[Section](#heading)';
+        const result = sanitizeMarkdownUrls(input);
+        expect(result).toBe('[Section](#heading)');
+      });
+    });
+
+    describe('Edge Cases', () => {
+      it('should handle empty link text', () => {
+        const input = '[](https://example.com)';
+        const result = sanitizeMarkdownUrls(input);
+        expect(result).toBe('[](https://example.com)');
+      });
+
+      it('should handle empty URL', () => {
+        const input = '[Text]()';
+        const result = sanitizeMarkdownUrls(input);
+        // Empty URL is technically invalid, but parser should handle it
+        expect(result).toContain('[Text]');
+      });
+
+      it('should handle unbalanced brackets (not a link)', () => {
+        const input = '[Unclosed bracket text';
+        const result = sanitizeMarkdownUrls(input);
+        expect(result).toBe(input);
+      });
+
+      it('should handle unbalanced parens in URL', () => {
+        const input = '[Link](https://example.com/page(broken';
+        const result = sanitizeMarkdownUrls(input);
+        // Unbalanced - should not parse as a link
+        expect(result).toBe(input);
+      });
+
+      it('should handle bracket without following paren', () => {
+        const input = '[Just brackets] not a link';
+        const result = sanitizeMarkdownUrls(input);
+        expect(result).toBe(input);
+      });
+
+      it('should trim whitespace in URLs', () => {
+        const input = '[Link](  https://example.com  )';
+        const result = sanitizeMarkdownUrls(input);
+        expect(result).toBe('[Link](https://example.com)');
+      });
+
+      it('should handle very long input by truncating', () => {
+        const longInput = '[Link](https://example.com) '.repeat(500);
+        const result = sanitizeMarkdownUrls(longInput);
+        expect(result.length).toBeLessThanOrEqual(4096 + 100); // Some buffer for replacements
+      });
+    });
+
+    describe('Real-world Wikipedia URL Examples', () => {
+      it('should handle typical Wikipedia disambiguation URLs', () => {
+        const input = 'Read about [Python (programming language)](https://en.wikipedia.org/wiki/Python_(programming_language))';
+        const result = sanitizeMarkdownUrls(input);
+        expect(result).toBe('Read about [Python (programming language)](https://en.wikipedia.org/wiki/Python_(programming_language))');
+      });
+
+      it('should handle Wikipedia URLs with multiple parens', () => {
+        const input = '[C++](https://en.wikipedia.org/wiki/C%2B%2B_(programming_language))';
+        const result = sanitizeMarkdownUrls(input);
+        expect(result).toBe('[C++](https://en.wikipedia.org/wiki/C%2B%2B_(programming_language))');
+      });
+    });
+
+    describe('Complex Mixed Content', () => {
+      it('should handle links mixed with other markdown', () => {
+        const input = '**Bold** and [link](https://example.com) and `code`';
+        const result = sanitizeMarkdownUrls(input);
+        expect(result).toBe('**Bold** and [link](https://example.com) and `code`');
+      });
+
+      it('should handle both nested brackets AND parens in URL', () => {
+        const input = '[Topic [subtopic]](https://example.com/Page_(Section))';
+        const result = sanitizeMarkdownUrls(input);
+        expect(result).toBe('[Topic [subtopic]](https://example.com/Page_(Section))');
+      });
     });
   });
 });
