@@ -29,7 +29,7 @@
       "headers": [
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; img-src 'self' data: https:; font-src 'self' data: https://fonts.gstatic.com; style-src 'unsafe-inline' 'self' https://fonts.googleapis.com; script-src 'unsafe-inline' 'wasm-unsafe-eval' 'self' data:; form-action 'self'; base-uri 'self'; connect-src 'self' https://o4510255602663424.ingest.de.sentry.io; frame-ancestors 'none';"
+          "value": "default-src 'self'; img-src 'self' data: https:; font-src 'self' data: https://fonts.gstatic.com; style-src 'unsafe-inline' 'self' https://fonts.googleapis.com; script-src 'unsafe-inline' 'wasm-unsafe-eval' 'self' data: https://giscus.app; form-action 'self'; base-uri 'self'; connect-src 'self' https://o4510255602663424.ingest.de.sentry.io https://giscus.app; frame-src https://giscus.app; frame-ancestors 'none';"
         },
         {
           "key": "X-Frame-Options",

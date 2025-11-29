@@ -25,7 +25,8 @@
     "test:e2e:headed": "playwright test --headed",
     "test:e2e:debug": "playwright test --debug",
     "test:e2e:chrome": "playwright test --project=chromium",
-    "test:all": "pnpm test:run && pnpm test:e2e"
+    "test:all": "pnpm test:run && pnpm test:e2e",
+    "security:audit": "pnpm audit --audit-level=high"
   },
   "dependencies": {
     "@astrojs/rss": "^4.0.14",
