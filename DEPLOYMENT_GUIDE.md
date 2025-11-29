@@ -128,9 +128,119 @@ git push origin main
 | "Unauthorized" error                 | Repository doesn't have Discussions enabled | Enable Discussions in GitHub repo settings                               |
 | CSP (Content-Security-Policy) errors | Headers blocking giscus.app                 | Check `vercel.json` has giscus.app in CSP headers ✓ (already configured) |
 
-## 4. Post-Deployment Verification
+## 4. Vercel Web Analytics & Speed Insights (Automatic)
 
-Once Vercel reports "Ready", perform these checks on the live URL:
+**Good News:** Analytics are automatically enabled! 📊
+
+### What's Tracked:
+
+1. **Vercel Web Analytics** - Privacy-first analytics
+   - ✅ NO cookies used
+   - ✅ NO personal data collected
+   - ✅ NO consent banner required
+   - ✅ User opt-out via localStorage: `localStorage.setItem('va-disable', 'true')`
+
+2. **Vercel Speed Insights** - Performance monitoring
+   - Core Web Vitals (FCP, LCP, CLS)
+   - Real user monitoring (RUM)
+
+### Features:
+
+- **Localhost Filtering:** Development events not counted (saves quota)
+- **Sensitive Route Filtering:** Private, drafts, admin, API routes excluded
+- **Parameter Redaction:** Tokens, passwords, emails redacted automatically
+- **Sample Rate:** Currently 100% for Speed Insights (adjust if needed for quota)
+
+### View Analytics:
+
+1. Go to your **Vercel Dashboard** → Project → **Analytics**
+2. Monitor real-time traffic, page views, and performance metrics
+
+### Quota Management (Free Tier):
+
+- **Web Analytics:** 50k events/month (typically sufficient for < 1000 daily users)
+- **Speed Insights:** 10k page views/month
+
+If you exceed limits, adjust in `src/components/features/Analytics.astro`:
+
+```typescript
+<SpeedInsights debug={isDev} sampleRate={0.5} />  // Track 50% of visits instead of 100%
+```
+
+## 4.1. Setting Up Giscus Comments (Required for Production)
+
+Giscus is a comment system powered by GitHub Discussions. To enable comments in production, follow these steps:
+
+### Step 1: Create a GitHub Discussion Repository
+
+1. Go to the repository where you want to host discussions (typically the same repo as your blog)
+2. Enable "Discussions" in repository settings: Settings → Features → Discussions ✅
+3. Create a discussion category named "Announcements" (or your preferred name)
+
+### Step 2: Get Your Giscus Configuration
+
+1. Visit https://giscus.app/
+2. Fill in your repository details (owner/repo)
+3. Select your discussion category
+4. Copy the values:
+   - **Repository ID** (starts with `R_`)
+   - **Category Name**
+   - **Category ID** (starts with `DIC_`)
+
+### Step 3: Add Environment Variables to Vercel
+
+1. Go to your Vercel Project Settings
+2. Navigate to **Environment Variables**
+3. Add the following:
+
+| Variable Name               | Value                         | Example                |
+| --------------------------- | ----------------------------- | ---------------------- |
+| `PUBLIC_GISCUS_REPO`        | `owner/repo`                  | `NikaNats/Natspaper`   |
+| `PUBLIC_GISCUS_REPO_ID`     | Repository ID from giscus.app | `R_kgDOKmL5Zg`         |
+| `PUBLIC_GISCUS_CATEGORY`    | Discussion category name      | `Announcements`        |
+| `PUBLIC_GISCUS_CATEGORY_ID` | Category ID from giscus.app   | `DIC_kwDOKmL5Zs4CZj7R` |
+
+⚠️ **Important:** These must be set for **all environments** where you want comments to appear (Production, Preview, Development).
+
+### Step 4: Verify Locally
+
+Before deploying, test locally:
+
+```powershell
+# Set environment variables locally
+$env:PUBLIC_GISCUS_REPO='YourUsername/YourRepo'
+$env:PUBLIC_GISCUS_REPO_ID='R_...'
+$env:PUBLIC_GISCUS_CATEGORY='Announcements'
+$env:PUBLIC_GISCUS_CATEGORY_ID='DIC_...'
+
+# Build and test
+pnpm run build
+pnpm run preview
+
+# Visit a blog post and verify comments section loads
+```
+
+### Step 5: Deploy
+
+Once verified locally, push your changes:
+
+```bash
+git add .
+git commit -m "feat: add giscus configuration"
+git push origin main
+```
+
+**Troubleshooting:**
+
+| Issue                                | Cause                                       | Solution                                                                 |
+| ------------------------------------ | ------------------------------------------- | ------------------------------------------------------------------------ |
+| Comments section doesn't appear      | Giscus disabled in `src/config.ts`          | Set `enabled: true` in `GISCUS` config                                   |
+| "Loading comments..." hangs          | Missing environment variables               | Add all 4 variables to Vercel Project Settings                           |
+| Comments iframe shows error          | Invalid repo ID or category ID              | Verify IDs from https://giscus.app/                                      |
+| "Unauthorized" error                 | Repository doesn't have Discussions enabled | Enable Discussions in GitHub repo settings                               |
+| CSP (Content-Security-Policy) errors | Headers blocking giscus.app                 | Check `vercel.json` has giscus.app in CSP headers ✓ (already configured) |
+
+## 5. Post-Deployment Verification
 
 ### A. Smoke Test
 
