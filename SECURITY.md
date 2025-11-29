@@ -22,7 +22,7 @@ style-src 'unsafe-inline' 'self' https://fonts.googleapis.com;
 script-src 'unsafe-inline' 'wasm-unsafe-eval' 'self' data: https://giscus.app;
 form-action 'self';
 base-uri 'self';
-connect-src 'self' https://o4510255602663424.ingest.de.sentry.io https://giscus.app;
+connect-src 'self' https://giscus.app;
 frame-src https://giscus.app;
 frame-ancestors 'none';
 ```
@@ -39,12 +39,11 @@ frame-ancestors 'none';
 
 ### External Resources
 
-| Resource          | Source                           | Security                            |
-| ----------------- | -------------------------------- | ----------------------------------- |
-| Giscus Comments   | `https://giscus.app`             | SRI hash verified                   |
-| Google Fonts      | `fonts.googleapis.com`           | CSP-restricted                      |
-| Sentry Monitoring | `https://o*.ingest.de.sentry.io` | CSP-restricted to specific endpoint |
-| KaTeX Math        | Bundled locally                  | No external dependency              |
+| Resource        | Source                 | Security               |
+| --------------- | ---------------------- | ---------------------- |
+| Giscus Comments | `https://giscus.app`   | SRI hash verified      |
+| Google Fonts    | `fonts.googleapis.com` | CSP-restricted         |
+| KaTeX Math      | Bundled locally        | No external dependency |
 
 ### Input Handling
 

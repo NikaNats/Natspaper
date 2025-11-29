@@ -22,7 +22,6 @@
  * - seo/         - Structured data and SEO helpers
  * - analytics/   - Analytics tracking service
  * - i18n/        - Locale-aware formatting utilities
- * - sentry/      - Error tracking configuration
  * - transformers/- Shiki code block transformers
  */
 
@@ -98,16 +97,6 @@ export {
   formatRelativeTime,
   getCopyrightText,
 } from "./i18n";
-
-// ============================================================
-// SENTRY UTILITIES
-// Error tracking configuration
-// ============================================================
-export {
-  getSentryConfig,
-  getClientSentryInit,
-  getServerSentryInit,
-} from "./sentry";
 
 // ============================================================
 // TRANSFORMERS

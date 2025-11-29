@@ -14,7 +14,6 @@ Ensure your local environment matches production requirements:
 
 ```env
 SITE_WEBSITE=https://your-domain.com
-SENTRY_DSN=... (Optional)
 ```
 
 ## 2. Local Build Verification (Do Not Skip)
@@ -82,7 +81,6 @@ Run a Lighthouse audit in an Incognito window.
 ### C. Search & Math
 
 - **Math:** Visit a post with equations. Verify KaTeX renders correctly (no raw LaTeX)
-- **Search:** Verify the search bar returns results (loads pagefind)
 
 ## 5. Troubleshooting Common Issues
 

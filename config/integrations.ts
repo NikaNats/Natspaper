@@ -1,11 +1,8 @@
 import sitemap from "@astrojs/sitemap";
-import sentry from "@sentry/astro";
 import Sonda from "sonda/astro";
 import expressiveCode from "astro-expressive-code";
 import { envValidationIntegration } from "../src/integrations/envValidation";
 import { FEATURES } from "../src/config";
-
-const isProduction = process.env.NODE_ENV === 'production';
 
 export function getIntegrations() {
   const integrations = [
@@ -53,25 +50,6 @@ export function getIntegrations() {
       format: ["html", "json"],
     }),
   ];
-
-  // Conditionally add Sentry only for production builds
-  if (isProduction) {
-    integrations.push(sentry({
-      // Configuration for source map uploads during build
-      // Enables readable stack traces in production by uploading source maps
-      sourceMapsUploadOptions: {
-        project: "natspaper",
-        org: "nika-1u",
-        authToken: process.env.SENTRY_AUTH_TOKEN,
-      },
-
-      // Auto instrumentation for request handling (Astro 3.5.2+)
-      // Automatically adds middleware for request tracking and distributed tracing
-      autoInstrumentation: {
-        requestHandler: true,
-      },
-    }));
-  }
 
   return integrations;
 }

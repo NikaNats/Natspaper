@@ -23,18 +23,6 @@ export const isEnum =
       ? `${name} has an invalid value "${value}". Must be one of: ${allowedValues.join(", ")}.`
       : null;
 
-export const isSentryDsn: ValidatorFn = (value, name) => {
-  if (!value) return null;
-  try {
-    const url = new URL(value);
-    return url.protocol === "https:" && url.hostname.includes("sentry.io")
-      ? null
-      : `${name} has an invalid Sentry DSN format.`;
-  } catch {
-    return `${name} has an invalid Sentry DSN format.`;
-  }
-};
-
 export const isNumberInRange =
   (min: number, max: number): ValidatorFn =>
   (value, name) => {

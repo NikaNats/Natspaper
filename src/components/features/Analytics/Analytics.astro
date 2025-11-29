@@ -2,25 +2,9 @@
 /**
  * ⚠️ DEPRECATED - This component is no longer used
  *
- * This component is DEPRECATED and should not be used in new code.
- * Sentry client-side initialization has been consolidated in src/utils/sentry-client-init.ts
- * and is now called directly from Layout.astro.
- *
- * MIGRATION GUIDE:
- * ═══════════════════════════════════════════════════════════════
- * The initialization logic previously in this component has been moved to:
- * - src/utils/sentry-client-init.ts (new consolidated utility)
- * - src/layouts/Layout.astro (imports and calls initDeferred())
- *
- * REASON FOR REMOVAL:
- * - Consolidation of scattered Sentry initialization logic
- * - Better clarity on when and where error tracking is initialized
- * - Improved maintainability with single source of truth
- * - Clear performance strategy: deferred initialization after page load
- *
- * See src/utils/sentry-client-init.ts for the new implementation.
- * See docs/SENTRY_SETUP.md for the complete setup guide.
+ * This component is deprecated and no longer needed.
+ * Analytics tracking is now handled directly via the analytics service.
  */
 ---
 
-<!-- This component is deprecated and should not be used -->
+<!-- This component is deprecated -->

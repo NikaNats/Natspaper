@@ -160,13 +160,11 @@ export const settingsConfig = {
 The project uses a layered environment variable system for managing secrets and environment-specific settings.
 
 1.  **Defaults (Committed):** `.env.development` and `.env.production` contain non-sensitive defaults.
-2.  **Local Overrides (Ignored):** Create a `.env.local` file to add secrets (like Sentry DSNs) or override defaults for local development. This file is ignored by Git.
+2.  **Local Overrides (Ignored):** Create a `.env.local` file to add secrets or override defaults for local development. This file is ignored by Git.
 
 ```env
 # .env.local (Never committed to Git)
-PUBLIC_SENTRY_DSN=your_client_dsn
-SENTRY_DSN=your_server_dsn
-SENTRY_AUTH_TOKEN=your_auth_token
+PUBLIC_GOOGLE_SITE_VERIFICATION=your_google_token
 ```
 
 ### Project Structure
