@@ -34,26 +34,37 @@ const SAFE_PROTOCOLS = new Set([
 const MAX_INPUT_LENGTH = 4096;
 
 /**
+ * Check if URL uses a relative path or fragment identifier
+ */
+function isRelativeUrl(url: string): boolean {
+  return url.startsWith("/") || url.startsWith("#");
+}
+
+/**
+ * Check if URL uses protocol-relative format
+ */
+function isProtocolRelativeUrl(url: string): boolean {
+  return url.startsWith("//");
+}
+
+/**
+ * Check if a protocol is in the safe protocols list
+ */
+function isSafeProtocol(protocol: string): boolean {
+  return SAFE_PROTOCOLS.has(protocol.toLowerCase());
+}
+
+/**
  * Test if a URL is safe
  */
 function isSafeUrl(url: string): boolean {
+  if (isRelativeUrl(url) || isProtocolRelativeUrl(url)) {
+    return true;
+  }
+
   try {
-    // Handle relative URLs
-    if (url.startsWith("/") || url.startsWith("#")) {
-      return true;
-    }
-
-    // Handle protocol-relative URLs
-    if (url.startsWith("//")) {
-      return true;
-    }
-
-    // Parse absolute URLs
     const urlObj = new URL(url, "https://example.com");
-    const protocol = urlObj.protocol.toLowerCase();
-
-    // Check if protocol is in safe list
-    return SAFE_PROTOCOLS.has(protocol);
+    return isSafeProtocol(urlObj.protocol);
   } catch {
     // If URL parsing fails, consider it unsafe
     return false;
@@ -77,6 +88,49 @@ interface ParsedLink {
 }
 
 /**
+ * Try to parse a complete markdown link starting at position `i`
+ * Returns the parsed link or null if not a valid link
+ */
+function tryParseLink(
+  input: string,
+  i: number
+): { link: ParsedLink; nextIndex: number } | null {
+  const linkStart = i;
+
+  const textResult = parseBalancedBrackets(input, i);
+  if (!textResult) return null;
+
+  const { content: linkText, endIndex: textEndIndex } = textResult;
+
+  if (textEndIndex >= input.length || input[textEndIndex] !== "(") {
+    return null;
+  }
+
+  const urlResult = parseBalancedParens(input, textEndIndex);
+  if (!urlResult) return null;
+
+  const { content: url, endIndex: urlEndIndex } = urlResult;
+
+  return {
+    link: {
+      fullMatch: input.slice(linkStart, urlEndIndex),
+      text: linkText,
+      url,
+      startIndex: linkStart,
+      endIndex: urlEndIndex,
+    },
+    nextIndex: urlEndIndex,
+  };
+}
+
+/**
+ * Check if character at position is an escaped character
+ */
+function isEscapedChar(input: string, i: number): boolean {
+  return input[i] === "\\" && i + 1 < input.length;
+}
+
+/**
  * Parse markdown links using a character-by-character approach.
  * This handles edge cases that regex cannot:
  * - Nested brackets: [Click [here] for more](url)
@@ -91,56 +145,34 @@ function parseMarkdownLinks(input: string): ParsedLink[] {
   let i = 0;
 
   while (i < input.length) {
-    // Skip escaped brackets
-    if (input[i] === "\\" && i + 1 < input.length) {
+    if (isEscapedChar(input, i)) {
       i += 2;
       continue;
     }
 
-    // Look for start of link: [
     if (input[i] === "[") {
-      const linkStart = i;
-
-      // Parse the link text with bracket balancing
-      const textResult = parseBalancedBrackets(input, i);
-      if (!textResult) {
+      const result = tryParseLink(input, i);
+      if (result) {
+        links.push(result.link);
+        i = result.nextIndex;
+      } else {
         i++;
-        continue;
       }
-
-      const { content: linkText, endIndex: textEndIndex } = textResult;
-
-      // Check for ( immediately after ]
-      if (textEndIndex >= input.length || input[textEndIndex] !== "(") {
-        i++;
-        continue;
-      }
-
-      // Parse the URL with parenthesis balancing
-      const urlResult = parseBalancedParens(input, textEndIndex);
-      if (!urlResult) {
-        i++;
-        continue;
-      }
-
-      const { content: url, endIndex: urlEndIndex } = urlResult;
-
-      links.push({
-        fullMatch: input.slice(linkStart, urlEndIndex),
-        text: linkText,
-        url: url,
-        startIndex: linkStart,
-        endIndex: urlEndIndex,
-      });
-
-      // Continue after this link
-      i = urlEndIndex;
     } else {
       i++;
     }
   }
 
   return links;
+}
+
+/**
+ * Update depth counter for bracket nesting
+ */
+function updateBracketDepth(char: string | undefined, depth: number): number {
+  if (char === "[") return depth + 1;
+  if (char === "]") return depth - 1;
+  return depth;
 }
 
 /**
@@ -164,30 +196,32 @@ function parseBalancedBrackets(
   while (i < input.length && depth > 0) {
     const char = input[i];
 
-    // Handle escape sequences
-    if (char === "\\" && i + 1 < input.length) {
+    if (isEscapedChar(input, i)) {
       i += 2;
       continue;
     }
 
-    if (char === "[") {
-      depth++;
-    } else if (char === "]") {
-      depth--;
-    }
-
+    depth = updateBracketDepth(char, depth);
     if (depth > 0) {
       i++;
     }
   }
 
-  // If we didn't find a closing bracket
   if (depth !== 0) return null;
 
   return {
     content: input.slice(contentStart, i),
-    endIndex: i + 1, // Position after the closing ]
+    endIndex: i + 1,
   };
+}
+
+/**
+ * Update depth counter for parenthesis nesting
+ */
+function updateParenDepth(char: string | undefined, depth: number): number {
+  if (char === "(") return depth + 1;
+  if (char === ")") return depth - 1;
+  return depth;
 }
 
 /**
@@ -211,30 +245,34 @@ function parseBalancedParens(
   while (i < input.length && depth > 0) {
     const char = input[i];
 
-    // Handle escape sequences
-    if (char === "\\" && i + 1 < input.length) {
+    if (isEscapedChar(input, i)) {
       i += 2;
       continue;
     }
 
-    if (char === "(") {
-      depth++;
-    } else if (char === ")") {
-      depth--;
-    }
-
+    depth = updateParenDepth(char, depth);
     if (depth > 0) {
       i++;
     }
   }
 
-  // If we didn't find a closing paren
   if (depth !== 0) return null;
 
   return {
     content: input.slice(contentStart, i),
-    endIndex: i + 1, // Position after the closing )
+    endIndex: i + 1,
   };
+}
+
+/**
+ * Generate replacement for a link (safe or fallback)
+ */
+function getLinkReplacement(link: ParsedLink): string {
+  const trimmedUrl = link.url.trim();
+  if (isSafeUrl(trimmedUrl)) {
+    return `[${link.text}](${trimmedUrl})`;
+  }
+  return `[${link.text}](about:blank)`;
 }
 
 /**
@@ -250,37 +288,22 @@ function parseBalancedParens(
  */
 export function sanitizeMarkdownUrls(markdown: string): string {
   // SECURITY: DoS Protection
-  // If input is too long, truncate it before processing.
   const safeInput =
     markdown.length > MAX_INPUT_LENGTH
       ? markdown.slice(0, MAX_INPUT_LENGTH)
       : markdown;
 
-  // Parse all markdown links
   const links = parseMarkdownLinks(safeInput);
 
-  // If no links found, return as-is
   if (links.length === 0) {
     return safeInput;
   }
 
-  // Build the result by replacing links from end to start
-  // (to preserve indices as we modify the string)
+  // Replace links from end to start to preserve indices
   let result = safeInput;
-
   for (let i = links.length - 1; i >= 0; i--) {
     const link = links[i]!;
-    const trimmedUrl = link.url.trim();
-
-    let replacement: string;
-    if (!isSafeUrl(trimmedUrl)) {
-      // Replace unsafe URL with safe fallback
-      replacement = `[${link.text}](about:blank)`;
-    } else {
-      // Keep safe URL (but trim whitespace)
-      replacement = `[${link.text}](${trimmedUrl})`;
-    }
-
+    const replacement = getLinkReplacement(link);
     result =
       result.slice(0, link.startIndex) +
       replacement +
