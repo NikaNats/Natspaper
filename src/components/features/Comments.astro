@@ -163,7 +163,12 @@ const { locale = "en" } = Astro.props;
               mutation.addedNodes[0].tagName === "IFRAME" &&
               mutation.addedNodes[0].classList.contains("giscus-frame")
             ) {
-              updateGiscusTheme();
+              // Wait for iframe to fully load before sending theme message
+              const iframe = mutation.addedNodes[0];
+              iframe.addEventListener("load", () => {
+                // Small delay to ensure giscus app is ready to receive messages
+                setTimeout(updateGiscusTheme, 100);
+              });
               mutationObserver.disconnect();
             }
           });

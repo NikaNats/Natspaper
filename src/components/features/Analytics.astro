@@ -10,13 +10,16 @@
  *
  * @see https://vercel.com/docs/analytics/privacy-and-compliance
  *
+ * NOTE: Vercel Web Analytics is enabled via @astrojs/vercel adapter in astro.config.ts
+ * (webAnalytics: { enabled: true }). We only import SpeedInsights here since the
+ * adapter doesn't include it automatically.
+ *
  * Features:
  * - User opt-out via localStorage ('va-disable')
  * - Sensitive URL filtering
  * - Development mode detection
  * - Cost optimization (localhost filtering)
  */
-import VercelAnalytics from "@vercel/analytics/astro";
 import SpeedInsights from "@vercel/speed-insights/astro";
 
 const isDev = import.meta.env.DEV;
@@ -80,7 +83,8 @@ const isDev = import.meta.env.DEV;
           urlObj.searchParams.set(param, "[REDACTED]");
         }
       });
-      event.url = urlObj.pathname + urlObj.search;
+      // IMPORTANT: Keep full URL (Vercel API requires https:// prefix)
+      event.url = urlObj.href;
     } catch {
       // URL parsing failed, use original
     }
@@ -110,16 +114,12 @@ const isDev = import.meta.env.DEV;
 </script>
 
 <!--
-  Analytics Component
-  - debug: Logs events to console in Dev mode
-  - mode: 'production' ensures data is sent correctly on Vercel
--->
-<VercelAnalytics mode={isDev ? "development" : "production"} debug={isDev} />
-
-<!--
   SpeedInsights Component
   - sampleRate: 1.0 = 100% of users.
     ⚠️ If you exceed 10k views/month, lower this to 0.5 or 0.1
     to stay within free tier limits.
+  
+  NOTE: Vercel Web Analytics is already enabled via @astrojs/vercel adapter
+  in astro.config.ts, so we don't need to include VercelAnalytics component here.
 -->
 <SpeedInsights debug={isDev} sampleRate={1.0} />
