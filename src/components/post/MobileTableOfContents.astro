@@ -17,7 +17,7 @@ const toc = headings.filter(h => h.depth >= 2 && h.depth <= 3);
 
 {
   toc.length > 0 && (
-    <div class="mb-8 lg:hidden">
+    <div class="mb-8 xl:hidden">
       <details class="group rounded-xl border border-border/60 bg-muted/30 transition-colors open:bg-muted/50">
         <summary class="flex cursor-pointer list-none items-center justify-between p-4 font-medium text-foreground transition-colors duration-200 hover:bg-muted/60 focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none">
           <span class="text-sm font-bold tracking-wide uppercase opacity-80">
@@ -55,7 +55,7 @@ const toc = headings.filter(h => h.depth >= 2 && h.depth <= 3);
    */
   function initMobileTOC() {
     const detailsElements = document.querySelectorAll(
-      "div.lg\\:hidden > details"
+      "div.xl\\:hidden > details"
     );
 
     detailsElements.forEach(details => {

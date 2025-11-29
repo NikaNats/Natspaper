@@ -16,7 +16,7 @@ import PostHero from "@/components/post/PostHero.astro";
 import PostContent from "@/components/post/PostContent.astro";
 import PostFooter from "@/components/post/PostFooter.astro";
 import TableOfContents from "@/components/post/TableOfContents.astro";
-// REMOVED: MobileTableOfContents - TOC now only on desktop sidebar
+import MobileTableOfContents from "@/components/post/MobileTableOfContents.astro";
 
 // PERFORMANCE: Bundle critical CSS for math rendering
 import "katex/dist/katex.min.css";
@@ -108,6 +108,12 @@ const copyrightText = `Copyright © ${currentYear} • ${t("footer.copyright")}`
         {timezone}
         {readingTimeText}
       />
+
+      <!-- 2. Restore logic: Hide ONLY when sidebar appears (xl/2xl breakpoint) -->
+      <!-- Using 'xl:hidden' or matching your sidebar breakpoint (min-width: 80rem) -->
+      <div class="block xl:hidden">
+        <MobileTableOfContents headings={headings} />
+      </div>
 
       <PostContent>
         <Content />
