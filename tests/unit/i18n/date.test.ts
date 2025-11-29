@@ -19,94 +19,106 @@ import {
   DATE_FORMATS,
 } from "@/utils/i18n/date";
 
+const testDate = new Date("2024-12-25T12:00:00Z");
+
+/**
+ * Test formatDate with English locale
+ */
+function testFormatDateEnglish() {
+  it("should format date in short format", () => {
+    const result = formatDate(testDate, "en", "short");
+    expect(result).toMatch(/Dec/i);
+    expect(result).toMatch(/25/);
+    expect(result).toMatch(/2024/);
+  });
+
+  it("should format date in long format", () => {
+    const result = formatDate(testDate, "en", "long");
+    expect(result).toMatch(/December/i);
+    expect(result).toMatch(/25/);
+    expect(result).toMatch(/2024/);
+  });
+
+  it("should default to short format when not specified", () => {
+    const result = formatDate(testDate, "en");
+    expect(result).toMatch(/Dec/i);
+  });
+}
+
+/**
+ * Test formatDate with Georgian locale
+ */
+function testFormatDateGeorgian() {
+  it("should format date in short format with Georgian month", () => {
+    const result = formatDate(testDate, "ka", "short");
+    expect(result).toBeTruthy();
+    expect(result.length).toBeGreaterThan(0);
+    expect(result).toMatch(/25/);
+    expect(result).toMatch(/2024/);
+  });
+
+  it("should format date in long format with Georgian month", () => {
+    const result = formatDate(testDate, "ka", "long");
+    expect(result).toBeTruthy();
+    expect(result.length).toBeGreaterThan(0);
+  });
+}
+
+/**
+ * Test formatDate input types
+ */
+function testFormatDateInputTypes() {
+  it("should accept Date object", () => {
+    const result = formatDate(new Date("2024-01-15"), "en", "short");
+    expect(result).toMatch(/Jan/i);
+    expect(result).toMatch(/15/);
+  });
+
+  it("should accept date string", () => {
+    const result = formatDate("2024-06-20", "en", "short");
+    expect(result).toMatch(/Jun/i);
+    expect(result).toMatch(/20/);
+  });
+
+  it("should accept timestamp number", () => {
+    const timestamp = new Date("2024-03-10").getTime();
+    const result = formatDate(timestamp, "en", "short");
+    expect(result).toMatch(/Mar/i);
+    expect(result).toMatch(/10/);
+  });
+}
+
+/**
+ * Test formatDate edge cases
+ */
+function testFormatDateEdgeCases() {
+  it("should handle invalid date gracefully", () => {
+    expect(() => formatDate("invalid-date", "en")).not.toThrow();
+  });
+
+  it("should handle year boundaries", () => {
+    const newYear = new Date("2025-01-01");
+    const result = formatDate(newYear, "en", "short");
+    expect(result).toMatch(/2025/);
+    expect(result).toMatch(/Jan/i);
+  });
+
+  it("should handle leap year date", () => {
+    const leapDay = new Date("2024-02-29");
+    const result = formatDate(leapDay, "en", "short");
+    expect(result).toMatch(/Feb/i);
+    expect(result).toMatch(/29/);
+  });
+}
+
 describe("Date Formatting Utilities", () => {
   describe("formatDate()", () => {
-    const testDate = new Date("2024-12-25T12:00:00Z");
-
-    describe("English locale", () => {
-      it("should format date in short format", () => {
-        const result = formatDate(testDate, "en", "short");
-        // Should contain month abbreviation, day, and year
-        expect(result).toMatch(/Dec/i);
-        expect(result).toMatch(/25/);
-        expect(result).toMatch(/2024/);
-      });
-
-      it("should format date in long format", () => {
-        const result = formatDate(testDate, "en", "long");
-        // Should contain full month name
-        expect(result).toMatch(/December/i);
-        expect(result).toMatch(/25/);
-        expect(result).toMatch(/2024/);
-      });
-
-      it("should default to short format when not specified", () => {
-        const result = formatDate(testDate, "en");
-        expect(result).toMatch(/Dec/i);
-      });
-    });
-
-    describe("Georgian locale", () => {
-      it("should format date in short format with Georgian month", () => {
-        const result = formatDate(testDate, "ka", "short");
-        // Georgian uses different month names
-        expect(result).toBeTruthy();
-        expect(result.length).toBeGreaterThan(0);
-        // Should contain 25 and 2024
-        expect(result).toMatch(/25/);
-        expect(result).toMatch(/2024/);
-      });
-
-      it("should format date in long format with Georgian month", () => {
-        const result = formatDate(testDate, "ka", "long");
-        expect(result).toBeTruthy();
-        // Georgian months are in Georgian script
-        expect(result.length).toBeGreaterThan(0);
-      });
-    });
-
-    describe("Input types", () => {
-      it("should accept Date object", () => {
-        const result = formatDate(new Date("2024-01-15"), "en", "short");
-        expect(result).toMatch(/Jan/i);
-        expect(result).toMatch(/15/);
-      });
-
-      it("should accept date string", () => {
-        const result = formatDate("2024-06-20", "en", "short");
-        expect(result).toMatch(/Jun/i);
-        expect(result).toMatch(/20/);
-      });
-
-      it("should accept timestamp number", () => {
-        const timestamp = new Date("2024-03-10").getTime();
-        const result = formatDate(timestamp, "en", "short");
-        expect(result).toMatch(/Mar/i);
-        expect(result).toMatch(/10/);
-      });
-    });
-
-    describe("Edge cases", () => {
-      it("should handle invalid date gracefully", () => {
-        // Invalid dates should not throw
-        expect(() => formatDate("invalid-date", "en")).not.toThrow();
-      });
-
-      it("should handle year boundaries", () => {
-        const newYear = new Date("2025-01-01");
-        const result = formatDate(newYear, "en", "short");
-        expect(result).toMatch(/2025/);
-        expect(result).toMatch(/Jan/i);
-      });
-
-      it("should handle leap year date", () => {
-        const leapDay = new Date("2024-02-29");
-        const result = formatDate(leapDay, "en", "short");
-        expect(result).toMatch(/Feb/i);
-        expect(result).toMatch(/29/);
-      });
-    });
+    describe("English locale", testFormatDateEnglish);
+    describe("Georgian locale", testFormatDateGeorgian);
+    describe("Input types", testFormatDateInputTypes);
+    describe("Edge cases", testFormatDateEdgeCases);
   });
+
 
   describe("formatNumber()", () => {
     describe("English locale", () => {
@@ -202,11 +214,83 @@ describe("Date Formatting Utilities", () => {
     });
   });
 
+/**
+ * Test formatRelativeTime with English locale
+ */
+function testFormatRelativeTimeEnglish() {
+  it("should return 'today' for current date", () => {
+    const today = new Date("2024-12-25T10:00:00Z");
+    const result = formatRelativeTime(today, "en");
+    expect(result.toLowerCase()).toMatch(/today/);
+  });
+
+  it("should return 'yesterday' for previous day", () => {
+    const yesterday = new Date("2024-12-24T12:00:00Z");
+    const result = formatRelativeTime(yesterday, "en");
+    expect(result.toLowerCase()).toMatch(/yesterday/);
+  });
+
+  it("should return days ago for recent dates", () => {
+    const threeDaysAgo = new Date("2024-12-22T12:00:00Z");
+    const result = formatRelativeTime(threeDaysAgo, "en");
+    expect(result.toLowerCase()).toMatch(/3|three/);
+    expect(result.toLowerCase()).toMatch(/day/);
+  });
+
+  it("should return weeks ago for dates 7-30 days old", () => {
+    const twoWeeksAgo = new Date("2024-12-11T12:00:00Z");
+    const result = formatRelativeTime(twoWeeksAgo, "en");
+    expect(result.toLowerCase()).toMatch(/2|two/);
+    expect(result.toLowerCase()).toMatch(/week/);
+  });
+
+  it("should return months ago for dates 30-365 days old", () => {
+    const twoMonthsAgo = new Date("2024-10-25T12:00:00Z");
+    const result = formatRelativeTime(twoMonthsAgo, "en");
+    expect(result.toLowerCase()).toMatch(/month/);
+  });
+
+  it("should return years ago for old dates", () => {
+    const twoYearsAgo = new Date("2022-12-25T12:00:00Z");
+    const result = formatRelativeTime(twoYearsAgo, "en");
+    expect(result.toLowerCase()).toMatch(/year/);
+  });
+}
+
+/**
+ * Test formatRelativeTime with Georgian locale
+ */
+function testFormatRelativeTimeGeorgian() {
+  it("should return Georgian relative time", () => {
+    const yesterday = new Date("2024-12-24T12:00:00Z");
+    const result = formatRelativeTime(yesterday, "ka");
+    expect(result).toBeTruthy();
+    expect(result.length).toBeGreaterThan(0);
+  });
+}
+
+/**
+ * Test formatRelativeTime input types
+ */
+function testFormatRelativeTimeInputTypes() {
+  it("should accept Date object", () => {
+    const date = new Date("2024-12-24T12:00:00Z");
+    expect(() => formatRelativeTime(date, "en")).not.toThrow();
+  });
+
+  it("should accept date string", () => {
+    expect(() => formatRelativeTime("2024-12-24", "en")).not.toThrow();
+  });
+
+  it("should accept timestamp", () => {
+    const timestamp = new Date("2024-12-24").getTime();
+    expect(() => formatRelativeTime(timestamp, "en")).not.toThrow();
+  });
+}
+
   describe("formatRelativeTime()", () => {
-    // Use fake timers for deterministic tests
     beforeEach(() => {
       vi.useFakeTimers();
-      // Set "now" to a fixed date
       vi.setSystemTime(new Date("2024-12-25T12:00:00Z"));
     });
 
@@ -214,71 +298,9 @@ describe("Date Formatting Utilities", () => {
       vi.useRealTimers();
     });
 
-    describe("English locale", () => {
-      it("should return 'today' for current date", () => {
-        const today = new Date("2024-12-25T10:00:00Z");
-        const result = formatRelativeTime(today, "en");
-        expect(result.toLowerCase()).toMatch(/today/);
-      });
-
-      it("should return 'yesterday' for previous day", () => {
-        const yesterday = new Date("2024-12-24T12:00:00Z");
-        const result = formatRelativeTime(yesterday, "en");
-        expect(result.toLowerCase()).toMatch(/yesterday/);
-      });
-
-      it("should return days ago for recent dates", () => {
-        const threeDaysAgo = new Date("2024-12-22T12:00:00Z");
-        const result = formatRelativeTime(threeDaysAgo, "en");
-        expect(result.toLowerCase()).toMatch(/3|three/);
-        expect(result.toLowerCase()).toMatch(/day/);
-      });
-
-      it("should return weeks ago for dates 7-30 days old", () => {
-        const twoWeeksAgo = new Date("2024-12-11T12:00:00Z");
-        const result = formatRelativeTime(twoWeeksAgo, "en");
-        expect(result.toLowerCase()).toMatch(/2|two/);
-        expect(result.toLowerCase()).toMatch(/week/);
-      });
-
-      it("should return months ago for dates 30-365 days old", () => {
-        const twoMonthsAgo = new Date("2024-10-25T12:00:00Z");
-        const result = formatRelativeTime(twoMonthsAgo, "en");
-        expect(result.toLowerCase()).toMatch(/month/);
-      });
-
-      it("should return years ago for old dates", () => {
-        const twoYearsAgo = new Date("2022-12-25T12:00:00Z");
-        const result = formatRelativeTime(twoYearsAgo, "en");
-        expect(result.toLowerCase()).toMatch(/year/);
-      });
-    });
-
-    describe("Georgian locale", () => {
-      it("should return Georgian relative time", () => {
-        const yesterday = new Date("2024-12-24T12:00:00Z");
-        const result = formatRelativeTime(yesterday, "ka");
-        // Georgian uses Georgian script
-        expect(result).toBeTruthy();
-        expect(result.length).toBeGreaterThan(0);
-      });
-    });
-
-    describe("Input types", () => {
-      it("should accept Date object", () => {
-        const date = new Date("2024-12-24T12:00:00Z");
-        expect(() => formatRelativeTime(date, "en")).not.toThrow();
-      });
-
-      it("should accept date string", () => {
-        expect(() => formatRelativeTime("2024-12-24", "en")).not.toThrow();
-      });
-
-      it("should accept timestamp", () => {
-        const timestamp = new Date("2024-12-24").getTime();
-        expect(() => formatRelativeTime(timestamp, "en")).not.toThrow();
-      });
-    });
+    describe("English locale", testFormatRelativeTimeEnglish);
+    describe("Georgian locale", testFormatRelativeTimeGeorgian);
+    describe("Input types", testFormatRelativeTimeInputTypes);
   });
 
   describe("DATE_FORMATS constant", () => {
