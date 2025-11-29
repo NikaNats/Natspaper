@@ -135,12 +135,42 @@ export default {
        */
       fontFamily: {
         // Body & UI: High x-height for rapid character recognition
-        sans: ["var(--font-inter)", "sans-serif"],
+        // GRACEFUL DEGRADATION: Comprehensive fallback chain ensures readable text
+        // even if web fonts fail to load (CDN outage, slow connection, etc.)
+        sans: [
+          "var(--font-inter)",
+          "Inter",
+          "system-ui",
+          "-apple-system",
+          "BlinkMacSystemFont",
+          "Segoe UI",
+          "Roboto",
+          "Helvetica Neue",
+          "Arial",
+          "sans-serif",
+        ],
+        // Georgian text fallback chain
+        georgian: [
+          "var(--font-georgian)",
+          "Noto Sans Georgian",
+          "system-ui",
+          "sans-serif",
+        ],
         // Headings & Editorial: Switched to Inter (sans) - use Inter variable for consistent heading styles
         // Keeping `serif` key available if you want to revert to a serif heading in the future
         // CHANGED: removed serif token entirely so `font-serif` uses browser fallback.
         // Code: Monospace for technical clarity
-        mono: ["var(--font-jetbrains-mono)", "monospace"],
+        mono: [
+          "var(--font-jetbrains-mono)",
+          "JetBrains Mono",
+          "ui-monospace",
+          "SFMono-Regular",
+          "SF Mono",
+          "Menlo",
+          "Consolas",
+          "Liberation Mono",
+          "monospace",
+        ],
       },
     },
   },

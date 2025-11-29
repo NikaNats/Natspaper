@@ -1,30 +1,139 @@
 ---
+/**
+ * 404 Error Page (English)
+ * ========================
+ * AVAILABILITY: This page is statically generated (prerender = true by default
+ * in static output mode) so it's served instantly from the Edge CDN without
+ * spinning up a serverless function.
+ *
+ * Provides helpful navigation options to reduce user frustration and keep them
+ * on the site rather than bouncing.
+ */
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/layout/Header.astro";
 import Footer from "@/components/layout/Footer.astro";
 import LinkButton from "@/components/ui/LinkButton.astro";
 import { SITE } from "@/config";
+
+// Ensure static generation for Edge availability
+export const prerender = true;
 ---
 
-<Layout title={`404 Not Found | ${SITE.title}`}>
+<Layout
+  title={`404 Not Found | ${SITE.title}`}
+  description="The page you're looking for doesn't exist. Try searching or browsing our archives."
+>
   <Header />
 
   <main
     id="main-content"
-    class="mx-auto flex max-w-app flex-1 items-center justify-center"
+    class="mx-auto flex max-w-3xl flex-1 flex-col items-center justify-center px-4 py-12"
   >
-    <div class="mb-14 flex flex-col items-center justify-center">
-      <!-- CHANGED: Replaced 'text-9xl' with 'text-fluid-6xl' for responsive scaling -->
+    <div class="mb-8 flex flex-col items-center justify-center text-center">
       <h1 class="text-fluid-6xl font-bold text-accent">404</h1>
       <span aria-hidden="true" class="text-xl">¯\_(ツ)_/¯</span>
       <p class="mt-4 text-2xl sm:text-3xl">Page Not Found</p>
-      <LinkButton
-        href="/"
-        class="my-6 text-lg underline decoration-dashed underline-offset-8"
-      >
-        Go back home
-      </LinkButton>
+      <p class="mt-2 text-text-secondary">
+        The page you're looking for doesn't exist or has been moved.
+      </p>
     </div>
+
+    <!-- Helpful Navigation Options -->
+    <nav aria-label="Helpful links" class="w-full max-w-md">
+      <p
+        class="mb-4 text-center text-sm font-medium tracking-wide text-text-secondary uppercase"
+      >
+        Try one of these instead:
+      </p>
+      <ul class="flex flex-col gap-3">
+        <li>
+          <LinkButton
+            href="/en/"
+            class="flex w-full items-center justify-center gap-2 rounded-lg border border-border bg-muted px-4 py-3 transition-colors hover:border-accent hover:bg-accent/10"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-5 w-5"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+              <polyline points="9 22 9 12 15 12 15 22"></polyline>
+            </svg>
+            Go to Homepage
+          </LinkButton>
+        </li>
+        <li>
+          <LinkButton
+            href="/en/search/"
+            class="flex w-full items-center justify-center gap-2 rounded-lg border border-border bg-muted px-4 py-3 transition-colors hover:border-accent hover:bg-accent/10"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-5 w-5"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="11" cy="11" r="8"></circle>
+              <path d="m21 21-4.3-4.3"></path>
+            </svg>
+            Search Articles
+          </LinkButton>
+        </li>
+        <li>
+          <LinkButton
+            href="/en/posts/"
+            class="flex w-full items-center justify-center gap-2 rounded-lg border border-border bg-muted px-4 py-3 transition-colors hover:border-accent hover:bg-accent/10"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-5 w-5"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path
+                d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"
+              ></path>
+            </svg>
+            Browse All Posts
+          </LinkButton>
+        </li>
+        <li>
+          <LinkButton
+            href="/en/archives/"
+            class="flex w-full items-center justify-center gap-2 rounded-lg border border-border bg-muted px-4 py-3 transition-colors hover:border-accent hover:bg-accent/10"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-5 w-5"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <rect width="20" height="5" x="2" y="3" rx="1"></rect>
+              <path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"></path>
+              <path d="M10 12h4"></path>
+            </svg>
+            View Archives
+          </LinkButton>
+        </li>
+      </ul>
+    </nav>
   </main>
 
   <Footer />

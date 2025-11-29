@@ -52,6 +52,37 @@
 </style>
 
 <!--
+  GRACEFUL DEGRADATION: Fallback styles when JavaScript is disabled.
+  Uses prefers-color-scheme to respect OS theme preference.
+  The site remains fully usable without JS - only the theme toggle button won't work.
+-->
+<noscript>
+  <style>
+    /* When JS is disabled, use system preference directly */
+    @media (prefers-color-scheme: dark) {
+      html {
+        --background: #121212;
+        --foreground: #e0e0e0;
+        --accent: #6aadff;
+        --muted: #1e1e1e;
+        --border: #333333;
+        --text-secondary: #b3b3b3;
+        --code-bg: #2a2a2a;
+      }
+      html[data-theme] {
+        /* Force dark theme variables */
+        --background: #121212 !important;
+        --foreground: #e0e0e0 !important;
+      }
+    }
+    /* Hide the theme toggle button since it won't work without JS */
+    #theme-btn {
+      display: none !important;
+    }
+  </style>
+</noscript>
+
+<!--
   CRITICAL: This script MUST be inline to prevent FOUC.
   It runs synchronously before first paint.
   DO NOT convert to a bundled script.
