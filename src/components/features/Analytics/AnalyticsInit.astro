@@ -2,15 +2,11 @@
 /**
  * Analytics Initializer Component
  *
- * Initializes Google Analytics 4 tracking with language support
- * Call this component once in your main layout to initialize analytics
+ * Initializes analytics tracking with language support.
+ * Properly bundles TypeScript imports to avoid 404 errors in production.
  *
- * Usage in Layout.astro:
- * ```astro
- * import AnalyticsInit from '@/components/Analytics/AnalyticsInit.astro';
- *
- * <AnalyticsInit locale={currentLocale} />
- * ```
+ * FIXED: Removed 'is:inline' to allow Vite to bundle analytics.ts
+ * into the production build correctly.
  */
 
 import { getCurrentLocale } from "@/i18n";
@@ -19,41 +15,82 @@ export interface Props {
   locale?: string;
 }
 
+// Server-side: Determine the locale
 const { locale = getCurrentLocale(Astro.url.pathname) || "en" } = Astro.props;
 ---
 
-<script define:vars={{ locale }} is:inline>
-  // Initialize analytics with language support
-  (async () => {
-    try {
-      const {
-        initializeAnalytics,
-        setUserLanguageProperty,
-        trackPageView,
-        trackTimeOnPage,
-      } = await import("/src/utils/analytics.ts");
+<!-- 
+  Data Bridge: Pass server-side locale to client-side script.
+  Using a data attribute avoids 'define:vars' which would force inline script.
+-->
+<div
+  id="analytics-init-marker"
+  data-locale={locale}
+  aria-hidden="true"
+  style="display: none;"
+></div>
 
-      // Initialize analytics
+<script>
+  // Static Import: Vite will now bundle this TypeScript file into production
+  import {
+    initializeAnalytics,
+    setUserLanguageProperty,
+    trackPageView,
+    trackTimeOnPage,
+  } from "@/utils/analytics";
+
+  /**
+   * Initialize Analytics
+   * Triggered on initial load and after every View Transition navigation.
+   */
+  function initAnalytics() {
+    const marker = document.getElementById("analytics-init-marker");
+    if (!marker) return;
+
+    const locale = marker.dataset.locale || "en";
+
+    try {
+      // Initialize analytics with language support
       initializeAnalytics(locale);
 
       // Set user language property for all events
       setUserLanguageProperty(locale);
 
       // Track initial page view
-      trackPageView(window.location.pathname, document.title, locale);
+      trackPageView(window.location.pathname, document.title);
 
       // Track time on page before leaving
       const pageLoadTime = Date.now();
-      window.addEventListener("beforeunload", () => {
+
+      const handleUnload = () => {
         const timeOnPage = Math.round((Date.now() - pageLoadTime) / 1000);
+        // Only track if spent at least 1 second
         if (timeOnPage > 1) {
-          // Only track if spent at least 1 second
-          trackTimeOnPage(window.location.pathname, timeOnPage, locale);
+          trackTimeOnPage(window.location.pathname, timeOnPage);
         }
-      });
+      };
+
+      // Capture exit intent or navigation
+      window.addEventListener("beforeunload", handleUnload, { once: true });
+
+      // Cleanup for SPA navigation (Astro View Transitions)
+      document.addEventListener(
+        "astro:before-swap",
+        () => {
+          handleUnload();
+          window.removeEventListener("beforeunload", handleUnload);
+        },
+        { once: true }
+      );
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error("Failed to initialize analytics:", error);
+      if (import.meta.env.DEV) {
+        // eslint-disable-next-line no-console
+        console.error("Analytics initialization failed:", error);
+      }
     }
-  })();
+  }
+
+  // Lifecycle Binding:
+  // 'astro:page-load' fires once on initial load AND after every transition.
+  document.addEventListener("astro:page-load", initAnalytics);
 </script>
