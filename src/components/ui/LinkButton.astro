@@ -7,12 +7,40 @@ export interface Props {
   class?: string;
   ariaLabel?: string;
   title?: string;
+  /** SEO: rel attribute for pagination (prev/next) or external links */
+  rel?: string;
 }
 
-const { id, href, class: className = "", ariaLabel, title } = Astro.props;
+const { id, href, class: className = "", ariaLabel, title, rel } = Astro.props;
 
 // REFACTORED: The component's state is inferred from the props.
 const isLink = !!href;
+
+/**
+ * SEO: Determine appropriate rel attribute for external links
+ * - External links get "noopener noreferrer" for security
+ * - External followed links also get "nofollow" (optional, controlled by rel prop)
+ * - Internal links use the provided rel (e.g., "prev", "next" for pagination)
+ */
+function getRelAttribute(): string | undefined {
+  if (!href) return undefined;
+  if (rel) return rel; // Use explicitly provided rel
+
+  // Check if external link (starts with http/https and not same origin)
+  try {
+    const url = new URL(href, Astro.url.origin);
+    const isExternal = url.origin !== Astro.url.origin;
+    if (isExternal) {
+      return "noopener noreferrer";
+    }
+  } catch {
+    // Invalid URL, treat as internal
+  }
+
+  return undefined;
+}
+
+const computedRel = getRelAttribute();
 ---
 
 {
@@ -29,6 +57,7 @@ const isLink = !!href;
       class:list={["inline-flex hover:text-accent", className]}
       aria-label={ariaLabel}
       title={title}
+      rel={computedRel}
     >
       <slot />
     </a>

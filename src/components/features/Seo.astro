@@ -50,6 +50,17 @@ const socialImageURL = new URL(pageOgImage ?? SITE.ogImage, Astro.url.origin)
 // Build og:locale value (e.g., "en_US", "ka_GE")
 const ogLocale = LOCALE_CODES[currentLocale]?.replace("-", "_") ?? "en_US";
 
+// SEO: Determine og:type based on page type
+// "article" for blog posts (has pubDatetime), "website" for all other pages
+const ogType = pubDatetime ? "article" : "website";
+
+// SEO: Truncate title to 60 chars (Google SERP truncation)
+const truncatedTitle = title.length > 60 ? `${title.slice(0, 57)}...` : title;
+
+// SEO: Cap description at 160 chars for meta description
+const truncatedDescription =
+  description.length > 160 ? `${description.slice(0, 157)}...` : description;
+
 /**
  * Generate hreflang alternate URLs for all supported languages
  * Each page should point to its counterpart in other languages
@@ -73,9 +84,9 @@ const hreflangAlternates = getHreflangAlternates();
 ---
 
 <!-- General Meta Tags -->
-<title>{title}</title>
-<meta name="title" content={title} />
-<meta name="description" content={description} />
+<title>{truncatedTitle}</title>
+<meta name="title" content={truncatedTitle} />
+<meta name="description" content={truncatedDescription} />
 
 <!-- Canonical URL (self-referencing for current locale) -->
 <link rel="canonical" href={canonicalURL} />
@@ -97,7 +108,7 @@ const hreflangAlternates = getHreflangAlternates();
 />
 
 <!-- Open Graph / Facebook -->
-<meta property="og:type" content="website" />
+<meta property="og:type" content={ogType} />
 <meta property="og:locale" content={ogLocale} />
 {
   SUPPORTED_LANGS.filter(lang => lang !== currentLocale).map(lang => (
@@ -107,8 +118,8 @@ const hreflangAlternates = getHreflangAlternates();
     />
   ))
 }
-<meta property="og:title" content={title} />
-<meta property="og:description" content={description} />
+<meta property="og:title" content={truncatedTitle} />
+<meta property="og:description" content={truncatedDescription} />
 <meta property="og:url" content={canonicalURL} />
 <meta property="og:image" content={socialImageURL} />
 <meta property="og:site_name" content={SITE.title} />
@@ -134,6 +145,6 @@ const hreflangAlternates = getHreflangAlternates();
 <!-- Twitter -->
 <meta property="twitter:card" content="summary_large_image" />
 <meta property="twitter:url" content={canonicalURL} />
-<meta property="twitter:title" content={title} />
-<meta property="twitter:description" content={description} />
+<meta property="twitter:title" content={truncatedTitle} />
+<meta property="twitter:description" content={truncatedDescription} />
 <meta property="twitter:image" content={socialImageURL} />

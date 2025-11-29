@@ -11,8 +11,16 @@ export function getIntegrations() {
   const integrations = [
     envValidationIntegration(),
     sitemap({
-      // Filter configuration - excludes archive pages if showArchives is false
-      filter: page => FEATURES.showArchives || !page.endsWith("/archives"),
+      // SEO: Filter configuration - exclude pages that shouldn't be indexed
+      filter: page => {
+        // Exclude archive pages if showArchives feature is disabled
+        if (!FEATURES.showArchives && page.endsWith("/archives")) return false;
+
+        // Exclude 404 error pages from sitemap
+        if (page.includes("/404")) return false;
+
+        return true;
+      },
 
       // Internationalization support for multi-language sitemaps
       // Automatically generates alternate language links (hreflang)

@@ -6,7 +6,7 @@ import { ClientRouter } from "astro:transitions";
 import { Font } from "astro:assets";
 import { SITE, FEATURES } from "@/config";
 import "@/styles/global.css";
-import { getI18n, type Lang } from "@/i18n";
+import { getI18n, type Lang, LOCALE_CODES } from "@/i18n";
 
 // PERFORMANCE FIX: Removed manual @fontsource imports.
 // These are handled by 'experimental.fonts' in astro.config.ts.
@@ -18,12 +18,22 @@ import StructuredData from "@/components/features/StructuredData.astro";
 import ThemeManager from "@/components/features/ThemeManager.astro";
 import Analytics from "@/components/features/Analytics.astro";
 
+// SEO: Structured data generators
+import {
+  generateBlogPostingSchema,
+  generateWebSiteSchema,
+  generateBreadcrumbSchema,
+  combineSchemas,
+} from "@/utils/seo";
+
 // FIX: Access the environment variable directly
 const PUBLIC_GOOGLE_SITE_VERIFICATION = import.meta.env
   .PUBLIC_GOOGLE_SITE_VERIFICATION;
 
 // Get translations for current locale
 const { t } = getI18n(Astro.currentLocale as Lang);
+const currentLocale = (Astro.currentLocale ?? "en") as Lang;
+const localeCode = LOCALE_CODES[currentLocale] ?? "en-US";
 
 // The props interface remains the same, as it's the public API for the layout.
 export interface Props {
@@ -36,6 +46,10 @@ export interface Props {
   pubDatetime?: Date;
   modDatetime?: Date | null;
   scrollSmooth?: boolean;
+  /** Tags/keywords for the content (used in structured data) */
+  tags?: string[];
+  /** Word count for blog posts (used in structured data) */
+  wordCount?: number;
 }
 
 const {
@@ -48,26 +62,70 @@ const {
   pubDatetime,
   modDatetime,
   scrollSmooth = FEATURES.scrollSmooth,
+  tags,
+  wordCount,
 } = Astro.props;
 
-// The logic to build the structured data remains here, in the "smart" component.
-const socialImageURL = new URL(ogImage, Astro.url);
+// Build social image URL
+const siteUrl = Astro.url.origin;
+const socialImageURL = new URL(ogImage, siteUrl);
+const pageUrl = canonicalURL.toString();
 
-const structuredData = {
-  "@context": "https://schema.org",
-  "@type": "BlogPosting",
-  headline: `${title}`,
-  image: `${socialImageURL}`,
-  datePublished: `${pubDatetime?.toISOString()}`,
-  ...(modDatetime && { dateModified: modDatetime.toISOString() }),
-  author: [
-    {
-      "@type": "Person",
-      name: `${author}`,
-      ...(profile && { url: profile }),
-    },
-  ],
-};
+// Determine if this is a blog post (has pubDatetime) or a general page
+const isBlogPost = Boolean(pubDatetime);
+
+// Generate appropriate structured data based on page type
+// Using type assertion since our schema interfaces extend Record<string, unknown>
+let structuredData: Record<string, unknown>;
+
+if (isBlogPost && pubDatetime) {
+  // Blog post: Generate BlogPosting + Breadcrumb schema
+  const blogPostingSchema = generateBlogPostingSchema({
+    title,
+    description,
+    imageUrl: socialImageURL.toString(),
+    datePublished: pubDatetime,
+    dateModified: modDatetime,
+    authorName: author,
+    authorUrl: profile,
+    pageUrl,
+    siteUrl,
+    wordCount,
+    tags,
+    locale: localeCode,
+  });
+
+  // Generate breadcrumb: Home > Posts > [Post Title]
+  const breadcrumbSchema = generateBreadcrumbSchema([
+    { name: t("nav.home"), url: `${siteUrl}/${currentLocale}/` },
+    { name: t("nav.posts"), url: `${siteUrl}/${currentLocale}/posts/` },
+    { name: title }, // Current page (no URL - Google recommendation)
+  ]);
+
+  structuredData = combineSchemas(
+    blogPostingSchema as Record<string, unknown>,
+    breadcrumbSchema as Record<string, unknown>
+  );
+} else {
+  // General page: Generate WebSite schema for homepage, or just breadcrumb for other pages
+  const isHomePage =
+    Astro.url.pathname === "/" ||
+    Astro.url.pathname === `/${currentLocale}` ||
+    Astro.url.pathname === `/${currentLocale}/`;
+
+  if (isHomePage) {
+    structuredData = generateWebSiteSchema({
+      siteUrl,
+      locale: localeCode,
+    }) as Record<string, unknown>;
+  } else {
+    // Non-blog pages: Just breadcrumb schema
+    structuredData = generateBreadcrumbSchema([
+      { name: t("nav.home"), url: `${siteUrl}/${currentLocale}/` },
+      { name: title }, // Current page
+    ]) as Record<string, unknown>;
+  }
+}
 ---
 
 <!doctype html>

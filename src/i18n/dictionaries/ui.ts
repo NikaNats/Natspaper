@@ -153,5 +153,8 @@ type ValidateTranslations = {
   [K in UIKey]: (typeof ui.ka)[K] extends string ? true : never;
 };
 
-// This will error at compile time if ka is missing any keys from en
-const _validateKa: ValidateTranslations = {} as ValidateTranslations;
+/**
+ * Compile-time validation: This will error if `ka` is missing any keys from `en`.
+ * The variable is exported to suppress "unused variable" warnings.
+ */
+export const _validateKa: ValidateTranslations = {} as ValidateTranslations;

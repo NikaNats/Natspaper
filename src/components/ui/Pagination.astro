@@ -35,12 +35,12 @@ const { t } = getI18n(Astro.currentLocale as Lang);
       ]}
       aria-label="Pagination"
     >
-      {/* REFACTORED: LinkButton now correctly handles an undefined href,
-          making the 'as string' cast unnecessary and the code type-safe. */}
+      {/* SEO: rel="prev" tells search engines about pagination sequence */}
       <LinkButton
         href={prevUrl}
         class:list={["select-none", { "opacity-50": !prevUrl }]}
         ariaLabel={t("pagination.previousPage")}
+        rel={prevUrl ? "prev" : undefined}
       >
         <IconArrowLeft class="inline-block rtl:rotate-180" />
         {t("pagination.prev")}
@@ -51,10 +51,12 @@ const { t } = getI18n(Astro.currentLocale as Lang);
         {t("pagination.pageOf", { current: currentPage, total: totalPages })}
       </span>
 
+      {/* SEO: rel="next" tells search engines about pagination sequence */}
       <LinkButton
         href={nextUrl}
         class:list={["select-none", { "opacity-50": !nextUrl }]}
         ariaLabel={t("pagination.nextPage")}
+        rel={nextUrl ? "next" : undefined}
       >
         {t("pagination.next").replace("→", "").trim()}
         <IconArrowRight class="inline-block rtl:rotate-180" />
