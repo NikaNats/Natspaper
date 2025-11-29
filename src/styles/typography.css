@@ -7,13 +7,27 @@
     @apply prose prose-neutral dark:prose-invert;
     @apply text-foreground marker:text-accent;
     font-family: var(--font-inter), sans-serif;
-    line-height: 1.7; /* Slightly increased for better readability */
-    /**
-     * Width is controlled by parent container (720px in PostDetails)
-     * Override Tailwind prose default max-width: 65ch
-     * Using !important to ensure override takes precedence
+
+    /* 
+     * Optimal line-height: 1.6 for body text
+     * Research: 1.5-1.6 is ideal for fonts with high x-height (Inter)
+     * Previous: 1.7 was too airy, disconnecting lines visually
      */
-    max-width: none !important;
+    line-height: 1.6;
+
+    /* 
+     * Slightly positive letter-spacing improves body text legibility
+     * 0.01em provides subtle openness without affecting rhythm
+     */
+    letter-spacing: 0.01em;
+
+    /**
+     * Optimal reading width: 65ch (50-75 characters per line)
+     * This provides the ideal measure for comfortable reading
+     * Centered within parent container via margin auto
+     */
+    max-width: 65ch;
+    margin-inline: auto;
     width: 100%;
 
     /**
@@ -41,7 +55,8 @@
       @apply mb-6;
       /* Scales: 1.75rem (28px) → 3rem (48px) based on viewport */
       font-size: clamp(1.75rem, 1.25rem + 2.5vw, 3rem);
-      letter-spacing: -0.03em;
+      /* -0.025em is optimal for large headings: tight but not cramped */
+      letter-spacing: -0.025em;
     }
     h2 {
       @apply mt-10 mb-5;
@@ -400,7 +415,8 @@
      * preferred: 1.25rem + 3.5vw - Smooth transition curve
      */
     font-size: clamp(1.75rem, 1.25rem + 3.5vw, 4rem);
-    letter-spacing: -0.03em;
+    /* -0.025em is optimal for large headings: tight but not cramped */
+    letter-spacing: -0.025em;
     text-wrap: balance;
   }
 

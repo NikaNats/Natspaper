@@ -12,6 +12,7 @@ import {
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/layout/Header.astro";
 import Footer from "@/components/layout/Footer.astro";
+import Breadcrumb from "@/components/ui/Breadcrumb.astro";
 import PostHero from "@/components/post/PostHero.astro";
 import PostContent from "@/components/post/PostContent.astro";
 import PostFooter from "@/components/post/PostFooter.astro";
@@ -56,6 +57,15 @@ const showEditPost = !!(
 );
 const currentYear = new Date().getFullYear();
 const copyrightText = `Copyright © ${currentYear} • ${t("footer.copyright")}`;
+
+// 3. Breadcrumb Navigation
+const locale = Astro.currentLocale || "en";
+const postsHref = locale === "en" ? "/en/posts" : `/${locale}/posts`;
+const breadcrumbItems = [
+  { label: t("nav.home"), href: `/${locale}` },
+  { label: t("nav.posts"), href: postsHref },
+  { label: title },
+];
 ---
 
 <Layout
@@ -103,6 +113,9 @@ const copyrightText = `Copyright © ${currentYear} • ${t("footer.copyright")}`
 
     <!-- Main Article Content -->
     <main id="main-content" class="article-container" data-pagefind-body>
+      <!-- Breadcrumb Navigation -->
+      <Breadcrumb items={breadcrumbItems} class="mb-4" />
+
       <PostHero
         {title}
         {pubDatetime}

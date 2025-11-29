@@ -1,0 +1,109 @@
+---
+/**
+ * Breadcrumb Navigation Component
+ * ================================
+ * Provides visual breadcrumb navigation for improved wayfinding.
+ * Complements the JSON-LD BreadcrumbList schema for SEO.
+ *
+ * Features:
+ * - Accessible ARIA labels
+ * - Current page indication
+ * - Responsive text truncation
+ * - Theme-aware styling
+ *
+ * Usage:
+ * ```astro
+ * <Breadcrumb items={[
+ *   { label: "Home", href: "/" },
+ *   { label: "Posts", href: "/posts" },
+ *   { label: "Current Post" }
+ * ]} />
+ * ```
+ */
+
+export interface BreadcrumbItem {
+  label: string;
+  href?: string;
+}
+
+interface Props {
+  items: BreadcrumbItem[];
+  class?: string;
+}
+
+const { items, class: className = "" } = Astro.props;
+---
+
+<nav aria-label="Breadcrumb" class:list={["breadcrumb-nav", className]}>
+  <ol
+    class="flex flex-wrap items-center gap-1.5 text-sm text-text-secondary"
+    itemscope
+    itemtype="https://schema.org/BreadcrumbList"
+  >
+    {
+      items.map((item, index) => {
+        const isLast = index === items.length - 1;
+        const position = index + 1;
+
+        return (
+          <li
+            class="flex items-center gap-1.5"
+            itemprop="itemListElement"
+            itemscope
+            itemtype="https://schema.org/ListItem"
+          >
+            {/* Separator (except for first item) */}
+            {index > 0 && (
+              <span class="text-border" aria-hidden="true">
+                /
+              </span>
+            )}
+
+            {isLast ? (
+              /* Current page - no link, styled differently */
+              <span
+                class="max-w-[200px] truncate font-medium text-foreground"
+                aria-current="page"
+                itemprop="name"
+              >
+                {item.label}
+              </span>
+            ) : (
+              /* Clickable link */
+              <a
+                href={item.href}
+                class="max-w-[150px] truncate no-underline transition-colors hover:text-accent"
+                itemprop="item"
+              >
+                <span itemprop="name">{item.label}</span>
+              </a>
+            )}
+
+            <meta itemprop="position" content={String(position)} />
+          </li>
+        );
+      })
+    }
+  </ol>
+</nav>
+
+<style>
+  .breadcrumb-nav {
+    /* Subtle styling */
+    padding-block: 0.5rem;
+  }
+
+  /* Responsive: Hide intermediate items on very small screens */
+  @media (max-width: 400px) {
+    .breadcrumb-nav li:not(:first-child):not(:last-child) {
+      display: none;
+    }
+
+    /* Show ellipsis between first and last */
+    .breadcrumb-nav li:last-child::before {
+      content: "...";
+      margin-right: 0.375rem;
+      color: var(--border);
+    }
+  }
+</style>
