@@ -38,10 +38,16 @@ import { DEFAULT_LANG } from "@/i18n/config";
 // Declare Vercel Analytics on globalThis
 declare global {
   interface Window {
-    va?: (command: string, data: Record<string, unknown>) => void;
+    va?: (
+      event: "event" | "pageview" | "beforeSend",
+      properties?: unknown
+    ) => void;
   }
   var va:
-    | ((command: string, data: Record<string, unknown>) => void)
+    | ((
+        event: "event" | "pageview" | "beforeSend",
+        properties?: unknown
+      ) => void)
     | undefined;
 }
 
@@ -65,11 +71,18 @@ export function trackEvent(
   eventData?: Record<string, string | number | boolean>
 ): void {
   // Vercel Analytics custom events (if available)
-  if (typeof globalThis !== "undefined" && globalThis.va) {
+  if (
+    typeof globalThis !== "undefined" &&
+    (globalThis as unknown as { va?: unknown }).va
+  ) {
     try {
       // Vercel Analytics track function
       // @see https://vercel.com/docs/analytics/custom-events
-      globalThis.va?.("event", {
+      (
+        globalThis as unknown as {
+          va: (event: string, data: Record<string, unknown>) => void;
+        }
+      ).va("event", {
         name: eventName,
         ...eventData,
       });
