@@ -104,8 +104,144 @@
     blockquote {
       @apply my-6 border-l-4 border-accent/40 pl-4 italic opacity-90;
     }
+
+    /* ==========================================================================
+       FLUID CONTENT ASSETS
+       ==========================================================================
+       Responsive media elements with:
+       - Fluid sizing that respects container width
+       - Aspect ratio preservation
+       - Lazy loading optimization
+       - GPU-accelerated transitions
+       - Accessible loading states
+       ========================================================================== */
+
+    /* Figure Container - Semantic wrapper for media */
+    figure {
+      @apply mx-0 my-8;
+
+      /* Fluid vertical spacing */
+      margin-block: clamp(1.5rem, 1rem + 2vw, 3rem);
+    }
+
+    /* Images - Fluid responsive sizing */
+    img {
+      /* Fluid sizing - fills container but respects aspect ratio */
+      width: 100%;
+      height: auto;
+      max-width: 100%;
+
+      /* Visual polish */
+      border-radius: clamp(0.5rem, 0.25rem + 0.5vw, 1rem);
+      background-color: var(--muted);
+
+      /* Smooth loading transition */
+      opacity: 1;
+      transition:
+        opacity 0.3s ease,
+        transform 0.3s ease,
+        box-shadow 0.3s ease;
+
+      /* Subtle depth */
+      box-shadow:
+        0 4px 6px -1px rgb(0 0 0 / 0.1),
+        0 2px 4px -2px rgb(0 0 0 / 0.1);
+    }
+
+    /* Loading state for lazy-loaded images */
+    img[loading="lazy"] {
+      /* Placeholder background while loading */
+      background: linear-gradient(
+        90deg,
+        var(--muted) 0%,
+        var(--border) 50%,
+        var(--muted) 100%
+      );
+      background-size: 200% 100%;
+    }
+
+    /* Hover effect for clickable images (in links) */
+    a img {
+      &:hover {
+        transform: scale(1.01);
+        box-shadow:
+          0 10px 15px -3px rgb(0 0 0 / 0.1),
+          0 4px 6px -4px rgb(0 0 0 / 0.1);
+      }
+    }
+
+    /* Figure Caption - Fluid typography */
     figcaption {
-      @apply mt-2 text-center text-sm text-text-secondary italic;
+      @apply text-center italic;
+
+      /* Fluid sizing: 0.8125rem (13px) → 0.9375rem (15px) */
+      font-size: clamp(0.8125rem, 0.75rem + 0.125vw, 0.9375rem);
+      line-height: 1.5;
+      color: var(--text-secondary);
+
+      /* Fluid spacing */
+      margin-block-start: clamp(0.5rem, 0.375rem + 0.25vw, 0.75rem);
+      padding-inline: clamp(0.5rem, 0.25rem + 0.5vw, 1rem);
+    }
+
+    /* Video Elements - Fluid responsive */
+    video {
+      width: 100%;
+      height: auto;
+      max-width: 100%;
+      border-radius: clamp(0.5rem, 0.25rem + 0.5vw, 1rem);
+      background-color: var(--muted);
+
+      /* Fluid vertical spacing */
+      margin-block: clamp(1.5rem, 1rem + 2vw, 3rem);
+    }
+
+    /* Iframe Embeds (YouTube, CodePen, etc.) - Responsive container */
+    iframe {
+      width: 100%;
+      max-width: 100%;
+      border: none;
+      border-radius: clamp(0.5rem, 0.25rem + 0.5vw, 1rem);
+      background-color: var(--muted);
+
+      /* Default 16:9 aspect ratio for video embeds */
+      aspect-ratio: 16 / 9;
+
+      /* Fluid vertical spacing */
+      margin-block: clamp(1.5rem, 1rem + 2vw, 3rem);
+    }
+
+    /* Audio Elements */
+    audio {
+      width: 100%;
+      max-width: 100%;
+
+      /* Fluid vertical spacing */
+      margin-block: clamp(1rem, 0.75rem + 0.5vw, 1.5rem);
+    }
+
+    /* SVG Images - Fluid sizing */
+    svg:not(.icon) {
+      width: 100%;
+      height: auto;
+      max-width: 100%;
+    }
+
+    /* Picture Element - For art direction */
+    picture {
+      display: block;
+      width: 100%;
+
+      img {
+        display: block;
+      }
+    }
+
+    /* Object/Embed Elements */
+    object,
+    embed {
+      width: 100%;
+      max-width: 100%;
     }
 
     /* Code */
@@ -160,8 +296,25 @@
         @apply rounded-none border-x-0;
       }
 
+      /* Full-bleed images on mobile */
       img {
-        @apply rounded-none;
+        border-radius: 0;
+        box-shadow: none;
+      }
+
+      /* Full-bleed videos and iframes on mobile */
+      video,
+      iframe {
+        --bleed-margin: calc(var(--layout-padding-fluid, 1rem) * -1);
+        margin-inline: var(--bleed-margin);
+        width: calc(100% + var(--layout-padding-fluid, 1rem) * 2);
+        border-radius: 0;
+      }
+
+      /* Compact figure captions on mobile */
+      figcaption {
+        padding-inline: 0;
+        font-size: 0.8125rem;
       }
 
       /* Compact table for mobile */
@@ -170,6 +323,20 @@
         td {
           @apply p-2 text-xs;
         }
+      }
+    }
+
+    /* ==========================================================================
+       REDUCED MOTION
+       ========================================================================== */
+    @media (prefers-reduced-motion: reduce) {
+      img,
+      video {
+        transition: none;
+      }
+
+      a img:hover {
+        transform: none;
       }
     }
   }
