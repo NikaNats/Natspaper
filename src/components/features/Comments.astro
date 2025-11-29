@@ -58,11 +58,16 @@ const { locale = "en" } = Astro.props;
       const theme = document.documentElement.dataset.theme || "light";
       const giscusTheme = getThemeUrl(theme);
       const iframe = document.querySelector("iframe.giscus-frame");
-      if (!iframe) return;
-      iframe.contentWindow.postMessage(
-        { giscus: { setConfig: { theme: giscusTheme } } },
-        "https://giscus.app"
-      );
+      // Only send message if iframe exists and has loaded (src set)
+      if (!iframe || !iframe.src || !iframe.contentWindow) return;
+      try {
+        iframe.contentWindow.postMessage(
+          { giscus: { setConfig: { theme: giscusTheme } } },
+          "https://giscus.app"
+        );
+      } catch {
+        // Ignore postMessage errors (iframe may not be ready)
+      }
     }
 
     function loadGiscus() {
