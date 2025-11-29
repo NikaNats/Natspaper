@@ -29,7 +29,7 @@ const { t } = getI18n(locale);
           class:list={{
             "active-nav text-accent": isActive(currentPath, link.href, locale),
           }}
-          class="flex h-8 items-center rounded px-2 font-sans text-sm font-medium text-foreground no-underline transition-colors hover:text-accent focus:outline-none"
+          class="flex min-h-11 items-center rounded-md px-3 py-2 font-sans text-base font-medium text-foreground no-underline transition-colors hover:bg-muted hover:text-accent focus:outline-none md:min-h-9 md:px-2 md:text-sm"
         >
           {t(link.text as UIKey)} {/* Use i18n key from config */}
         </a>
@@ -42,7 +42,7 @@ const { t } = getI18n(locale);
         <LinkButton
           href={`/${locale}/archives`}
           class:list={[
-            "flex items-center justify-center rounded-md p-2.5 text-foreground transition-colors hover:text-accent focus:outline-none",
+            "flex min-h-11 min-w-11 items-center justify-center rounded-md p-2.5 text-foreground transition-colors hover:bg-muted hover:text-accent focus:outline-none md:min-h-9 md:min-w-9",
             {
               "active-nav text-accent": isActive(
                 currentPath,
@@ -65,7 +65,7 @@ const { t } = getI18n(locale);
       <li>
         <button
           id="theme-btn"
-          class="inline-flex items-center justify-center rounded-md p-2.5 text-foreground transition-colors hover:text-accent focus:outline-none"
+          class="inline-flex min-h-11 min-w-11 items-center justify-center rounded-md p-2.5 text-foreground transition-colors hover:bg-muted hover:text-accent focus:outline-none md:min-h-9 md:min-w-9"
           title="Toggle light & dark theme"
           aria-label="Toggle theme"
           aria-live="polite"

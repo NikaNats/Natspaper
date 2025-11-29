@@ -21,30 +21,37 @@ const { page } = Astro.props;
 
 <Layout title={`Posts | ${SITE.title}`}>
   <Header />
-  <Main pageTitle="Posts" pageDesc="All the articles I've posted.">
-    <div class="grid gap-6">
-      <ul class="space-y-6">
-        {
-          page.data.map(({ data, slug, body }) => {
-            // Calculate word count for reading time
-            const wordCount = body.split(/\s+/).length;
-            return (
-              <PostSummaryCard
-                title={data.title}
-                description={data.description}
-                pubDatetime={data.pubDatetime}
-                modDatetime={data.modDatetime}
-                timezone={data.timezone}
-                slug={getLastPathSegment(slug)}
-                wordCount={wordCount}
-                tags={data.tags}
-                featured={data.featured}
-              />
-            );
-          })
-        }
-      </ul>
-    </div>
+  <Main pageTitle="Posts" pageDesc="All the articles I've posted." width="wide">
+    {
+      /* 
+      Responsive Post Grid:
+      - Mobile (default): Single column stack for optimal readability
+      - Tablet (md+): Still single column for article previews
+      - Ultra-wide (3xl+): 2 columns to utilize horizontal space
+      - 4K (4xl+): 3 columns for maximum screen real estate
+    */
+    }
+    <ul class="3xl:grid-cols-2 3xl:gap-8 4xl:grid-cols-3 grid gap-6">
+      {
+        page.data.map(({ data, slug, body }) => {
+          // Calculate word count for reading time
+          const wordCount = body.split(/\s+/).length;
+          return (
+            <PostSummaryCard
+              title={data.title}
+              description={data.description}
+              pubDatetime={data.pubDatetime}
+              modDatetime={data.modDatetime}
+              timezone={data.timezone}
+              slug={getLastPathSegment(slug)}
+              wordCount={wordCount}
+              tags={data.tags}
+              featured={data.featured}
+            />
+          );
+        })
+      }
+    </ul>
   </Main>
 
   <Pagination
