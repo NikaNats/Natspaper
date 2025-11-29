@@ -1,8 +1,7 @@
 ---
-// REFACTORED: The component is now a pure, presentational component.
-// It has no knowledge of Astro's i18n or the current URL.
+// src/components/features/LanguagePicker.astro
+// Pure presentational component for language selection with WCAG 2.5.5 touch target compliance
 
-// REFACTORED: The Props interface is now a simple data structure.
 export interface LanguageLink {
   code: string;
   name: string;
@@ -16,12 +15,27 @@ export interface Props {
 const { links } = Astro.props;
 ---
 
-<div class="language-picker flex gap-2">
+<div class="language-picker flex items-center gap-1 sm:gap-2">
   {
     links.map(({ code, name, url }) => (
       <a
         href={url}
-        class="text-sm font-medium transition-colors hover:text-accent"
+        class:list={[
+          // 1. Base Typography & Transition
+          "text-sm font-medium transition-colors duration-200",
+          "text-foreground hover:text-accent",
+
+          // 2. Mobile / Touch First (WCAG 2.5.5: Target Size)
+          // Enforce 44px minimum height/width for fingers (min-h-11 = 2.75rem = 44px)
+          "flex min-h-11 min-w-11 items-center justify-center rounded-md",
+
+          // 3. Desktop Overrides (Mouse Users)
+          // Reset minimums to 0 and use tight padding for mouse precision
+          "sm:min-h-0 sm:min-w-0 sm:px-2 sm:py-1",
+
+          // 4. Focus State (Accessibility)
+          "focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none",
+        ]}
         title={`Switch to ${name}`}
         aria-label={`Switch to ${name}`}
       >
@@ -32,25 +46,12 @@ const { links } = Astro.props;
 </div>
 
 <style>
+  /* 
+   * Touch-Friendly Layout Container
+   * Ensures proper alignment of language links with responsive gaps
+   */
   .language-picker {
     display: flex;
-    gap: 0.5rem;
     align-items: center;
-  }
-
-  .language-picker a {
-    color: var(--foreground);
-    text-decoration: none;
-    padding: 0.25rem 0.5rem;
-    border-radius: 0.25rem;
-    transition: color 0.2s ease;
-  }
-
-  .language-picker a:hover {
-    color: var(--accent);
-  }
-
-  .language-picker a:focus-visible {
-    outline: none;
   }
 </style>
