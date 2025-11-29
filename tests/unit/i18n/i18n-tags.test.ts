@@ -23,8 +23,8 @@ import { assertDefined } from '../../test-utils';
     });
 
     it('should have matching keys across locales', () => {
-      const enKeys = Object.keys(tagTranslations.en).sort();
-      const kaKeys = Object.keys(tagTranslations.ka).sort();
+      const enKeys = Object.keys(tagTranslations.en).sort((a, b) => a.localeCompare(b));
+      const kaKeys = Object.keys(tagTranslations.ka).sort((a, b) => a.localeCompare(b));
       
       // English and Georgian should have same tag keys
       enKeys.forEach(key => {

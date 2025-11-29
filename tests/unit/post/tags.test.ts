@@ -26,7 +26,7 @@ describe('Tag Utilities', () => {
       const uniqueTags = getUniqueTags(posts);
 
       expect(uniqueTags).toHaveLength(4);
-      const tagNames = uniqueTags.map(t => t.tag).sort();
+      const tagNames = uniqueTags.map(t => t.tag).sort((a, b) => a.localeCompare(b));
       expect(tagNames).toEqual(['backend', 'javascript', 'python', 'web']);
     });
 

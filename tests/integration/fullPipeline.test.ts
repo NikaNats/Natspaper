@@ -103,6 +103,13 @@ describe("Build Pipeline & Data Integrity Integration Tests", () => {
     });
   });
 
+  // --- Helper function for async task creation (extracted to reduce nesting) ---
+  const createAsyncTask = (id: number, executionOrder: number[]) => async () => {
+    executionOrder.push(id);
+    await new Promise(resolve => setTimeout(resolve, 5)); // Simulate work
+    return id;
+  };
+
   // --- Best Practice: Test for Performance and Stability Under Load ---
   describe("Performance & Concurrency Under Load", () => {
     it("should generate a 50-item RSS feed from 100 posts quickly", () => {
@@ -126,16 +133,10 @@ describe("Build Pipeline & Data Integrity Integration Tests", () => {
       const limiter = new ConcurrencyLimiter(1); // Limit to 1, forcing serialization
       const executionOrder: number[] = [];
 
-      const createAsyncTask = (id: number) => async () => {
-        executionOrder.push(id);
-        await new Promise(resolve => setTimeout(resolve, 5)); // Simulate work
-        return id;
-      };
-
       const tasks = [
-        limiter.run(createAsyncTask(1)),
-        limiter.run(createAsyncTask(2)),
-        limiter.run(createAsyncTask(3)),
+        limiter.run(createAsyncTask(1, executionOrder)),
+        limiter.run(createAsyncTask(2, executionOrder)),
+        limiter.run(createAsyncTask(3, executionOrder)),
       ];
 
       await Promise.all(tasks);
