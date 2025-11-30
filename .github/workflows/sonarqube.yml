@@ -5,11 +5,6 @@ env:
   PNPM_VERSION: "10.20.0"
 
 on:
-  push:
-    branches:
-      - master
-      - main
-      - develop
   pull_request:
     types: [opened, synchronize, reopened]
     branches:
