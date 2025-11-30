@@ -292,7 +292,11 @@ test.describe("Accessibility - Keyboard Navigation", () => {
       await page.keyboard.press("Tab");
       const activeElement = await page.evaluate(() => {
         const el = document.activeElement;
-        return el ? el.tagName + (el.id ? `#${el.id}` : "") : null;
+        if (!el) {
+          return null;
+        }
+        const idSelector = el.id ? `#${el.id}` : "";
+        return el.tagName + idSelector;
       });
       if (activeElement) {
         focusedElements.push(activeElement);
@@ -318,7 +322,7 @@ test.describe("Accessibility - Keyboard Navigation", () => {
       const el = document.activeElement;
       if (!el) return null;
 
-      const styles = window.getComputedStyle(el);
+      const styles = globalThis.getComputedStyle(el);
       return {
         outline: styles.outline,
         boxShadow: styles.boxShadow,
@@ -329,9 +333,14 @@ test.describe("Accessibility - Keyboard Navigation", () => {
     // Should have some visible focus indicator
     expect(activeElement).toBeTruthy();
     
-    const hasOutline = activeElement?.outline && activeElement.outline !== "none";
-    const hasBoxShadow = activeElement?.boxShadow && activeElement.boxShadow !== "none";
-    const hasBorder = activeElement?.border && !activeElement.border.includes("0px");
+    const hasOutline =
+      activeElement?.outline !== undefined && activeElement?.outline !== "none";
+    const hasBoxShadow =
+      activeElement?.boxShadow !== undefined &&
+      activeElement?.boxShadow !== "none";
+    const hasBorder =
+      activeElement?.border !== undefined &&
+      !activeElement?.border.includes("0px");
     const hasVisibleFocus = hasOutline || hasBoxShadow || hasBorder;
 
     expect(hasVisibleFocus).toBeTruthy();

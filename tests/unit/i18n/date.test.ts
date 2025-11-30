@@ -111,109 +111,6 @@ function testFormatDateEdgeCases() {
   });
 }
 
-describe("Date Formatting Utilities", () => {
-  describe("formatDate()", () => {
-    describe("English locale", testFormatDateEnglish);
-    describe("Georgian locale", testFormatDateGeorgian);
-    describe("Input types", testFormatDateInputTypes);
-    describe("Edge cases", testFormatDateEdgeCases);
-  });
-
-
-  describe("formatNumber()", () => {
-    describe("English locale", () => {
-      it("should format thousands with comma separator", () => {
-        const result = formatNumber(1234, "en");
-        expect(result).toBe("1,234");
-      });
-
-      it("should format millions", () => {
-        const result = formatNumber(1234567, "en");
-        expect(result).toBe("1,234,567");
-      });
-
-      it("should handle small numbers without separator", () => {
-        const result = formatNumber(123, "en");
-        expect(result).toBe("123");
-      });
-
-      it("should handle zero", () => {
-        const result = formatNumber(0, "en");
-        expect(result).toBe("0");
-      });
-
-      it("should handle negative numbers", () => {
-        const result = formatNumber(-1234, "en");
-        expect(result).toMatch(/-1,234/);
-      });
-    });
-
-    describe("Georgian locale", () => {
-      it("should format numbers according to Georgian conventions", () => {
-        const result = formatNumber(1234, "ka");
-        // Georgian may use different separators
-        expect(result).toBeTruthy();
-        expect(result.replace(/\D/g, "")).toBe("1234");
-      });
-    });
-
-    describe("with options", () => {
-      it("should respect decimal options", () => {
-        const result = formatNumber(1234.567, "en", {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2,
-        });
-        expect(result).toBe("1,234.57");
-      });
-
-      it("should format as currency when specified", () => {
-        const result = formatNumber(99.99, "en", {
-          style: "currency",
-          currency: "USD",
-        });
-        expect(result).toMatch(/\$99\.99/);
-      });
-
-      it("should format as percentage", () => {
-        const result = formatNumber(0.75, "en", { style: "percent" });
-        expect(result).toBe("75%");
-      });
-    });
-  });
-
-  describe("formatReadingTimeLocalized()", () => {
-    it("should format reading time with English suffix", () => {
-      const result = formatReadingTimeLocalized(5, "en", "min read");
-      expect(result).toBe("5 min read");
-    });
-
-    it("should format reading time with Georgian suffix", () => {
-      const result = formatReadingTimeLocalized(5, "ka", "წთ კითხვა");
-      expect(result).toMatch(/5/);
-      expect(result).toMatch(/წთ კითხვა/);
-    });
-
-    it("should round up fractional minutes", () => {
-      const result = formatReadingTimeLocalized(4.3, "en", "min read");
-      expect(result).toBe("5 min read");
-    });
-
-    it("should handle 1 minute", () => {
-      const result = formatReadingTimeLocalized(1, "en", "min read");
-      expect(result).toBe("1 min read");
-    });
-
-    it("should handle large reading times", () => {
-      const result = formatReadingTimeLocalized(45, "en", "min read");
-      expect(result).toBe("45 min read");
-    });
-
-    it("should format number according to locale", () => {
-      const result = formatReadingTimeLocalized(1234, "en", "min read");
-      expect(result).toBe("1,234 min read");
-    });
-  });
-
 /**
  * Test formatRelativeTime with English locale
  */
@@ -287,6 +184,109 @@ function testFormatRelativeTimeInputTypes() {
     expect(() => formatRelativeTime(timestamp, "en")).not.toThrow();
   });
 }
+
+describe("Date Formatting Utilities", () => {
+  describe("formatDate()", () => {
+    describe("English locale", testFormatDateEnglish);
+    describe("Georgian locale", testFormatDateGeorgian);
+    describe("Input types", testFormatDateInputTypes);
+    describe("Edge cases", testFormatDateEdgeCases);
+  });
+
+
+  describe("formatNumber()", () => {
+    describe("English locale", () => {
+      it("should format thousands with comma separator", () => {
+        const result = formatNumber(1234, "en");
+        expect(result).toBe("1,234");
+      });
+
+      it("should format millions", () => {
+        const result = formatNumber(1234567, "en");
+        expect(result).toBe("1,234,567");
+      });
+
+      it("should handle small numbers without separator", () => {
+        const result = formatNumber(123, "en");
+        expect(result).toBe("123");
+      });
+
+      it("should handle zero", () => {
+        const result = formatNumber(0, "en");
+        expect(result).toBe("0");
+      });
+
+      it("should handle negative numbers", () => {
+        const result = formatNumber(-1234, "en");
+        expect(result).toMatch(/-1,234/);
+      });
+    });
+
+    describe("Georgian locale", () => {
+      it("should format numbers according to Georgian conventions", () => {
+        const result = formatNumber(1234, "ka");
+        // Georgian may use different separators
+        expect(result).toBeTruthy();
+        expect(result.replaceAll(/\D/g, "")).toBe("1234");
+      });
+    });
+
+    describe("with options", () => {
+      it("should respect decimal options", () => {
+        const result = formatNumber(1234.567, "en", {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        });
+        expect(result).toBe("1,234.57");
+      });
+
+      it("should format as currency when specified", () => {
+        const result = formatNumber(99.99, "en", {
+          style: "currency",
+          currency: "USD",
+        });
+        expect(result).toMatch(/\$99\.99/);
+      });
+
+      it("should format as percentage", () => {
+        const result = formatNumber(0.75, "en", { style: "percent" });
+        expect(result).toBe("75%");
+      });
+    });
+  });
+
+  describe("formatReadingTimeLocalized()", () => {
+    it("should format reading time with English suffix", () => {
+      const result = formatReadingTimeLocalized(5, "en", "min read");
+      expect(result).toBe("5 min read");
+    });
+
+    it("should format reading time with Georgian suffix", () => {
+      const result = formatReadingTimeLocalized(5, "ka", "წთ კითხვა");
+      expect(result).toMatch(/5/);
+      expect(result).toMatch(/წთ კითხვა/);
+    });
+
+    it("should round up fractional minutes", () => {
+      const result = formatReadingTimeLocalized(4.3, "en", "min read");
+      expect(result).toBe("5 min read");
+    });
+
+    it("should handle 1 minute", () => {
+      const result = formatReadingTimeLocalized(1, "en", "min read");
+      expect(result).toBe("1 min read");
+    });
+
+    it("should handle large reading times", () => {
+      const result = formatReadingTimeLocalized(45, "en", "min read");
+      expect(result).toBe("45 min read");
+    });
+
+    it("should format number according to locale", () => {
+      const result = formatReadingTimeLocalized(1234, "en", "min read");
+      expect(result).toBe("1,234 min read");
+    });
+  });
 
   describe("formatRelativeTime()", () => {
     beforeEach(() => {
