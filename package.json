@@ -13,7 +13,9 @@
     "astro": "astro",
     "format:check": "prettier --check .",
     "format": "prettier --write .",
-    "lint": "eslint .",
+    "lint": "eslint . && stylelint \"src/styles/**/*.css\"",
+    "lint:style": "stylelint \"src/styles/**/*.css\"",
+    "lint:style:fix": "stylelint \"src/styles/**/*.css\" --fix",
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:run": "vitest run",
@@ -71,6 +73,7 @@
     "prettier-plugin-astro": "^0.14.1",
     "prettier-plugin-tailwindcss": "^0.7.1",
     "sonda": "^0.10.0",
+    "stylelint": "^16.26.1",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.48.0",
     "vitest": "^4.0.14"

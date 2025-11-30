@@ -42,16 +42,16 @@
 
 ## Key Features
 
-| Feature                     | Description                                                                                                                                  |
-| :-------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------- |
+| Feature                    | Description                                                                                                                                  |
+| :------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------- |
 | **⚡️ Instant Performance** | Statically-generated HTML. No server, no database, no lag.                                                                                   |
-| **✍️ Flawless LaTeX**       | Server-side **KaTeX** rendering for beautiful, accessible math (`$E=mc^2$`).                                                                 |
-| **🎨 FOUC-Free Dark Mode**  | Automatic theme detection with persistence. A critical inline script prevents any "flash."                                                   |
-| **🌐 Advanced i18n**        | Locale-aware routing (`/[locale]/...`) with automatic fallback logic via `PostRepository`. See [ARCHITECTURE.md](./ARCHITECTURE.md).         |
-| **🖼️ Dynamic OG Images**    | Concurrent-safe generation using **Satori/Resvg** with a `ConcurrencyLimiter` to prevent OOM during builds.                                  |
-| **🔒 Hardened Security**    | Strict CSP, security headers (`HSTS`, `X-Frame-Options`), and a custom `verify-build.js` script. See [SECURITY.md](./SECURITY.md).           |
-| **🧩 Feature Flags**        | Toggleable features (dark mode, comments, analytics) via a type-safe registry in `config/features.ts`.                                       |
-| **🏛️ Clean Architecture**   | "Smart vs. Dumb" component pattern. High-level logic depends on abstractions, not implementations. See [ARCHITECTURE.md](./ARCHITECTURE.md). |
+| **✍️ Flawless LaTeX**      | Server-side **KaTeX** rendering for beautiful, accessible math (`$E=mc^2$`).                                                                 |
+| **🎨 FOUC-Free Dark Mode** | Automatic theme detection with persistence. A critical inline script prevents any "flash."                                                   |
+| **🌐 Advanced i18n**       | Locale-aware routing (`/[locale]/...`) with automatic fallback logic via `PostRepository`. See [ARCHITECTURE.md](./ARCHITECTURE.md).         |
+| **🖼️ Dynamic OG Images**   | Concurrent-safe generation using **Satori/Resvg** with a `ConcurrencyLimiter` to prevent OOM during builds.                                  |
+| **🔒 Hardened Security**   | Strict CSP, security headers (`HSTS`, `X-Frame-Options`), and a custom `verify-build.js` script. See [SECURITY.md](./SECURITY.md).           |
+| **🧩 Feature Flags**       | Toggleable features (dark mode, comments, analytics) via a type-safe registry in `config/features.ts`.                                       |
+| **🏛️ Clean Architecture**  | "Smart vs. Dumb" component pattern. High-level logic depends on abstractions, not implementations. See [ARCHITECTURE.md](./ARCHITECTURE.md). |
 
 ---
 
