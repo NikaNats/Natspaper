@@ -1,0 +1,71 @@
+name: SonarQube Cloud Analysis
+
+env:
+  NODE_VERSION: "24"
+  PNPM_VERSION: "10.20.0"
+
+on:
+  push:
+    branches:
+      - master
+      - main
+      - develop
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches:
+      - master
+      - main
+      - develop
+
+# Cancel previous runs for same PR
+concurrency:
+  group: sonarqube-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  sonarqube-scan:
+    name: SonarQube Cloud Scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Required for SonarQube to analyze history
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "pnpm"
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile --prefer-offline
+
+      - name: Run Tests with Coverage
+        run: pnpm run test:coverage
+        continue-on-error: true # Coverage generation shouldn't block scanning
+
+      - name: Verify Coverage Report
+        run: |
+          if [ -f "coverage/lcov.info" ]; then
+            echo "✅ Coverage report generated successfully"
+            wc -l coverage/lcov.info
+          else
+            echo "⚠️ Warning: Coverage report not found"
+          fi
+
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@master
+        env:
+          SONAR_TOKEN: ${{ secrets.SONARCLOUD_TOKEN }}
+          SONAR_HOST_URL: https://sonarcloud.io
+
+      - name: SonarQube Quality Gate Check
+        uses: SonarSource/sonarqube-quality-gate-action@master
+        timeout-minutes: 5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONARCLOUD_TOKEN }}
+        continue-on-error: true # Don't fail CI if quality gate fails (informational)
