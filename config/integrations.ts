@@ -1,3 +1,5 @@
+/// <reference types="astro/client" />
+
 import sitemap from "@astrojs/sitemap";
 import Sonda from "sonda/astro";
 import expressiveCode from "astro-expressive-code";
