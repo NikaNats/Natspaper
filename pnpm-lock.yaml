@@ -15,7 +15,7 @@ importers:
         specifier: ^3.6.0
         version: 3.6.0
       '@astrojs/vercel':
-        specifier: ^9.0.2
+        specifier: ^9.0.1
         version: 9.0.2(astro@5.16.3(@types/node@24.10.1)(@vercel/functions@2.2.13)(jiti@2.6.1)(lightningcss@1.30.2)(rollup@4.53.3)(typescript@5.9.3)(yaml@2.8.2))(rollup@4.53.3)
       '@expressive-code/plugin-collapsible-sections':
         specifier: ^0.41.3
@@ -45,7 +45,7 @@ importers:
         specifier: ^1.2.0
         version: 1.2.0
       astro:
-        specifier: ^5.16.3
+        specifier: ^5.16.0
         version: 5.16.3(@types/node@24.10.1)(@vercel/functions@2.2.13)(jiti@2.6.1)(lightningcss@1.30.2)(rollup@4.53.3)(typescript@5.9.3)(yaml@2.8.2)
       astro-expressive-code:
         specifier: ^0.41.3
@@ -82,7 +82,7 @@ importers:
         version: 4.1.17
     devDependencies:
       '@astrojs/check':
-        specifier: ^0.9.6
+        specifier: ^0.9.5
         version: 0.9.6(prettier-plugin-astro@0.14.1)(prettier@3.7.3)(typescript@5.9.3)
       '@axe-core/playwright':
         specifier: ^4.11.0
@@ -91,7 +91,7 @@ importers:
         specifier: ^1.57.0
         version: 1.57.0
       '@shikijs/transformers':
-        specifier: ^3.17.0
+        specifier: ^3.15.0
         version: 3.17.0
       '@tailwindcss/typography':
         specifier: ^0.5.19
@@ -118,10 +118,10 @@ importers:
         specifier: ^16.5.0
         version: 16.5.0
       happy-dom:
-        specifier: ^20.0.11
+        specifier: ^20.0.10
         version: 20.0.11
       prettier:
-        specifier: ^3.7.3
+        specifier: ^3.6.2
         version: 3.7.3
       prettier-plugin-astro:
         specifier: ^0.14.1
@@ -130,7 +130,7 @@ importers:
         specifier: ^0.7.1
         version: 0.7.1(prettier-plugin-astro@0.14.1)(prettier@3.7.3)
       sonda:
-        specifier: ^0.10.1
+        specifier: ^0.10.0
         version: 0.10.1
       stylelint:
         specifier: ^16.26.1
