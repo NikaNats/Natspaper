@@ -88,6 +88,12 @@ const hreflangAlternates = getHreflangAlternates();
 <meta name="title" content={truncatedTitle} />
 <meta name="description" content={truncatedDescription} />
 
+<!-- SEO: Robots directive - allow indexing and following links -->
+<meta
+  name="robots"
+  content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
+/>
+
 <!-- Canonical URL (self-referencing for current locale) -->
 <link rel="canonical" href={canonicalURL} />
 

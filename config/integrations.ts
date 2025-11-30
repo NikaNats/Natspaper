@@ -1,12 +1,19 @@
 /// <reference types="astro/client" />
 
-import sitemap from "@astrojs/sitemap";
+import sitemap, { ChangeFreqEnum } from "@astrojs/sitemap";
 import Sonda from "sonda/astro";
 import expressiveCode from "astro-expressive-code";
 import { envValidationIntegration } from "../src/integrations/envValidation";
 import { FEATURES } from "../src/config";
+import { DEFAULT_LANG, LOCALE_CODES } from "../src/i18n/config";
 
 export function getIntegrations() {
+  // Build sitemap locales map from LOCALE_CODES
+  const sitemapLocales: Record<string, string> = {};
+  for (const [lang, code] of Object.entries(LOCALE_CODES)) {
+    sitemapLocales[lang] = code;
+  }
+
   const integrations = [
     envValidationIntegration(),
     sitemap({
@@ -23,12 +30,37 @@ export function getIntegrations() {
 
       // Internationalization support for multi-language sitemaps
       // Automatically generates alternate language links (hreflang)
+      // Uses locale codes from i18n config for consistency
       i18n: {
-        defaultLocale: "en",
-        locales: {
-          en: "en-US",
-          ka: "ka",
-        },
+        defaultLocale: DEFAULT_LANG,
+        locales: sitemapLocales,
+      },
+
+      // SEO: Serialize function to customize sitemap entries
+      // Google uses lastmod to determine crawl priority
+      serialize: item => {
+        // Set lastmod to current build time for freshness signals
+        item.lastmod = new Date().toISOString();
+
+        // Note: changefreq and priority are ignored by Google but kept for other crawlers
+        // Homepage and main sections get higher priority
+        const url = item.url;
+        if (
+          url.endsWith("/en/") ||
+          url.endsWith("/ka/") ||
+          url.includes("/posts")
+        ) {
+          item.changefreq = ChangeFreqEnum.WEEKLY;
+          item.priority = 0.8;
+        } else if (url.includes("/tags") || url.includes("/archives")) {
+          item.changefreq = ChangeFreqEnum.WEEKLY;
+          item.priority = 0.6;
+        } else {
+          item.changefreq = ChangeFreqEnum.MONTHLY;
+          item.priority = 0.5;
+        }
+
+        return item;
       },
 
       // Namespace optimization - exclude unused XML namespaces
