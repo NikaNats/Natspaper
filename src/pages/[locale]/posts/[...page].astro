@@ -17,7 +17,13 @@ export const getStaticPaths = (async ({ paginate }) => {
 
   // Generate paths for all supported locales
   for (const locale of SUPPORTED_LANGS) {
-    const posts = await PostRepository.getByLocale(locale);
+    const postsWithFallback =
+      await PostRepository.getByLocaleWithFallback(locale);
+    const posts = postsWithFallback.map(p => ({
+      ...p.post,
+      isFallback: p.isFallback,
+      originalLocale: p.originalLocale,
+    }));
     // Pass locale as params to paginate so it's included in all paginated routes
     const paginatedPages = paginate(posts, {
       params: { locale },
@@ -72,23 +78,27 @@ const pageContent = pageContentByLocale[locale];
     }
     <ul class="3xl:grid-cols-2 3xl:gap-8 4xl:grid-cols-3 grid gap-6">
       {
-        page.data.map(({ data, slug, body }) => {
-          // Calculate word count for reading time
-          const wordCount = body.split(/\s+/).length;
-          return (
-            <PostSummaryCard
-              title={data.title}
-              description={data.description}
-              pubDatetime={data.pubDatetime}
-              modDatetime={data.modDatetime}
-              timezone={data.timezone}
-              slug={getLastPathSegment(slug)}
-              wordCount={wordCount}
-              tags={data.tags}
-              featured={data.featured}
-            />
-          );
-        })
+        page.data
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          .map((item: any) => {
+            // Calculate word count for reading time
+            const wordCount = item.body.split(/\s+/).length;
+            return (
+              <PostSummaryCard
+                title={item.data.title}
+                description={item.data.description}
+                pubDatetime={item.data.pubDatetime}
+                modDatetime={item.data.modDatetime}
+                timezone={item.data.timezone}
+                slug={getLastPathSegment(item.slug)}
+                wordCount={wordCount}
+                tags={item.data.tags}
+                featured={item.data.featured}
+                isFallback={item.isFallback}
+                originalLocale={item.originalLocale}
+              />
+            );
+          })
       }
     </ul>
   </Main>

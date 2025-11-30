@@ -40,66 +40,82 @@ export const PostRepository = {
   },
 
   /**
-   * Get posts for a locale with fallback to English for missing translations
+   * BIDIRECTIONAL FALLBACK SYSTEM
    *
-   * When a post exists in English but not in the target locale:
-   * - Returns the English post marked with isFallback: true
-   * - UI can display an "English only" badge
+   * Groups posts by slug and returns the best available version:
+   * 1. First tries to match the target locale
+   * 2. If missing, falls back to any available locale (preferring DEFAULT_LANG)
    *
-   * @param locale - Target locale to get posts for
-   * @param includeFallback - Whether to include English fallback posts (default: true)
+   * This enables URLs like:
+   * - /ka/posts/my-post → Georgian version (if exists)
+   * - /ka/posts/my-post → English version (if Georgian missing)
+   * - /en/posts/georgian-only → Georgian version (if English missing)
+   *
+   * @param targetLocale - Target locale to get posts for
+   * @param includeFallback - Whether to include fallback posts (default: true)
    */
   getByLocaleWithFallback: async (
-    locale: Lang,
+    targetLocale: Lang,
     includeFallback: boolean = true
   ): Promise<PostWithFallback[]> => {
     const allPosts = await PostRepository.getSorted();
 
-    // Get posts in the target locale
-    const localePosts = allPosts.filter(post =>
-      post.id.startsWith(`${locale}/`)
-    );
+    // Helper: Extract slug from post ID (e.g., "ka/my-post.md" → "my-post")
+    const getSlug = (id: string) =>
+      id
+        .split("/")
+        .slice(1)
+        .join("/")
+        .replace(/\.(md|mdx)$/, "");
 
-    // If we don't want fallback, just return locale posts
-    if (!includeFallback || locale === DEFAULT_LANG) {
-      return localePosts.map(post => ({
-        post,
-        isFallback: false,
-        originalLocale: locale,
-      }));
+    // Helper: Extract locale from post ID
+    const getLocale = (id: string) => id.split("/")[0] as Lang;
+
+    // Group posts by slug
+    const postsBySlug = new Map<string, CollectionEntry<"blog">[]>();
+
+    for (const post of allPosts) {
+      const slug = getSlug(post.id);
+      if (!postsBySlug.has(slug)) {
+        postsBySlug.set(slug, []);
+      }
+      postsBySlug.get(slug)?.push(post);
     }
 
-    // Get English (default) posts
-    const englishPosts = allPosts.filter(post =>
-      post.id.startsWith(`${DEFAULT_LANG}/`)
-    );
+    const results: PostWithFallback[] = [];
 
-    // Extract slugs (without locale prefix) for comparison
-    const getSlug = (id: string) => id.split("/").slice(1).join("/");
+    // Iterate through each unique post slug
+    for (const [, variations] of postsBySlug.entries()) {
+      // 1. Try exact match for target locale
+      const exactMatch = variations.find(p =>
+        p.id.startsWith(`${targetLocale}/`)
+      );
 
-    const localeSlugs = new Set(localePosts.map(p => getSlug(p.id)));
+      if (exactMatch) {
+        results.push({
+          post: exactMatch,
+          isFallback: false,
+          originalLocale: targetLocale,
+        });
+      } else if (includeFallback) {
+        // 2. Fallback: Use first available version (prefer DEFAULT_LANG, then any)
+        const fallback =
+          variations.find(p => p.id.startsWith(`${DEFAULT_LANG}/`)) ||
+          variations[0];
 
-    // Find English posts that don't have a translation in the target locale
-    const fallbackPosts = englishPosts.filter(
-      post => !localeSlugs.has(getSlug(post.id))
-    );
-
-    // Combine locale posts with fallback posts
-    const result: PostWithFallback[] = [
-      ...localePosts.map(post => ({
-        post,
-        isFallback: false,
-        originalLocale: locale,
-      })),
-      ...fallbackPosts.map(post => ({
-        post,
-        isFallback: true,
-        originalLocale: DEFAULT_LANG,
-      })),
-    ];
+        if (fallback) {
+          const fallbackLocale = getLocale(fallback.id);
+          results.push({
+            post: fallback,
+            isFallback: true,
+            originalLocale: fallbackLocale,
+          });
+        }
+      }
+    }
 
     // Sort by publication date (descending)
-    return result.sort(
+    return results.sort(
       (a, b) =>
         Math.floor(new Date(b.post.data.pubDatetime).getTime() / 1000) -
         Math.floor(new Date(a.post.data.pubDatetime).getTime() / 1000)

@@ -2,6 +2,7 @@
 import { render, type CollectionEntry } from "astro:content";
 import { SITE, FEATURES } from "@/config";
 import { getI18n } from "@/i18n";
+import { LANGUAGES, type Lang } from "@/i18n/config";
 import {
   resolveOgImageUrl,
   getAdjacentPosts,
@@ -25,15 +26,17 @@ import "katex/dist/katex.min.css";
 export interface Props {
   post: CollectionEntry<"blog">;
   posts: CollectionEntry<"blog">[];
+  isFallback?: boolean;
+  originalLocale?: Lang;
 }
 
-const { post, posts } = Astro.props;
+const { post, posts, isFallback = false, originalLocale } = Astro.props;
 const {
   title,
   author,
   description,
   ogImage: initOgImage,
-  canonicalURL,
+  canonicalURL: frontmatterCanonical,
   pubDatetime,
   modDatetime,
   timezone,
@@ -66,6 +69,24 @@ const breadcrumbItems = [
   { label: t("nav.posts"), href: postsHref },
   { label: title },
 ];
+
+// 4. SEO: Handle Fallback Canonical
+// If this is a fallback, the canonical URL MUST point to the original locale
+// to avoid duplicate content penalties from search engines.
+const canonicalURL =
+  isFallback && originalLocale
+    ? new URL(
+        `/${originalLocale}/posts/${post.slug.split("/").pop()}`,
+        SITE.website
+      ).href
+    : frontmatterCanonical;
+
+// Helper: Get language name for UI display (e.g., "ქართული", "English")
+const originalLangName = originalLocale ? LANGUAGES[originalLocale] : "";
+
+// Helper: Determine the content language for the article tag
+// This is used for screen readers and browsers to properly handle the language
+const contentLang = isFallback && originalLocale ? originalLocale : locale;
 ---
 
 <Layout
@@ -116,6 +137,33 @@ const breadcrumbItems = [
       <!-- Breadcrumb Navigation -->
       <Breadcrumb items={breadcrumbItems} class="mb-4" />
 
+      <!-- Fallback Notice -->
+      {
+        isFallback && (
+          <div class="mb-8 flex items-center gap-3 rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-700 dark:text-amber-400">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="size-5 shrink-0"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="16" x2="12" y2="12" />
+              <line x1="12" y1="8" x2="12.01" y2="8" />
+            </svg>
+            <span>
+              {locale === "ka"
+                ? `ეს სტატია ჯერ არ არის თარგმნილი ქართულად. ნაჩვენებია ${originalLangName} ვერსია.`
+                : `This content is not available in your language. Showing ${originalLangName} version.`}
+            </span>
+          </div>
+        )
+      }
+
       <PostHero
         {title}
         {pubDatetime}
@@ -130,7 +178,7 @@ const breadcrumbItems = [
         <MobileTableOfContents headings={headings} />
       </div>
 
-      <PostContent>
+      <PostContent contentLang={contentLang}>
         <Content />
       </PostContent>
 

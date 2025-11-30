@@ -39,7 +39,14 @@ export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
 
   // Generate paths for all supported locales
   for (const locale of SUPPORTED_LANGS) {
-    const posts = await PostRepository.getByLocale(locale as Lang);
+    const postsWithFallback = await PostRepository.getByLocaleWithFallback(
+      locale as Lang
+    );
+    const posts = postsWithFallback.map(p => ({
+      ...p.post,
+      isFallback: p.isFallback,
+      originalLocale: p.originalLocale,
+    }));
     // Pass locale to get translated tag names
     const tags = getUniqueTags(posts, locale as Lang);
 
@@ -84,14 +91,17 @@ const pageContent = pageContentByLocale[locale as Lang];
       {
         page.data
           .filter(item => item !== undefined)
-          .map(({ data, slug }) => (
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          .map((item: any) => (
             <PostSummaryCard
-              title={data.title}
-              description={data.description}
-              pubDatetime={data.pubDatetime}
-              modDatetime={data.modDatetime}
-              timezone={data.timezone}
-              slug={getLastPathSegment(slug)}
+              title={item.data.title}
+              description={item.data.description}
+              pubDatetime={item.data.pubDatetime}
+              modDatetime={item.data.modDatetime}
+              timezone={item.data.timezone}
+              slug={getLastPathSegment(item.slug)}
+              isFallback={item.isFallback}
+              originalLocale={item.originalLocale}
             />
           ))
       }

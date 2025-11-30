@@ -30,7 +30,12 @@ if (!FEATURES.showArchives) {
   return Astro.redirect(`/${locale}/404`);
 }
 
-const posts = await PostRepository.getByLocale(locale);
+const posts = await PostRepository.getByLocaleWithFallback(locale);
+const postsData = posts.map(p => ({
+  ...p.post,
+  isFallback: p.isFallback,
+  originalLocale: p.originalLocale,
+}));
 
 // Month names localized by language
 const monthsByLocale: Record<Lang, string[]> = {
@@ -101,7 +106,7 @@ const pageContent = pageContentByLocale[locale];
     <div class="mt-8 space-y-12">
       {
         Object.entries(
-          getPostsByGroupCondition(posts, post =>
+          getPostsByGroupCondition(postsData, post =>
             post.data.pubDatetime.getFullYear()
           )
         )
@@ -159,7 +164,15 @@ const pageContent = pageContentByLocale[locale];
                                   new Date(a.data.pubDatetime).getTime() / 1000
                                 )
                             )
-                            .map(({ data, slug, body }) => {
+                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                            .map((item: any) => {
+                              const {
+                                data,
+                                slug,
+                                body,
+                                isFallback,
+                                originalLocale,
+                              } = item;
                               const wordCount = body.split(/\s+/).length;
 
                               return (
@@ -172,6 +185,8 @@ const pageContent = pageContentByLocale[locale];
                                   slug={getLastPathSegment(slug)}
                                   wordCount={wordCount}
                                   variant="h3"
+                                  isFallback={isFallback}
+                                  originalLocale={originalLocale}
                                 />
                               );
                             })}

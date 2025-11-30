@@ -26,6 +26,7 @@ import { calculateReadingTimeFromWords, formatReadingTime } from "@/utils/post";
 import Datetime from "./Datetime.astro";
 import ReadingTime from "./ReadingTime.astro";
 import { getI18n, type Lang } from "@/i18n";
+import { LANGUAGES } from "@/i18n/config";
 
 export interface Props {
   title: string;
@@ -38,6 +39,8 @@ export interface Props {
   wordCount?: number;
   tags?: string[];
   featured?: boolean;
+  isFallback?: boolean;
+  originalLocale?: Lang;
 }
 
 const {
@@ -51,6 +54,8 @@ const {
   wordCount = 0,
   tags = [],
   featured = false,
+  isFallback = false,
+  originalLocale,
 } = Astro.props;
 
 // Get translations for current locale
@@ -86,6 +91,16 @@ const hiddenTagsCount = tags.length - MAX_TAGS;
           <div class="post-card__badge">
             <span aria-hidden="true">✨</span>
             <span>{t("post.featured")}</span>
+          </div>
+        )
+      }
+
+      {/* Language Fallback Badge */}
+      {
+        isFallback && originalLocale && (
+          <div class="post-card__badge post-card__badge--language">
+            <span aria-hidden="true">🌍</span>
+            <span>{LANGUAGES[originalLocale]}</span>
           </div>
         )
       }
@@ -217,6 +232,18 @@ const hiddenTagsCount = tags.length - MAX_TAGS;
     font-size: clamp(0.6875rem, 0.625rem + 0.125vw, 0.75rem);
     font-weight: 600;
     color: var(--color-accent);
+  }
+
+  /* Language Badge - Different styling */
+  .post-card__badge--language {
+    background: color-mix(
+      in srgb,
+      var(--color-orange, #f97316) 10%,
+      transparent
+    );
+    color: var(--color-orange, #f97316);
+    margin-block-start: 0;
+    display: inline-flex;
   }
 
   /* Title - Fluid typography */

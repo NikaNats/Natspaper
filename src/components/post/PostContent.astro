@@ -10,10 +10,22 @@
  * - Fluid spacing that scales with container
  * - Full-bleed support for images and code blocks on mobile
  * - Proper heading hierarchy and accessible structure
+ * - Language-aware rendering for accessibility
  */
+
+export interface Props {
+  contentLang?: string;
+}
+
+const { contentLang } = Astro.props;
 ---
 
-<article id="article" class="post-content app-prose" data-testid="post-content">
+<article
+  id="article"
+  class="post-content app-prose"
+  data-testid="post-content"
+  lang={contentLang}
+>
   <slot />
 </article>
 

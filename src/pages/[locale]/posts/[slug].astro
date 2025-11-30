@@ -7,24 +7,27 @@ import type { Lang } from "@/i18n";
 
 export interface Props {
   post: CollectionEntry<"blog">;
+  isFallback?: boolean;
+  originalLocale?: Lang;
 }
 
 export async function getStaticPaths() {
   const { PostRepository } = await import("@/utils/post/repository");
+
   const postResult: Array<{
     params: { locale: string; slug: string };
-    props: { post: CollectionEntry<"blog"> };
+    props: Props;
   }> = [];
 
-  // Generate paths for all supported locales
   for (const locale of SUPPORTED_LANGS) {
-    const posts = await PostRepository.getByLocale(locale);
+    const postsWithFallback = await PostRepository.getByLocaleWithFallback(
+      locale as Lang
+    );
 
-    // Add only the clean slug paths (catch route handles .md redirects)
-    for (const post of posts) {
+    for (const { post, isFallback, originalLocale } of postsWithFallback) {
       postResult.push({
         params: { locale, slug: getLastPathSegment(post.slug) },
-        props: { post },
+        props: { post, isFallback, originalLocale },
       });
     }
   }
@@ -32,12 +35,20 @@ export async function getStaticPaths() {
   return postResult;
 }
 
-const { post } = Astro.props;
+const { post, isFallback, originalLocale } = Astro.props;
 const locale = (Astro.params.locale as Lang) || DEFAULT_LANG;
 
-const sortedPosts = await (
+// Use fallback logic for sorted posts to maintain consistency
+const sortedPostsWithFallback = await (
   await import("@/utils/post/repository")
-).PostRepository.getByLocale(locale);
+).PostRepository.getByLocaleWithFallback(locale);
+
+const sortedPosts = sortedPostsWithFallback.map(p => p.post);
 ---
 
-<PostDetails post={post} posts={sortedPosts} />
+<PostDetails
+  post={post}
+  posts={sortedPosts}
+  isFallback={isFallback}
+  originalLocale={originalLocale}
+/>
