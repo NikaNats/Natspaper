@@ -2,8 +2,12 @@
 // FILE: src/pages/index.astro
 import { DEFAULT_LANG } from "@/i18n/config";
 
-// Calculate the absolute URL for the default locale to establish canonical authority
+// Calculate the absolute URL for the default locale
 const destination = `/${DEFAULT_LANG}/`;
+
+// FIX: Retrieve the verification code for the root page
+const PUBLIC_GOOGLE_SITE_VERIFICATION = import.meta.env
+  .PUBLIC_GOOGLE_SITE_VERIFICATION;
 ---
 
 <!doctype html>
@@ -11,19 +15,32 @@ const destination = `/${DEFAULT_LANG}/`;
   <head>
     <meta charset="UTF-8" />
     <title>Redirecting...</title>
+
+    <!-- 
+      IMPORTANT: We keep noindex here to prevent Google from indexing this empty 
+      redirect page, BUT we add the verification tag below so Google 
+      knows you own the domain.
+    -->
     <meta name="robots" content="noindex, nofollow" />
+
+    <!-- FIX: This is what Google Search Console is looking for -->
+    {
+      PUBLIC_GOOGLE_SITE_VERIFICATION && (
+        <meta
+          name="google-site-verification"
+          content={PUBLIC_GOOGLE_SITE_VERIFICATION}
+        />
+      )
+    }
 
     <!-- 1. Canonical: Tells Google "The real content is at /en/" -->
     <link rel="canonical" href={destination} />
 
-    <!-- 2. Meta Refresh: The fastest browser-native redirect (0 seconds) -->
-    <!-- Acts as a fallback if JS is disabled or Vercel config is missing (localhost) -->
+    <!-- 2. Meta Refresh: The fastest browser-native redirect -->
     <meta http-equiv="refresh" content={`0;url=${destination}`} />
 
-    <!-- 3. Script: Minimal, non-blocking fallback for language detection in local dev -->
+    <!-- 3. Script: Fallback redirect -->
     <script is:inline define:vars={{ destination }}>
-      // Short-circuit: If this page loaded, edge redirection didn't happen.
-      // We prioritize speed over perfect language detection here.
       window.location.href = destination;
     </script>
   </head>
