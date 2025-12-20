@@ -17,7 +17,6 @@
  * <Hero
  *   name="John Doe"
  *   tagline=".NET Developer | Software Engineer"
- *   description="Building scalable microservices..."
  *   profileImage={profilePic}
  * />
  */
@@ -29,8 +28,6 @@ export interface Props {
   name: string;
   /** Professional tagline/title */
   tagline: string;
-  /** Main description/bio text */
-  description: string;
   /** Additional description paragraphs (optional) */
   additionalContent?: string[];
   /** Profile image source */
@@ -46,7 +43,6 @@ export interface Props {
 const {
   name,
   tagline,
-  description,
   additionalContent = [],
   profileImage,
   profileAlt = "Profile",
@@ -92,10 +88,6 @@ const {
 
       <p class="hero__tagline">
         {tagline}
-      </p>
-
-      <p class="hero__description">
-        {description}
       </p>
 
       {

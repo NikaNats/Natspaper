@@ -9,7 +9,6 @@ import Socials from "@/components/features/Socials.astro";
 import Hr from "@/components/ui/Hr.astro";
 import FeaturedPostCard from "@/components/post/FeaturedPostCard.astro";
 import { getSocials } from "@/data/socials";
-import { SITE } from "@/config";
 import { getI18n, type Lang } from "@/i18n";
 import { SUPPORTED_LANGS, DEFAULT_LANG } from "@/i18n/config";
 import profilePic from "@/assets/images/me.jpeg";
@@ -20,61 +19,57 @@ export const getStaticPaths = (() => {
   }));
 }) satisfies GetStaticPaths;
 
-// Extract and validate locale from URL params
 const locale = (
   SUPPORTED_LANGS.includes(Astro.params.locale as Lang)
     ? Astro.params.locale
     : DEFAULT_LANG
 ) as Lang;
 
-// Get translations for current locale
 const { t } = getI18n(locale);
-
-// Get posts only for the current language using the centralized repository
 const sortedPosts = await PostRepository.getByLocale(locale);
 const featuredPosts = sortedPosts.filter(({ data }) => data.featured);
 const socials = getSocials();
 
-// Hero content - localized based on locale
 const heroContentByLocale: Record<
   Lang,
   {
     tagline: string;
-    techStack: string[];
+    techStack?: string[];
     additionalContent: string[];
-    description?: string;
   }
 > = {
   en: {
-    tagline: ".NET Developer  |  Software Engineer",
-    techStack: [".NET Core", "Microservices", "AI/ML", "TypeScript", "Astro"],
+    tagline: "Explorer of Ideas | ex.Physicist | Software Engineer",
+    techStack: ["Physics", "Software Development", "Philosophy", "Cognition"],
     additionalContent: [
-      `Recent highlights include leading the migration of a credit reporting
-      system from monolith to microservices
-      <span class="highlight">40% perf boost</span>, architecting a Georgian-language AI assistant that won the
-      <span class="highlight">Jury's Favorite Award</span>
-      at GAIA Hackathon, and designing enterprise-grade systems like <a
-        href="https://github.com/NikaNats">Blogify API</a> and fintech microservices ecosystems.`,
-      `Currently pursuing a Master's in Data Science at Georgian National
-      University while working as a .NET Software Engineer at Credo Bank.
-      Reach out by <a href="mailto:nika.nacvlishvili1@gmail.com">sending an email</a> to discuss .NET, microservices, or AI/ML integration.`,
+      `Hello, I'm <strong>Nika</strong>. Although I work as a software engineer, my background is rooted in Physics. 
+      My Bachelor's degree in the field instilled in me a deep desire not merely to build systems, but to understand 
+      the fundamental laws that govern our universe.`,
+
+      `I am passionate about the art of <strong>thinking</strong> itself. I view coding, mathematics, and philosophy 
+      as distinct languages for a singular pursuit: cognition. I am driven by the joy of problem-solving—whether 
+      it involves deciphering a complex system architecture or exploring the nature of reality.`,
+
+      `This website is a digital reflection of my curiosity. Here, you will find a blend of 
+      <strong>technical research, personal observations, and life reflections</strong>. It serves as a chronicle 
+      of my learning journey and my efforts to make sense of the world.`,
     ],
   },
   ka: {
-    tagline: ".NET დეველოპერი  |  პროგრამული ინჟინერი",
-    description:
-      "მიკროსერვისების არქიტექტურაში სპეციალიზირებული .NET დეველოპერი და პროგრამული ინჟინერი",
-    techStack: [".NET Core", "Microservices", "AI/ML", "TypeScript", "Astro"],
+    tagline: "იდეების მკვლევარი | ექს-ფიზიკოსი | ინჟინერი",
+    techStack: ["ფიზიკა", "პროგრამული განვითარება", "ფილოსოფია", "შემეცნება"],
     additionalContent: [
-      `ყოველდღიური მიღწევები მოიცავს საკრედიტო რეპორტირების სისტემის
-      მიგრაციას მონოლიტიდან მიკროსერვისებზე <span class="highlight">40% შესრულების გაუმჯობესება</span>,
-      ქართულენოვანი AI ასისტენტის არქიტექტურას, რომელმაც მოიპოვა <span class="highlight">ჟიური Prize Award-ი</span>
-      GAIA Hackathon-ზე, და საწარმო-კლასის სისტემებზე, როგორიცაა
-      <a href="https://github.com/NikaNats">Blogify API</a> და fintech მიკროსერვისების ეკოსისტემები.`,
-      `მიზნად ისახავს მაგისტრის ხარისხის მიღებას მონაცემთა მეცნიერების
-      ფაკულტეტზე საქართველოს ეროვნული უნივერსიტეტში, ხოლო პრაქტიკულად
-      მუშაობს .NET პროგრამული ინჟინერად Credo Bank-ში. მოგვწერეთ <a href="mailto:nika.nacvlishvili1@gmail.com">ელ-ფოსტით</a>
-      .NET, მიკროსერვისებების ან AI/ML ინტეგრაციის შესახებ განსახილველი საკითხების შესაფერი.`,
+      `გამარჯობა, მე <strong>ნიკა</strong> ვარ. პროფესიით პროგრამული ინჟინერი გახლავართ, თუმცა ფიზიკის ბაკალავრის ხარისხს ვფლობ. 
+      ამ განათლემ არა მხოლოდ ახალი სისტემების შექმნის სურვილი გამიღვიძა, არამედ იმ ფუნდამენტური კანონების ღრმად გააზრების ინტერესიც, 
+      რომლებიც სამყაროს მართავს.`,
+
+      `გატაცებული ვარ <strong>აზროვნების პროცესით</strong>. კოდს, მათემატიკასა და ფილოსოფიას აღვიქვამ, როგორც შემეცნების 
+      სხვადასხვა ენას. ჩემი მთავარი მოტივაცია პრობლემების გადაწყვეტაშია — იქნება ეს რთული სისტემური 
+      არქიტექტურის აგება თუ რეალობის ბუნების კვლევა.`,
+
+      `ეს ვებგვერდი ჩემი ცნობისმოყვარეობის ანარეკლია. აქ იხილავთ სტატიებს მრავალფეროვან თემებზე: 
+      <strong>ტექნიკურ კვლევებს, პირად დაკვირვებებსა და ცხოვრებისეულ რეფლექსიებს</strong>. ეს არის სივრცე, 
+      სადაც აღვწერ ჩემი განვითარების გზას და სამყაროს გააზრების მცდელობებს.`,
     ],
   },
 };
@@ -89,17 +84,14 @@ const heroContent = heroContentByLocale[
   <main
     id="main-content"
     data-layout="index"
-    class="mx-auto flex h-svh w-full max-w-app flex-col items-center justify-center px-4"
+    class="mx-auto flex min-h-[calc(100svh-5rem)] w-full max-w-app flex-col items-center justify-center px-4 py-8"
   >
     <Hero
-      name={SITE.author}
+      name="Nika Natsvlishvili"
       tagline={heroContent.tagline}
-      description={SITE.desc}
       additionalContent={heroContent.additionalContent}
       profileImage={profilePic}
-      profileAlt={locale === "en"
-        ? `${SITE.author}'s profile photo`
-        : `${SITE.author}-ის პროფილის ფოტო`}
+      profileAlt={locale === "en" ? "Nika Natsvlishvili" : "ნიკა ნაცვლიშვილი"}
       techStack={heroContent.techStack}
     >
       {
@@ -111,13 +103,11 @@ const heroContent = heroContentByLocale[
       }
     </Hero>
 
-    <Hr />
-
     {
       featuredPosts.length > 0 && (
         <>
           <Hr />
-          <section id="featured-posts" class="py-8">
+          <section id="featured-posts" class="w-full py-8">
             <h2 class="mb-6 text-2xl font-bold">{t("hero.featuredPosts")}</h2>
             <ul class="grid gap-4 sm:grid-cols-2">
               {featuredPosts.map(({ data, id, body }) => (
@@ -141,7 +131,6 @@ const heroContent = heroContentByLocale[
     const indexLayout = (document.querySelector("#main-content") as HTMLElement)
       ?.dataset?.layout;
     if (indexLayout) {
-      // Get locale from current URL path
       const pathParts = window.location.pathname.split("/").filter(Boolean);
       const locale = pathParts[0] || "en";
       sessionStorage.setItem("backUrl", `/${locale}/`);
