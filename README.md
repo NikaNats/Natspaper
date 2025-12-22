@@ -1,7 +1,6 @@
 <br/>
 
 <div align="center">
-  <img src="https://raw.githubusercontent.com/NikaNats/Natspaper/main/public/favicon.svg" alt="Natspaper Logo" width="100" />
   <h1>Natspaper</h1>
   <p>
     <b>An academically-focused, performance-obsessed blog platform built with Astro and TypeScript.</b>
