@@ -32,6 +32,9 @@ export const ui = {
     "post.shareThisPost": "Share this post:",
     "post.featured": "Featured",
     "post.englishOnly": "English only",
+    "post.series": "Article Series",
+    "post.seriesPartOf": "Part {current} of {total}",
+    "post.seriesNext": "Next in series",
 
     // Navigation helpers
     "nav.previousPost": "← Previous",
@@ -94,6 +97,9 @@ export const ui = {
     "post.shareThisPost": "გააზიარე ეს პოსტი:",
     "post.featured": "გამორჩეული",
     "post.englishOnly": "მხოლოდ ინგლისურად",
+    "post.series": "სტატიების სერია",
+    "post.seriesPartOf": "ნაწილი {current} / {total}-დან",
+    "post.seriesNext": "შემდეგი სერიიდან",
 
     // Navigation helpers
     "nav.previousPost": "← წინა",

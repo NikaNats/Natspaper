@@ -80,7 +80,7 @@ const pageContent = pageContentByLocale[locale];
       {
         page.data.map(item => {
           // Calculate word count for reading time
-          const wordCount = item.body.split(/\s+/).length;
+          const wordCount = item.body?.split(/\s+/).length || 0;
           return (
             <PostSummaryCard
               title={item.data.title}

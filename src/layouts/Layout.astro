@@ -50,6 +50,8 @@ export interface Props {
   tags?: string[];
   /** Word count for blog posts (used in structured data) */
   wordCount?: number;
+  /** Structured data for CreativeWorkSeries (used for series posts) */
+  seriesSchema?: any;
 }
 
 const {
@@ -64,6 +66,7 @@ const {
   scrollSmooth = FEATURES.scrollSmooth,
   tags,
   wordCount,
+  seriesSchema,
 } = Astro.props;
 
 // Build social image URL
@@ -104,7 +107,8 @@ if (isBlogPost && pubDatetime) {
 
   structuredData = combineSchemas(
     blogPostingSchema as Record<string, unknown>,
-    breadcrumbSchema as Record<string, unknown>
+    breadcrumbSchema as Record<string, unknown>,
+    ...(seriesSchema ? [seriesSchema as Record<string, unknown>] : [])
   );
 } else {
   // General page: Generate WebSite schema for homepage, or just breadcrumb for other pages

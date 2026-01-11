@@ -155,6 +155,16 @@ const blog = defineCollection({
        * @default false
        */
       hideEditPost: z.boolean().default(false),
+
+      /**
+       * Series information for grouping related posts
+       * @optional
+       */
+      series: z.object({
+        id: z.string().describe("Unique identifier for the series (e.g., 'system-design')"),
+        order: z.number().int().positive().describe("The sequence number in the series"),
+        title: z.string().describe("The display name of the series group"),
+      }).optional(),
     }),
 });
 

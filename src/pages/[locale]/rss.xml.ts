@@ -24,11 +24,15 @@ export const GET: APIRoute = async ({ params, site }) => {
       atom: "http://www.w3.org/2005/Atom",
     },
     items: recentPosts.map(post => {
-      const slug = String(post.id).split("/").pop();
-
+      let displayTitle = post.data.title;
+      if (post.data.series) {
+        // Format: "[Series Name, Part 1] Article Title"
+        displayTitle = `[${post.data.series.title}, Part ${post.data.series.order}] ${displayTitle}`;
+      }
+      
       return {
-        link: `/${locale}/posts/${slug}`,
-        title: escapeHtml(post.data.title),
+        link: `/${locale}/posts/${String(post.id).split("/").pop()}`,
+        title: escapeHtml(displayTitle),
         description: `<![CDATA[${sanitizeMarkdownUrls(
           sanitizeDescription(post.data.description)
         )}]]>`,

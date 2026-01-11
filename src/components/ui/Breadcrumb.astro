@@ -39,7 +39,6 @@ const { items, class: className = "" } = Astro.props;
   >
     {
       items.map((item, index) => {
-        const isLast = index === items.length - 1;
         const position = index + 1;
 
         return (
@@ -56,16 +55,7 @@ const { items, class: className = "" } = Astro.props;
               </span>
             )}
 
-            {isLast ? (
-              /* Current page - no link, styled differently */
-              <span
-                class="max-w-[200px] truncate font-medium text-foreground"
-                aria-current="page"
-                itemprop="name"
-              >
-                {item.label}
-              </span>
-            ) : (
+            {item.href ? (
               /* Clickable link */
               <a
                 href={item.href}
@@ -74,6 +64,14 @@ const { items, class: className = "" } = Astro.props;
               >
                 <span itemprop="name">{item.label}</span>
               </a>
+            ) : (
+              /* Non-clickable text (current page or series title) */
+              <span
+                class="max-w-[200px] truncate font-medium text-foreground"
+                itemprop="name"
+              >
+                {item.label}
+              </span>
             )}
 
             <meta itemprop="position" content={String(position)} />

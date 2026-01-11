@@ -1,4 +1,5 @@
 ---
+// src/layouts/PostDetails.astro
 import { render, type CollectionEntry } from "astro:content";
 import { SITE, FEATURES } from "@/config";
 import { getI18n } from "@/i18n";
@@ -8,6 +9,9 @@ import {
   getAdjacentPosts,
   getReadingTimeDisplay,
 } from "@/utils/post";
+import { getLastPathSegment } from "@/utils/core/slugify";
+import { PostRepository } from "@/utils/post/repository";
+import type { BreadcrumbItem } from "@/types"; // <--- 1. Import the type
 
 // Components
 import Layout from "@/layouts/Layout.astro";
@@ -19,8 +23,8 @@ import PostContent from "@/components/post/PostContent.astro";
 import PostFooter from "@/components/post/PostFooter.astro";
 import TableOfContents from "@/components/post/TableOfContents.astro";
 import MobileTableOfContents from "@/components/post/MobileTableOfContents.astro";
+import SeriesBox from "@/components/post/SeriesBox.astro";
 
-// PERFORMANCE: Bundle critical CSS for math rendering
 import "katex/dist/katex.min.css";
 
 export interface Props {
@@ -43,49 +47,74 @@ const {
   tags,
   hideEditPost,
 } = post.data;
+
 const { Content, headings } = await render(post);
 
 // 1. Data Preparation
-const { t, tTag } = getI18n(Astro.currentLocale as "en" | "ka" | undefined);
+const locale = (Astro.currentLocale as Lang) || "en";
+const { t, tTag } = getI18n(locale);
 const readingTimeText = getReadingTimeDisplay(post.body || "");
 const ogImage = resolveOgImageUrl(initOgImage, post.slug, Astro.url.origin);
-const { previous: prevPost, next: nextPost } = getAdjacentPosts(posts, post.id);
 
-// 2. Config & Helpers
+// 2. Fetch Series Data
+const seriesParts = post.data.series 
+  ? await PostRepository.getSeries(post.data.series.id, locale)
+  : [];
+
+// 3. Breadcrumb Navigation Logic (Fixed Redeclaration & Typing)
+const postsHref = locale === "en" ? "/en/posts" : `/${locale}/posts`;
+const breadcrumbItems: BreadcrumbItem[] = [ // <--- 2. Explicitly type the array
+  { label: t("nav.home"), href: `/${locale}` },
+  { label: t("nav.posts"), href: postsHref },
+];
+
+if (post.data.series) {
+  breadcrumbItems.push({ label: post.data.series.title }); // No href needed for text-only
+}
+breadcrumbItems.push({ label: title });
+
+// 4. Navigation Override (Prev/Next logic)
+let { previous: prevPost, next: nextPost } = getAdjacentPosts(posts, post.id);
+
+if (seriesParts.length > 0) {
+  const idx = seriesParts.findIndex(p => p.post.id === post.id);
+  if (idx > 0 && idx < seriesParts.length) {
+    const p = seriesParts[idx - 1]?.post;
+    if (p) {
+      prevPost = { id: p.id, title: p.data.title, filePath: p.filePath };
+    }
+  }
+  if (idx >= 0 && idx < seriesParts.length - 1) {
+    const n = seriesParts[idx + 1]?.post;
+    if (n) {
+      nextPost = { id: n.id, title: n.data.title, filePath: n.filePath };
+    }
+  }
+}
+
+// 5. Config & Helpers
 const editPostConfig = FEATURES.editPost;
-const showEditPost = !!(
-  editPostConfig.enabled &&
-  !hideEditPost &&
-  editPostConfig.url
-);
+const showEditPost = !!(editPostConfig.enabled && !hideEditPost && editPostConfig.url);
 const currentYear = new Date().getFullYear();
 const copyrightText = `Copyright © ${currentYear} • ${t("footer.copyright")}`;
 
-// 3. Breadcrumb Navigation
-const locale = Astro.currentLocale || "en";
-const postsHref = locale === "en" ? "/en/posts" : `/${locale}/posts`;
-const breadcrumbItems = [
-  { label: t("nav.home"), href: `/${locale}` },
-  { label: t("nav.posts"), href: postsHref },
-  { label: title },
-];
+// 6. Advanced SEO (CreativeWorkSeries)
+const seriesSchema = post.data.series ? {
+  "@type": "CreativeWorkSeries",
+  "name": post.data.series.title,
+  "hasPart": seriesParts.map(p => ({
+    "@type": "BlogPosting",
+    "headline": p.post.data.title,
+    "url": new URL(`/${locale}/posts/${getLastPathSegment(p.post.slug)}`, SITE.website).href
+  }))
+} : null;
 
-// 4. SEO: Handle Fallback Canonical
-// If this is a fallback, the canonical URL MUST point to the original locale
-// to avoid duplicate content penalties from search engines.
-const canonicalURL =
-  isFallback && originalLocale
-    ? new URL(
-        `/${originalLocale}/posts/${post.slug.split("/").pop()}`,
-        SITE.website
-      ).href
+// 7. SEO: Handle Fallback Canonical
+const canonicalURL = isFallback && originalLocale
+    ? new URL(`/${originalLocale}/posts/${post.slug.split("/").pop()}`, SITE.website).href
     : frontmatterCanonical;
 
-// Helper: Get language name for UI display (e.g., "ქართული", "English")
-const originalLangName = originalLocale ? LANGUAGES[originalLocale] : "";
-
-// Helper: Determine the content language for the article tag
-// This is used for screen readers and browsers to properly handle the language
+const originalLangName = originalLocale ? LANGUAGES[originalLocale as Lang] : "";
 const contentLang = isFallback && originalLocale ? originalLocale : locale;
 ---
 
@@ -100,6 +129,7 @@ const contentLang = isFallback && originalLocale ? originalLocale : locale;
   tags={tags}
   wordCount={post.body?.split(/\s+/).length}
   scrollSmooth
+  seriesSchema={seriesSchema}
 >
   <Header />
 
@@ -177,6 +207,14 @@ const contentLang = isFallback && originalLocale ? originalLocale : locale;
       <div class="block xl:hidden">
         <MobileTableOfContents headings={headings} />
       </div>
+
+      {seriesParts.length > 0 && (
+        <SeriesBox 
+          seriesParts={seriesParts} 
+          currentPostId={post.id} 
+          locale={locale} 
+        />
+      )}
 
       <PostContent contentLang={contentLang}>
         <Content />

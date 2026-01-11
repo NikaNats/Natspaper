@@ -172,7 +172,7 @@ const pageContent = pageContentByLocale[locale];
                                 isFallback,
                                 originalLocale,
                               } = item;
-                              const wordCount = body.split(/\s+/).length;
+                              const wordCount = body?.split(/\s+/).length || 0;
 
                               return (
                                 <PostSummaryCard
