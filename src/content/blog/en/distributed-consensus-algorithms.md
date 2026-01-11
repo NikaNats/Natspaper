@@ -1,5 +1,5 @@
 ---
-author: Dr. Aris Thorne
+author: Nika Natsvlishvili
 pubDatetime: 2025-01-15T10:00:00.000Z
 title: "Distributed Consensus Algorithms: From Theory to Production"
 tags:
@@ -7,7 +7,7 @@ tags:
   - algorithms
   - consensus
   - system-design
-description: A comprehensive exploration of consensus algorithms in distributed systems, covering Paxos, Raft, and practical implementations in modern software architecture.
+description: "A comprehensive exploration of consensus algorithms in distributed systems, covering Paxos, Raft, and practical implementations."
 references:
   - id: lamport1998
     title: "The Part-Time Parliament"
@@ -22,12 +22,6 @@ references:
     year: 2014
     url: "https://raft.github.io/raft.pdf"
     doi: "10.1145/2643634.2643666"
-  - id: howard1997
-    title: "Arcane Secrets of Synchronization"
-    author: "Howard, J."
-    year: 1997
-    journal: "Dr. Dobb's Journal"
-    url: "https://www.drdobbs.com/parallel/arcane-secrets-of-synchronization/184408666"
 ---
 
 In the realm of distributed systems, consensus represents the holy grail of coordination. When multiple processes must agree on a single value despite network partitions, message delays, and node failures, we enter the domain of distributed consensus algorithms.
@@ -44,9 +38,7 @@ At its core, consensus requires that a group of processes agree on a value, even
 
 ### Paxos: The Foundation
 
-Lamport's Paxos algorithm, introduced in 1998, provides a solution to the consensus problem in asynchronous networks with crash failures. The algorithm operates in phases, using proposers, acceptors, and learners to achieve agreement.
-
-The beauty of Paxos lies in its minimal assumptions about the network and failure model. It requires only that messages may be delayed but not corrupted, and that fewer than half the processes fail.
+Lamport's Paxos algorithm, introduced in 1998 <a href="#ref-lamport1998"><sup>[1]</sup></a>, provides a solution to the consensus problem in asynchronous networks. The algorithm operates in phases, using proposers, acceptors, and learners to achieve agreement.
 
 ### Raft: Understandability First
 

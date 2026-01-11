@@ -1,5 +1,5 @@
 ---
-author: Dr. Aris Thorne
+author: Nika Natsvlishvili
 pubDatetime: 2025-05-15T14:30:00.000Z
 modDatetime: 2025-05-20T09:15:00.000Z
 title: "The Architecture of Asynchrony: A Definitive Treatise on C# Async/Await"
@@ -9,10 +9,33 @@ tags:
   - async-await
   - compiler-design
   - internals
-description: An exhaustive analysis of the C# async state machine, APM/EAP transition, hardware interrupts, and zero-allocation pooling in modern .NET.
+description: "An exhaustive analysis of the C# async state machine, hardware interrupts, and zero-allocation pooling in modern .NET."
+references:
+  - id: toub2023
+    title: "How Async/Await Really Works in C#"
+    author: "Toub, Stephen"
+    year: 2023
+    journal: ".NET Blog"
+    url: "https://devblogs.microsoft.com/dotnet/how-async-await-really-works/"
+  - id: cleary2013
+    title: "There Is No Thread"
+    author: "Cleary, Stephen"
+    year: 2013
+    url: "https://blog.stephencleary.com/2013/11/there-is-no-thread.html"
+  - id: fruhauff2022
+    title: "10 Best Practices in Async-Await Code in C#"
+    author: "Frühauff, Dennis"
+    year: 2022
+    journal: "Medium"
+    url: "https://medium.com/@dennis.fruehauff/10-best-practices-in-async-await-code-in-c-2022-e2f7933f6e49"
+  - id: microsoft-tap
+    title: "Task-based Asynchronous Pattern (TAP)"
+    author: "Microsoft Documentation"
+    year: 2024
+    url: "https://learn.microsoft.com/en-us/dotnet/standard/asynchronous-programming-patterns/task-based-asynchronous-pattern-tap"
 ---
 
-The introduction of the Task-based Asynchronous Pattern (TAP) via the `async` and `await` keywords in C# 5.0 marked a paradigm shift in managed software development. It transitioned the industry from complex, callback-heavy architectures to a structured, linear style of programming that preserves logical flow while maximizing hardware utilization.
+The introduction of the Task-based Asynchronous Pattern (TAP) <a href="#ref-microsoft-tap"><sup>[4]</sup></a> via the `async` and `await` keywords in C# 5.0 marked a paradigm shift in managed software development. It transitioned the industry from complex, callback-heavy architectures to a structured, linear style of programming that preserves logical flow while maximizing hardware utilization.
 
 However, the simplicity of the syntax—sprinkling a few keywords onto a method signature—belies the immense complexity occurring beneath the surface. To truly master asynchronous programming in .NET, one must look beyond the abstraction. One must understand the compiler transformations, the allocation strategies of the runtime, the flow of execution contexts, and the physical interaction with hardware interrupts.
 
@@ -89,7 +112,7 @@ Consider the algorithm for making breakfast:
 
 ## Part 3: The Compiler Transformation
 
-When you compile an `async` method, the Roslyn compiler performs a radical transformation. It does not leave your code as a standard method. It converts it into a `struct` implementing the `IAsyncStateMachine` interface.
+When you compile an `async` method, the Roslyn compiler performs a radical transformation <a href="#ref-toub2023"><sup>[1]</sup></a>. It does not leave your code as a standard method. It converts it into a `struct` implementing the `IAsyncStateMachine` interface.
 
 ### 3.1 Anatomy of the State Machine
 
@@ -201,7 +224,7 @@ Modern .NET uses a specialized generic class: `AsyncStateMachineBox<TStateMachin
 
 ## Part 4: The Hardware Reality ("There Is No Thread")
 
-One of the most persistent myths is that `async` works by spawning a background thread to "wait" for the operation. **This is false.** For I/O-bound operations, there is absolutely no thread watching, waiting, or blocking.
+One of the most persistent myths is that `async` works by spawning a background thread to "wait" for the operation. **This is false.** For I/O-bound operations, there is absolutely no thread watching, waiting, or blocking <a href="#ref-cleary2013"><sup>[2]</sup></a>..
 
 Let us trace the lifecycle of `await fileStream.ReadAsync()` down to the silicon:
 
@@ -261,7 +284,7 @@ async Task<string> GetDataAsync()
 
 ### 5.3 ConfigureAwait(false)
 
-The solution for library authors is `ConfigureAwait(false)`.
+The solution for library authors <a href="#ref-fruhauff2022"><sup>[3]</sup></a> is `ConfigureAwait(false)`.
 
 - **Mechanism:** It passes a boolean flag to the awaiter logic.
 - **Effect:** It tells the runtime: "I do not need to resume on the captured context. Any ThreadPool thread is fine."
@@ -297,6 +320,7 @@ Modern .NET allows implementing `IValueTaskSource`. This allows a backing object
 ---
 
 ## Part 7: Best Practices and Patterns
+Mastering asynchrony requires strict adherence to established patterns <a href="#ref-fruhauff2022"><sup>[3:1]</sup></a>:
 
 ### 7.1 Async Void
 
@@ -356,7 +380,6 @@ Cancellation in C# is cooperative.
 3.  If doing CPU work loops, call `token.ThrowIfCancellationRequested()`.
 4.  Catch `OperationCanceledException` if you need to perform cleanup upon cancellation.
 
----
 
 ## Conclusion
 
@@ -364,11 +387,3 @@ Cancellation in C# is cooperative.
 
 By understanding the layers—from the compiler-generated structs to the OS I/O Completion Ports—developers can avoid common pitfalls like deadlocks and "sync-over-async," and write applications that scale vertically to the limits of modern hardware. As features like `ValueTask` pooling and `AsyncStreams` mature, C# continues to solidify its position as a premier language for high-performance, high-concurrency systems.
 
----
-
-### References and Further Reading
-
-- **Toub, Stephen.** [_How Async/Await Really Works in C#_](https://devblogs.microsoft.com/dotnet/how-async-await-really-works/). .NET Blog.
-- **Cleary, Stephen.** [_There Is No Thread_](https://blog.stephencleary.com/2013/11/there-is-no-thread.html).
-- **Frühauff, Dennis.** [_10 Best Practices in Async-Await Code in C#_](https://medium.com/@dennis.fruehauff/10-best-practices-in-async-await-code-in-c-2022-e2f7933f6e49).
-- **Microsoft Documentation.** [_Task-based Asynchronous Pattern (TAP)_](https://learn.microsoft.com/en-us/dotnet/standard/asynchronous-programming-patterns/task-based-asynchronous-pattern-tap).

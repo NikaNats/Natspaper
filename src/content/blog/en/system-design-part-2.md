@@ -1,5 +1,5 @@
 ---
-author: Test Author
+author: Nika Natsvlishvili
 pubDatetime: 2025-01-11T11:00:00.000Z
 title: System Design Series - Part 2
 tags:
