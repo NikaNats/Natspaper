@@ -1,7 +1,7 @@
 /**
  * Robust URL Sanitization Utility
  * Standardizes security checks across RSS feeds and post content.
- * 
+ *
  * DESIGN PATTERN: Allowlist vs Blocklist
  * Instead of checking for "bad" schemes like javascript:, we only permit
  * schemes that are explicitly known to be safe.
@@ -10,12 +10,7 @@
 /**
  * Allowed protocols for URLs
  */
-const ALLOWED_PROTOCOLS = new Set([
-  "http:",
-  "https:",
-  "mailto:",
-  "tel:",
-]);
+const ALLOWED_PROTOCOLS = new Set(["http:", "https:", "mailto:", "tel:"]);
 
 /**
  * Maximum safe length for input to prevent denial of service.

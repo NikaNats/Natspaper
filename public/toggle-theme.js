@@ -24,7 +24,7 @@
    * 2. APPLY THEME (The single source of truth)
    * Replacing the conflicting 'reflectPreference' declarations.
    */
-  const applyTheme = (theme) => {
+  const applyTheme = theme => {
     // WRITE: Set data attribute and class
     document.documentElement.dataset.theme = theme;
     document.documentElement.classList.toggle("dark", theme === "dark");
@@ -32,7 +32,8 @@
     // WRITE: Update ARIA label for accessibility
     const themeBtn = document.querySelector("#theme-btn");
     if (themeBtn) {
-      const label = theme === "dark" ? "Switch to light theme" : "Switch to dark theme";
+      const label =
+        theme === "dark" ? "Switch to light theme" : "Switch to dark theme";
       themeBtn.setAttribute("aria-label", label);
     }
 
@@ -41,12 +42,17 @@
       const metaThemeColor = document.querySelector("meta[name='theme-color']");
       if (metaThemeColor) {
         const bgColor = getComputedStyle(document.body).backgroundColor;
-        metaThemeColor.setAttribute("content", bgColor || (theme === "dark" ? "#121212" : "#fafafa"));
+        metaThemeColor.setAttribute(
+          "content",
+          bgColor || (theme === "dark" ? "#121212" : "#fafafa")
+        );
       }
     });
 
     // Dispatch event for specialized components (like Giscus)
-    document.dispatchEvent(new CustomEvent("theme-changed", { detail: { theme } }));
+    document.dispatchEvent(
+      new CustomEvent("theme-changed", { detail: { theme } })
+    );
   };
 
   /**
