@@ -70,7 +70,11 @@ const breadcrumbItems: BreadcrumbItem[] = [ // <--- 2. Explicitly type the array
 ];
 
 if (post.data.series) {
-  breadcrumbItems.push({ label: post.data.series.title }); // No href needed for text-only
+  // Use series title, but truncate if too long for breadcrumbs
+  const seriesTitle = post.data.series.title.length > 30 
+    ? post.data.series.title.substring(0, 27) + "..." 
+    : post.data.series.title;
+  breadcrumbItems.push({ label: seriesTitle }); // No href needed for text-only
 }
 breadcrumbItems.push({ label: title });
 
