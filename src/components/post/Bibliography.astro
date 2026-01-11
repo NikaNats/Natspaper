@@ -16,40 +16,67 @@ const { references, locale } = Astro.props;
 const { t } = getI18n(locale as Lang);
 ---
 
-<section class="mt-16 border-t border-border pt-8 print:mt-8" aria-labelledby="refs-heading">
+<section
+  class="mt-16 border-t border-border pt-8 print:mt-8"
+  aria-labelledby="refs-heading"
+>
   <h2 id="refs-heading" class="mb-6 text-xl font-bold text-foreground">
     {t("post.references")}
   </h2>
 
-  <ol class="space-y-4 list-none p-0">
-    {references.map((ref: Reference, index: number) => (
-      <li id={`ref-${ref.id}`} class="group flex gap-4 text-sm leading-relaxed text-text-secondary">
-        <!-- Citation Number -->
-        <span class="flex h-6 w-8 shrink-0 items-center justify-center rounded bg-muted font-mono text-[10px] font-bold text-accent group-target:bg-accent group-target:text-white transition-colors">
-          [{index + 1}]
-        </span>
+  <ol class="list-none space-y-4 p-0">
+    {
+      references.map((ref: Reference, index: number) => (
+        <li
+          id={`ref-${ref.id}`}
+          class="group flex gap-4 text-sm leading-relaxed text-text-secondary"
+        >
+          {/* Citation Number */}
+          <span class="flex h-6 w-8 shrink-0 items-center justify-center rounded bg-muted font-mono text-[10px] font-bold text-accent transition-colors group-target:bg-accent group-target:text-white">
+            [{index + 1}]
+          </span>
 
-        <div class="flex flex-col gap-1">
-          <span class="text-foreground font-medium">{ref.author}. ({ref.year}).</span>
-          <cite class="not-italic font-semibold text-foreground/90">{ref.title}.</cite>
-          {ref.journal && <span class="italic text-text-secondary/80">{ref.journal}.</span>}
+          <div class="flex flex-col gap-1">
+            <span class="font-medium text-foreground">
+              {ref.author}. ({ref.year}).
+            </span>
+            <cite class="font-semibold text-foreground/90 not-italic">
+              {ref.title}.
+            </cite>
+            {ref.journal && (
+              <span class="text-text-secondary/80 italic">{ref.journal}.</span>
+            )}
 
-          <div class="mt-1 flex flex-wrap gap-3">
-            {ref.url && (
-              <a href={ref.url} target="_blank" rel="noopener noreferrer" class="flex items-center gap-1 text-xs text-accent hover:underline">
-                {t("post.viewSource")}
-                <svg class="size-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/></svg>
-              </a>
-            )}
-            {ref.doi && (
-              <span class="text-[10px] font-mono opacity-60">
-                {t("post.doi")}: {ref.doi}
-              </span>
-            )}
+            <div class="mt-1 flex flex-wrap gap-3">
+              {ref.url && (
+                <a
+                  href={ref.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="flex items-center gap-1 text-xs text-accent hover:underline"
+                >
+                  {t("post.viewSource")}
+                  <svg
+                    class="size-3"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3" />
+                  </svg>
+                </a>
+              )}
+              {ref.doi && (
+                <span class="font-mono text-[10px] opacity-60">
+                  {t("post.doi")}: {ref.doi}
+                </span>
+              )}
+            </div>
           </div>
-        </div>
-      </li>
-    ))}
+        </li>
+      ))
+    }
   </ol>
 </section>
 

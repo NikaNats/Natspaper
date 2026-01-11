@@ -15,56 +15,74 @@ const seriesData = seriesParts[0]?.post.data.series;
 const currentIndex = seriesParts.findIndex(p => p.post.id === currentPostId);
 ---
 
-<aside 
+<aside
   class="my-10 overflow-hidden rounded-2xl border border-accent/20 bg-muted/30 shadow-sm print:hidden"
   aria-labelledby="series-heading"
 >
-  <div class="bg-accent/5 px-6 py-4 border-b border-accent/10">
-    <span id="series-heading" class="text-[10px] font-bold tracking-[0.2em] text-accent uppercase">
+  <div class="border-b border-accent/10 bg-accent/5 px-6 py-4">
+    <span
+      id="series-heading"
+      class="text-[10px] font-bold tracking-[0.2em] text-accent uppercase"
+    >
       {t("post.series")}
     </span>
     <h2 class="mt-1 text-xl font-bold text-foreground">{seriesData?.title}</h2>
     <p class="text-sm text-text-secondary">
-      {t("post.seriesPartOf", { current: currentIndex + 1, total: seriesParts.length })}
+      {
+        t("post.seriesPartOf", {
+          current: currentIndex + 1,
+          total: seriesParts.length,
+        })
+      }
     </p>
   </div>
-  
+
   <nav class="p-4" aria-label="Series parts">
     <ul class="space-y-1">
-      {seriesParts.map((part, index) => {
-        const isCurrent = part.post.id === currentPostId;
-        const slug = getLastPathSegment(part.post.slug);
-        
-        return (
-          <li>
-            <a 
-              href={isCurrent ? undefined : `/${locale}/posts/${slug}`}
-              class:list={[
-                "no-underline",
-                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all",
-                isCurrent 
-                  ? "bg-accent/10 text-accent font-semibold cursor-default" 
-                  : "text-text-secondary hover:bg-muted hover:text-foreground"
-              ]}
-              aria-current={isCurrent ? "page" : undefined}
-            >
-              <span class:list={[
-                "flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] border transition-colors",
-                isCurrent ? "bg-accent text-white border-accent" : "border-border"
-              ]}>
-                {index + 1}
-              </span>
-              <span class="flex-1 truncate">{part.post.data.title}</span>
-              {isCurrent && <span class="text-[9px] uppercase tracking-widest opacity-60">Current</span>}
-              {part.isFallback && !isCurrent && (
-                <span class="text-[9px] font-bold uppercase border border-amber-500/50 text-amber-600 px-1.5 py-0.5 rounded bg-amber-500/5">
-                  {part.originalLocale}
+      {
+        seriesParts.map((part, index) => {
+          const isCurrent = part.post.id === currentPostId;
+          const slug = getLastPathSegment(part.post.slug);
+
+          return (
+            <li>
+              <a
+                href={isCurrent ? undefined : `/${locale}/posts/${slug}`}
+                class:list={[
+                  "no-underline",
+                  "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all",
+                  isCurrent
+                    ? "cursor-default bg-accent/10 font-semibold text-accent"
+                    : "text-text-secondary hover:bg-muted hover:text-foreground",
+                ]}
+                aria-current={isCurrent ? "page" : undefined}
+              >
+                <span
+                  class:list={[
+                    "flex h-5 w-5 shrink-0 items-center justify-center rounded-full border text-[10px] transition-colors",
+                    isCurrent
+                      ? "border-accent bg-accent text-white"
+                      : "border-border",
+                  ]}
+                >
+                  {index + 1}
                 </span>
-              )}
-            </a>
-          </li>
-        );
-      })}
+                <span class="flex-1 truncate">{part.post.data.title}</span>
+                {isCurrent && (
+                  <span class="text-[9px] tracking-widest uppercase opacity-60">
+                    Current
+                  </span>
+                )}
+                {part.isFallback && !isCurrent && (
+                  <span class="rounded border border-amber-500/50 bg-amber-500/5 px-1.5 py-0.5 text-[9px] font-bold text-amber-600 uppercase">
+                    {part.originalLocale}
+                  </span>
+                )}
+              </a>
+            </li>
+          );
+        })
+      }
     </ul>
   </nav>
 </aside>

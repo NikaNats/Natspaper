@@ -50,13 +50,18 @@ const schemas = {
 
   /** Reference schema for academic citations */
   reference: z.object({
-    id: z.string().describe("Internal ID to match in-text citations (e.g., 'hoare1974')"),
+    id: z
+      .string()
+      .describe("Internal ID to match in-text citations (e.g., 'hoare1974')"),
     title: z.string(),
     author: z.string(),
     year: z.number().int(),
     journal: z.string().optional(),
     url: z.string().url().optional(),
-    doi: z.string().optional().describe("Digital Object Identifier for academic papers"),
+    doi: z
+      .string()
+      .optional()
+      .describe("Digital Object Identifier for academic papers"),
   }),
 } as const;
 
@@ -171,11 +176,21 @@ const blog = defineCollection({
        * Series information for grouping related posts
        * @optional
        */
-      series: z.object({
-        id: z.string().describe("Unique identifier for the series (e.g., 'system-design')"),
-        order: z.number().int().positive().describe("The sequence number in the series"),
-        title: z.string().describe("The display name of the series group"),
-      }).optional(),
+      series: z
+        .object({
+          id: z
+            .string()
+            .describe(
+              "Unique identifier for the series (e.g., 'system-design')"
+            ),
+          order: z
+            .number()
+            .int()
+            .positive()
+            .describe("The sequence number in the series"),
+          title: z.string().describe("The display name of the series group"),
+        })
+        .optional(),
 
       /**
        * Academic references for citations

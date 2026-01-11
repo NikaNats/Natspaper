@@ -320,6 +320,7 @@ Modern .NET allows implementing `IValueTaskSource`. This allows a backing object
 ---
 
 ## Part 7: Best Practices and Patterns
+
 Mastering asynchrony requires strict adherence to established patterns <a href="#ref-fruhauff2022"><sup>[3:1]</sup></a>:
 
 ### 7.1 Async Void
@@ -380,10 +381,8 @@ Cancellation in C# is cooperative.
 3.  If doing CPU work loops, call `token.ThrowIfCancellationRequested()`.
 4.  Catch `OperationCanceledException` if you need to perform cleanup upon cancellation.
 
-
 ## Conclusion
 
 `async` and `await` are not magic; they are a triumph of compiler engineering and runtime integration. They allow us to write code that reads like a synchronous narrative but executes with the efficiency of a non-blocking state machine.
 
 By understanding the layers—from the compiler-generated structs to the OS I/O Completion Ports—developers can avoid common pitfalls like deadlocks and "sync-over-async," and write applications that scale vertically to the limits of modern hardware. As features like `ValueTask` pooling and `AsyncStreams` mature, C# continues to solidify its position as a premier language for high-performance, high-concurrency systems.
-

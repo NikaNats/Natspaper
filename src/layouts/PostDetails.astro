@@ -58,22 +58,24 @@ const readingTimeText = getReadingTimeDisplay(post.body || "");
 const ogImage = resolveOgImageUrl(initOgImage, post.slug, Astro.url.origin);
 
 // 2. Fetch Series Data
-const seriesParts = post.data.series 
+const seriesParts = post.data.series
   ? await PostRepository.getSeries(post.data.series.id, locale)
   : [];
 
 // 3. Breadcrumb Navigation Logic (Fixed Redeclaration & Typing)
 const postsHref = locale === "en" ? "/en/posts" : `/${locale}/posts`;
-const breadcrumbItems: BreadcrumbItem[] = [ // <--- 2. Explicitly type the array
+const breadcrumbItems: BreadcrumbItem[] = [
+  // <--- 2. Explicitly type the array
   { label: t("nav.home"), href: `/${locale}` },
   { label: t("nav.posts"), href: postsHref },
 ];
 
 if (post.data.series) {
   // Use series title, but truncate if too long for breadcrumbs
-  const seriesTitle = post.data.series.title.length > 30 
-    ? post.data.series.title.substring(0, 27) + "..." 
-    : post.data.series.title;
+  const seriesTitle =
+    post.data.series.title.length > 30
+      ? post.data.series.title.substring(0, 27) + "..."
+      : post.data.series.title;
   breadcrumbItems.push({ label: seriesTitle }); // No href needed for text-only
 }
 breadcrumbItems.push({ label: title });
@@ -99,27 +101,42 @@ if (seriesParts.length > 0) {
 
 // 5. Config & Helpers
 const editPostConfig = FEATURES.editPost;
-const showEditPost = !!(editPostConfig.enabled && !hideEditPost && editPostConfig.url);
+const showEditPost = !!(
+  editPostConfig.enabled &&
+  !hideEditPost &&
+  editPostConfig.url
+);
 const currentYear = new Date().getFullYear();
 const copyrightText = `Copyright © ${currentYear} • ${t("footer.copyright")}`;
 
 // 6. Advanced SEO (CreativeWorkSeries)
-const seriesSchema = post.data.series ? {
-  "@type": "CreativeWorkSeries",
-  "name": post.data.series.title,
-  "hasPart": seriesParts.map(p => ({
-    "@type": "BlogPosting",
-    "headline": p.post.data.title,
-    "url": new URL(`/${locale}/posts/${getLastPathSegment(p.post.slug)}`, SITE.website).href
-  }))
-} : null;
+const seriesSchema = post.data.series
+  ? {
+      "@type": "CreativeWorkSeries",
+      name: post.data.series.title,
+      hasPart: seriesParts.map(p => ({
+        "@type": "BlogPosting",
+        headline: p.post.data.title,
+        url: new URL(
+          `/${locale}/posts/${getLastPathSegment(p.post.slug)}`,
+          SITE.website
+        ).href,
+      })),
+    }
+  : null;
 
 // 7. SEO: Handle Fallback Canonical
-const canonicalURL = isFallback && originalLocale
-    ? new URL(`/${originalLocale}/posts/${post.slug.split("/").pop()}`, SITE.website).href
+const canonicalURL =
+  isFallback && originalLocale
+    ? new URL(
+        `/${originalLocale}/posts/${post.slug.split("/").pop()}`,
+        SITE.website
+      ).href
     : frontmatterCanonical;
 
-const originalLangName = originalLocale ? LANGUAGES[originalLocale as Lang] : "";
+const originalLangName = originalLocale
+  ? LANGUAGES[originalLocale as Lang]
+  : "";
 const contentLang = isFallback && originalLocale ? originalLocale : locale;
 ---
 
@@ -213,24 +230,25 @@ const contentLang = isFallback && originalLocale ? originalLocale : locale;
         <MobileTableOfContents headings={headings} />
       </div>
 
-      {seriesParts.length > 0 && (
-        <SeriesBox 
-          seriesParts={seriesParts} 
-          currentPostId={post.id} 
-          locale={locale} 
-        />
-      )}
+      {
+        seriesParts.length > 0 && (
+          <SeriesBox
+            seriesParts={seriesParts}
+            currentPostId={post.id}
+            locale={locale}
+          />
+        )
+      }
 
       <PostContent contentLang={contentLang}>
         <Content />
       </PostContent>
 
-      {post.data.references && post.data.references.length > 0 && (
-        <Bibliography 
-          references={post.data.references} 
-          locale={locale} 
-        />
-      )}
+      {
+        post.data.references && post.data.references.length > 0 && (
+          <Bibliography references={post.data.references} locale={locale} />
+        )
+      }
 
       <PostFooter
         {tags}

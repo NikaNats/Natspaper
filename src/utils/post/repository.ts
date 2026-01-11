@@ -168,11 +168,18 @@ export const PostRepository = {
   /**
    * Retrieves all parts of a series, respecting locale fallbacks.
    */
-  getSeries: async (seriesId: string, locale: Lang): Promise<PostWithFallback[]> => {
-    const allWithFallbacks = await PostRepository.getByLocaleWithFallback(locale);
-    
+  getSeries: async (
+    seriesId: string,
+    locale: Lang
+  ): Promise<PostWithFallback[]> => {
+    const allWithFallbacks =
+      await PostRepository.getByLocaleWithFallback(locale);
+
     return allWithFallbacks
       .filter(p => p.post.data.series?.id === seriesId)
-      .sort((a, b) => (a.post.data.series?.order ?? 0) - (b.post.data.series?.order ?? 0));
+      .sort(
+        (a, b) =>
+          (a.post.data.series?.order ?? 0) - (b.post.data.series?.order ?? 0)
+      );
   },
 };

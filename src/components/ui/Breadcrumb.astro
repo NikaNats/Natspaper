@@ -59,7 +59,7 @@ const { items, class: className = "" } = Astro.props;
               /* Clickable link */
               <a
                 href={item.href}
-                class="max-w-[120px] sm:max-w-[150px] truncate no-underline transition-colors hover:text-accent"
+                class="max-w-[120px] truncate no-underline transition-colors hover:text-accent sm:max-w-[150px]"
                 itemprop="item"
               >
                 <span itemprop="name">{item.label}</span>
@@ -67,7 +67,7 @@ const { items, class: className = "" } = Astro.props;
             ) : (
               /* Non-clickable text (current page or series title) */
               <span
-                class="max-w-[160px] sm:max-w-[240px] truncate font-medium text-foreground"
+                class="max-w-[160px] truncate font-medium text-foreground sm:max-w-[240px]"
                 title={item.label}
                 itemprop="name"
               >

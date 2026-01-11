@@ -45,6 +45,7 @@ Lamport's Paxos algorithm, introduced in 1998 <a href="#ref-lamport1998"><sup>[1
 While Paxos is theoretically elegant, its complexity has hindered widespread adoption. Diego Ongaro and John Ousterhout's Raft algorithm <a href="#ref-ongaro2014"><sup>[2]</sup></a> addresses this by prioritizing understandability over theoretical minimalism.
 
 Raft decomposes consensus into three subproblems:
+
 - **Leader Election**: Establishing a stable leader for coordination
 - **Log Replication**: Ensuring all nodes maintain identical logs
 - **Safety**: Guaranteeing consistency under all failure scenarios
