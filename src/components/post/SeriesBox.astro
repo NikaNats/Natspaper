@@ -40,6 +40,7 @@ const currentIndex = seriesParts.findIndex(p => p.post.id === currentPostId);
             <a 
               href={isCurrent ? undefined : `/${locale}/posts/${slug}`}
               class:list={[
+                "no-underline",
                 "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all",
                 isCurrent 
                   ? "bg-accent/10 text-accent font-semibold cursor-default" 
