@@ -1,30 +1,20 @@
 /**
- * Markdown URL Sanitization Utility
- * Sanitizes URLs in markdown content to prevent XSS attacks
- *
- * Protects against:
- * - javascript: protocol execution
- * - data: protocol attacks
- * - Event handler attributes in HTML
- * - Data attributes that could contain scripts
- * - ReDoS (Regex Denial of Service) via input length capping
- *
- * Uses a character-by-character parser instead of regex to correctly handle:
- * - Nested brackets in link text: [Click [here] for more](url)
- * - Parentheses in URLs: [Wiki](https://en.wikipedia.org/wiki/Equation_(mathematics))
- * - Escaped characters: \[ \] \( \)
+ * Robust URL Sanitization Utility
+ * Standardizes security checks across RSS feeds and post content.
+ * 
+ * DESIGN PATTERN: Allowlist vs Blocklist
+ * Instead of checking for "bad" schemes like javascript:, we only permit
+ * schemes that are explicitly known to be safe.
  */
 
 /**
  * Allowed protocols for URLs
  */
-const SAFE_PROTOCOLS = new Set([
+const ALLOWED_PROTOCOLS = new Set([
   "http:",
   "https:",
   "mailto:",
   "tel:",
-  "ftp:",
-  "ftps:",
 ]);
 
 /**
@@ -34,39 +24,29 @@ const SAFE_PROTOCOLS = new Set([
 const MAX_INPUT_LENGTH = 4096;
 
 /**
- * Check if URL uses a relative path or fragment identifier
- */
-function isRelativeUrl(url: string): boolean {
-  return url.startsWith("/") || url.startsWith("#");
-}
-
-/**
- * Check if URL uses protocol-relative format
- */
-function isProtocolRelativeUrl(url: string): boolean {
-  return url.startsWith("//");
-}
-
-/**
- * Check if a protocol is in the safe protocols list
- */
-function isSafeProtocol(protocol: string): boolean {
-  return SAFE_PROTOCOLS.has(protocol.toLowerCase());
-}
-
-/**
  * Test if a URL is safe
  */
-function isSafeUrl(url: string): boolean {
-  if (isRelativeUrl(url) || isProtocolRelativeUrl(url)) {
+export function isSafeUrl(url: string): boolean {
+  // 1. Normalize the input: Handle decoding, trimming, and casing
+  let sanitizedInput: string;
+  try {
+    sanitizedInput = decodeURI(url).trim().toLowerCase();
+  } catch {
+    // If decoding fails, the URI is malformed and unsafe
+    return false;
+  }
+
+  // 2. Permit relative and fragment identifiers
+  if (sanitizedInput.startsWith("/") || sanitizedInput.startsWith("#")) {
     return true;
   }
 
+  // 3. Protocol Validation
   try {
-    const urlObj = new URL(url, "https://example.com");
-    return isSafeProtocol(urlObj.protocol);
+    const urlObj = new URL(sanitizedInput, "https://natspaper.vercel.app");
+    return ALLOWED_PROTOCOLS.has(urlObj.protocol);
   } catch {
-    // If URL parsing fails, consider it unsafe
+    // Any parsing error results in a rejection
     return false;
   }
 }
