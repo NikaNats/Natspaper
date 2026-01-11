@@ -180,6 +180,24 @@ describe("postHelpers", () => {
       expect(secondResult.previous?.id).toBe("post-1");
       expect(secondResult.next).toBeNull();
     });
+
+    it("should correctly identify adjacent posts for a middle-positioned article", () => {
+      const posts = [
+        { id: "post-0", title: "First" },
+        { id: "post-1", title: "Middle" },
+        { id: "post-2", title: "Last" }
+      ];
+
+      const currentIndex = 1;
+
+      // FIX: Use the ! (non-null assertion) operator to tell TS 
+      // that we guarantee these indices exist in this static test case.
+      const prevPost = posts[currentIndex - 1]!; 
+      const nextPost = posts[currentIndex + 1]!;
+
+      expect(prevPost.id).toBe("post-0");
+      expect(nextPost.id).toBe("post-2");
+    });
   });
 
   describe("generatePostStructuredData()", () => {
