@@ -35,6 +35,9 @@ export const ui = {
     "post.series": "Article Series",
     "post.seriesPartOf": "Part {current} of {total}",
     "post.seriesNext": "Next in series",
+    "post.references": "References",
+    "post.viewSource": "View Source",
+    "post.doi": "DOI",
 
     // Navigation helpers
     "nav.previousPost": "← Previous",
@@ -100,6 +103,9 @@ export const ui = {
     "post.series": "სტატიების სერია",
     "post.seriesPartOf": "ნაწილი {current} / {total}-დან",
     "post.seriesNext": "შემდეგი სერიიდან",
+    "post.references": "ლიტერატურა",
+    "post.viewSource": "წყაროს ნახვა",
+    "post.doi": "DOI",
 
     // Navigation helpers
     "nav.previousPost": "← წინა",

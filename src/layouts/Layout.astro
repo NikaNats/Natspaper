@@ -51,7 +51,7 @@ export interface Props {
   /** Word count for blog posts (used in structured data) */
   wordCount?: number;
   /** Structured data for CreativeWorkSeries (used for series posts) */
-  seriesSchema?: any;
+  seriesSchema?: Record<string, unknown> | null;
 }
 
 const {

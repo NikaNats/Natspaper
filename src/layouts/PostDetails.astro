@@ -24,6 +24,7 @@ import PostFooter from "@/components/post/PostFooter.astro";
 import TableOfContents from "@/components/post/TableOfContents.astro";
 import MobileTableOfContents from "@/components/post/MobileTableOfContents.astro";
 import SeriesBox from "@/components/post/SeriesBox.astro";
+import Bibliography from "@/components/post/Bibliography.astro";
 
 import "katex/dist/katex.min.css";
 
@@ -219,6 +220,13 @@ const contentLang = isFallback && originalLocale ? originalLocale : locale;
       <PostContent contentLang={contentLang}>
         <Content />
       </PostContent>
+
+      {post.data.references && post.data.references.length > 0 && (
+        <Bibliography 
+          references={post.data.references} 
+          locale={locale} 
+        />
+      )}
 
       <PostFooter
         {tags}
