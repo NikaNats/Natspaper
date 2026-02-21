@@ -2,6 +2,7 @@ import { getCollection } from "astro:content";
 import type { CollectionEntry } from "astro:content";
 import { slugifyStr } from "../core/slugify";
 import { DEFAULT_LANG, type Lang } from "@/i18n/config";
+import type { IPostRepository } from "./IPostRepository";
 
 /**
  * Post with fallback information
@@ -16,7 +17,7 @@ export interface PostWithFallback {
 }
 
 // Encapsulate sorting/filtering logic here
-export const PostRepository = {
+export const PostRepository: IPostRepository = {
   getAll: async (): Promise<CollectionEntry<"blog">[]> => {
     // FIX: Explicitly type the destructured 'data' property
     return await getCollection(
@@ -183,3 +184,15 @@ export const PostRepository = {
       );
   },
 };
+
+/**
+ * `MarkdownPostRepository` is the canonical name for the concrete implementation
+ * that reads from Astro's Markdown/MDX content layer.
+ *
+ * `PostRepository` is kept as the primary export for backward compatibility
+ * with all existing import sites.  Both identifiers refer to the same object.
+ *
+ * When migrating to a Headless CMS, create a new class/object that satisfies
+ * `IPostRepository` and swap the binding here — zero consumer changes required.
+ */
+export const MarkdownPostRepository: IPostRepository = PostRepository;

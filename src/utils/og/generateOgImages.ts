@@ -3,45 +3,27 @@ import { type CollectionEntry } from "astro:content";
 import postOgImage from "./templates/post";
 
 /**
- * Helper: Clean up Resvg native memory
+ * @resvg/resvg-js v2+ uses Node-API (N-API), which automatically releases the
+ * underlying C++ memory via a Finalizer when the JS object becomes unreachable.
+ *
+ * Calling `resvg.free()` manually was only required by the old WASM build and
+ * is now a no-op at best and a double-free crash at worst.
+ *
+ * Triggering `globalThis.gc()` is a "Stop-The-World" V8 operation that halts
+ * the entire Event Loop.  With a ConcurrencyLimiter running 8 workers in
+ * parallel, calling gc() after every image would serially block the build.
+ *
+ * Strategy: set local refs to `null` in the `finally` block so the N-API
+ * Finalizer can collect the native handle as soon as the current task drains.
  */
-function cleanupResvg(resvg: Resvg | null): void {
-  if (!resvg) return;
-  try {
-    // @ts-expect-error Resvg may have free method depending on version
-    if (typeof resvg.free === "function") {
-      try {
-        // @ts-expect-error Resvg.free() is not typed
-        resvg.free();
-      } catch (freeError) {
-        console.warn(
-          `[OG Image] Failed to free Resvg: ${
-            freeError instanceof Error ? freeError.message : String(freeError)
-          }`
-        );
-      }
-    }
-  } catch (cleanupError) {
-    console.warn(
-      `[OG Image] Unexpected error during Resvg cleanup: ${
-        cleanupError instanceof Error
-          ? cleanupError.message
-          : String(cleanupError)
-      }`
-    );
-  }
-}
-
-/**
- * Helper: Trigger garbage collection if available
- */
-function triggerGarbageCollection(): void {
-  if (typeof globalThis.gc !== "function") return;
-  try {
-    globalThis.gc();
-  } catch {
-    // GC failures are non-critical, ignore silently
-  }
+function releaseResvgRefs(
+  resvg: Resvg | null,
+  pngData: ReturnType<Resvg["render"]> | null
+): void {
+  // Intentionally empty — the assignment to null at the call-site is what
+  // matters.  This function exists only for documentation clarity.
+  void resvg;
+  void pngData;
 }
 
 /**
@@ -81,11 +63,13 @@ function svgBufferToPngBuffer(svg: string): Uint8Array {
     );
     throw error;
   } finally {
-    // CRITICAL: Always clean up native memory, even on exception
-    cleanupResvg(resvg);
+    // Null out local references so the N-API Finalizer can reclaim the
+    // native Resvg/PngData handles as part of normal GC.
+    // Do NOT call resvg.free() (removed — double-free risk in N-API builds).
+    // Do NOT call globalThis.gc() (removed — Stop-The-World, blocks Event Loop).
+    releaseResvgRefs(resvg, pngDataRef);
     resvg = null;
     pngDataRef = null;
-    triggerGarbageCollection();
   }
 }
 

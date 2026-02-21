@@ -23,11 +23,51 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const projectRoot = path.resolve(__dirname, "..");
 
 // Minimum file sizes to detect corrupt/empty files
+// Values are conservative lower-bounds based on observed build output:
+//   - HTML: even a minimal Astro page with <head> is well over 2 KB
+//   - CSS:  a Tailwind bundle with a few utilities exceeds 1 KB
+//   - JS:   any non-empty bundle with an import or module preamble is > 200 B
 const MIN_FILE_SIZES = {
-  html: 500, // HTML pages should be at least 500 bytes
-  css: 100, // CSS files should be at least 100 bytes
-  js: 100, // JS files should be at least 100 bytes
+  html: 2000, // HTML pages should be at least 2 KB
+  css: 1000,  // CSS bundles should be at least 1 KB
+  js: 200,    // JS bundles should be at least 200 bytes
 };
+
+/**
+ * Structural content requirements for critical HTML pages.
+ * Each entry is searched as a plain substring inside the rendered HTML.
+ * A missing marker means a critical component failed silently during build.
+ */
+const HTML_CONTENT_CHECKS = [
+  {
+    file: "dist/en/index.html",
+    markers: [
+      "<html",        // Page rendered at all
+      "</head>",      // <head> properly closed
+      "</body>",      // <body> properly closed
+      "<main",        // Main content area present
+      "charset",      // Charset meta tag
+    ],
+  },
+  {
+    file: "dist/ka/index.html",
+    markers: [
+      "<html",
+      "</head>",
+      "</body>",
+      "<main",
+      "charset",
+    ],
+  },
+  {
+    file: "dist/en/404/index.html",
+    markers: [
+      "<html",
+      "404",           // 404 page must mention the status code
+      "</body>",
+    ],
+  },
+];
 
 // Files that are intentionally small (redirects, etc.)
 const REDIRECT_FILES = new Set([
@@ -150,6 +190,31 @@ for (const artifact of IMPORTANT_ARTIFACTS) {
   } else {
     warnings.push(`⚠️  OPTIONAL: ${artifact}`);
     console.log(`⚠️  ${artifact} - not found`);
+  }
+}
+
+// Structural HTML content checks
+// 500-byte threshold is too low — a blank Astro layout already exceeds it.
+// These checks verify that *meaningful content* was actually rendered.
+console.log("\n🔬 HTML Content Integrity:");
+for (const { file, markers } of HTML_CONTENT_CHECKS) {
+  const fullPath = path.join(projectRoot, file);
+
+  if (!fs.existsSync(fullPath)) {
+    // Already caught by REQUIRED_ARTIFACTS — skip to avoid duplicate error
+    console.log(`⏭️  ${file} - skipped (file not found)`);
+    continue;
+  }
+
+  const html = fs.readFileSync(fullPath, "utf8");
+  const missing = markers.filter(m => !html.includes(m));
+
+  if (missing.length > 0) {
+    const detail = missing.map(m => `"${m}"`).join(", ");
+    errors.push(`❌ CONTENT: ${file} is missing expected markers: ${detail}`);
+    console.log(`❌ ${file} - missing content markers: ${detail}`);
+  } else {
+    console.log(`✅ ${file} - all ${markers.length} content markers present`);
   }
 }
 

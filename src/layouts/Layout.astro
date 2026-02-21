@@ -52,6 +52,11 @@ export interface Props {
   wordCount?: number;
   /** Structured data for CreativeWorkSeries (used for series posts) */
   seriesSchema?: Record<string, unknown> | null;
+  /**
+   * When true, injects `<meta name="robots" content="noindex, follow">` so
+   * crawlers skip locale-fallback pages and avoid indexing conflicts.
+   */
+  noindex?: boolean;
 }
 
 const {
@@ -67,6 +72,7 @@ const {
   tags,
   wordCount,
   seriesSchema,
+  noindex = false,
 } = Astro.props;
 
 // Build social image URL
@@ -157,6 +163,7 @@ if (isBlogPost && pubDatetime) {
       canonicalURL={canonicalURL.toString()}
       pubDatetime={pubDatetime}
       modDatetime={modDatetime}
+      noindex={noindex}
     />
 
     <!-- REFACTORED: Delegate structured data to its own component -->

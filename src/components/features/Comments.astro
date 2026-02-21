@@ -80,13 +80,11 @@ const { locale = "en" } = Astro.props;
       // Read configuration from data attributes
       const script = document.createElement("script");
       script.src = "https://giscus.app/client.js";
-      // SECURITY: SRI hash ensures script integrity (generate new hash when updating Giscus)
-      // To regenerate (PowerShell):
-      //   Invoke-WebRequest https://giscus.app/client.js -OutFile client.js
-      //   $hash = [System.Security.Cryptography.SHA384]::Create().ComputeHash((Get-Content client.js -AsByteStream))
-      //   "sha384-" + [Convert]::ToBase64String($hash)
-      script.integrity =
-        "sha384-UwLZGbJGvkTzz0719+xEzUm/idqwzs0yZN8aB9Se5vUXHbyRyDWw9yqZTIsOsJ7x";
+      // NOTE: SRI (integrity attribute) has been intentionally omitted.
+      // Giscus is a living service that updates client.js frequently.
+      // A hardcoded SRI hash breaks silently the moment upstream updates
+      // the file — comments disappear for all users without any error page.
+      // Recommendation: self-host client.js if a fixed SRI is required.
       script.setAttribute("data-repo", wrapper.dataset.giscusRepo || "");
       script.setAttribute("data-repo-id", wrapper.dataset.giscusRepoId || "");
       script.setAttribute(

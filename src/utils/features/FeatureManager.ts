@@ -28,34 +28,46 @@ import { ProgressBar } from "./progressBar";
 import { HeadingLinks } from "./headingLinks";
 
 class FeatureManager {
-  private readonly features: Feature[] = [];
+  /**
+   * Accepts an optional initial list of features for testability (Dependency
+   * Injection).  In production the singleton below uses `register()` to add
+   * features, keeping construction side-effect-free.
+   */
+  constructor(private readonly features: Feature[] = []) {}
 
-  constructor() {
-    // The list of all features to manage. Open for extension!
-    // To add a new feature, simply create a new class implementing Feature
-    // and add an instance of it to this array.
-    this.features = [new ProgressBar(), new HeadingLinks()];
+  /**
+   * Register a feature with the manager.  Follows the Open/Closed Principle:
+   * adding a new feature never requires modifying this class.
+   *
+   * @example
+   * featureManager.register(new MyNewFeature());
+   */
+  public register(feature: Feature): void {
+    this.features.push(feature);
   }
 
   /**
-   * Initialize all features
-   * Calls init() on each feature in the correct order
-   * Safe to call multiple times (re-initialization for page transitions)
+   * Initialize all features.
+   * Calls init() on each feature in registration order.
+   * Safe to call multiple times (re-initialization for page transitions).
    */
   public initializeFeatures(): void {
     this.features.forEach(feature => feature.init());
   }
 
   /**
-   * Clean up all features
-   * Calls cleanup() on each feature to prevent memory leaks
-   * Essential for proper cleanup during page transitions
+   * Clean up all features.
+   * Calls cleanup() on each feature to prevent memory leaks.
+   * Essential for proper teardown during page transitions.
    */
   public cleanupFeatures(): void {
     this.features.forEach(feature => feature.cleanup());
   }
 }
 
-// Create a single, global instance of the manager.
-// This follows the Singleton pattern for client-side feature management.
+// Singleton — features are registered here, not hard-wired in the
+// constructor, so tests can inject their own implementations without
+// coupling to concrete classes.
 export const featureManager = new FeatureManager();
+featureManager.register(new ProgressBar());
+featureManager.register(new HeadingLinks());
