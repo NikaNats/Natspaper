@@ -19,6 +19,22 @@ export function escapeHtml(text: string): string {
 }
 
 /**
+ * Returns true when the character immediately following `<` indicates a real
+ * HTML tag: a letter (start/void tag), `/` (closing tag), or `!` (comment /
+ * doctype).  Any other character — such as a digit or space — means the `<`
+ * is a literal operator (e.g. `x < 5`) and must NOT be stripped.
+ */
+function isHtmlTagOpener(c: string): boolean {
+  const code = c.charCodeAt(0);
+  return (
+    c === "/" ||
+    c === "!" ||
+    (code >= 65 && code <= 90) || // A-Z
+    (code >= 97 && code <= 122)   // a-z
+  );
+}
+
+/**
  * Sanitize description by removing HTML tags, escaping entities, and removing markdown.
  * Defense-in-depth approach to prevent XSS in RSS feeds.
  *
@@ -33,26 +49,40 @@ export function escapeHtml(text: string): string {
 export function sanitizeDescription(description: string): string {
   if (!description) return "";
 
-  // LAYER 1: Remove all HTML tags (most important - blocks <img>, <script>, etc.)
-  // Simple approach: find all <...> patterns and remove them
-  let result = description;
-
-  // Remove HTML tags by finding < and >
-  // This is safer than complex regex and handles nested/malformed tags
-  let inTag = false;
+  // LAYER 1: Remove actual HTML tags while preserving bare `<` / `>` operators.
+  //
+  // The naive approach of treating every `<…>` span as a tag incorrectly
+  // strips content like `x < 5 && y > 2` — classifying `5 && y` as a tag
+  // body and discarding it (data-loss bug).
+  //
+  // Fix: only enter tag-skip mode when `<` is immediately followed by a
+  // character that can legally open an HTML tag (letter, `/`, `!`).  Every
+  // other `<` is a literal operator and is kept as-is so that the subsequent
+  // escapeHtml pass converts it to `&lt;` for safe XML output.
+  const chars = Array.from(description);
+  const len = chars.length;
   let sanitized = "";
+  let i = 0;
 
-  for (const char of result) {
-    if (char === "<") {
-      inTag = true;
-    } else if (char === ">") {
-      inTag = false;
-    } else if (!inTag) {
-      sanitized += char;
+  while (i < len) {
+    if (
+      chars[i] === "<" &&
+      i + 1 < len &&
+      isHtmlTagOpener(chars[i + 1])
+    ) {
+      // Skip the entire tag: advance past `<`, scan until matching `>`
+      i++;
+      while (i < len && chars[i] !== ">") {
+        i++;
+      }
+      if (i < len) i++; // consume the closing `>`
+    } else {
+      sanitized += chars[i];
+      i++;
     }
   }
 
-  result = sanitized;
+  let result = sanitized;
 
   // LAYER 2: Escape HTML entities to prevent entity injection
   const escaped = escapeHtml(result);
@@ -102,8 +132,8 @@ export function sanitizeDescription(description: string): string {
   }
 
   // LAYER 4: Safe truncation: count characters, not bytes (handles UTF-8)
-  const chars = Array.from(noCode);
-  const truncated = chars.slice(0, 500).join("");
+  const codepoints = Array.from(noCode);
+  const truncated = codepoints.slice(0, 500).join("");
 
   return truncated.trim();
 }

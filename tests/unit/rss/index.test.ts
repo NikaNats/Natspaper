@@ -200,7 +200,34 @@ describe('RSS Feed Security - Integration Tests', () => {
       expect(result).not.toContain('<img');
       expect(result).toContain('Great post');
     });
-  });
+    it('should preserve mathematical less-than / greater-than operators', () => {
+      // Classic data-loss bug: `x < 5 && y > 2` was treated as an HTML tag
+      // body, silently deleting ` 5 && y` from the output.
+      const input = 'Filter items where x < 5 && y > 2';
+      const result = sanitizeDescription(input);
+      expect(result).toContain('x');
+      expect(result).toContain('5');
+      expect(result).toContain('y');
+      expect(result).toContain('2');
+      // The operators must be XML-escaped for safe RSS output
+      expect(result).toContain('&lt;');
+      expect(result).toContain('&gt;');
+    });
+
+    it('should strip real HTML tags but keep logical operators in the same string', () => {
+      const input = 'Use <code>filter</code> when a < b || c > d';
+      const result = sanitizeDescription(input);
+      // HTML tags removed
+      expect(result).not.toContain('<code>');
+      expect(result).not.toContain('</code>');
+      // Identifier text kept
+      expect(result).toContain('filter');
+      // Logical expression variables kept
+      expect(result).toContain('a');
+      expect(result).toContain('b');
+      expect(result).toContain('c');
+      expect(result).toContain('d');
+    });  });
 
   describe('Edge Cases', () => {
     it('should handle empty string', () => {
