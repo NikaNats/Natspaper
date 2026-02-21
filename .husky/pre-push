@@ -1,0 +1,9 @@
+# pre-push: full quality gate — build, all tests, security audit
+echo "▶ pre-push: production build..."
+pnpm build:prod
+
+echo "▶ pre-push: E2E tests..."
+pnpm test:e2e --project=chromium
+
+echo "▶ pre-push: security audit..."
+pnpm security:audit

@@ -30,7 +30,7 @@ function isHtmlTagOpener(c: string): boolean {
     c === "/" ||
     c === "!" ||
     (code >= 65 && code <= 90) || // A-Z
-    (code >= 97 && code <= 122)   // a-z
+    (code >= 97 && code <= 122) // a-z
   );
 }
 
@@ -68,7 +68,7 @@ export function sanitizeDescription(description: string): string {
     if (
       chars[i] === "<" &&
       i + 1 < len &&
-      isHtmlTagOpener(chars[i + 1])
+      isHtmlTagOpener(chars[i + 1]!) // guarded by `i + 1 < len` above
     ) {
       // Skip the entire tag: advance past `<`, scan until matching `>`
       i++;
@@ -82,7 +82,7 @@ export function sanitizeDescription(description: string): string {
     }
   }
 
-  let result = sanitized;
+  const result = sanitized;
 
   // LAYER 2: Escape HTML entities to prevent entity injection
   const escaped = escapeHtml(result);

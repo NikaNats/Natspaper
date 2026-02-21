@@ -27,7 +27,8 @@
     "test:e2e:debug": "playwright test --debug",
     "test:e2e:chrome": "playwright test --project=chromium",
     "test:all": "pnpm test:run && pnpm test:e2e",
-    "security:audit": "pnpm audit --audit-level=high"
+    "security:audit": "pnpm audit --audit-level=high",
+    "prepare": "husky"
   },
   "dependencies": {
     "@astrojs/rss": "^4.0.14",
@@ -69,6 +70,8 @@
     "eslint-plugin-astro": "^1.5.0",
     "globals": "^17.0.0",
     "happy-dom": "^20.1.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
     "prettier": "^3.7.4",
     "prettier-plugin-astro": "^0.14.1",
     "prettier-plugin-tailwindcss": "^0.7.2",
@@ -77,5 +80,22 @@
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.52.0",
     "vitest": "^4.0.16"
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "eslint --fix --max-warnings=0",
+      "prettier --write"
+    ],
+    "*.astro": [
+      "eslint --fix --max-warnings=0",
+      "prettier --write"
+    ],
+    "*.css": [
+      "stylelint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,yaml,yml}": [
+      "prettier --write"
+    ]
   }
 }

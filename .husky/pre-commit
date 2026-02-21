@@ -1,0 +1,9 @@
+# pre-commit: fast gate — type-check, lint, unit tests on staged files
+echo "▶ pre-commit: running lint-staged..."
+pnpm exec lint-staged
+
+echo "▶ pre-commit: TypeScript type-check..."
+pnpm exec astro check --minimumSeverity error
+
+echo "▶ pre-commit: unit tests..."
+pnpm test:run --reporter=verbose --bail=1

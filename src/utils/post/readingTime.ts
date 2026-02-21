@@ -81,7 +81,7 @@ export function calculateReadingTime(
  * ```
  */
 export function formatReadingTime(result: ReadingTimeResult): string {
-  const wordCount = result.words.toLocaleString();
+  const wordCount = result.words.toLocaleString("en-US");
   return `${result.displayText} • ${wordCount} words`;
 }
 

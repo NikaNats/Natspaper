@@ -34,8 +34,7 @@ describe("generateOgImages — GC / free() regression guards", () => {
   // so all transitive deps (Resvg, astro:content) use fakes.
 
   afterEach(() => {
-    // @ts-expect-error clean up any gc spy
-    delete globalThis.gc;
+    delete (globalThis as Record<string, unknown>).gc;
     vi.clearAllMocks();
   });
 
@@ -57,8 +56,7 @@ describe("generateOgImages — GC / free() regression guards", () => {
   // -------------------------------------------------------------------------
   it("does NOT call globalThis.gc() during image generation", async () => {
     const gcSpy = vi.fn();
-    // @ts-expect-error write gc on global
-    globalThis.gc = gcSpy;
+    (globalThis as Record<string, unknown>).gc = gcSpy;
 
     const { generateOgImageForPost } = await import("@/utils/og/generateOgImages");
     await generateOgImageForPost(makeFakePost("gc-test"));
@@ -75,9 +73,10 @@ describe("generateOgImages — GC / free() regression guards", () => {
 
     await generateOgImageForPost(makeFakePost("free-check"));
 
+    type MockInstance = { render: ReturnType<typeof vi.fn>; free: ReturnType<typeof vi.fn> };
     const instances = vi.mocked(Resvg).mock.results
       .filter(r => r.type === "return")
-      .map(r => r.value);
+      .map(r => r.value as unknown as MockInstance);
 
     for (const instance of instances) {
       expect(instance.free).not.toHaveBeenCalled();
@@ -99,7 +98,7 @@ describe("generateOgImages — GC / free() regression guards", () => {
 // ---------------------------------------------------------------------------
 // Helper
 // ---------------------------------------------------------------------------
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+ 
 function makeFakePost(id: string): any {
   return {
     id: `en/${id}.md`,

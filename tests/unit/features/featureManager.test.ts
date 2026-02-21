@@ -8,13 +8,13 @@
  * - The global singleton still contains ProgressBar + HeadingLinks
  */
 
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect } from "vitest";
 import type { Feature } from "@/utils/features/Feature";
 
 // ---------------------------------------------------------------------------
 // Fake implementation — avoids DOM side-effects from real ProgressBar etc.
 // ---------------------------------------------------------------------------
-function makeFakeFeature(name: string): Feature & { initCount: number; cleanupCount: number } {
+function makeFakeFeature(name: string): Feature & { name: string; initCount: number; cleanupCount: number } {
   return {
     name,
     initCount: 0,
