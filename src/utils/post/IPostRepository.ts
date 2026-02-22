@@ -44,9 +44,7 @@ export interface IPostRepository {
   hasTranslation(slug: string, locale: Lang): Promise<boolean>;
 
   /** Return a map of locale → post for every available translation of a slug. */
-  getTranslations(
-    slug: string
-  ): Promise<Map<Lang, CollectionEntry<"blog">>>;
+  getTranslations(slug: string): Promise<Map<Lang, CollectionEntry<"blog">>>;
 
   /** Return all posts tagged with the given (slugified) tag string. */
   getByTag(tag: string): Promise<CollectionEntry<"blog">[]>;

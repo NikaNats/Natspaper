@@ -9,7 +9,10 @@ export default defineConfig({
       // Astro virtual modules are not available in the Vitest environment.
       // These stubs provide the minimum surface area required by source files
       // under test.  Extend the stub files if new imports are needed.
-      "astro:content": path.resolve(__dirname, "./tests/__mocks__/astro-content.ts"),
+      "astro:content": path.resolve(
+        __dirname,
+        "./tests/__mocks__/astro-content.ts"
+      ),
     },
   },
   test: {
