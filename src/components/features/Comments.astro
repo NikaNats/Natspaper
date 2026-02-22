@@ -9,6 +9,38 @@ const isEnabled =
   GISCUS.enabled && !!GISCUS.repo && !!GISCUS.repoId && !!GISCUS.categoryId;
 
 const { locale = "en" } = Astro.props;
+
+// Giscus does not support all languages (e.g. Georgian 'ka').
+// Passing an unsupported lang causes the Giscus iframe to 404 and triggers a CSP block.
+// Fall back to 'en' for any locale not in the supported set.
+const SUPPORTED_GISCUS_LANGS = new Set([
+  "ar",
+  "ca",
+  "de",
+  "en",
+  "es",
+  "fa",
+  "fr",
+  "he",
+  "hu",
+  "id",
+  "it",
+  "ja",
+  "kh",
+  "ko",
+  "nl",
+  "pl",
+  "pt",
+  "ro",
+  "ru",
+  "th",
+  "tr",
+  "uk",
+  "vi",
+  "zh-CN",
+  "zh-TW",
+]);
+const giscusLang = SUPPORTED_GISCUS_LANGS.has(locale) ? locale : "en";
 ---
 
 {
@@ -23,7 +55,7 @@ const { locale = "en" } = Astro.props;
       data-giscus-reactions-enabled={GISCUS.reactionsEnabled ? "1" : "0"}
       data-giscus-emit-metadata={GISCUS.emitMetadata ? "1" : "0"}
       data-giscus-input-position={GISCUS.inputPosition}
-      data-giscus-lang={locale}
+      data-giscus-lang={giscusLang}
       data-giscus-loading={GISCUS.loading}
     >
       <div class="giscus" />
