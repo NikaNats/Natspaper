@@ -13,15 +13,15 @@ export default defineEcConfig({
     // WCAG 2.1.1 (scrollable-region-focusable): add tabindex="0" to <pre>
     // so keyboard users can scroll code blocks that overflow horizontally
     {
-      name: 'a11y-focusable-pre',
+      name: "a11y-focusable-pre",
       hooks: {
         postprocessRenderedBlock({ renderData }) {
           // blockAst is <figure>; find the <pre> child
           const figure = renderData.blockAst;
           const pre = figure.children?.find(
-            (node) => node.type === 'element' && node.tagName === 'pre'
+            node => node.type === "element" && node.tagName === "pre"
           );
-          if (pre && pre.type === 'element') {
+          if (pre && pre.type === "element") {
             if (!pre.properties) pre.properties = {};
             pre.properties.tabIndex = 0;
           }
@@ -60,9 +60,7 @@ export default defineEcConfig({
     // github-light code bg is ≈#f6f8fa; #767676 → 4.54:1 ✓
     lineNumbers: {
       foreground: ({ theme }) =>
-        theme.name.includes("dark")
-          ? "rgba(255, 255, 255, 0.55)"
-          : "#767676",
+        theme.name.includes("dark") ? "rgba(255, 255, 255, 0.55)" : "#767676",
       background: "transparent",
     },
 

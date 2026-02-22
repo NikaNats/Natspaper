@@ -9,7 +9,7 @@
  *    proving the interface enables proper Dependency Injection in tests.
  */
 
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect } from "vitest";
 import type { IPostRepository } from "@/utils/post/IPostRepository";
 
 // Note: astro:content is aliased to a test stub via vitest.config.ts
