@@ -20,8 +20,6 @@
  * - Development mode detection
  * - Cost optimization (localhost filtering)
  */
-import SpeedInsights from "@vercel/speed-insights/astro";
-
 const isDev = import.meta.env.DEV;
 ---
 
@@ -114,12 +112,48 @@ const isDev = import.meta.env.DEV;
 </script>
 
 <!--
-  SpeedInsights Component
-  - sampleRate: 1.0 = 100% of users.
-    ⚠️ If you exceed 10k views/month, lower this to 0.5 or 0.1
-    to stay within free tier limits.
-  
+  Speed Insights — guarded manual injection.
+
+  WHY: @vercel/speed-insights/astro re-registers an `astro:page-load` handler
+  every time this component is rendered.  With Astro View Transitions the body
+  is swapped on every navigation, so the handler count grows unboundedly and
+  every blocked-by-ad-blocker error is logged once per accumulated handler.
+
+  FIX:
+  1. A `window.__siInit` guard ensures the <script> tag is appended exactly once.
+  2. `onerror` is a no-op — ad blockers routinely block telemetry endpoints and
+     the error is expected / non-actionable for end users.
+  3. A single, idempotent `astro:page-load` listener (also guarded) nudges the
+     already-loaded SDK to report each soft-navigation as a new page view.
+
   NOTE: Vercel Web Analytics is already enabled via @astrojs/vercel adapter
-  in astro.config.ts, so we don't need to include VercelAnalytics component here.
+  in astro.config.ts, so we don't need a separate VercelAnalytics component.
 -->
-<SpeedInsights debug={isDev} sampleRate={1.0} />
+<script is:inline define:vars={{ isDev }}>
+  (function () {
+    // ── Guard: run the bootstrap logic only once per browser session ──────────
+    if (window.__siInit) return;
+    window.__siInit = true;
+
+    // ── Inject the Speed Insights loader script ───────────────────────────────
+    const s = document.createElement("script");
+    s.src = "/_vercel/speed-insights/script.js";
+    s.async = true;
+    s.defer = true;
+    if (isDev) s.setAttribute("data-debug", "true");
+    // Silently swallow blocked-by-ad-blocker / net errors — these are
+    // expected when the user has an ad blocker enabled and are not actionable.
+    s.onerror = function () {};
+    document.head.appendChild(s);
+
+    // ── Re-report on Astro View Transition page loads ─────────────────────────
+    // After the script loads, window.si (the Speed Insights API) becomes
+    // available.  On each soft-navigation we ask it to flush pending vitals.
+    document.addEventListener("astro:page-load", function () {
+      // `window.si` is the Speed Insights push function injected by the script.
+      if (typeof window.si === "function") {
+        window.si("event", { name: "Astro View Transition" });
+      }
+    });
+  })();
+</script>
