@@ -18,38 +18,40 @@ const toc = headings.filter(h => h.depth >= 2 && h.depth <= 3);
 {
   toc.length > 0 && (
     <nav
-      class="toc-nav opacity-0 transition-opacity duration-500"
+      class="toc-nav transition-opacity duration-500"
       aria-label="Table of Contents"
     >
       <h2 class="mb-4 text-xs font-bold tracking-widest text-text-secondary uppercase opacity-60">
         On this page
       </h2>
-      <ul class="relative flex flex-col gap-1 border-l border-border/40 text-sm">
-        {/* Animated Active Marker */}
+      {/* Wrapper provides the relative positioning context for the indicator */}
+      <div class="relative">
+        {/* Animated Active Marker — outside <ul> to keep list semantics valid */}
         <div
           id="toc-indicator"
           class="absolute top-0 -left-1 h-6 w-1 rounded-full bg-accent opacity-0 transition-all duration-300 ease-out"
         />
-
-        {toc.map(heading => (
-          <li class:list={[{ "ml-3": heading.depth === 3 }]}>
-            <a
-              href={`#${heading.slug}`}
-              class:list={[
-                // Layout & Typography
-                "toc-link block py-1.5 pr-2 pl-4 leading-tight transition-colors duration-200",
-                "no-underline", // Explicitly remove global underline style
-                // Default State
-                "text-text-secondary hover:text-foreground",
-                // Hierarchy adjustments
-                heading.depth === 3 ? "text-xs" : "text-sm",
-              ]}
-            >
-              {heading.text}
-            </a>
-          </li>
-        ))}
-      </ul>
+        <ul class="flex flex-col gap-1 border-l border-border/40 text-sm">
+          {toc.map(heading => (
+            <li class:list={[{ "ml-3": heading.depth === 3 }]}>
+              <a
+                href={`#${heading.slug}`}
+                class:list={[
+                  // Layout & Typography
+                  "toc-link block py-1.5 pr-2 pl-4 leading-tight transition-colors duration-200",
+                  "no-underline", // Explicitly remove global underline style
+                  // Default State
+                  "text-text-secondary hover:text-foreground",
+                  // Hierarchy adjustments
+                  heading.depth === 3 ? "text-xs" : "text-sm",
+                ]}
+              >
+                {heading.text}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
     </nav>
   )
 }

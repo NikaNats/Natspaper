@@ -193,11 +193,13 @@ test.describe("Dark Mode - System Preference", () => {
     // Emulate dark color scheme
     await page.emulateMedia({ colorScheme: "dark" });
 
-    // Clear any saved preference
-    await page.evaluate(() => localStorage.removeItem("theme"));
-
-    // Reload to apply
+    // Navigate first so localStorage operations run against the correct origin
     await page.goto("/en/");
+    await page.waitForLoadState("networkidle");
+
+    // Clear any saved preference, then reload so the FOUC script re-reads media
+    await page.evaluate(() => localStorage.removeItem("theme"));
+    await page.reload();
     await page.waitForLoadState("networkidle");
 
     // Should detect system preference
@@ -211,11 +213,13 @@ test.describe("Dark Mode - System Preference", () => {
     // Emulate light color scheme
     await page.emulateMedia({ colorScheme: "light" });
 
-    // Clear any saved preference
-    await page.evaluate(() => localStorage.removeItem("theme"));
-
-    // Reload to apply
+    // Navigate first so localStorage operations run against the correct origin
     await page.goto("/en/");
+    await page.waitForLoadState("networkidle");
+
+    // Clear any saved preference, then reload so the FOUC script re-reads media
+    await page.evaluate(() => localStorage.removeItem("theme"));
+    await page.reload();
     await page.waitForLoadState("networkidle");
 
     // Should detect system preference
@@ -229,11 +233,13 @@ test.describe("Dark Mode - System Preference", () => {
     // Emulate dark system preference
     await page.emulateMedia({ colorScheme: "dark" });
 
-    // But set light in localStorage
-    await page.evaluate(() => localStorage.setItem("theme", "light"));
-
-    // Reload to apply
+    // Navigate first so localStorage operations run against the correct origin
     await page.goto("/en/");
+    await page.waitForLoadState("networkidle");
+
+    // Override saved preference to light, then reload so the FOUC script picks it up
+    await page.evaluate(() => localStorage.setItem("theme", "light"));
+    await page.reload();
     await page.waitForLoadState("networkidle");
 
     // Should use saved preference, not system

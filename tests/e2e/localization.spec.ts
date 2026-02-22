@@ -113,9 +113,11 @@ test.describe("Localization - Language Switching", () => {
     // Switch to Georgian
     const kaLink = page.locator('[data-testid="lang-ka"]');
     await kaLink.click();
+    // Wait for URL to reflect KA page before reading nav text
+    await page.waitForURL(/\/ka\//);
     await page.waitForLoadState("networkidle");
 
-    // Navigation text should change
+    // Navigation text should change (LanguagePicker shows "EN" on KA page vs "KA" on EN page)
     const kaNavText = await page.locator('[data-testid="nav-menu"]').textContent();
     expect(kaNavText).not.toBe(enNavText);
   });
@@ -123,9 +125,9 @@ test.describe("Localization - Language Switching", () => {
   test("should have proper aria-label on language links", async ({ page }) => {
     const kaLink = page.locator('[data-testid="lang-ka"]');
 
-    // Should have accessible label
-    await expect(kaLink).toHaveAttribute("aria-label", /switch.*georgian/i);
-    await expect(kaLink).toHaveAttribute("title", /switch.*georgian/i);
+    // Should have accessible label (app uses native language name "ქართული", not English "Georgian")
+    await expect(kaLink).toHaveAttribute("aria-label", /switch to ქართული/i);
+    await expect(kaLink).toHaveAttribute("title", /switch to ქართული/i);
   });
 });
 
@@ -215,11 +217,9 @@ test.describe("Localization - Accessibility", () => {
     await page.waitForLoadState("networkidle");
 
     const html = page.locator("html");
-    // English is LTR
+    // English is LTR — accept either null (browser default) or explicit "ltr"
     const dir = await html.getAttribute("dir");
-    expect(dir).toBeNull(); // LTR is default, may not be explicitly set
-    // Or if explicitly set:
-    // await expect(html).toHaveAttribute("dir", "ltr");
+    expect(dir === null || dir === "ltr").toBe(true);
   });
 
   test("should have accessible language picker links", async ({ page }) => {

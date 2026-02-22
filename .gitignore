@@ -48,6 +48,10 @@ coverage/
 all_code.txt
 temp/
 tmp/
+*.txt
+
+# Sonda bundle analysis
+.sonda/
 
 .vercel
 

@@ -119,6 +119,10 @@ test.describe("Accessibility - Blog Posts Page", () => {
 
 test.describe("Accessibility - Individual Post", () => {
   test("should have no critical violations on blog post", async ({ page }) => {
+    // Force light color scheme so the test is deterministic regardless of OS setting.
+    // Dark-mode is tested separately in dark-mode.spec.ts.
+    await page.emulateMedia({ colorScheme: "light" });
+
     // Navigate to posts and click first one
     await page.goto("/en/posts");
     await page.waitForLoadState("networkidle");
@@ -126,6 +130,9 @@ test.describe("Accessibility - Individual Post", () => {
     const firstPost = page.locator('[data-testid="post-card"] a').first();
     if ((await firstPost.count()) > 0) {
       await firstPost.click();
+      // Explicitly wait for URL to change to a post detail page before scanning,
+      // so the axe run happens on the post content page, not the listing page.
+      await page.waitForURL(/\/posts\/.+/);
       await page.waitForLoadState("networkidle");
 
       const accessibilityScanResults = await new AxeBuilder({ page })
@@ -147,6 +154,8 @@ test.describe("Accessibility - Individual Post", () => {
     const firstPost = page.locator('[data-testid="post-card"] a').first();
     if ((await firstPost.count()) > 0) {
       await firstPost.click();
+      // Wait for URL to reflect post detail page before scanning
+      await page.waitForURL(/\/posts\/.+/);
       await page.waitForLoadState("networkidle");
 
       // Check for code block accessibility
@@ -291,12 +300,17 @@ test.describe("Accessibility - Keyboard Navigation", () => {
     for (let i = 0; i < 5; i++) {
       await page.keyboard.press("Tab");
       const activeElement = await page.evaluate(() => {
-        const el = document.activeElement;
+        const el = document.activeElement as HTMLElement | null;
         if (!el) {
           return null;
         }
-        const idSelector = el.id ? `#${el.id}` : "";
-        return el.tagName + idSelector;
+        // Use a unique key combining tagName, id, href, and aria-label
+        // so different links (which share the same tagName "A") are distinguished
+        const id = el.id ? `#${el.id}` : "";
+        const href = (el as HTMLAnchorElement).getAttribute?.("href") ?? "";
+        const label = el.getAttribute("aria-label") ?? "";
+        const cls = el.className?.split(" ")[0] ?? "";
+        return `${el.tagName}${id}[href=${href}][label=${label}][cls=${cls}]`;
       });
       if (activeElement) {
         focusedElements.push(activeElement);

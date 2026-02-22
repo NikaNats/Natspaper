@@ -166,8 +166,13 @@ const { t } = getI18n(locale as Lang);
           requestAnimationFrame(() => closeBtn.focus());
         } else {
           document.body.style.overflow = "";
-          // WCAG 2.4.3: Return focus to open button when menu closes
-          requestAnimationFrame(() => openBtn.focus());
+          // Return focus to open button, but only if the element is still
+          // connected (guard against page crash during View Transitions navigation)
+          requestAnimationFrame(() => {
+            if (openBtn.isConnected) {
+              openBtn.focus();
+            }
+          });
         }
       };
 
@@ -182,9 +187,16 @@ const { t } = getI18n(locale as Lang);
         toggleMenu(false);
       });
 
-      // Close when clicking any link (SPA feel)
+      // Close when clicking any link (SPA navigation).
+      // Skip the requestAnimationFrame focus-return to prevent a crash when
+      // Chromium fires the RAF callback against a detached element during the
+      // Astro View Transitions DOM swap.
       links.forEach(link => {
-        link.addEventListener("click", () => toggleMenu(false));
+        link.addEventListener("click", () => {
+          overlay.setAttribute("data-state", "closed");
+          openBtn.setAttribute("aria-expanded", "false");
+          document.body.style.overflow = "";
+        });
       });
 
       // Close on Escape key
@@ -207,4 +219,23 @@ const { t } = getI18n(locale as Lang);
   if (!customElements.get("mobile-menu")) {
     customElements.define("mobile-menu", MobileMenu);
   }
+
+  // Astro View Transitions: after each SPA navigation, ensure the menu is
+  // reset to closed.  The ClientRouter DOM morph can leave data-state=""
+  // on the #mobile-menu-overlay element.  This handler is registered once
+  // at module-scope (not inside the class) to avoid duplicating listeners
+  // across navigations.
+  document.addEventListener("astro:after-swap", () => {
+    const overlay = document.querySelector(
+      "#mobile-menu-overlay"
+    ) as HTMLElement | null;
+    const btn = document.querySelector("#menu-btn") as HTMLButtonElement | null;
+    if (overlay) {
+      overlay.setAttribute("data-state", "closed");
+    }
+    if (btn) {
+      btn.setAttribute("aria-expanded", "false");
+    }
+    document.body.style.overflow = "";
+  });
 </script>

@@ -231,7 +231,8 @@ const hiddenTagsCount = tags.length - MAX_TAGS;
     background: color-mix(in srgb, var(--color-accent) 10%, transparent);
     font-size: clamp(0.6875rem, 0.625rem + 0.125vw, 0.75rem);
     font-weight: 600;
-    color: var(--color-accent);
+    /* Darken accent by 10% to achieve ≥4.5:1 contrast on the light background */
+    color: color-mix(in srgb, var(--color-accent) 90%, #000000);
   }
 
   /* Language Badge - Different styling */
@@ -315,7 +316,8 @@ const hiddenTagsCount = tags.length - MAX_TAGS;
   .post-card__link:hover .post-card__tag,
   .post-card__link:focus-visible .post-card__tag {
     background: color-mix(in srgb, var(--color-accent) 10%, transparent);
-    color: var(--color-accent);
+    /* Darken accent by 10% to achieve ≥4.5:1 contrast on the light background */
+    color: color-mix(in srgb, var(--color-accent) 90%, #000000);
   }
 
   .post-card__tag-overflow {

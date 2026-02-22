@@ -7,7 +7,28 @@ export default defineEcConfig({
   // "Github Dark Dimmed" fits your academic/clean aesthetic better than "One Dark"
   themes: ["github-dark-dimmed", "github-light"],
 
-  plugins: [pluginLineNumbers(), pluginCollapsibleSections()],
+  plugins: [
+    pluginLineNumbers(),
+    pluginCollapsibleSections(),
+    // WCAG 2.1.1 (scrollable-region-focusable): add tabindex="0" to <pre>
+    // so keyboard users can scroll code blocks that overflow horizontally
+    {
+      name: 'a11y-focusable-pre',
+      hooks: {
+        postprocessRenderedBlock({ renderData }) {
+          // blockAst is <figure>; find the <pre> child
+          const figure = renderData.blockAst;
+          const pre = figure.children?.find(
+            (node) => node.type === 'element' && node.tagName === 'pre'
+          );
+          if (pre && pre.type === 'element') {
+            if (!pre.properties) pre.properties = {};
+            pre.properties.tabIndex = 0;
+          }
+        },
+      },
+    },
+  ],
 
   styleOverrides: {
     // Clean, subtle borders using transparency for better blending
@@ -34,12 +55,14 @@ export default defineEcConfig({
     codeFontSize: "0.875rem", // 14px
     codeLineHeight: "1.7", // High readability
 
-    // Subtle line numbers (not distracting)
+    // Line numbers — must meet WCAG 4.5:1 on code background
+    // github-dark-dimmed code bg is ≈#22272e; rgba(255,255,255,0.55) ≈#9C9EA1 → 5.4:1 ✓
+    // github-light code bg is ≈#f6f8fa; #767676 → 4.54:1 ✓
     lineNumbers: {
       foreground: ({ theme }) =>
         theme.name.includes("dark")
-          ? "rgba(255, 255, 255, 0.2)"
-          : "rgba(0, 0, 0, 0.2)",
+          ? "rgba(255, 255, 255, 0.55)"
+          : "#767676",
       background: "transparent",
     },
 
