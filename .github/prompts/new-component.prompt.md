@@ -1,5 +1,5 @@
 ---
-mode: "agent"
+agent: "new-component"
 tools: ["filesystem", "sequential-thinking"]
 description: "Scaffold a new Astro UI (dumb) or Feature (smart) component with correct patterns."
 ---

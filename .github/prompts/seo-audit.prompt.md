@@ -1,5 +1,5 @@
 ---
-mode: "agent"
+agent: "seo-audit"
 tools: ["filesystem", "sequential-thinking"]
 description: "Audit SEO, canonicalization, robots directives, and i18n completeness."
 ---

@@ -1,5 +1,5 @@
 ---
-mode: "agent"
+agent: "add-feature"
 tools: ["filesystem", "sequential-thinking"]
 description: "End-to-end feature implementation: design, code, test, verify."
 ---

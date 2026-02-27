@@ -1,5 +1,5 @@
 ---
-mode: "ask"
+agent: "review-pr"
 tools: ["filesystem", "git", "sequential-thinking"]
 description: "Structured PR review: architecture, correctness, perf, a11y, i18n, tests."
 ---

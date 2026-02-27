@@ -1,5 +1,5 @@
 ---
-mode: "agent"
+agent: "new-post"
 tools: ["filesystem", "sequential-thinking"]
 description: "Scaffold a new blog post with correct frontmatter, locale routing and i18n wiring."
 ---

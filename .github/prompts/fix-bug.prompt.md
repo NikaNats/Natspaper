@@ -1,5 +1,5 @@
 ---
-mode: "agent"
+agent: "fix-bug"
 tools: ["filesystem", "sequential-thinking", "git"]
 description: "Systematic bug investigation: reproduce, isolate, fix, test, verify."
 ---
