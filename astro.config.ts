@@ -65,40 +65,37 @@ export default defineConfig({
       domains: [], // Add external domains if you fetch images from elsewhere
     },
   }),
-  experimental: {
-    preserveScriptOrder: true,
-    contentIntellisense: true,
-    headingIdCompat: true,
-    fonts: [
-      {
-        name: "Inter",
-        provider: fontProviders.fontsource(),
-        weights: [400, 700],
-        styles: ["normal"],
-        cssVariable: "--font-inter",
-        fallbacks: ["sans-serif"],
-        display: "swap",
-      },
-      {
-        name: "Noto Sans Georgian",
-        provider: fontProviders.fontsource(),
-        weights: [400, 700],
-        styles: ["normal"],
-        cssVariable: "--font-georgian",
-        fallbacks: ["sans-serif"],
-        display: "swap",
-      },
-      {
-        name: "JetBrains Mono",
-        provider: fontProviders.fontsource(),
-        weights: [400],
-        styles: ["normal"],
-        cssVariable: "--font-jetbrains-mono",
-        fallbacks: ["monospace"],
-        display: "swap",
-      },
-    ],
-  },
+  // Experimental features have been promoted or removed in Astro 6
+  // preserved for reference if needed in future
+  fonts: [
+    {
+      name: "Inter",
+      provider: fontProviders.fontsource(),
+      weights: [400, 700],
+      styles: ["normal"],
+      cssVariable: "--font-inter",
+      fallbacks: ["sans-serif"],
+      display: "swap",
+    },
+    {
+      name: "Noto Sans Georgian",
+      provider: fontProviders.fontsource(),
+      weights: [400, 700],
+      styles: ["normal"],
+      cssVariable: "--font-georgian",
+      fallbacks: ["sans-serif"],
+      display: "swap",
+    },
+    {
+      name: "JetBrains Mono",
+      provider: fontProviders.fontsource(),
+      weights: [400],
+      styles: ["normal"],
+      cssVariable: "--font-jetbrains-mono",
+      fallbacks: ["monospace"],
+      display: "swap",
+    },
+  ],
   image: {
     responsiveStyles: true,
     layout: "constrained",

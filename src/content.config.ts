@@ -86,8 +86,7 @@ const blog = defineCollection({
        * Must be a valid date that can be parsed
        */
       pubDatetime: z.date({
-        required_error: "Publication date is required",
-        invalid_type_error: "Publication date must be a valid date",
+        message: "Publication date must be a valid date",
       }),
 
       /**
