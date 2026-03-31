@@ -22,8 +22,10 @@
  */
 import type { CollectionEntry } from "astro:content";
 import type { HTMLAttributes } from "astro/types";
-import { slugifyStr } from "@/utils/core";
-import { getReadingTimeDisplay } from "@/utils/post";
+import {
+  getReadingTimeDisplay,
+  getPostTitleTransitionName,
+} from "@/utils/post";
 import Datetime from "./Datetime.astro";
 import ReadingTime from "./ReadingTime.astro";
 
@@ -87,7 +89,7 @@ const hiddenTagsCount = tags.length - MAX_TAGS;
         {/* Title */}
         <h3
           class="featured-card__title"
-          style={{ viewTransitionName: slugifyStr(title) }}
+          transition:name={getPostTitleTransitionName(href)}
         >
           {title}
         </h3>

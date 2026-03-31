@@ -16,3 +16,4 @@ export {
   formatReadingTime,
   getReadingTimeDisplay,
 } from "./readingTime";
+export { getPostTitleTransitionName } from "./getPostTitleTransitionName";

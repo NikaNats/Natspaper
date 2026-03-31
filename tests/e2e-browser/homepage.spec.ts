@@ -48,6 +48,55 @@ test.describe('Home Page - E2E Tests', () => {
     await page.waitForLoadState('networkidle');
   });
 
+  test('should keep shared post title transition key from homepage to article page', async ({ browserName }) => {
+    test.skip(browserName === 'webkit', 'View Transitions are not reliable on WebKit in this suite');
+
+    const featuredCards = page.getByTestId('featured-post-card');
+    const featuredCount = await featuredCards.count();
+
+    let sourceCard = featuredCards.first();
+
+    if (featuredCount === 0) {
+      await navigateWithRetry(page, '/en/posts');
+      await page.waitForLoadState('networkidle');
+
+      const postCards = page.getByTestId('post-card');
+      const postCount = await postCards.count();
+      test.skip(postCount === 0, 'No post cards found to verify transition key continuity');
+
+      sourceCard = postCards.first();
+    }
+
+    const sourceTitle = sourceCard.getByRole('heading').first();
+
+    const sourceTransitionName = await sourceTitle.evaluate(element =>
+      getComputedStyle(element).getPropertyValue('view-transition-name').trim()
+    );
+
+    expect(sourceTransitionName).toMatch(/^post-title-/);
+
+    await page.evaluate(() => {
+      (globalThis as { __transitionProbe?: string }).__transitionProbe = 'persisted';
+    });
+
+    await sourceCard.getByRole('link').click();
+    await page.waitForLoadState('networkidle');
+
+    const probeValue = await page.evaluate(
+      () => (globalThis as { __transitionProbe?: string }).__transitionProbe ?? null
+    );
+    expect(probeValue).toBe('persisted');
+
+    const heroTitle = page.getByTestId('post-title');
+    await expect(heroTitle).toBeVisible();
+
+    const destinationTransitionName = await heroTitle.evaluate(element =>
+      getComputedStyle(element).getPropertyValue('view-transition-name').trim()
+    );
+
+    expect(destinationTransitionName).toBe(sourceTransitionName);
+  });
+
   test('should load and display home page with header', async () => {
     // Skip dev toolbar header elements by filtering to main page header
     const header = page.locator('body > header').first();

@@ -21,8 +21,11 @@
  *   slug="my-post"
  * />
  */
-import { slugifyStr } from "@/utils/core";
-import { calculateReadingTimeFromWords, formatReadingTime } from "@/utils/post";
+import {
+  calculateReadingTimeFromWords,
+  formatReadingTime,
+  getPostTitleTransitionName,
+} from "@/utils/post";
 import Datetime from "./Datetime.astro";
 import ReadingTime from "./ReadingTime.astro";
 import { getI18n, type Lang } from "@/i18n";
@@ -108,7 +111,7 @@ const hiddenTagsCount = tags.length - MAX_TAGS;
       {/* Title */}
       <Heading
         class="post-card__title"
-        style={{ viewTransitionName: slugifyStr(title) }}
+        transition:name={getPostTitleTransitionName(slug)}
       >
         {title}
       </Heading>

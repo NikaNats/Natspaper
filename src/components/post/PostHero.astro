@@ -11,11 +11,12 @@
  * - Semantic HTML with proper heading hierarchy
  * - View Transitions support for smooth navigation
  */
-import { slugifyStr } from "@/utils/core";
+import { getPostTitleTransitionName } from "@/utils/post";
 import Datetime from "./Datetime.astro";
 import ReadingTime from "./ReadingTime.astro";
 
 export interface Props {
+  slug: string;
   title: string;
   pubDatetime: Date;
   modDatetime?: Date | null;
@@ -23,13 +24,13 @@ export interface Props {
   readingTimeText: string;
 }
 
-const { title, pubDatetime, modDatetime, timezone, readingTimeText } =
+const { slug, title, pubDatetime, modDatetime, timezone, readingTimeText } =
   Astro.props;
 ---
 
 <header class="post-hero">
   <h1
-    transition:name={slugifyStr(title)}
+    transition:name={getPostTitleTransitionName(slug)}
     class="post-hero__title"
     data-testid="post-title"
   >
