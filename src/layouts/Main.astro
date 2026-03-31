@@ -241,9 +241,8 @@ const layoutClass =
 
   /* After content slot styling */
   .main-content :global([slot="after-content"]) {
-    margin-top: var(--space-fluid-lg, 2rem);
-    padding-top: var(--space-fluid-md, 1.5rem);
-    border-top: 1px solid var(--border-color, hsl(0 0% 90%));
+    margin-top: clamp(3.5rem, 8vw, 6rem);
+    padding-top: clamp(1.5rem, 3vw, 2.5rem);
   }
 
   /* Before title slot styling */
