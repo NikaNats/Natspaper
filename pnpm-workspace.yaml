@@ -12,5 +12,6 @@ overrides:
   flatted: ">=3.4.2"
   "picomatch@<2.3.2": "2.3.2"
   "picomatch@>=4.0.0 <4.0.4": "4.0.4"
+  path-to-regexp: ">=6.3.0"
 
 minimumReleaseAge: 0
