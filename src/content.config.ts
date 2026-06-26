@@ -13,7 +13,8 @@
  * @see https://docs.astro.build/en/guides/content-collections/
  */
 
-import { defineCollection, z } from "astro:content";
+import { defineCollection, z } from "astro:content"; // <-- დააბრუნეთ 'z' აქ
+import { glob } from "astro/loaders";
 import { SITE } from "./config";
 
 /**
@@ -72,7 +73,8 @@ const schemas = {
  * All fields are documented for contributor clarity.
  */
 const blog = defineCollection({
-  type: "content",
+  // Astro v6 Content Layer ლოდერი, რომელიც კითხულობს ყველა .md და .mdx ფაილს
+  loader: glob({ pattern: "**/*.{md,mdx}", base: "./src/content/blog" }),
   schema: ({ image }) =>
     z.object({
       /**

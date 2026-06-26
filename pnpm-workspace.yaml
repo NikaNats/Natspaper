@@ -1,0 +1,16 @@
+allowBuilds:
+  esbuild: true
+  sharp: true
+
+overrides:
+  rollup: ">=4.59.0"
+  h3: ">=1.15.6"
+  svgo: ">=4.0.1"
+  fast-xml-parser: ">=5.5.6"
+  tar: ">=7.5.11"
+  minimatch: ">=10.2.3"
+  flatted: ">=3.4.2"
+  "picomatch@<2.3.2": "2.3.2"
+  "picomatch@>=4.0.0 <4.0.4": "4.0.4"
+
+minimumReleaseAge: 0

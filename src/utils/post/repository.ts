@@ -19,11 +19,22 @@ export interface PostWithFallback {
 // Encapsulate sorting/filtering logic here
 export const PostRepository: IPostRepository = {
   getAll: async (): Promise<CollectionEntry<"blog">[]> => {
-    // FIX: Explicitly type the destructured 'data' property
-    return await getCollection(
+    const posts = await getCollection(
       "blog",
       ({ data }: CollectionEntry<"blog">) => !data.draft
     );
+
+    return posts.map((post: CollectionEntry<"blog">) => {
+      if (!post.slug) {
+        Object.defineProperty(post, "slug", {
+          value: post.id,
+          writable: true,
+          configurable: true,
+          enumerable: true,
+        });
+      }
+      return post;
+    });
   },
 
   getSorted: async (): Promise<CollectionEntry<"blog">[]> => {

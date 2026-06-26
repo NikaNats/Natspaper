@@ -31,21 +31,22 @@
     "prepare": "husky"
   },
   "dependencies": {
+    "@astrojs/markdown-remark": "^7.2.0",
     "@astrojs/rss": "^4.0.18",
-    "@astrojs/sitemap": "^3.7.2",
-    "@astrojs/vercel": "^10.0.3",
+    "@astrojs/sitemap": "^3.7.3",
+    "@astrojs/vercel": "^10.0.8",
     "@expressive-code/plugin-collapsible-sections": "^0.41.7",
     "@expressive-code/plugin-line-numbers": "^0.41.7",
     "@fontsource/inter": "^5.2.8",
     "@fontsource/jetbrains-mono": "^5.2.8",
     "@fontsource/noto-sans-georgian": "^5.2.8",
     "@resvg/resvg-js": "^2.6.2",
-    "@tailwindcss/vite": "^4.2.2",
+    "@tailwindcss/vite": "^4.3.1",
     "@vercel/analytics": "^2.0.1",
-    "astro": "^6.1.2",
+    "astro": "^6.4.8",
     "astro-expressive-code": "^0.41.7",
-    "dayjs": "^1.11.20",
-    "katex": "^0.16.44",
+    "dayjs": "^1.11.21",
+    "katex": "^0.16.47",
     "rehype-katex": "^7.0.1",
     "remark-collapse": "^0.1.2",
     "remark-math": "^6.0.0",
@@ -53,32 +54,32 @@
     "satori": "^0.26.0",
     "satori-html": "^0.3.2",
     "sharp": "^0.34.5",
-    "tailwindcss": "^4.2.2"
+    "tailwindcss": "^4.3.1"
   },
   "devDependencies": {
-    "@astrojs/check": "^0.9.8",
-    "@axe-core/playwright": "^4.11.1",
-    "@playwright/test": "^1.58.2",
-    "@shikijs/transformers": "^4.0.2",
-    "@tailwindcss/typography": "^0.5.19",
-    "@typescript-eslint/parser": "^8.58.0",
+    "@astrojs/check": "^0.9.9",
+    "@axe-core/playwright": "^4.12.1",
+    "@playwright/test": "^1.61.1",
+    "@shikijs/transformers": "^4.3.0",
+    "@tailwindcss/typography": "^0.5.20",
+    "@typescript-eslint/parser": "^8.62.0",
     "@vitest/coverage-v8": "4.1.2",
-    "@vitest/ui": "^4.1.2",
+    "@vitest/ui": "^4.1.9",
     "cross-env": "^10.1.0",
-    "eslint": "^10.1.0",
-    "eslint-plugin-astro": "^1.6.0",
-    "globals": "^17.4.0",
-    "happy-dom": "^20.8.9",
+    "eslint": "^10.5.0",
+    "eslint-plugin-astro": "^1.7.0",
+    "globals": "^17.7.0",
+    "happy-dom": "^20.10.6",
     "husky": "^9.1.7",
     "lint-staged": "^16.4.0",
-    "prettier": "^3.8.1",
+    "prettier": "^3.8.5",
     "prettier-plugin-astro": "^0.14.1",
-    "prettier-plugin-tailwindcss": "^0.7.2",
+    "prettier-plugin-tailwindcss": "^0.7.4",
     "sonda": "^0.11.1",
-    "stylelint": "^17.6.0",
-    "typescript": "^6.0.2",
-    "typescript-eslint": "^8.58.0",
-    "vitest": "^4.1.2"
+    "stylelint": "^17.14.0",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.62.0",
+    "vitest": "^4.1.9"
   },
   "lint-staged": {
     "*.{ts,tsx}": [
@@ -96,18 +97,5 @@
     "*.{json,md,yaml,yml}": [
       "prettier --write"
     ]
-  },
-  "pnpm": {
-    "overrides": {
-      "rollup": ">=4.59.0",
-      "h3": ">=1.15.6",
-      "svgo": ">=4.0.1",
-      "fast-xml-parser": ">=5.5.6",
-      "tar": ">=7.5.11",
-      "minimatch": ">=10.2.3",
-      "flatted": ">=3.4.2",
-      "picomatch@<2.3.2": "2.3.2",
-      "picomatch@>=4.0.0 <4.0.4": "4.0.4"
-    }
   }
 }
