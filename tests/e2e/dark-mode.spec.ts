@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, type Page } from "@playwright/test";
 
 /**
  * Dark Mode Toggle E2E Tests
@@ -13,6 +13,18 @@ import { test, expect } from "@playwright/test";
  * - System preference is respected when no saved preference
  */
 
+async function ensureMenuOpen(page: Page) {
+  const menuBtn = page.locator("#menu-btn");
+  if (await menuBtn.isVisible()) {
+    const menuOverlay = page.locator("#mobile-menu-overlay");
+    const state = await menuOverlay.getAttribute("data-state");
+    if (state !== "open") {
+      await menuBtn.click();
+      await page.waitForSelector('#mobile-menu-overlay[data-state="open"]');
+    }
+  }
+}
+
 test.describe("Dark Mode Toggle", () => {
   test.beforeEach(async ({ page }) => {
     // Clear any saved theme preference before each test
@@ -20,11 +32,13 @@ test.describe("Dark Mode Toggle", () => {
     await page.evaluate(() => localStorage.removeItem("theme"));
     await page.reload();
     await page.waitForLoadState("networkidle");
+    await ensureMenuOpen(page);
   });
 
   test("should have theme toggle button with proper accessibility", async ({
     page,
   }) => {
+    await ensureMenuOpen(page);
     const themeBtn = page.locator('[data-testid="theme-toggle"]');
 
     // Button should exist and be visible
@@ -38,6 +52,7 @@ test.describe("Dark Mode Toggle", () => {
   });
 
   test("should toggle theme from light to dark", async ({ page }) => {
+    await ensureMenuOpen(page);
     const themeBtn = page.locator('[data-testid="theme-toggle"]');
     const html = page.locator("html");
 
@@ -70,6 +85,8 @@ test.describe("Dark Mode Toggle", () => {
     await page.reload();
     await page.waitForLoadState("networkidle");
 
+    await ensureMenuOpen(page);
+
     // Verify dark mode
     await expect(html).toHaveAttribute("data-theme", "dark");
 
@@ -84,6 +101,7 @@ test.describe("Dark Mode Toggle", () => {
   test("should persist theme preference across page reload", async ({
     page,
   }) => {
+    await ensureMenuOpen(page);
     const themeBtn = page.locator('[data-testid="theme-toggle"]');
     const html = page.locator("html");
 
@@ -111,6 +129,7 @@ test.describe("Dark Mode Toggle", () => {
   });
 
   test("should persist theme across navigation", async ({ page }) => {
+    await ensureMenuOpen(page);
     const themeBtn = page.locator('[data-testid="theme-toggle"]');
     const html = page.locator("html");
 
@@ -135,7 +154,6 @@ test.describe("Dark Mode Toggle", () => {
   });
 
   test("should update html class for dark mode styling", async ({ page }) => {
-    const themeBtn = page.locator('[data-testid="theme-toggle"]');
     const html = page.locator("html");
 
     // Set dark mode
@@ -144,6 +162,9 @@ test.describe("Dark Mode Toggle", () => {
     });
     await page.reload();
     await page.waitForLoadState("networkidle");
+
+    await ensureMenuOpen(page);
+    const themeBtn = page.locator('[data-testid="theme-toggle"]');
 
     // html should have dark class
     await expect(html).toHaveClass(/dark/);
@@ -158,11 +179,8 @@ test.describe("Dark Mode Toggle", () => {
   });
 
   test("should show correct icon based on theme", async ({ page }) => {
+    await ensureMenuOpen(page);
     const themeBtn = page.locator('[data-testid="theme-toggle"]');
-
-    // In light mode, moon icon should be visible (to switch to dark)
-    // In dark mode, sun icon should be visible (to switch to light)
-    // The icons use dark: prefix for visibility
 
     // Check that the button contains SVG icons
     const hasSvg = await themeBtn.locator("svg").count();

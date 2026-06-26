@@ -37,14 +37,10 @@ test.describe('Mobile Menu - Interaction', () => {
     // Menu should open with fade animation
     await expect(menuOverlay).toHaveAttribute('data-state', 'open');
 
-    // Wait for animation to complete
-    await page.waitForTimeout(350);
+    // Verify animation happened (using Playwright's native auto-retry assertion)
+    await expect(menuOverlay).toBeVisible();
 
-    // Verify animation happened (check for visibility and has a transition)
-    const isVisible = await menuOverlay.evaluate(el => window.getComputedStyle(el).visibility);
     const hasTransition = await menuOverlay.evaluate(el => window.getComputedStyle(el).transition);
-    
-    expect(isVisible).toBe('visible');
     // Transition can be "transition-property duration timing" or just duration
     expect(hasTransition.length).toBeGreaterThan(0);
   });
@@ -61,15 +57,9 @@ test.describe('Mobile Menu - Interaction', () => {
     // Click close button
     await closeBtn.click();
 
-    // Menu should close with fade animation
+    // Verify animation completed by checking data-state and visibility (automatically retries)
     await expect(menuOverlay).toHaveAttribute('data-state', 'closed');
-
-    // Wait for animation to complete
-    await page.waitForTimeout(350);
-
-    // Verify animation completed by checking opacity changes
-    // The state-attribute itself is the most reliable indicator
-    await expect(menuOverlay).toHaveAttribute('data-state', 'closed');
+    await expect(menuOverlay).toBeHidden();
   });
 
   test('should close menu when clicking a navigation link', async ({ page }) => {
@@ -223,10 +213,12 @@ test.describe('Mobile Menu - Accessibility', () => {
   test('should trap focus within menu when open (basic check)', async ({ page }) => {
     const menuBtn = page.locator('#menu-btn');
     const closeBtn = page.locator('#menu-close-btn');
+    const menuOverlay = page.locator('#mobile-menu-overlay');
 
     // Open menu
     await menuBtn.click();
-    await page.waitForTimeout(50); // Brief wait for menu to render
+    // Wait for the overlay to be visible instead of using a hardcoded delay
+    await expect(menuOverlay).toBeVisible();
 
     // Try to focus close button
     try {
