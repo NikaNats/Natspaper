@@ -5,9 +5,8 @@ import { getEnvSchema } from "./config/env";
 import { SITE } from "./src/config";
 // NEW: Import directly from i18n config to avoid circular dependencies with src/config
 import { DEFAULT_LANG, SUPPORTED_LANGS } from "./src/i18n/config";
-// Disabled: remarkToc and remarkCollapse - using desktop sidebar TOC instead
-// import remarkToc from "remark-toc";
-// import remarkCollapse from "remark-collapse";
+// unified() პროცესორის იმპორტი Astro 7-ში მათემატიკური (KaTeX) პლაგინების შესანარჩუნებლად
+import { unified } from "@astrojs/markdown-remark";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 import { remarkModifiedTime } from "./src/lib/remark-modified-time.mjs";
@@ -18,7 +17,7 @@ const siteUrl = process.env.SITE_WEBSITE || SITE.website;
 export default defineConfig({
   site: siteUrl,
   output: "static",
-  // PERFORMANCE: Enable HTML compression (already default, but explicit)
+  // PERFORMANCE: Enable HTML compression და JSX-სტილის თაიმინგების პრევენცია
   compressHTML: true,
   // PERFORMANCE: Prefetch configuration for faster navigation
   prefetch: {
@@ -37,6 +36,8 @@ export default defineConfig({
   },
   integrations: getIntegrations(),
   markdown: {
+    // Astro v7-ს მივუთითებთ, რომ გამოიყენოს unified პროცესორი Markdown ფაილების ასაწყობად
+    processor: unified(),
     remarkPlugins: [
       remarkModifiedTime,
       remarkMath,

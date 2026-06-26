@@ -19,3 +19,8 @@ declare module "sonda/astro" {
   function SondaAstroPlugin(options?: SondaOptions): AstroIntegration;
   export default SondaAstroPlugin;
 }
+
+declare module "*/remark-modified-time.mjs" {
+  import type { Plugin } from "unified";
+  export const remarkModifiedTime: Plugin;
+}

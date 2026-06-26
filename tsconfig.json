@@ -3,10 +3,9 @@
   "include": [".astro/types.d.ts", "**/*"],
   "exclude": ["dist", "coverage", ".astro", ".sonda", "node_modules"],
   "compilerOptions": {
-    "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"],
-      "@tests/*": ["tests/*"]
+      "@/*": ["./src/*"],
+      "@tests/*": ["./tests/*"]
     },
 
     // --- Type Safety (Strict) ---
