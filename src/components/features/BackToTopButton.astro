@@ -9,7 +9,7 @@ import { FEATURES } from "@/config"; // Import configuration
   data-threshold={FEATURES.backToTopThreshold}
   data-visible="false"
   class:list={[
-    "transition-opacity-transform fixed end-4 bottom-8 z-50 duration-500",
+    "fixed end-4 bottom-8 z-50 transition-opacity transition-transform duration-500 motion-reduce:transition-none",
     "md:sticky md:end-auto md:float-end md:me-1",
   ]}
 >

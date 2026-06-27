@@ -54,7 +54,10 @@ const computedRel = getRelAttribute();
     <a
       id={id}
       href={href}
-      class:list={["inline-flex hover:text-accent", className]}
+      class:list={[
+        "inline-flex hover:text-accent focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none",
+        className,
+      ]}
       aria-label={ariaLabel}
       title={title}
       rel={computedRel}

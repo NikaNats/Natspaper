@@ -36,7 +36,7 @@ const { t } = getI18n(locale as Lang);
   <div
     id="mobile-menu-overlay"
     data-state="closed"
-    class="fixed inset-0 z-100 flex flex-col items-center justify-center bg-background/95 p-4 backdrop-blur-sm transition-all duration-300 md:static md:z-auto md:flex-row md:bg-transparent md:p-0 md:backdrop-blur-none"
+    class="fixed inset-0 z-100 flex flex-col items-center justify-center bg-background/95 p-4 backdrop-blur-sm transition-[visibility] transition-colors transition-opacity transition-transform duration-300 motion-reduce:transition-none md:static md:z-auto md:flex-row md:bg-transparent md:p-0 md:backdrop-blur-none"
     role="dialog"
     aria-modal="true"
     aria-label={t("nav.mainMenu")}
