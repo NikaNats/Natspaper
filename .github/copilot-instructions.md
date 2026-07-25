@@ -11,9 +11,9 @@ src/components/ui/        ← Dumb/presentational — props only, no side effect
 src/components/features/  ← Smart — may bind window, call data layer, load 3rd-party scripts
 src/utils/post/repository.ts  ← ALL content fetching (never call getCollection() elsewhere)
 src/utils/features/FeatureManager.ts  ← Register client-side features
-config/features.ts        ← Runtime feature toggles (darkMode, comments, analytics…)
+src/config.ts (FEATURES)  ← Runtime feature toggles (darkMode, comments, analytics…)
 src/i18n/dictionaries/    ← Every user-visible string lives here (en + ka)
-src/utils/core/ConcurrencyLimiter.ts  ← Wrap ALL Satori/Resvg OG calls to prevent OOM
+src/utils/core/concurrencyLimiter.ts  ← Wrap ALL Satori/Resvg OG calls to prevent OOM
 ```
 
 Page routing: `src/pages/[locale]/` — all locale routes are DRY dynamic routes; never
@@ -29,6 +29,7 @@ duplicate pages under `en/` and `ka/` manually.
 | No `style=""` attributes — Tailwind utilities only                          | `components.css` via `@layer components` is the only escape        |
 | No `getCollection()` outside `PostRepository`                               | Data-layer abstraction; all filtering/sorting lives there          |
 | No hardcoded UI strings — always `getI18n(locale)` from `src/i18n/index.ts` | Both `en` and `ka` keys must be added atomically                   |
+| Feature toggles via `FEATURES` in `src/config.ts` only                      | No ad-hoc `import.meta.env` checks scattered in components         |
 | No React/Vue/Svelte                                                         | 100 % Vanilla JS + Astro — no virtual DOM                          |
 | No SSR / server runtime                                                     | Static output only; `@astrojs/vercel` adapter stays in static mode |
 | `vercel.json` CSP must not be weakened                                      | No `unsafe-eval`; no removing existing directives                  |
@@ -41,29 +42,51 @@ duplicate pages under `en/` and `ka/` manually.
 ### Adding a new feature flag
 
 ```typescript
-// 1. config/features.ts — extend FeatureKey union and FeatureRegistry
-export type FeatureKey = "darkMode" | "comments" | "myFeature";
-// 2. Use in components
-import { isFeatureEnabled } from "@/config/features";
-{isFeatureEnabled("myFeature") && <MyFeature />}
-// 3. Toggle via env (optional): PUBLIC_FEATURE_MY_FEATURE=true
+// 1. src/types.ts — extend FeaturesConfig interface
+export interface FeaturesConfig {
+  // ... existing fields
+  myFeature: boolean;
+}
+
+// 2. src/config.ts — set default in FEATURES object
+export const FEATURES: FeaturesConfig = {
+  // ... existing flags
+  myFeature: false,
+};
+
+// 3. Use in components
+import { FEATURES } from "@/config";
+{FEATURES.myFeature && <MyFeature />}
+
+// 4. Toggle via env (optional): PUBLIC_FEATURE_MY_FEATURE=true
 ```
 
 ### i18n string (always both locales in one commit)
 
 ```typescript
-// src/i18n/dictionaries/en.ts  ← add key
-// src/i18n/dictionaries/ka.ts  ← add translation
+// src/i18n/dictionaries/ui.ts — add key to BOTH en and ka objects
+export const ui = {
+  en: {
+    "my.key": "English text", // ← add here
+  },
+  ka: {
+    "my.key": "ქართული ტექსტი", // ← and here
+  },
+} as const;
+
 // Usage in .astro frontmatter:
-const { t } = getI18n(locale); // import from src/i18n/index.ts
+import { getI18n, type Lang } from "@/i18n";
+const { t } = getI18n(Astro.currentLocale as Lang);
 ```
 
 ### OG image generation (must use limiter)
 
 ```typescript
-import { ConcurrencyLimiter } from "@/utils/core/ConcurrencyLimiter";
-const limiter = new ConcurrencyLimiter(2);
-const png = await limiter.run(() => generateOgImages(post));
+import { generateOgImageForPost } from "@/utils/og";
+import { ogImageLimiter } from "@/utils/core";
+
+// Use the pre-configured global limiter (adaptive concurrency)
+const png = await ogImageLimiter.run(() => generateOgImageForPost(post));
 ```
 
 ### Custom interactive element
@@ -74,6 +97,9 @@ const png = await limiter.run(() => generateOgImages(post));
   class MyWidget extends HTMLElement {
     connectedCallback() {
       /* ... */
+    }
+    disconnectedCallback() {
+      /* cleanup — remove all event listeners */
     }
   }
   customElements.define("my-widget", MyWidget);
@@ -128,13 +154,14 @@ New features require **both** `tests/unit/*.test.ts` (Vitest) **and** `tests/e2e
 
 ### Environment variables
 
-Declare in `src/env/schema.ts` (Zod) and `config/env.ts`. The `envValidation` Astro integration will fail the build if an undeclared var is used.
+Declare in `config/env.ts` (Zod schema via `getEnvSchema()`). The `envValidation`
+Astro integration will fail the build if an undeclared var is used.
 
 ---
 
 ## File Naming
 
-- Astro components: `kebab-case.astro`
+- Astro components: `PascalCase.astro` (e.g., `PostHero.astro`, `BackToTopButton.astro`)
 - TS utilities: `camelCase.ts` matching the subdomain folder (`src/utils/core/`, `src/utils/post/`, `src/utils/seo/`)
 - Tests: `tests/unit/<module>.test.ts` · `tests/e2e/<feature>.spec.ts`
 - New integrations: `src/integrations/<name>.ts` → register in `config/integrations.ts`
@@ -143,5 +170,7 @@ Declare in `src/env/schema.ts` (Zod) and `config/env.ts`. The `envValidation` As
 
 - Avoid RegEx on critical paths — use char-by-char parsing (see `sanitizeMarkdownUrls.ts`)
 - `ConcurrencyLimiter` is mandatory for any native-memory-heavy async batch (OG images, Resvg)
+- No `globalThis.gc()` — V8 handles native finalizers automatically; null references in `finally` blocks
+- No manual `.free()` on N-API objects (resvg, sharp) — reference nulling is sufficient
 - Math rendering is **server-side KaTeX only** (`remark-math` + `rehype-katex`); no client-side fallback scripts
 - Code blocks via **ExpressiveCode** (`astro-expressive-code`); raw `<pre>` with inline colours is forbidden

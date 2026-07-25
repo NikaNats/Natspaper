@@ -1,15 +1,23 @@
 <!--
 SYNC IMPACT REPORT
 ==================
-Version change: (none) → 1.0.0  (initial ratification, template → concrete)
-Modified principles: N/A (first fill)
-Added sections: Core Principles (I–VIII), Rendering & Content Standards, Development Workflow & Quality Gates, Governance
+Version change: 1.0.0 → 1.1.0  (MINOR — factual corrections, no principle redefinition)
+Modified principles: III (file naming convention corrected), IV (feature flag path corrected)
+Added sections: N/A
 Removed sections: N/A
 Templates requiring updates:
-  ✅ .specify/templates/plan-template.md  — Constitution Check gates verified; no structural changes needed
-  ✅ .specify/templates/spec-template.md  — Mandatory sections (i18n, tests, accessibility) already implied; no changes needed
-  ✅ .specify/templates/tasks-template.md — Test task categories (unit/e2e) align with Principle VII; no changes needed
+  ✅ .specify/templates/plan-template.md  — No changes needed
+  ✅ .specify/templates/spec-template.md  — No changes needed
+  ✅ .specify/templates/tasks-template.md — No changes needed
 Follow-up TODOs: None — all placeholders resolved.
+
+Previous amendment:
+  2026-07-26: Principle IV updated — `config/features.ts` reference replaced
+  with `src/config.ts` (`FEATURES` export) following file deletion in
+  specs/001-remove-unused-files. Principle III and File Naming table corrected
+  to reflect actual PascalCase component naming. Environment Variables section
+  corrected to remove non-existent `src/env/schema.ts`. i18n dictionary file
+  naming corrected to match actual `ui.ts` / `tags.ts` structure.
 -->
 
 # Natspaper Constitution
@@ -68,8 +76,8 @@ Two and only two component categories are recognised:
   global event listeners are forbidden.
 - FOUC-prevention scripts (dark-mode toggle, theme persistence) MUST use `<script
   is:inline>` and MUST be self-contained — they MUST NOT import modules.
-- File names MUST follow **kebab-case** with `.astro` extension
-  (e.g., `post-card.astro`, `tag-badge.astro`).
+- File names MUST follow **PascalCase** with `.astro` extension
+  (e.g., `PostHero.astro`, `BackToTopButton.astro`, `FeaturedPostCard.astro`).
 
 **Rationale**: Clear separation of presentational and behavioural concerns enables
 isolated unit-testing of dumb components and prevents logic creep into the design
@@ -95,7 +103,8 @@ Concrete rules:
   components are forbidden.
 - Client-side features MUST be registered via `src/utils/features/FeatureManager.ts`.
 - Runtime feature toggles (dark mode, comments, analytics, etc.) MUST be controlled
-  exclusively through `config/features.ts`; toggling a feature by editing component
+  exclusively through the `FEATURES` object in `src/config.ts` (typed by
+  `FeaturesConfig` in `src/types.ts`); toggling a feature by editing component
   code directly is forbidden.
 - Pure utility functions MUST live in `src/utils/` and MUST be free of side effects.
 
@@ -109,7 +118,7 @@ easier to test, refactor, and safely extend without touching stable layers.
 - The `en` (English) dictionary MUST be treated as the canonical source of truth;
   the `ka` (Georgian) dictionary MUST provide a translation for every key defined in
   `en`.
-- New dictionary keys MUST be added to _both_ locale files atomically in the same
+- New dictionary keys MUST be added to _both_ locale objects atomically in the same
   commit / PR.
 - Components MUST obtain translations via `getI18n(locale)` imported from
   `src/i18n/index.ts`. Hardcoded English text in JSX/template output is forbidden.
@@ -221,11 +230,11 @@ principle in this constitution; without them the principles are aspirational onl
 
 | Artifact | Convention |
 |---|---|
-| Astro components | `kebab-case.astro` |
+| Astro components | `PascalCase.astro` (e.g., `PostHero.astro`, `BackToTopButton.astro`) |
 | TypeScript modules | `camelCase.ts` or `kebab-case.ts` matching the existing pattern in the target directory |
 | Style files | `kebab-case.css` under `src/styles/` |
 | Utility functions | Pure functions in `src/utils/` subdirectories; group by domain (e.g., `core/`, `post/`, `seo/`) |
-| i18n dictionaries | `src/i18n/dictionaries/<locale>.ts` |
+| i18n dictionaries | `src/i18n/dictionaries/ui.ts` (UI strings) and `src/i18n/dictionaries/tags.ts` (tag names); both locales in one file |
 | Test files (unit) | `tests/unit/<module-name>.test.ts` |
 | Test files (E2E) | `tests/e2e/<feature>.spec.ts` |
 
@@ -246,8 +255,8 @@ are discouraged.
 Before a PR may be merged the author MUST confirm:
 
 - [ ] All CI/CD gates (Principle VIII) pass with a green build.
-- [ ] New user-visible strings are added to both `en` and `ka` dictionaries
-  (Principle V).
+- [ ] New user-visible strings are added to both `en` and `ka` locale objects
+  in `src/i18n/dictionaries/ui.ts` (Principle V).
 - [ ] New features have Vitest unit tests AND Playwright E2E tests (Principle VII).
 - [ ] No `style=""` attributes introduced; only Tailwind utilities used (Principle II).
 - [ ] No direct `getCollection()` calls outside `PostRepository` (Principle IV).
@@ -257,9 +266,10 @@ Before a PR may be merged the author MUST confirm:
 
 ### Environment Variables
 
-- All environment variables MUST be declared and validated in `config/env.ts` and
-  `src/env/schema.ts` via Zod before use.
-- A build that references an undeclared env var MUST fail via `envValidation.ts`.
+- All environment variables MUST be declared and validated in `config/env.ts`
+  via the `getEnvSchema()` Zod schema before use.
+- A build that references an undeclared env var MUST fail via the `envValidation`
+  Astro integration (`src/integrations/envValidation.ts`).
 - Secrets required only at build time MUST be clearly labelled; no runtime-secret
   access is permitted (Principle VI).
 
@@ -285,6 +295,6 @@ Natspaper project. Amendments follow the process below:
 
 All PRs and code reviews MUST verify compliance with this document. Raise
 non-compliance as a blocking review comment citing the specific principle violated.
-For runtime development guidance refer to `.github/instructions/copilot-instructions.md`.
+For runtime development guidance refer to `.github/copilot-instructions.md`.
 
-**Version**: 1.0.0 | **Ratified**: 2026-02-27 | **Last Amended**: 2026-02-27
+**Version**: 1.1.0 | **Ratified**: 2026-02-27 | **Last Amended**: 2026-07-26

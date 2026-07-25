@@ -1,6 +1,7 @@
 # Natspaper Architecture Guide
 
-> A comprehensive guide to the architecture patterns, design decisions, and extensibility mechanisms in Natspaper.
+> A comprehensive guide to the architecture patterns, design decisions, and
+> extensibility mechanisms in Natspaper.
 
 ## Table of Contents
 
@@ -9,8 +10,10 @@
 3. [Feature Flag System](#feature-flag-system)
 4. [Slot Strategy](#slot-strategy)
 5. [Plugin Architecture](#plugin-architecture)
-6. [Data Flow](#data-flow)
-7. [Extending the System](#extending-the-system)
+6. [Locale-Aware Routing (DRY Page Architecture)](#locale-aware-routing-dry-page-architecture)
+7. [Data Flow](#data-flow)
+8. [Extending the System](#extending-the-system)
+9. [Best Practices](#best-practices)
 
 ---
 
@@ -22,27 +25,39 @@ Natspaper follows **SOLID principles** with a focus on:
 - **Open/Closed**: Extend via props and slots, don't modify
 - **Liskov Substitution**: Components are interchangeable via consistent interfaces
 - **Interface Segregation**: Small, focused prop interfaces
-- **Dependency Inversion**: High-level components depend on abstractions (feature flags, configs)
+- **Dependency Inversion**: High-level components depend on abstractions
+  (`FEATURES` config, `IPostRepository`), not concrete implementations
 
 ### Directory Structure
 
 ```
 src/
+├── config.ts        # Site identity, FEATURES flags, socials, navigation
+├── types.ts         # Shared TypeScript interfaces (SiteConfig, FeaturesConfig, …)
 ├── components/
-│   ├── ui/          # Dumb/Presentational components (Grid, Card, Section)
-│   ├── features/    # Smart components with logic (Comments, Analytics)
-│   └── common/      # Shared utilities (Header, Footer)
-├── layouts/         # Page templates with named slots
-├── pages/           # Route handlers (data fetching)
+│   ├── ui/          # Dumb/Presentational (Breadcrumb, Hr, Icon, LinkButton, Pagination)
+│   ├── features/    # Smart components (Comments, Analytics, Seo, ThemeManager)
+│   ├── layout/      # Page chrome (Header, Footer, MobileMenu, NavMenu, NavLinks)
+│   └── post/        # Post-specific (PostHero, PostContent, PostFooter, Tag, …)
+├── layouts/         # Page templates with named slots (Layout, Main, PostDetails)
+├── pages/           # Route handlers (data fetching via PostRepository)
 ├── utils/           # Pure functions and utilities
-├── types/           # Shared TypeScript interfaces
-└── config.ts        # Centralized configuration
+│   ├── core/        # ConcurrencyLimiter, slugify
+│   ├── features/    # FeatureManager, ProgressBar, HeadingLinks
+│   ├── i18n/        # Date formatting
+│   ├── og/          # Satori/Resvg OG image generation
+│   ├── post/        # PostRepository (data access layer)
+│   ├── rss/         # RSS feed generation & sanitization
+│   └── seo/         # Canonical URLs, structured data
+├── i18n/            # Dictionaries & locale config
+├── integrations/    # Custom Astro integrations (env validation)
+├── styles/          # Tailwind CSS v4 layers (base, components, typography, global)
+└── types/           # Ambient declarations (global.d.ts, modules.d.ts)
 
 config/
-├── features.ts      # Feature flag system
-├── integrations.ts  # Astro integrations
-├── env.ts           # Environment schema
-└── index.ts         # Barrel exports
+├── env.ts           # Zod-validated env schema
+├── integrations.ts  # Astro integrations registry
+└── vite.ts          # Vite plugin configuration
 ```
 
 ---
@@ -56,13 +71,17 @@ config/
 - Accept data via props
 - No data fetching or side effects
 - Pure rendering logic
-- Examples: `Grid`, `Card`, `Section`
+- Examples: `Breadcrumb`, `Hr`, `Icon`, `LinkButton`, `Pagination`
 
 ```astro
 <!-- ✅ Good: Dumb component receives data -->
-<Grid cols="responsive">
-  {posts.map(post => <PostCard {...post} />)}
-</Grid>
+<Breadcrumb
+  items={[
+    { label: "Home", href: `/${locale}` },
+    { label: "Posts", href: `/${locale}/posts` },
+    { label: title },
+  ]}
+/>
 ```
 
 **Smart Components** (`src/components/features/`):
@@ -70,11 +89,12 @@ config/
 - May fetch data or have side effects
 - Integrate with external services
 - Handle feature flag logic
-- Examples: `Comments`, `Analytics`, `Seo`
+- Examples: `Comments`, `Analytics`, `Seo`, `ThemeManager`, `StructuredData`
 
 ```astro
 <!-- ✅ Smart component handles its own logic -->
-<Comments postId={post.id} />
+<Comments locale={locale} />
+<Analytics />
 ```
 
 ### Composition Pattern
@@ -83,57 +103,59 @@ Prefer composition over inheritance:
 
 ```astro
 <!-- ✅ Compose small components -->
-<Section title="Recent Posts">
-  <Grid cols="3">
-    {
-      posts.map(post => (
-        <Card variant="elevated" interactive>
-          <PostCard {...post} />
-        </Card>
-      ))
-    }
-  </Grid>
-</Section>
+<PostFooter
+  {tags}
+  {showEditPost}
+  {editPostConfig}
+  {post}
+  {prevPost}
+  {nextPost}
+  {tTag}
+  locale={Astro.currentLocale}
+/>
 
 <!-- ❌ Avoid: Monolithic components with many responsibilities -->
-<PostGridSection posts={posts} variant="elevated" cols={3} />
+<PostPageWithFooterAndCommentsAndNavigation post={post} />
 ```
 
 ---
 
 ## Feature Flag System
 
-The feature flag system (`config/features.ts`) provides:
+The feature flag system lives in `src/config.ts` as the `FEATURES` export,
+typed by `FeaturesConfig` in `src/types.ts`.
 
 ### Basic Usage
 
 ```typescript
-import { isFeatureEnabled } from "@/config/features";
+import { FEATURES } from "@/config";
 
-if (isFeatureEnabled("newsletter")) {
-  // Render newsletter form
+if (FEATURES.lightAndDarkMode) {
+  // Render theme toggle
+}
+
+if (FEATURES.showArchives) {
+  // Render archives navigation link
 }
 ```
 
 ### Adding New Features
 
-1. Add the feature key to `FeatureKey` type:
+1. Add the field to `FeaturesConfig` in `src/types.ts`:
 
 ```typescript
-export type FeatureKey = "darkMode" | "search" | "newsletter"; // ← Add here
-// ...
+export interface FeaturesConfig {
+  // ... existing fields
+  newsletter: boolean; // ← Add here
+}
 ```
 
-2. Define the feature in `FeatureRegistry`:
+2. Set the default value in `src/config.ts`:
 
 ```typescript
-export const FeatureRegistry: Record<FeatureKey, FeatureDefinition> = {
-  newsletter: {
-    description: "Newsletter subscription form",
-    defaultEnabled: false,
-    envKey: "PUBLIC_FEATURE_NEWSLETTER",
-    requires: ["analytics"], // Optional: dependencies
-  },
+export const FEATURES: FeaturesConfig = {
+  // ... existing flags
+  newsletter: false,
 };
 ```
 
@@ -141,18 +163,25 @@ export const FeatureRegistry: Record<FeatureKey, FeatureDefinition> = {
 
 ```astro
 ---
-import { isFeatureEnabled } from "@/config/features";
+import { FEATURES } from "@/config";
 ---
 
-{isFeatureEnabled("newsletter") && <NewsletterForm />}
+{FEATURES.newsletter && <NewsletterForm />}
 ```
 
 ### Environment Overrides
 
-Features can be toggled via environment variables:
+For runtime-toggleable flags, read from `import.meta.env` in `src/config.ts`:
+
+```typescript
+export const FEATURES: FeaturesConfig = {
+  newsletter: import.meta.env.PUBLIC_FEATURE_NEWSLETTER === "true",
+  // ...
+};
+```
 
 ```env
-# Enable in production only
+# .env.production
 PUBLIC_FEATURE_NEWSLETTER=true
 ```
 
@@ -251,12 +280,12 @@ export function getIntegrations() {
 
 ### Existing Integrations
 
-| Integration      | Purpose                                 |
-| ---------------- | --------------------------------------- |
-| `envValidation`  | Runtime environment variable validation |
-| `sitemap`        | XML sitemap generation                  |
-| `expressiveCode` | Syntax highlighting for code blocks     |
-| `sentry`         | Error tracking (production only)        |
+| Integration      | Purpose                                    |
+| ---------------- | ------------------------------------------ |
+| `envValidation`  | Build-time environment variable validation |
+| `sitemap`        | XML sitemap generation with i18n hreflang  |
+| `expressiveCode` | Syntax highlighting for code blocks        |
+| `Sonda`          | Bundle analysis (HTML + JSON reports)      |
 
 ---
 
@@ -264,7 +293,8 @@ export function getIntegrations() {
 
 ### Overview
 
-To maintain the **DRY (Don't Repeat Yourself) principle**, all locale-specific pages use **dynamic routing** through `src/pages/[locale]/`.
+To maintain the **DRY (Don't Repeat Yourself) principle**, all locale-specific
+pages use **dynamic routing** through `src/pages/[locale]/`.
 
 ### Before (Duplicated Pages)
 
@@ -293,19 +323,24 @@ src/pages/
 
 ```
 src/pages/
-├── [locale]/
-│   ├── index.astro                 # Handles /en and /ka
-│   ├── archives/index.astro        # Handles /en/archives and /ka/archives
-│   ├── tags/index.astro            # Handles /en/tags and /ka/tags
-│   ├── tags/[tag]/[...page].astro  # Handles tag pagination
-│   ├── posts/
-│   │   ├── [slug].astro            # Handles all posts
-│   │   ├── [...page].astro         # Handles pagination
-│   │   ├── [...file].md.ts         # Handles .md redirects
-│   │   ├── [...catch].ts           # Handles 404s
-│   │   └── [slug].png.ts           # Handles OG images
-│   └── search/index.astro          # Handles search
-└── [other top-level routes]
+├── index.astro                     # Root redirect → /en/
+├── robots.txt.ts                   # SEO: robots.txt
+├── api/
+│   └── health.json.ts              # Uptime monitoring endpoint
+└── [locale]/
+    ├── index.astro                 # Handles /en and /ka
+    ├── 404.astro                   # Localized error page
+    ├── rss.xml.ts                  # Per-locale RSS feed
+    ├── archives/index.astro        # Handles /en/archives and /ka/archives
+    ├── tags/
+    │   ├── index.astro             # Tag listing
+    │   └── [tag]/[...page].astro   # Tag pagination
+    └── posts/
+        ├── [slug].astro            # Handles all posts
+        ├── [...page].astro         # Handles pagination
+        ├── [...file].md.ts         # Handles .md redirects
+        ├── [...catch].ts           # Handles 404s
+        └── [slug].png.ts           # Handles OG images
 ```
 
 ### Implementation Pattern
@@ -353,11 +388,11 @@ const content = contentByLocale[locale];
 
 ### Benefits
 
-✅ **No Code Duplication** - Single page handles all locales  
-✅ **Easy Maintenance** - Fix Archives layout in one place  
-✅ **Consistent Behavior** - All locales use identical logic  
-✅ **Scalable** - Adding new locales requires no new pages  
-✅ **Type-Safe** - TypeScript ensures all locales are defined  
+✅ **No Code Duplication** - Single page handles all locales
+✅ **Easy Maintenance** - Fix Archives layout in one place
+✅ **Consistent Behavior** - All locales use identical logic
+✅ **Scalable** - Adding new locales requires no new pages
+✅ **Type-Safe** - TypeScript ensures all locales are defined
 ✅ **Testable** - Single source to test
 
 ---
@@ -367,39 +402,50 @@ const content = contentByLocale[locale];
 ### Content Collection Pipeline
 
 ```
-1. Markdown/MDX Files (src/content/)
+1. Markdown/MDX Files (src/content/blog/{locale}/)
         ↓
-2. Content Collection (Astro)
+2. Content Collection (Astro, validated by src/content.config.ts)
         ↓
 3. PostRepository (src/utils/post/repository.ts)
         ↓
-4. Page Components (src/pages/)
+4. Page Components (src/pages/[locale]/)
         ↓
 5. UI Components (src/components/)
 ```
 
 ### PostRepository Pattern
 
-All post-related data access goes through `PostRepository`:
+All post-related data access goes through `PostRepository`, which implements
+the `IPostRepository` interface (Dependency Inversion):
 
 ```typescript
-import PostRepository from "@/utils/post/repository";
+import { PostRepository } from "@/utils/post/repository";
 
-// Get all published posts
-const posts = await PostRepository.getPublished();
+// Get all published posts (sorted, drafts excluded)
+const posts = await PostRepository.getSorted();
+
+// Get posts for a specific locale
+const enPosts = await PostRepository.getByLocale("en");
+
+// Get posts with cross-locale fallback
+const kaPosts = await PostRepository.getByLocaleWithFallback("ka");
 
 // Get posts by tag
 const taggedPosts = await PostRepository.getByTag("astro");
 
-// Get recent posts
-const recent = await PostRepository.getRecent(5);
+// Get featured posts
+const featured = await PostRepository.getFeatured();
+
+// Get series parts
+const seriesParts = await PostRepository.getSeries("system-design", "en");
 ```
 
 **Why?**
 
 - Single source of truth for post queries
+- `IPostRepository` abstraction enables test doubles without mocking Astro
 - Easy to add caching, filtering, or transformations
-- Testable without mocking content collections
+- Swappable implementation (e.g., future Headless CMS migration)
 
 ---
 
@@ -408,17 +454,18 @@ const recent = await PostRepository.getRecent(5);
 ### Adding a New Page Type
 
 1. Create the content collection schema in `src/content.config.ts`
-2. Add repository methods for the new content type
-3. Create page templates in `src/pages/`
+2. Add repository methods to `IPostRepository` and implement in `repository.ts`
+3. Create page templates in `src/pages/[locale]/`
 4. Add UI components as needed
 
 ### Adding a New UI Component
 
 1. Create component in `src/components/ui/`
 2. Follow the dumb component pattern (props in, markup out)
-3. Export from `src/components/ui/index.ts`
+3. Import directly where needed (no barrel file)
 4. Document props with JSDoc comments
 
+<!-- prettier-ignore -->
 ```astro
 ---
 /**
@@ -442,9 +489,9 @@ const { variant = "primary" } = Astro.props;
 
 ### Adding Feature Flags for New Features
 
-1. Add to `FeatureKey` type in `config/features.ts`
-2. Define in `FeatureRegistry` with description and default
-3. Use `isFeatureEnabled()` in components
+1. Add the field to `FeaturesConfig` interface in `src/types.ts`
+2. Set the default value in `FEATURES` object in `src/config.ts`
+3. Use `FEATURES.<flagName>` in components
 4. Document in this guide
 
 ---
@@ -456,17 +503,21 @@ const { variant = "primary" } = Astro.props;
 - Use composition over inheritance
 - Keep components small and focused
 - Use named slots for flexible layouts
-- Feature-flag new functionality
-- Test with the existing test suite
-- Document prop interfaces
+- Feature-flag new functionality via `FEATURES` in `src/config.ts`
+- Test with the existing test suite (Vitest + Playwright)
+- Document prop interfaces with JSDoc
+- Route all content access through `PostRepository`
+- Add `data-testid` to every interactive element
 
 ### Don'ts ❌
 
-- Don't fetch data in UI components
+- Don't fetch data in UI components (`src/components/ui/`)
+- Don't call `getCollection()` outside `PostRepository`
 - Don't modify core components directly
-- Don't hardcode feature states
+- Don't hardcode feature states or UI strings
 - Don't duplicate styling across components
-- Don't skip type annotations
+- Don't skip type annotations (`any` is forbidden)
+- Don't use `enum` — use `const` objects with `as const`
 
 ---
 
@@ -474,4 +525,5 @@ const { variant = "primary" } = Astro.props;
 
 - [Astro Documentation](https://docs.astro.build)
 - [SOLID Principles](https://en.wikipedia.org/wiki/SOLID)
-- [Component Composition](https://reactjs.org/docs/composition-vs-inheritance.html)
+- [CSS Container Queries](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_containment/Container_queries)
+- [Astro Content Collections](https://docs.astro.build/en/guides/content-collections/)

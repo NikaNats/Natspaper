@@ -49,7 +49,7 @@
 | **🌐 Advanced i18n**       | Locale-aware routing (`/[locale]/...`) with automatic fallback logic via `PostRepository`. See [ARCHITECTURE.md](./ARCHITECTURE.md).         |
 | **🖼️ Dynamic OG Images**   | Concurrent-safe generation using **Satori/Resvg** with a `ConcurrencyLimiter` to prevent OOM during builds.                                  |
 | **🔒 Hardened Security**   | Strict CSP, security headers (`HSTS`, `X-Frame-Options`), and a custom `verify-build.js` script. See [SECURITY.md](./SECURITY.md).           |
-| **🧩 Feature Flags**       | Toggleable features (dark mode, comments, analytics) via a type-safe registry in `config/features.ts`.                                       |
+| **🧩 Feature Flags**       | Toggleable features (dark mode, comments, analytics) via a type-safe `FEATURES` object in `src/config.ts`.                                   |
 | **🏛️ Clean Architecture**  | "Smart vs. Dumb" component pattern. High-level logic depends on abstractions, not implementations. See [ARCHITECTURE.md](./ARCHITECTURE.md). |
 
 ---
@@ -93,10 +93,10 @@ Your site is now running at `http://localhost:4321`.
 ```
 ├── config/                 # Build-time configuration
 │   ├── env.ts              # Zod-validated env schema
-│   ├── features.ts         # Feature flag registry
 │   └── integrations.ts     # Astro integrations
 │
 ├── src/
+│   ├── config.ts           # Site identity, FEATURES flags, socials, navigation
 │   ├── components/
 │   │   ├── ui/             # Dumb (presentational) components
 │   │   └── features/       # Smart components (logic, integrations)
