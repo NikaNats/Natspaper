@@ -114,7 +114,12 @@ jobs:
             check_url "$BASE$page" || FAILED=1
           done
 
-          [ "$FAILED" -eq 1 ] && exit 1
+          if [ "$FAILED" -eq 1 ]; then
+            exit 1
+          fi
+
+          echo "🎉 All deployment checks passed successfully!"
+          exit 0
 
       - name: Rollback on failure
         if: failure() && steps.deploy.outputs.url != ''
