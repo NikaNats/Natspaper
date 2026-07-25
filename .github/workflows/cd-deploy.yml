@@ -64,7 +64,7 @@ jobs:
           if-no-files-found: ignore
 
       - name: Install Vercel CLI
-        run: pnpm install --global vercel@latest
+        run: npm install --global vercel@latest
 
       - name: Pull Vercel environment
         env:
