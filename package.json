@@ -4,9 +4,10 @@
   "version": "1.0.0",
   "scripts": {
     "dev": "cross-env NODE_ENV=development astro dev",
-    "build": "cross-env NODE_ENV=production astro check && astro build && npm run verify-build",
+    "generate-csp": "node scripts/generate-csp-hashes.js",
+    "build": "cross-env NODE_ENV=production astro check && astro build && npm run generate-csp && npm run verify-build",
     "build:dev": "cross-env NODE_ENV=development astro check && astro build",
-    "build:prod": "cross-env NODE_ENV=production astro check && astro build && npm run verify-build",
+    "build:prod": "cross-env NODE_ENV=production astro check && astro build && npm run generate-csp && npm run verify-build",
     "preview": "cross-env NODE_ENV=production astro preview",
     "verify-build": "node scripts/verify-build.js",
     "sync": "astro sync",
