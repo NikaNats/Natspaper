@@ -1,11 +1,9 @@
-import { defineConfig } from "astro/config";
+import { defineConfig, sharpImageService } from "astro/config";
 import { getIntegrations } from "./config/integrations";
 import { getViteConfig } from "./config/vite";
 import { getEnvSchema } from "./config/env";
 import { SITE } from "./src/config";
-// NEW: Import directly from i18n config to avoid circular dependencies with src/config
 import { DEFAULT_LANG, SUPPORTED_LANGS } from "./src/i18n/config";
-// unified() პროცესორის იმპორტი Astro 7-ში მათემატიკური (KaTeX) პლაგინების შესანარჩუნებლად
 import { unified } from "@astrojs/markdown-remark";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
@@ -17,56 +15,43 @@ const siteUrl = process.env.SITE_WEBSITE || SITE.website;
 export default defineConfig({
   site: siteUrl,
   output: "static",
-  // PERFORMANCE: Enable HTML compression და JSX-სტილის თაიმინგების პრევენცია
+  // PERFORMANCE: Enable HTML compression
   compressHTML: true,
   // PERFORMANCE: Prefetch configuration for faster navigation
   prefetch: {
-    // Prefetch on hover for instant-feeling navigation
     defaultStrategy: "hover",
-    // Only prefetch links with data-astro-prefetch attribute
-    // (ClientRouter already prefetches all links by default)
     prefetchAll: false,
   },
   i18n: {
     defaultLocale: DEFAULT_LANG,
-    locales: [...SUPPORTED_LANGS], // Spread to ensure mutability if needed by Astro types
+    locales: [...SUPPORTED_LANGS],
     routing: {
       prefixDefaultLocale: true,
     },
   },
   integrations: getIntegrations(),
   markdown: {
-    // Astro v7-ს მივუთითებთ, რომ გამოიყენოს unified პროცესორი Markdown ფაილების ასაწყობად
-    processor: unified(),
-    remarkPlugins: [
-      remarkModifiedTime,
-      remarkMath,
-      // Disabled inline markdown TOC - using desktop sidebar TOC instead
-      // [remarkToc, { heading: "(table of contents|შინაარსის ცხრილი)" }],
-      // [remarkCollapse, { test: "(Table of contents|შინაარსის ცხრილი)" }],
-    ],
-    rehypePlugins: [rehypeKatex],
+    // Astro v7 unified-პროცესორში პირდაპირ გადავცემთ remark და rehype პლაგინებს (Deprecation fix)
+    processor: unified({
+      remarkPlugins: [remarkModifiedTime, remarkMath],
+      rehypePlugins: [rehypeKatex],
+    }),
   },
   vite: getViteConfig(),
   env: getEnvSchema(),
   // PERFORMANCE: Build optimizations
   build: {
-    // Inline small stylesheets (<4kb) to reduce HTTP requests
-    // Larger stylesheets are kept external for better caching
     inlineStylesheets: "auto",
   },
   adapter: vercel({
     webAnalytics: {
       enabled: true,
     },
-    imageService: true,
-    imagesConfig: {
-      // Limits strictly for free tier safety
-      sizes: [320, 640, 1280],
-      domains: [], // Add external domains if you fetch images from elsewhere
-    },
+    // imageService: false უზრუნველყოფს სურათების 100% სტატიკურ გენერაციას dist/_astro/-ში
+    imageService: false,
   }),
   image: {
+    service: sharpImageService(),
     responsiveStyles: true,
     layout: "constrained",
   },
