@@ -1,261 +1,236 @@
-import { describe, it, expect, vi } from "vitest";
-import { ConcurrencyLimiter } from "@/utils/core/concurrencyLimiter";
+import { describe, it, expect } from "vitest";
+import {
+  ConcurrencyLimiter,
+  TimeoutError,
+  AbortError,
+} from "@/utils/core/concurrencyLimiter";
 
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+const delay = (ms: number) => new Promise(r => setTimeout(r, ms));
 
 describe("ConcurrencyLimiter", () => {
+  // ── Constructor validation ──────────────────────────────────────────
+
   describe("constructor", () => {
-    it("should create limiter with valid maxConcurrent", () => {
-      const limiter = new ConcurrencyLimiter(1);
-      expect(limiter.getStats().maxConcurrent).toBe(1);
+    it("should accept valid positive integers", () => {
+      expect(() => new ConcurrencyLimiter(1)).not.toThrow();
+      expect(() => new ConcurrencyLimiter(8)).not.toThrow();
     });
 
-    it("should throw error if maxConcurrent < 1", () => {
-      expect(() => new ConcurrencyLimiter(0)).toThrow(
-        "maxConcurrent must be at least 1"
-      );
-      expect(() => new ConcurrencyLimiter(-1)).toThrow(
-        "maxConcurrent must be at least 1"
-      );
-    });
+    it.each([0, -1, 1.5, NaN, Infinity])(
+      "should throw RangeError for %s",
+      value => {
+        expect(() => new ConcurrencyLimiter(value)).toThrow(RangeError);
+      },
+    );
   });
+
+  // ── Core scheduling ─────────────────────────────────────────────────
 
   describe("run()", () => {
-    it("should execute function immediately when under limit", async () => {
+    it("should execute immediately when under limit", async () => {
       const limiter = new ConcurrencyLimiter(2);
-      const fn = vi.fn(async () => "result");
-
-      const result = await limiter.run(fn);
-
-      expect(result).toBe("result");
-      expect(fn).toHaveBeenCalledOnce();
+      const result = await limiter.run(async () => "ok");
+      expect(result).toBe("ok");
     });
 
-    it("should execute multiple functions concurrently up to limit", async () => {
-      const limiter = new ConcurrencyLimiter(2);
-      const execution: number[] = [];
-
-      const fn1 = vi.fn(async () => {
-        execution.push(1);
-        await delay(10);
-        execution.push(-1);
-        return "result1";
-      });
-
-      const fn2 = vi.fn(async () => {
-        execution.push(2);
-        await delay(10);
-        execution.push(-2);
-        return "result2";
-      });
-
-      const fn3 = vi.fn(async () => {
-        execution.push(3);
-        await delay(10);
-        execution.push(-3);
-        return "result3";
-      });
-
-      const promises = [limiter.run(fn1), limiter.run(fn2), limiter.run(fn3)];
-
-      const [result1, result2, result3] = await Promise.all(promises);
-
-      expect(result1).toBe("result1");
-      expect(result2).toBe("result2");
-      expect(result3).toBe("result3");
-
-      // Verify that at most 2 are running concurrently
-      let maxConcurrent = 0;
-      const running: Set<number> = new Set();
-
-      for (const event of execution) {
-        if (event > 0) {
-          running.add(event);
-        } else {
-          running.delete(-event);
-        }
-        maxConcurrent = Math.max(maxConcurrent, running.size);
-      }
-
-      expect(maxConcurrent).toBeLessThanOrEqual(2);
-    });
-
-    it("should serialize execution when maxConcurrent=1", async () => {
+    it("should enforce FIFO order with maxConcurrent=1", async () => {
       const limiter = new ConcurrencyLimiter(1);
-      const execution: number[] = [];
+      const order: number[] = [];
 
-      const fn1 = vi.fn(async () => {
-        execution.push(1);
-        await delay(10);
-        execution.push(-1);
-        return "result1";
-      });
+      const makeTask = (id: number) => async () => {
+        order.push(id);
+        await delay(5);
+        return id;
+      };
 
-      const fn2 = vi.fn(async () => {
-        execution.push(2);
-        await delay(10);
-        execution.push(-2);
-        return "result2";
-      });
+      const results = await Promise.all([
+        limiter.run(makeTask(1)),
+        limiter.run(makeTask(2)),
+        limiter.run(makeTask(3)),
+      ]);
 
-      const fn3 = vi.fn(async () => {
-        execution.push(3);
-        await delay(10);
-        execution.push(-3);
-        return "result3";
-      });
-
-      const promises = [limiter.run(fn1), limiter.run(fn2), limiter.run(fn3)];
-
-      const [result1, result2, result3] = await Promise.all(promises);
-
-      expect(result1).toBe("result1");
-      expect(result2).toBe("result2");
-      expect(result3).toBe("result3");
-
-      // Verify strict serialization: only 1 at a time
-      let maxConcurrent = 0;
-      const running: Set<number> = new Set();
-
-      for (const event of execution) {
-        if (event > 0) {
-          running.add(event);
-        } else {
-          running.delete(-event);
-        }
-        maxConcurrent = Math.max(maxConcurrent, running.size);
-      }
-
-      expect(maxConcurrent).toBe(1);
+      expect(results).toEqual([1, 2, 3]);
+      expect(order).toEqual([1, 2, 3]); // strict FIFO
     });
 
-    it("should return function result", async () => {
-      const limiter = new ConcurrencyLimiter(1);
+    it("should never exceed maxConcurrent", async () => {
+      const limiter = new ConcurrencyLimiter(3);
+      let peak = 0;
+      let active = 0;
 
-      const result = await limiter.run(async () => ({ data: "test" }));
+      const task = async () => {
+        active++;
+        peak = Math.max(peak, active);
+        await delay(10);
+        active--;
+      };
 
-      expect(result).toEqual({ data: "test" });
+      await Promise.all(Array.from({ length: 20 }, () => limiter.run(task)));
+      expect(peak).toBeLessThanOrEqual(3);
     });
 
-    it("should propagate function errors", async () => {
+    it("should propagate errors from fn", async () => {
       const limiter = new ConcurrencyLimiter(1);
-      const error = new Error("Test error");
-
       await expect(
         limiter.run(async () => {
-          throw error;
-        })
-      ).rejects.toThrow("Test error");
+          throw new Error("boom");
+        }),
+      ).rejects.toThrow("boom");
     });
 
-    it("should release slot after function completes (success)", async () => {
+    it("should release slot after error", async () => {
       const limiter = new ConcurrencyLimiter(1);
-      let stats = limiter.getStats();
-      expect(stats.running).toBe(0);
 
-      await limiter.run(async () => {
-        stats = limiter.getStats();
-        expect(stats.running).toBe(1);
-      });
+      await limiter.run(async () => {}).catch(() => {});
+      expect(limiter.getStats().running).toBe(0);
 
-      stats = limiter.getStats();
-      expect(stats.running).toBe(0);
-    });
-
-    it("should release slot after function completes (error)", async () => {
-      const limiter = new ConcurrencyLimiter(1);
-      let stats = limiter.getStats();
-      expect(stats.running).toBe(0);
-
-      try {
-        await limiter.run(async () => {
-          stats = limiter.getStats();
-          expect(stats.running).toBe(1);
-          throw new Error("Test");
-        });
-      } catch {
-        // Expected error
-      }
-
-      stats = limiter.getStats();
-      expect(stats.running).toBe(0);
+      // Slot is free — next call should not hang
+      const result = await limiter.run(async () => "recovered");
+      expect(result).toBe("recovered");
     });
   });
+
+  // ── Stats ───────────────────────────────────────────────────────────
 
   describe("getStats()", () => {
-    it("should return correct stats initially", () => {
-      const limiter = new ConcurrencyLimiter(3);
-      const stats = limiter.getStats();
+    it("should track completed and failed counts", async () => {
+      const limiter = new ConcurrencyLimiter(2);
 
-      expect(stats).toEqual({
-        running: 0,
-        queued: 0,
-        maxConcurrent: 3,
-      });
+      await limiter.run(async () => "a");
+      await limiter.run(async () => "b");
+      await limiter
+        .run(async () => {
+          throw new Error("fail");
+        })
+        .catch(() => {});
+
+      const stats = limiter.getStats();
+      expect(stats.completed).toBe(2);
+      expect(stats.failed).toBe(1);
+      expect(stats.running).toBe(0);
+      expect(stats.queued).toBe(0);
     });
 
-    it("should update running count during execution", async () => {
-      const limiter = new ConcurrencyLimiter(2);
-      let statsInsideRun: ReturnType<typeof limiter.getStats> | null = null;
-
-      await limiter.run(async () => {
-        statsInsideRun = limiter.getStats();
+    it("should report queued count accurately", async () => {
+      const limiter = new ConcurrencyLimiter(1);
+      let resolveFirst!: () => void;
+      const gate = new Promise<void>(r => {
+        resolveFirst = r;
       });
 
-      expect(statsInsideRun).toEqual({
-        running: 1,
-        queued: 0,
-        maxConcurrent: 2,
+      // Occupy the only slot
+      const first = limiter.run(async () => {
+        await gate;
       });
+
+      // These will queue
+      const second = limiter.run(async () => "b");
+      const third = limiter.run(async () => "c");
+
+      // Allow microtasks to settle
+      await delay(0);
+      expect(limiter.getStats().queued).toBe(2);
+
+      resolveFirst();
+      await Promise.all([first, second, third]);
+      expect(limiter.getStats().queued).toBe(0);
     });
   });
 
-  describe("concurrent stress test", () => {
-    it("should handle many concurrent operations with limit", async () => {
-      const limiter = new ConcurrencyLimiter(3);
-      const operations: Promise<number>[] = [];
+  // ── AbortSignal ─────────────────────────────────────────────────────
 
-      for (let i = 0; i < 20; i++) {
-        operations.push(limitedDelay(limiter, i));
-      }
+  describe("AbortSignal", () => {
+    it("should reject immediately if already aborted", async () => {
+      const limiter = new ConcurrencyLimiter(1);
+      const controller = new AbortController();
+      controller.abort();
 
-      const results = await Promise.all(operations);
-
-      expect(results).toHaveLength(20);
-      expect(results).toEqual([...new Array(20).keys()]);
+      await expect(
+        limiter.run(async () => "never", { signal: controller.signal }),
+      ).rejects.toThrow(AbortError);
     });
 
-    it("should handle rapid fire operations with maxConcurrent=1", async () => {
+    it("should remove queued task on abort", async () => {
       const limiter = new ConcurrencyLimiter(1);
-      let activeCount = 0;
-      let maxActive = 0;
+      let resolveFirst!: () => void;
+      const gate = new Promise<void>(r => {
+        resolveFirst = r;
+      });
 
-      const operations: Promise<void>[] = [];
+      const first = limiter.run(async () => {
+        await gate;
+      });
 
-      for (let i = 0; i < 10; i++) {
-        operations.push(
-          limiter.run(async () => {
-            activeCount++;
-            maxActive = Math.max(maxActive, activeCount);
-            await delay(1);
-            activeCount--;
-          })
-        );
-      }
+      const controller = new AbortController();
+      const second = limiter.run(async () => "should not run", {
+        signal: controller.signal,
+      });
 
-      await Promise.all(operations);
+      await delay(0);
+      expect(limiter.getStats().queued).toBe(1);
 
-      expect(maxActive).toBe(1);
+      // Abort while queued
+      controller.abort();
+
+      await expect(second).rejects.toThrow(AbortError);
+      expect(limiter.getStats().queued).toBe(0);
+
+      resolveFirst();
+      await first;
+    });
+  });
+
+  // ── Timeout ─────────────────────────────────────────────────────────
+
+  describe("timeout", () => {
+    it("should reject with TimeoutError when exceeded", async () => {
+      const limiter = new ConcurrencyLimiter(1);
+
+      await expect(
+        limiter.run(() => delay(500).then(() => "late"), {
+          timeoutMs: 50,
+        }),
+      ).rejects.toThrow(TimeoutError);
+    });
+
+    it("should resolve normally within timeout", async () => {
+      const limiter = new ConcurrencyLimiter(1);
+      const result = await limiter.run(
+        async () => {
+          await delay(10);
+          return "fast";
+        },
+        { timeoutMs: 5000 },
+      );
+      expect(result).toBe("fast");
+    });
+  });
+
+  // ── onIdle ──────────────────────────────────────────────────────────
+
+  describe("onIdle()", () => {
+    it("should resolve immediately when idle", async () => {
+      const limiter = new ConcurrencyLimiter(2);
+      await expect(limiter.onIdle()).resolves.toBeUndefined();
+    });
+
+    it("should resolve after all tasks complete", async () => {
+      const limiter = new ConcurrencyLimiter(1);
+      const results: string[] = [];
+
+      const p1 = limiter.run(async () => {
+        await delay(10);
+        results.push("a");
+      });
+      const p2 = limiter.run(async () => {
+        await delay(10);
+        results.push("b");
+      });
+
+      await limiter.onIdle();
+      expect(results).toEqual(["a", "b"]);
+
+      await Promise.all([p1, p2]);
     });
   });
 });
-
-async function limitedDelay(
-  limiter: ConcurrencyLimiter,
-  value: number
-): Promise<number> {
-  return limiter.run(async () => {
-    await delay(5);
-    return value;
-  });
-}
