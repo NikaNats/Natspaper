@@ -372,12 +372,8 @@ const posts = await PostRepository.getByLocale(locale);
 
 // 4. Define localized content
 const contentByLocale: Record<Lang, object> = {
-  en: {
-    /* English content */
-  },
-  ka: {
-    /* Georgian content */
-  },
+  en: {/* English content */},
+  ka: {/* Georgian content */},
 };
 
 const content = contentByLocale[locale];

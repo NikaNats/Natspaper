@@ -1,13 +1,7 @@
----
-// This component has no HTML output. It only prepares data and logic.
-
-// 1. Import the navigation links from a single source of truth
 import { NAVIGATION } from "@/config";
 
-// Re-export the data so existing consumers still work.
 export const navLinks = NAVIGATION;
 
-// 2. The isActive logic is now self-contained here.
 export function isActive(
   currentPath: string,
   linkPath: string,
@@ -44,4 +38,3 @@ export function isActive(
     currentPagePath[0] === checkPagePath[0]
   );
 }
----

@@ -60,13 +60,13 @@ function getGitModTime(filepath) {
       [
         "log",
         "-1",
-        "--pretty=format:%cI",  // ISO 8601 committer date
-        "--",                    // ← Separator: everything after is a path
+        "--pretty=format:%cI", // ISO 8601 committer date
+        "--", // ← Separator: everything after is a path
         filepath,
       ],
       {
         encoding: "utf8",
-        timeout: 10000,          // 10s timeout per file
+        timeout: 10000, // 10s timeout per file
         stdio: ["pipe", "pipe", "pipe"], // Suppress stderr noise
       }
     );
