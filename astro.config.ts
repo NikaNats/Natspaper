@@ -4,7 +4,6 @@ import { getViteConfig } from "./config/vite";
 import { getEnvSchema } from "./config/env";
 import { SITE } from "./src/config";
 import { DEFAULT_LANG, SUPPORTED_LANGS } from "./src/i18n/config";
-import { unified } from "@astrojs/markdown-remark";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 import { remarkModifiedTime } from "./src/lib/remark-modified-time.mjs";
@@ -30,13 +29,12 @@ export default defineConfig({
     },
   },
   integrations: getIntegrations(),
+
   markdown: {
-    // Astro v7 unified-პროცესორში პირდაპირ გადავცემთ remark და rehype პლაგინებს (Deprecation fix)
-    processor: unified({
-      remarkPlugins: [remarkModifiedTime, remarkMath],
-      rehypePlugins: [rehypeKatex],
-    }),
+    remarkPlugins: [remarkModifiedTime, remarkMath],
+    rehypePlugins: [rehypeKatex],
   },
+
   vite: getViteConfig(),
   env: getEnvSchema(),
   // PERFORMANCE: Build optimizations
