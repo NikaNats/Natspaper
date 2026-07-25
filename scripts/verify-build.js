@@ -1,337 +1,337 @@
 #!/usr/bin/env node
 
 /**
- * Build Verification Script (SRE Guardrails)
- * ==========================================
+ * Build Verification Script (SRE Guardrails) v2
+ * ==============================================
  * Prevents deployment of broken builds by validating:
- * 1. Critical HTML pages exist
+ * 1. Critical HTML pages exist with structural integrity
  * 2. CSS/JS bundles exist and have non-zero size
- * 3. SEO assets (sitemap, robots.txt) are present
- * 4. Build size is reasonable (not empty or suspiciously small)
+ * 3. SEO assets (sitemap, robots.txt) are present AND valid
+ * 4. Static assets (favicon, fonts, OG images) are present
+ * 5. Build size is reasonable (not empty or suspiciously small)
  *
- * AVAILABILITY RISK: Silent build failures can deploy blank pages,
- * causing 100% downtime for affected routes.
+ * CLI Flags:
+ *   --json     Output results as JSON (for CI/CD parsing)
+ *   --strict   Treat warnings as errors
+ *   --verbose  Show detailed file-by-file output
  *
- * Run: npm run verify-build
+ * Run: node scripts/verify-build.js [--json] [--strict] [--verbose]
  */
 
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const projectRoot = path.resolve(__dirname, "..");
-
-// Minimum file sizes to detect corrupt/empty files
-// Values are conservative lower-bounds based on observed build output:
-//   - HTML: even a minimal Astro page with <head> is well over 2 KB
-//   - CSS:  a Tailwind bundle with a few utilities exceeds 1 KB
-//   - JS:   any non-empty bundle with an import or module preamble is > 200 B
-const MIN_FILE_SIZES = {
-  html: 2000, // HTML pages should be at least 2 KB
-  css: 1000,  // CSS bundles should be at least 1 KB
-  js: 200,    // JS bundles should be at least 200 bytes
+// ── CLI Argument Parsing ─────────────────────────────────────────────
+const args = process.argv.slice(2);
+const FLAGS = {
+  json: args.includes("--json"),
+  strict: args.includes("--strict"),
+  verbose: args.includes("--verbose"),
 };
 
-/**
- * Structural content requirements for critical HTML pages.
- * Each entry is searched as a plain substring inside the rendered HTML.
- * A missing marker means a critical component failed silently during build.
- */
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const projectRoot = path.resolve(__dirname, "..");
+const distDir = path.join(projectRoot, "dist");
+
+// ── Configuration (extracted from magic numbers) ─────────────────────
+const CONFIG = {
+  minFileSizes: {
+    html: 2_000,   // bytes — minimal Astro page with <head>
+    css: 1_000,    // bytes — Tailwind bundle with utilities
+    js: 200,       // bytes — non-empty module preamble
+    xml: 100,      // bytes — minimal valid XML
+    txt: 50,       // bytes — minimal robots.txt
+    json: 20,      // bytes — minimal JSON object
+  },
+  buildSize: {
+    criticalMinBytes: 100 * 1024,   // 100 KB — below = build failed
+    warningMinBytes: 500 * 1024,    // 500 KB — below = suspicious
+  },
+  minHtmlPages: 5,                  // en + ka + 404s + posts
+};
+
+// ── Structural HTML Content Checks ───────────────────────────────────
 const HTML_CONTENT_CHECKS = [
   {
     file: "dist/en/index.html",
-    markers: [
-      "<html",        // Page rendered at all
-      "</head>",      // <head> properly closed
-      "</body>",      // <body> properly closed
-      "<main",        // Main content area present
-      "charset",      // Charset meta tag
-    ],
+    markers: ["<html", "</head>", "</body>", "<main", "charset"],
   },
   {
     file: "dist/ka/index.html",
-    markers: [
-      "<html",
-      "</head>",
-      "</body>",
-      "<main",
-      "charset",
-    ],
+    markers: ["<html", "</head>", "</body>", "<main", "charset"],
   },
   {
     file: "dist/en/404/index.html",
-    markers: [
-      "<html",
-      "404",           // 404 page must mention the status code
-      "</body>",
-    ],
+    markers: ["<html", "404", "</body>"],
+  },
+  {
+    file: "dist/ka/404/index.html",
+    markers: ["<html", "404", "</body>"],
   },
 ];
 
-// Files that are intentionally small (redirects, etc.)
-const REDIRECT_FILES = new Set([
-  "dist/index.html", // i18n redirect to /en/
-]);
-
-// Critical files and directories that must exist after build
-const REQUIRED_ARTIFACTS = [
-  "dist/index.html", // Redirect page (small is OK)
-  "dist/en/index.html", // Main English page
-  "dist/ka/index.html", // Main Georgian page
-  "dist/robots.txt", // SEO: robots.txt
-  "dist/sitemap-index.xml", // SEO: sitemap
-  "dist/en/rss.xml", // RSS feed (generated under locale path)
-  "dist/en/404/index.html", // English error page
-  "dist/ka/404/index.html", // Georgian error page
-  "dist/api/health.json", // Health check endpoint for uptime monitoring
+// ── SEO Content Validation ───────────────────────────────────────────
+const SEO_CONTENT_CHECKS = [
+  {
+    file: "dist/robots.txt",
+    markers: ["User-agent:", "Sitemap:"],
+    description: "robots.txt must contain User-agent and Sitemap directives",
+  },
+  {
+    file: "dist/sitemap-index.xml",
+    markers: ["<?xml", "<sitemapindex", "</sitemapindex>"],
+    description: "sitemap-index.xml must be valid XML with sitemapindex root",
+  },
 ];
 
-// Asset directories that must contain files
+// ── Required Artifacts (deduplicated) ────────────────────────────────
+const REDIRECT_FILES = new Set(["dist/index.html"]);
+
+const REQUIRED_ARTIFACTS = [
+  "dist/index.html",
+  "dist/en/index.html",
+  "dist/ka/index.html",
+  "dist/robots.txt",
+  "dist/sitemap-index.xml",
+  "dist/en/rss.xml",
+  "dist/ka/rss.xml",
+  "dist/en/404/index.html",
+  "dist/ka/404/index.html",
+  "dist/api/health.json",
+  "dist/favicon.svg",
+];
+
 const REQUIRED_ASSET_DIRS = [
   { path: "dist/_astro", minFiles: 1, description: "Astro bundled assets" },
 ];
 
-// Optional but important files
-const IMPORTANT_ARTIFACTS = [
-  "dist/en/rss.xml",
-];
+// ── State ────────────────────────────────────────────────────────────
+const errors = [];
+const warnings = [];
+const passed = [];
 
-console.log("🔍 Verifying build artifacts...\n");
-console.log("=".repeat(50));
+function log(msg) {
+  if (!FLAGS.json) console.log(msg);
+}
 
-let errors = [];
-let warnings = [];
+function addError(msg) {
+  errors.push(msg);
+  log(`❌ ${msg}`);
+}
 
-// Check required artifacts with size validation
-console.log("\n📄 Critical Files:");
-for (const artifact of REQUIRED_ARTIFACTS) {
-  const fullPath = path.join(projectRoot, artifact);
-
-  if (fs.existsSync(fullPath)) {
-    const stats = fs.statSync(fullPath);
-    const size = stats.size;
-    const sizeKB = (size / 1024).toFixed(2);
-
-    // Determine file type for size validation
-    const ext = path.extname(artifact).slice(1);
-    const minSize = MIN_FILE_SIZES[ext] || 0;
-
-    // Skip size validation for known redirect files
-    const isRedirect = REDIRECT_FILES.has(artifact);
-
-    if (!isRedirect && size < minSize) {
-      errors.push(`❌ CORRUPT: ${artifact} (${size} bytes < ${minSize} min)`);
-      console.log(`❌ ${artifact} - CORRUPT (only ${size} bytes)`);
-    } else if (isRedirect) {
-      console.log(`✅ ${artifact} (${sizeKB} KB) [redirect]`);
-    } else {
-      console.log(`✅ ${artifact} (${sizeKB} KB)`);
-    }
+function addWarning(msg) {
+  if (FLAGS.strict) {
+    addError(`[strict] ${msg}`);
   } else {
-    errors.push(`❌ MISSING: ${artifact}`);
-    console.log(`❌ ${artifact} - NOT FOUND`);
+    warnings.push(msg);
+    log(`⚠️  ${msg}`);
   }
 }
 
-// Check asset directories
-console.log("\n📦 Asset Bundles:");
+function addPass(msg) {
+  passed.push(msg);
+  if (FLAGS.verbose) log(`✅ ${msg}`);
+}
+
+// ── Helpers ──────────────────────────────────────────────────────────
+function getFileSize(filePath) {
+  try {
+    return fs.statSync(filePath).size;
+  } catch {
+    return -1;
+  }
+}
+
+function fileContains(filePath, marker) {
+  try {
+    const content = fs.readFileSync(filePath, "utf8");
+    return content.includes(marker);
+  } catch {
+    return false;
+  }
+}
+
+function getDirectorySize(dirPath) {
+  let size = 0;
+  try {
+    for (const entry of fs.readdirSync(dirPath, { withFileTypes: true })) {
+      const fullPath = path.join(dirPath, entry.name);
+      if (entry.isDirectory()) {
+        size += getDirectorySize(fullPath);
+      } else {
+        size += fs.statSync(fullPath).size;
+      }
+    }
+  } catch { /* ignore permission errors */ }
+  return size;
+}
+
+function countFilesByExtension(dirPath, extension) {
+  let count = 0;
+  try {
+    for (const entry of fs.readdirSync(dirPath, { withFileTypes: true })) {
+      const fullPath = path.join(dirPath, entry.name);
+      if (entry.isDirectory()) {
+        count += countFilesByExtension(fullPath, extension);
+      } else if (entry.name.endsWith(extension)) {
+        count++;
+      }
+    }
+  } catch { /* ignore */ }
+  return count;
+}
+
+// ── 1. Required Artifacts ────────────────────────────────────────────
+log("\n📄 Critical Files:");
+for (const artifact of REQUIRED_ARTIFACTS) {
+  const fullPath = path.join(projectRoot, artifact);
+  const size = getFileSize(fullPath);
+
+  if (size === -1) {
+    addError(`MISSING: ${artifact}`);
+    continue;
+  }
+
+  const ext = path.extname(artifact).slice(1);
+  const minSize = CONFIG.minFileSizes[ext] || 0;
+  const isRedirect = REDIRECT_FILES.has(artifact);
+  const sizeKB = (size / 1024).toFixed(2);
+
+  if (!isRedirect && size < minSize) {
+    addError(`CORRUPT: ${artifact} (${size}B < ${minSize}B min)`);
+  } else {
+    addPass(`${artifact} (${sizeKB} KB)${isRedirect ? " [redirect]" : ""}`);
+  }
+}
+
+// ── 2. Asset Directories ─────────────────────────────────────────────
+log("\n📦 Asset Bundles:");
 for (const dir of REQUIRED_ASSET_DIRS) {
   const fullPath = path.join(projectRoot, dir.path);
 
-  if (fs.existsSync(fullPath) && fs.statSync(fullPath).isDirectory()) {
-    const files = fs.readdirSync(fullPath);
-    const cssFiles = files.filter(f => f.endsWith(".css"));
-    const jsFiles = files.filter(f => f.endsWith(".js"));
+  if (!fs.existsSync(fullPath) || !fs.statSync(fullPath).isDirectory()) {
+    addError(`MISSING DIR: ${dir.path} (${dir.description})`);
+    continue;
+  }
 
-    if (files.length < dir.minFiles) {
-      errors.push(
-        `❌ EMPTY: ${dir.path} (${files.length} files < ${dir.minFiles} min)`
-      );
-      console.log(`❌ ${dir.path} - TOO FEW FILES (${files.length})`);
-    } else {
-      console.log(`✅ ${dir.path} (${files.length} files)`);
-      console.log(`   ├─ CSS: ${cssFiles.length} files`);
-      console.log(`   └─ JS:  ${jsFiles.length} files`);
+  const files = fs.readdirSync(fullPath);
+  const cssFiles = files.filter(f => f.endsWith(".css"));
+  const jsFiles = files.filter(f => f.endsWith(".js"));
 
-      // Validate CSS bundle sizes
-      for (const cssFile of cssFiles) {
-        const cssPath = path.join(fullPath, cssFile);
-        const cssSize = fs.statSync(cssPath).size;
-        if (cssSize < MIN_FILE_SIZES.css) {
-          warnings.push(`⚠️ Small CSS: ${cssFile} (${cssSize} bytes)`);
-        }
-      }
+  if (files.length < dir.minFiles) {
+    addError(`EMPTY: ${dir.path} (${files.length} files < ${dir.minFiles} min)`);
+  } else {
+    addPass(`${dir.path} (${files.length} files: ${cssFiles.length} CSS, ${jsFiles.length} JS)`);
 
-      // Validate JS bundle sizes
-      for (const jsFile of jsFiles) {
-        const jsPath = path.join(fullPath, jsFile);
-        const jsSize = fs.statSync(jsPath).size;
-        if (jsSize < MIN_FILE_SIZES.js) {
-          warnings.push(`⚠️ Small JS: ${jsFile} (${jsSize} bytes)`);
-        }
+    for (const cssFile of cssFiles) {
+      const cssSize = getFileSize(path.join(fullPath, cssFile));
+      if (cssSize < CONFIG.minFileSizes.css) {
+        addWarning(`Small CSS: ${cssFile} (${cssSize}B)`);
       }
     }
-  } else {
-    errors.push(`❌ MISSING DIR: ${dir.path} (${dir.description})`);
-    console.log(`❌ ${dir.path} - NOT FOUND`);
+    for (const jsFile of jsFiles) {
+      const jsSize = getFileSize(path.join(fullPath, jsFile));
+      if (jsSize < CONFIG.minFileSizes.js) {
+        addWarning(`Small JS: ${jsFile} (${jsSize}B)`);
+      }
+    }
   }
 }
 
-// Check important artifacts
-console.log("\n📋 Optional Files:");
-for (const artifact of IMPORTANT_ARTIFACTS) {
-  const fullPath = path.join(projectRoot, artifact);
-
-  if (fs.existsSync(fullPath)) {
-    const stats = fs.statSync(fullPath);
-    const size = (stats.size / 1024).toFixed(2);
-    console.log(`✅ ${artifact} (${size} KB)`);
-  } else {
-    warnings.push(`⚠️  OPTIONAL: ${artifact}`);
-    console.log(`⚠️  ${artifact} - not found`);
-  }
-}
-
-// Structural HTML content checks
-// 500-byte threshold is too low — a blank Astro layout already exceeds it.
-// These checks verify that *meaningful content* was actually rendered.
-console.log("\n🔬 HTML Content Integrity:");
+// ── 3. HTML Content Integrity ────────────────────────────────────────
+log("\n🔬 HTML Content Integrity:");
 for (const { file, markers } of HTML_CONTENT_CHECKS) {
   const fullPath = path.join(projectRoot, file);
 
   if (!fs.existsSync(fullPath)) {
-    // Already caught by REQUIRED_ARTIFACTS — skip to avoid duplicate error
-    console.log(`⏭️  ${file} - skipped (file not found)`);
+    log(`⏭️  ${file} - skipped (not found)`);
     continue;
   }
 
-  const html = fs.readFileSync(fullPath, "utf8");
-  const missing = markers.filter(m => !html.includes(m));
-
+  const missing = markers.filter(m => !fileContains(fullPath, m));
   if (missing.length > 0) {
-    const detail = missing.map(m => `"${m}"`).join(", ");
-    errors.push(`❌ CONTENT: ${file} is missing expected markers: ${detail}`);
-    console.log(`❌ ${file} - missing content markers: ${detail}`);
+    addError(`CONTENT: ${file} missing: ${missing.map(m => `"${m}"`).join(", ")}`);
   } else {
-    console.log(`✅ ${file} - all ${markers.length} content markers present`);
+    addPass(`${file} - all ${markers.length} markers present`);
   }
 }
 
-// Check dist folder size
-console.log("\n📊 Build Size Analysis:");
-try {
-  const distSize = getDirectorySize(path.join(projectRoot, "dist"));
-  const distSizeMB = (distSize / 1024 / 1024).toFixed(2);
-  console.log(`   Total dist size: ${distSizeMB} MB`);
+// ── 4. SEO Content Validation (NEW) ──────────────────────────────────
+log("\n🔍 SEO Content Validation:");
+for (const { file, markers, description } of SEO_CONTENT_CHECKS) {
+  const fullPath = path.join(projectRoot, file);
 
-  // Count HTML pages
-  const htmlCount = countFilesByExtension(
-    path.join(projectRoot, "dist"),
-    ".html"
-  );
-  console.log(`   HTML pages: ${htmlCount}`);
-
-  if (distSize < 100 * 1024) {
-    // Less than 100KB
-    errors.push(
-      `❌ Build size critically small (${distSizeMB} MB) - build may have failed`
-    );
-  } else if (distSize < 500 * 1024) {
-    // Less than 500KB
-    warnings.push(`⚠️ Build size seems small (${distSizeMB} MB)`);
+  if (!fs.existsSync(fullPath)) {
+    addError(`SEO: ${file} not found — ${description}`);
+    continue;
   }
 
-  if (htmlCount < 5) {
-    errors.push(
-      `❌ Too few HTML pages (${htmlCount}) - content may be missing`
-    );
+  const missing = markers.filter(m => !fileContains(fullPath, m));
+  if (missing.length > 0) {
+    addError(`SEO: ${file} invalid — missing: ${missing.map(m => `"${m}"`).join(", ")}`);
+  } else {
+    addPass(`${file} - valid (${description})`);
   }
-} catch (e) {
-  warnings.push(`⚠️ Could not calculate build size: ${e.message}`);
 }
 
-// Summary
-console.log("\n" + "=".repeat(50));
+// ── 5. Build Size Analysis ───────────────────────────────────────────
+log("\n📊 Build Size Analysis:");
+const distSize = getDirectorySize(distDir);
+const distSizeMB = (distSize / 1024 / 1024).toFixed(2);
+const htmlCount = countFilesByExtension(distDir, ".html");
 
-if (errors.length === 0) {
-  console.log("✅ BUILD VERIFICATION PASSED");
-  console.log(`   All ${REQUIRED_ARTIFACTS.length} critical artifacts found!`);
-  console.log(`   Asset bundles validated!`);
+log(`   Total dist size: ${distSizeMB} MB`);
+log(`   HTML pages: ${htmlCount}`);
 
-  if (warnings.length > 0) {
-    console.log(`\n⚠️  Warnings: ${warnings.length}`);
-    for (const w of warnings) {
-      console.log(`   ${w}`);
-    }
-  }
+if (distSize < CONFIG.buildSize.criticalMinBytes) {
+  addError(`Build size critically small (${distSizeMB} MB)`);
+} else if (distSize < CONFIG.buildSize.warningMinBytes) {
+  addWarning(`Build size seems small (${distSizeMB} MB)`);
+}
 
-  console.log("\n🚀 Build is ready for deployment!");
-  process.exit(0);
+if (htmlCount < CONFIG.minHtmlPages) {
+  addError(`Too few HTML pages (${htmlCount} < ${CONFIG.minHtmlPages})`);
+}
+
+// ── 6. Summary ───────────────────────────────────────────────────────
+const result = {
+  passed: errors.length === 0,
+  errors: errors.length,
+  warnings: warnings.length,
+  checks: passed.length,
+  distSizeMB: parseFloat(distSizeMB),
+  htmlPages: htmlCount,
+  errorDetails: errors,
+  warningDetails: warnings,
+};
+
+if (FLAGS.json) {
+  console.log(JSON.stringify(result, null, 2));
 } else {
-  console.log("❌ BUILD VERIFICATION FAILED");
-  console.log("\n🚨 DEPLOYMENT BLOCKED - Fix these issues first:");
-  console.log(`\n❌ Critical Issues: ${errors.length}`);
-  for (const e of errors) {
-    console.log(`   ${e}`);
-  }
-
-  if (warnings.length > 0) {
-    console.log(`\n⚠️  Warnings: ${warnings.length}`);
-    for (const w of warnings) {
-      console.log(`   ${w}`);
+  log("\n" + "=".repeat(50));
+  if (errors.length === 0) {
+    log("✅ BUILD VERIFICATION PASSED");
+    log(`   ${passed.length} checks passed, ${warnings.length} warnings`);
+    if (warnings.length > 0) {
+      log("\n⚠️  Warnings:");
+      warnings.forEach(w => log(`   ${w}`));
     }
+    log("\n🚀 Build is ready for deployment!");
+  } else {
+    log("❌ BUILD VERIFICATION FAILED");
+    log(`\n🚨 DEPLOYMENT BLOCKED — ${errors.length} critical issue(s):`);
+    errors.forEach(e => log(`   ❌ ${e}`));
+    if (warnings.length > 0) {
+      log(`\n⚠️  Warnings: ${warnings.length}`);
+      warnings.forEach(w => log(`   ${w}`));
+    }
+    log("\n💡 Troubleshooting:");
+    log("   1. Check build output for errors");
+    log("   2. Run: pnpm run build");
+    log("   3. Inspect dist/ folder contents");
+    log("   4. Then: pnpm run verify-build");
   }
-
-  console.log("\n💡 Troubleshooting Steps:");
-  console.log("   1. Check build output for errors");
-  console.log("   2. Run: pnpm run build");
-  console.log("   3. Inspect dist/ folder contents");
-  console.log("   4. Then: pnpm run verify-build");
-
-  process.exit(1);
 }
 
-/**
- * Calculate total size of a directory recursively
- */
-function getDirectorySize(dirPath) {
-  let size = 0;
-
-  const files = fs.readdirSync(dirPath);
-
-  for (const file of files) {
-    const filePath = path.join(dirPath, file);
-    const stats = fs.statSync(filePath);
-
-    if (stats.isDirectory()) {
-      size += getDirectorySize(filePath);
-    } else {
-      size += stats.size;
-    }
-  }
-
-  return size;
-}
-
-/**
- * Count files with a specific extension recursively
- */
-function countFilesByExtension(dirPath, extension) {
-  let count = 0;
-
-  const files = fs.readdirSync(dirPath);
-
-  for (const file of files) {
-    const filePath = path.join(dirPath, file);
-    const stats = fs.statSync(filePath);
-
-    if (stats.isDirectory()) {
-      count += countFilesByExtension(filePath, extension);
-    } else if (file.endsWith(extension)) {
-      count++;
-    }
-  }
-
-  return count;
-}
+process.exit(errors.length === 0 ? 0 : 1);

@@ -2,12 +2,16 @@
 FROM node:24-alpine AS base
 WORKDIR /app
 
-# Install git for remark-modified-time plugin and corepack for pnpm
+# Disable Husky in Docker builds
+ENV HUSKY=0
+
+# Install git for remark-modified-time plugin and corepack for pnpm v11
 RUN apk add --no-cache git && \
     corepack enable && \
-    corepack prepare pnpm@10.20.0 --activate
+    corepack prepare pnpm@11.17.0 --activate
 
-COPY package.json pnpm-lock.yaml ./
+# IMPORTANT: COPY pnpm-workspace.yaml so pnpm v11 reads allowBuilds settings!
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN pnpm install --no-frozen-lockfile
 
 COPY . .

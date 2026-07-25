@@ -9,15 +9,16 @@ concurrency:
   group: production
   cancel-in-progress: false
 
+# Only ORG_ID and PROJECT_ID at workflow level (non-secret)
 env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-  VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
 
 jobs:
   deploy:
     name: Deploy to Production
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     environment:
       name: production
       url: https://natspaper.vercel.app
@@ -26,65 +27,108 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 0 # Full git history for remark-modified-time plugin
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 10
+          version: 11.17.0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 26
+          node-version: 24
           cache: pnpm
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Run checks
+      - name: Type check
+        run: pnpm astro check
+
+      - name: Lint & Format
         run: |
           pnpm run lint
           pnpm run format:check
-          pnpm test:run
+
+      - name: Unit tests
+        run: pnpm test:run
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v7 # Upgraded to v7 for Node 24 support
+        with:
+          name: test-results-${{ github.run_id }}
+          path: coverage/
+          retention-days: 7
+          if-no-files-found: ignore
 
       - name: Install Vercel CLI
         run: pnpm install --global vercel@latest
 
       - name: Pull Vercel environment
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: vercel pull --yes --environment=production --token=$VERCEL_TOKEN
 
       - name: Build project
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: vercel build --prod --token=$VERCEL_TOKEN
 
       - name: Deploy to Vercel
         id: deploy
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: |
           url=$(vercel deploy --prebuilt --prod --token=$VERCEL_TOKEN)
           echo "url=$url" >> $GITHUB_OUTPUT
 
       - name: Verify deployment
         run: |
-          echo "Waiting for deployment to be ready..."
-          sleep 10
+          MAX_RETRIES=5
+          RETRY_DELAY=5
 
-          BASE_URL="https://natspaper.vercel.app/en"
+          check_url() {
+            local url="$1"
+            for i in $(seq 1 $MAX_RETRIES); do
+              status=$(curl -s -L -w "%{http_code}" -o /dev/null --max-time 15 "$url")
+              if [ "$status" = "200" ]; then
+                echo "✅ $url"
+                return 0
+              fi
+              sleep $RETRY_DELAY
+              RETRY_DELAY=$((RETRY_DELAY * 2))
+            done
+            echo "❌ $url ($status)"
+            return 1
+          }
 
-          for page in "/" "/posts" "/tags" "/archives"; do
-            status=$(curl -s -L -w "%{http_code}" -o /dev/null "$BASE_URL$page")
-            if [ "$status" = "200" ]; then
-              echo "✅ $page - OK"
-            else
-              echo "❌ $page - Failed ($status)"
-              exit 1
-            fi
+          FAILED=0
+          BASE="https://natspaper.vercel.app"
+
+          for page in /en/ /en/posts /en/tags /en/archives \
+                      /ka/ /ka/posts /ka/tags \
+                      /api/health.json /sitemap-index.xml \
+                      /en/rss.xml /robots.txt; do
+            check_url "$BASE$page" || FAILED=1
           done
+
+          [ "$FAILED" -eq 1 ] && exit 1
+
+      - name: Rollback on failure
+        if: failure() && steps.deploy.outputs.url != ''
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          echo "🔄 Rolling back..."
+          vercel rollback --yes --token=$VERCEL_TOKEN
 
       - name: Deployment summary
         if: always()
         run: |
           echo "### 🚀 Production Deployment" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "- **URL**: ${{ steps.deploy.outputs.url }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **URL**: ${{ steps.deploy.outputs.url || 'N/A' }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Commit**: \`${GITHUB_SHA:0:7}\`" >> $GITHUB_STEP_SUMMARY
           echo "- **Status**: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
