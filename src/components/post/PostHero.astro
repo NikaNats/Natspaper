@@ -54,15 +54,14 @@ const { slug, title, pubDatetime, modDatetime, timezone, readingTimeText } =
      ========================================================================== */
 
   .post-hero {
-    /* Fluid spacing */
+    /* ✅ Container Query Context */
+    container-type: inline-size;
+    container-name: post-hero;
+
     --hero-margin-block-start: clamp(1.5rem, 1rem + 2vw, 3rem);
     --hero-margin-block-end: clamp(2rem, 1.5rem + 2.5vw, 4rem);
     --hero-gap: clamp(1rem, 0.75rem + 0.5vw, 1.5rem);
-
-    /* Layout - full width of parent (720px container) */
     width: 100%;
-    margin-block-start: var(--hero-margin-block-start);
-    margin-block-end: var(--hero-margin-block-end);
     text-align: center;
   }
 
