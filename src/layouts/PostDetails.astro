@@ -8,8 +8,8 @@ import {
   resolveOgImageUrl,
   getAdjacentPosts,
   getReadingTimeDisplay,
+  getPostUrl,
 } from "@/utils/post";
-import { getLastPathSegment } from "@/utils/core/slugify";
 import { PostRepository } from "@/utils/post/repository";
 import type { BreadcrumbItem } from "@/types"; // <--- 1. Import the type
 
@@ -55,7 +55,16 @@ const { Content, headings } = await render(post);
 const locale = (Astro.currentLocale as Lang) || "en";
 const { t, tTag } = getI18n(locale);
 const readingTimeText = getReadingTimeDisplay(post.body || "");
-const ogImage = resolveOgImageUrl(initOgImage, post.slug, Astro.url.origin);
+// Dynamic OG images are keyed by the SOURCE locale of the entry
+// ([slug].png.ts only generates images for posts in each locale's own
+// collection). A fallback-rendered post must therefore reference its
+// original locale's image, mirroring the canonical URL logic below.
+const ogImage = resolveOgImageUrl(
+  initOgImage,
+  post.slug,
+  Astro.url.origin,
+  isFallback && originalLocale ? originalLocale : locale
+);
 
 // 2. Fetch Series Data
 const seriesParts = post.data.series
@@ -117,10 +126,7 @@ const seriesSchema = post.data.series
       hasPart: seriesParts.map(p => ({
         "@type": "BlogPosting",
         headline: p.post.data.title,
-        url: new URL(
-          `/${locale}/posts/${getLastPathSegment(p.post.slug)}`,
-          SITE.website
-        ).href,
+        url: new URL(getPostUrl(locale, p.post.slug), SITE.website).href,
       })),
     }
   : null;
@@ -128,10 +134,7 @@ const seriesSchema = post.data.series
 // 7. SEO: Handle Fallback Canonical
 const canonicalURL =
   isFallback && originalLocale
-    ? new URL(
-        `/${originalLocale}/posts/${post.slug.split("/").pop()}`,
-        SITE.website
-      ).href
+    ? new URL(getPostUrl(originalLocale, post.slug), SITE.website).href
     : frontmatterCanonical;
 
 const originalLangName = originalLocale

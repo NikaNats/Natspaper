@@ -941,30 +941,28 @@ Web performance optimization is an ongoing process that requires monitoring, tes
 
     it("should resolve remote OG image URL", () => {
       const ogImage = 'https://example.com/og.jpg';
-      const result = resolveOgImageUrl(ogImage, 'test-post', siteUrl);
+      const result = resolveOgImageUrl(ogImage, 'test-post', siteUrl, 'en');
 
       expect(result).toBe('https://example.com/og.jpg');
     });
 
     it("should resolve local asset OG image", () => {
       const ogImage = { src: '/images/og.png' };
-      const result = resolveOgImageUrl(ogImage, 'test-post', siteUrl);
+      const result = resolveOgImageUrl(ogImage, 'test-post', siteUrl, 'en');
 
       expect(result).toBe('https://natspaper.vercel.app/images/og.png');
     });
 
-    it("should generate dynamic OG image when enabled", () => {
+    it("should generate dynamic OG image matching the static route contract", () => {
       // This test assumes FEATURES.dynamicOgImage is true
-      const result = resolveOgImageUrl(undefined, 'test-post', siteUrl);
+      const result = resolveOgImageUrl(undefined, 'test-post', siteUrl, 'en');
 
-      // The actual result depends on FEATURES.dynamicOgImage setting
-      // If enabled, it should be /posts/test-post/index.png
-      expect(result).toMatch(/^https:\/\/natspaper\.vercel\.app\/(posts\/test-post\/index\.png)?$/);
+      expect(result).toBe('https://natspaper.vercel.app/en/posts/test-post.png');
     });
 
     it("should return undefined when no OG image is available", () => {
       // Mock FEATURES.dynamicOgImage as false if possible, or test the undefined case
-      const result = resolveOgImageUrl(undefined, 'test-post', siteUrl);
+      const result = resolveOgImageUrl(undefined, 'test-post', siteUrl, 'en');
 
       // This might return the dynamic image or undefined depending on config
       expect(result).toBeDefined(); // For now, just check it's handled

@@ -17,3 +17,4 @@ export {
   getReadingTimeDisplay,
 } from "./readingTime";
 export { getPostTitleTransitionName } from "./getPostTitleTransitionName";
+export { getPostSlug, getPostUrl } from "./postUrl";

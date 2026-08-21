@@ -1,5 +1,7 @@
 import type { CollectionEntry } from "astro:content";
 import { FEATURES } from "@/config";
+import { getPostUrl } from "./postUrl";
+import type { Lang } from "@/i18n/config";
 
 /**
  * Resolve the final OG image URL for a blog post.
@@ -9,29 +11,31 @@ import { FEATURES } from "@/config";
  * 3. Dynamic OG image if enabled
  *
  * @param ogImage - OG image from post frontmatter (can be string, object with src, or undefined)
- * @param slug - Post slug for dynamic OG image path construction
+ * @param slug - Post slug or locale-prefixed entry ID ("en/my-post")
  * @param siteUrl - Base site URL for resolving relative URLs (typically Astro.url.origin)
+ * @param locale - Route locale; required for building the dynamic OG image path
  * @returns Absolute URL to OG image or undefined if no image is available
  *
  * @example
  * // Remote OG image
- * resolveOgImageUrl("https://example.com/og.jpg", "my-post", "https://example.com")
+ * resolveOgImageUrl("https://example.com/og.jpg", "my-post", "https://example.com", "en")
  * // Returns: "https://example.com/og.jpg"
  *
  * @example
  * // Local asset
- * resolveOgImageUrl({ src: "@/images/og.png" }, "my-post", "https://example.com")
+ * resolveOgImageUrl({ src: "@/images/og.png" }, "my-post", "https://example.com", "en")
  * // Returns: "https://example.com/images/og.png"
  *
  * @example
  * // Dynamic OG image (if FEATURES.dynamicOgImage is true)
- * resolveOgImageUrl(undefined, "my-post", "https://example.com")
- * // Returns: "https://example.com/posts/my-post/index.png"
+ * resolveOgImageUrl(undefined, "en/my-post", "https://example.com", "ka")
+ * // Returns: "https://example.com/ka/posts/my-post.png"
  */
 export function resolveOgImageUrl(
   ogImage: string | { src: string } | undefined,
   slug: string,
-  siteUrl: string
+  siteUrl: string,
+  locale: Lang | string
 ): string | undefined {
   let ogImageUrl: string | undefined;
 
@@ -47,7 +51,11 @@ export function resolveOgImageUrl(
 
   // Priority 3: Dynamic OG image (if enabled and no explicit image provided)
   if (!ogImageUrl && FEATURES.dynamicOgImage) {
-    ogImageUrl = `/posts/${slug}/index.png`;
+    // Must match the static route contract of
+    // src/pages/[locale]/posts/[slug].png.ts → "/{locale}/posts/{slug}.png".
+    // getPostUrl() strips any locale prefix from the slug and applies the
+    // explicit target locale, so locale-prefixed entry IDs are handled safely.
+    ogImageUrl = `${getPostUrl(locale, slug)}.png`;
   }
 
   // Convert relative/dynamic paths to absolute URLs
@@ -137,20 +145,23 @@ export function getAdjacentPosts(
  * @param post - Blog post collection entry
  * @param siteUrl - Base site URL
  * @param postUrl - Full URL to the post
+ * @param locale - Route locale; required for building the dynamic OG image path
  * @returns Structured data object suitable for JSON-LD embedding
  *
  * @example
  * const structuredData = generatePostStructuredData(
  *   post,
  *   "https://example.com",
- *   "https://example.com/posts/my-post"
+ *   "https://example.com/posts/my-post",
+ *   "en"
  * );
  * // Returns: { "@context": "https://schema.org", "@type": "BlogPosting", ... }
  */
 export function generatePostStructuredData(
   post: CollectionEntry<"blog">,
   siteUrl: string,
-  postUrl: string
+  postUrl: string,
+  locale: Lang | string
 ) {
   const {
     title,
@@ -162,7 +173,7 @@ export function generatePostStructuredData(
     ogImage: ogImageData,
   } = post.data;
 
-  const ogImageUrl = resolveOgImageUrl(ogImageData, post.slug, siteUrl);
+  const ogImageUrl = resolveOgImageUrl(ogImageData, post.slug, siteUrl, locale);
 
   return {
     "@context": "https://schema.org",

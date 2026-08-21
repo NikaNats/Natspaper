@@ -22,7 +22,7 @@ describe('SEO Utilities', () => {
       const siteUrl = 'https://natspaper.vercel.app';
       const postUrl = 'https://natspaper.vercel.app/posts/test-post';
 
-      const structuredData = generatePostStructuredData(post, siteUrl, postUrl);
+      const structuredData = generatePostStructuredData(post, siteUrl, postUrl, 'en');
 
       expect(structuredData['@context']).toBe('https://schema.org');
       expect(structuredData['@type']).toBe('BlogPosting');
@@ -39,7 +39,7 @@ describe('SEO Utilities', () => {
 
       const post = createMockBlogPost("test-post", pubDate, modDate);
 
-      const structuredData = generatePostStructuredData(post, 'https://example.com', 'https://example.com/post');
+      const structuredData = generatePostStructuredData(post, 'https://example.com', 'https://example.com/post', 'en');
 
       expect(structuredData.datePublished).toBe(pubDate.toISOString());
       expect(structuredData.dateModified).toBe(modDate.toISOString());
@@ -50,7 +50,7 @@ describe('SEO Utilities', () => {
 
       const post = createMockBlogPost("test-post", pubDate, null);
 
-      const structuredData = generatePostStructuredData(post, 'https://example.com', 'https://example.com/post');
+      const structuredData = generatePostStructuredData(post, 'https://example.com', 'https://example.com/post', 'en');
 
       expect(structuredData.datePublished).toBe(pubDate.toISOString());
       expect(structuredData.dateModified).toBe(pubDate.toISOString());
@@ -65,7 +65,7 @@ describe('SEO Utilities', () => {
 
       const siteUrl = 'https://natspaper.vercel.app';
 
-      const structuredData = generatePostStructuredData(post, siteUrl, 'https://natspaper.vercel.app/post');
+      const structuredData = generatePostStructuredData(post, siteUrl, 'https://natspaper.vercel.app/post', 'en');
 
       expect(structuredData.image).toBeDefined();
       if (structuredData.image) {
@@ -77,11 +77,11 @@ describe('SEO Utilities', () => {
     it('should include dynamic OG image when no explicit image is provided', () => {
       const post = createMockBlogPost("test-post", new Date("2025-01-15"));
 
-      const structuredData = generatePostStructuredData(post, 'https://example.com', 'https://example.com/post');
+      const structuredData = generatePostStructuredData(post, 'https://example.com', 'https://example.com/post', 'en');
 
       expect(structuredData.image).toBeDefined();
       if (structuredData.image) {
-        expect(structuredData.image.url).toBe('https://example.com/posts/test-post/index.png');
+        expect(structuredData.image.url).toBe('https://example.com/en/posts/test-post.png');
       }
     });
 
@@ -94,7 +94,7 @@ describe('SEO Utilities', () => {
 
       const siteUrl = 'https://natspaper.vercel.app';
 
-      const structuredData = generatePostStructuredData(post, siteUrl, 'https://natspaper.vercel.app/post');
+      const structuredData = generatePostStructuredData(post, siteUrl, 'https://natspaper.vercel.app/post', 'en');
 
       expect(structuredData.image).toBeDefined();
       if (structuredData.image) {
@@ -108,32 +108,30 @@ describe('SEO Utilities', () => {
 
     it('should resolve remote OG image URL', () => {
       const ogImage = 'https://example.com/og.jpg';
-      const result = resolveOgImageUrl(ogImage, 'test-post', siteUrl);
+      const result = resolveOgImageUrl(ogImage, 'test-post', siteUrl, 'en');
 
       expect(result).toBe('https://example.com/og.jpg');
     });
 
     it('should resolve local asset OG image', () => {
       const ogImage = { src: '/images/og.png' };
-      const result = resolveOgImageUrl(ogImage, 'test-post', siteUrl);
+      const result = resolveOgImageUrl(ogImage, 'test-post', siteUrl, 'en');
 
       expect(result).toBe('https://natspaper.vercel.app/images/og.png');
     });
 
     it('should generate dynamic OG image when enabled and no explicit image provided', () => {
       // This depends on FEATURES.dynamicOgImage being true
-      const result = resolveOgImageUrl(undefined, 'test-post', siteUrl);
+      const result = resolveOgImageUrl(undefined, 'test-post', siteUrl, 'en');
 
-      // Should return the dynamic OG image path
-      expect(result).toMatch(/https:\/\/natspaper\.vercel\.app\/posts\/test-post\/index\.png/);
+      // Should return the dynamic OG image path matching the static route
+      expect(result).toBe('https://natspaper.vercel.app/en/posts/test-post.png');
     });
 
-    it('should return undefined when no OG image is available and dynamic is disabled', () => {
-      // This test assumes the function handles the case properly
-      // The actual behavior depends on FEATURES.dynamicOgImage
-      const result = resolveOgImageUrl(undefined, 'test-post', siteUrl);
+    it('should handle locale-prefixed slugs in dynamic path', () => {
+      const result = resolveOgImageUrl(undefined, 'ka/test-post', siteUrl, 'en');
 
-      expect(result).toBeDefined(); // Either dynamic image or undefined
+      expect(result).toBe('https://natspaper.vercel.app/en/posts/test-post.png');
     });
   });
 

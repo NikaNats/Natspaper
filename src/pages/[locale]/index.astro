@@ -10,6 +10,7 @@ import FeaturedPostCard from "@/components/post/FeaturedPostCard.astro";
 import { getSocials } from "@/data/socials";
 import { getI18n, type Lang } from "@/i18n";
 import { SUPPORTED_LANGS, DEFAULT_LANG } from "@/i18n/config";
+import { getPostUrl } from "@/utils/post";
 import profilePic from "@/assets/images/me.jpeg";
 
 export const getStaticPaths = (() => {
@@ -112,7 +113,7 @@ const heroContent = heroContentByLocale[
           <ul class="grid gap-4 sm:grid-cols-2">
             {featuredPosts.map(({ data, id, body }) => (
               <FeaturedPostCard
-                href={`/${locale}/posts/${id}`}
+                href={getPostUrl(locale, id)}
                 frontmatter={data}
                 body={body}
               />

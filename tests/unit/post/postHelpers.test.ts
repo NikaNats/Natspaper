@@ -29,7 +29,8 @@ describe("postHelpers", () => {
           format: "png" | "jpg";
         },
         "test-post",
-        "https://mysite.com"
+        "https://mysite.com",
+        "en"
       );
 
       expect(result).toBe("https://example.com/og.jpg");
@@ -45,7 +46,8 @@ describe("postHelpers", () => {
       const result = resolveOgImageUrl(
         assetImage,
         "test-post",
-        "https://mysite.com"
+        "https://mysite.com",
+        "en"
       );
 
       expect(result).toBe("https://mysite.com/images/og.png");
@@ -55,11 +57,30 @@ describe("postHelpers", () => {
       const result = resolveOgImageUrl(
         undefined,
         "my-post",
-        "https://mysite.com"
+        "https://mysite.com",
+        "en"
       );
 
-      // With dynamic OG enabled, should return dynamic path
-      expect(result).toContain("/posts/my-post/index.png");
+      // Must match the [locale]/posts/[slug].png.ts route contract
+      expect(result).toBe("https://mysite.com/en/posts/my-post.png");
+    });
+
+    it("should build the dynamic path from a locale-prefixed entry ID (regression: dead OG route)", () => {
+      // Regression guard: glob-loader IDs are locale-prefixed ("en/my-post");
+      // the emitted URL must use the target locale and bare slug, matching
+      // the actual static route /{locale}/posts/{slug}.png.
+      const result = resolveOgImageUrl(
+        undefined,
+        "en/system-design-part-1",
+        "https://mysite.com",
+        "ka"
+      );
+
+      expect(result).toBe(
+        "https://mysite.com/ka/posts/system-design-part-1.png"
+      );
+      expect(result).not.toContain("/index.png");
+      expect(result).not.toContain("/posts/en/");
     });
 
     it("should resolve relative URLs to absolute paths", () => {
@@ -71,7 +92,8 @@ describe("postHelpers", () => {
           format: "png" | "jpg";
         },
         "test-post",
-        "https://mysite.com"
+        "https://mysite.com",
+        "en"
       );
 
       expect(result).toBe("https://mysite.com/og-images/post.jpg");
@@ -86,7 +108,8 @@ describe("postHelpers", () => {
           format: "png" | "jpg";
         }, // Direct URL takes priority
         "test-post",
-        "https://mysite.com"
+        "https://mysite.com",
+        "en"
       );
 
       expect(result).toBe("https://remote.com/og.jpg");
@@ -227,7 +250,8 @@ describe("postHelpers", () => {
       const result = generatePostStructuredData(
         mockPost,
         "https://mysite.com",
-        "https://mysite.com/posts/test-post"
+        "https://mysite.com/posts/test-post",
+        "en"
       );
 
       expect(result["@context"]).toBe("https://schema.org");
@@ -240,7 +264,8 @@ describe("postHelpers", () => {
       const result = generatePostStructuredData(
         mockPost,
         "https://mysite.com",
-        "https://mysite.com/posts/test-post"
+        "https://mysite.com/posts/test-post",
+        "en"
       );
 
       expect(result.author).toEqual({
@@ -253,7 +278,8 @@ describe("postHelpers", () => {
       const result = generatePostStructuredData(
         mockPost,
         "https://mysite.com",
-        "https://mysite.com/posts/test-post"
+        "https://mysite.com/posts/test-post",
+        "en"
       );
 
       expect(result.datePublished).toMatch(/\d{4}-\d{2}-\d{2}T/);
@@ -264,7 +290,8 @@ describe("postHelpers", () => {
       const result = generatePostStructuredData(
         mockPost,
         "https://mysite.com",
-        "https://mysite.com/posts/test-post"
+        "https://mysite.com/posts/test-post",
+        "en"
       );
 
       expect(result.keywords).toBe("test, demo");
@@ -274,7 +301,8 @@ describe("postHelpers", () => {
       const result = generatePostStructuredData(
         mockPost,
         "https://mysite.com",
-        "https://mysite.com/posts/test-post"
+        "https://mysite.com/posts/test-post",
+        "en"
       );
 
       expect(result.image).toEqual({
@@ -295,7 +323,8 @@ describe("postHelpers", () => {
       const result = generatePostStructuredData(
         postWithoutModDate,
         "https://mysite.com",
-        "https://mysite.com/posts/test-post"
+        "https://mysite.com/posts/test-post",
+        "en"
       );
 
       expect(result.dateModified).toBe(result.datePublished);
@@ -305,7 +334,8 @@ describe("postHelpers", () => {
       const result = generatePostStructuredData(
         mockPost,
         "https://mysite.com",
-        "https://mysite.com/posts/test-post"
+        "https://mysite.com/posts/test-post",
+        "en"
       );
 
       expect(result.url).toBe("https://mysite.com/posts/test-post");
