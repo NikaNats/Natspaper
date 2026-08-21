@@ -21,10 +21,7 @@ const { href, text, class: className = "" } = Astro.props;
   href={href}
   target="_blank"
   rel="noopener noreferrer"
-  class:list={[
-    "flex items-baseline gap-1.5 opacity-80 hover:text-accent",
-    className,
-  ]}
+  class:list={["flex items-baseline gap-1.5 hover:text-accent", className]}
 >
   <IconEdit class="inline-block" />
   <span>{text}</span>
