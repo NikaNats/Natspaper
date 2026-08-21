@@ -20,6 +20,7 @@
 
 import fs from "node:fs";
 import path from "node:path";
+import crypto from "node:crypto";
 import { fileURLToPath } from "node:url";
 
 // ── CLI Argument Parsing ─────────────────────────────────────────────
@@ -69,6 +70,10 @@ const HTML_CONTENT_CHECKS = [
     file: "dist/ka/404/index.html",
     markers: ["<html", "404", "</body>"],
   },
+  {
+    file: "dist/404.html",
+    markers: ["<html", "404", "</body>"],
+  },
 ];
 
 // ── SEO Content Validation ───────────────────────────────────────────
@@ -98,6 +103,7 @@ const REQUIRED_ARTIFACTS = [
   "dist/ka/rss.xml",
   "dist/en/404/index.html",
   "dist/ka/404/index.html",
+  "dist/404.html",
   "dist/api/health.json",
   "dist/favicon.svg",
 ];
@@ -180,6 +186,35 @@ function countFilesByExtension(dirPath, extension) {
     }
   } catch { /* ignore */ }
   return count;
+}
+
+function findHtmlFiles(dir) {
+  const results = [];
+  try {
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      const fullPath = path.join(dir, entry.name);
+      if (entry.isDirectory()) {
+        results.push(...findHtmlFiles(fullPath));
+      } else if (entry.name.endsWith(".html")) {
+        results.push(fullPath);
+      }
+    }
+  } catch { /* ignore */ }
+  return results;
+}
+
+// Mirrors scripts/generate-csp-hashes.js: raw bytes between tags,
+// excluding only real src attributes (\ssrc= — not data-src etc.).
+const INLINE_SCRIPT_REGEX = /<script(?![^>]*\ssrc=)[^>]*>([\s\S]*?)<\/script>/gi;
+
+function extractInlineScripts(html) {
+  const scripts = [];
+  let match;
+  while ((match = INLINE_SCRIPT_REGEX.exec(html)) !== null) {
+    if (match[1].trim().length > 0) scripts.push(match[1]);
+  }
+  INLINE_SCRIPT_REGEX.lastIndex = 0;
+  return scripts;
 }
 
 // ── 1. Required Artifacts ────────────────────────────────────────────
@@ -275,7 +310,69 @@ for (const { file, markers, description } of SEO_CONTENT_CHECKS) {
   }
 }
 
-// ── 5. Build Size Analysis ───────────────────────────────────────────
+// ── 5. CSP Hash Consistency (NEW) ────────────────────────────────────
+// Closed-loop check: every inline script present in dist/ HTML must have
+// its raw-byte SHA-256 hash listed in vercel.json's script-src directive.
+// Catches stale vercel.json (e.g. a build that skipped generate-csp),
+// which would ship pages whose inline scripts are blocked by the CSP.
+log("\n🔐 CSP Hash Consistency:");
+try {
+  const vercelConfig = JSON.parse(
+    fs.readFileSync(path.join(projectRoot, "vercel.json"), "utf8")
+  );
+  const cspHeader = vercelConfig.headers
+    .find(h => h.source === "/(.*)")
+    ?.headers.find(h => h.key === "Content-Security-Policy");
+
+  if (!cspHeader) {
+    addError("CSP: Content-Security-Policy header not found in vercel.json");
+  } else {
+    const scriptSrcDirective =
+      cspHeader.value
+        .split(";")
+        .map(d => d.trim())
+        .find(d => d.startsWith("script-src")) ?? "";
+    const allowedHashes = new Set(scriptSrcDirective.match(/'sha256-[^']+'/g) ?? []);
+
+    if (allowedHashes.size === 0) {
+      addError("CSP: script-src contains no sha256 hashes");
+    } else {
+      const htmlFiles = findHtmlFiles(distDir);
+      let inlineScriptCount = 0;
+      const missingHashes = new Set();
+
+      for (const file of htmlFiles) {
+        const html = fs.readFileSync(file, "utf8");
+        for (const content of extractInlineScripts(html)) {
+          inlineScriptCount++;
+          const hash = crypto
+            .createHash("sha256")
+            .update(content, "utf8")
+            .digest("base64");
+          const cspHash = `'sha256-${hash}'`;
+          if (!allowedHashes.has(cspHash)) {
+            missingHashes.add(`${path.relative(projectRoot, file)} → ${cspHash}`);
+          }
+        }
+      }
+
+      if (missingHashes.size > 0) {
+        addError(
+          `CSP: ${missingHashes.size} inline script hash(es) missing from vercel.json (stale CSP — run "pnpm run generate-csp"):`
+        );
+        for (const entry of missingHashes) log(`   ❌ ${entry}`);
+      } else {
+        addPass(
+          `CSP: all ${inlineScriptCount} inline scripts across ${htmlFiles.length} HTML files covered by ${allowedHashes.size} hashes in vercel.json`
+        );
+      }
+    }
+  }
+} catch (err) {
+  addError(`CSP: consistency check failed — ${err.message}`);
+}
+
+// ── 6. Build Size Analysis ───────────────────────────────────────────
 log("\n📊 Build Size Analysis:");
 const distSize = getDirectorySize(distDir);
 const distSizeMB = (distSize / 1024 / 1024).toFixed(2);
@@ -294,7 +391,7 @@ if (htmlCount < CONFIG.minHtmlPages) {
   addError(`Too few HTML pages (${htmlCount} < ${CONFIG.minHtmlPages})`);
 }
 
-// ── 6. Summary ───────────────────────────────────────────────────────
+// ── 7. Summary ───────────────────────────────────────────────────────
 const result = {
   passed: errors.length === 0,
   errors: errors.length,

@@ -39,19 +39,28 @@ function extractInlineContents(html) {
   const scripts = [];
   const styles = [];
 
-  // Match <script>...</script> WITHOUT src attribute (inline only)
-  const scriptRegex = /<script(?![^>]*\bsrc\b)[^>]*>([\s\S]*?)<\/script>/gi;
+  // Match <script>...</script> WITHOUT a src attribute (inline only).
+  // NOTE: `\ssrc=` (whitespace + attribute name + equals) is deliberate.
+  // A word-boundary pattern like \bsrc\b also matches data-src, which
+  // would wrongly exclude inline scripts carrying that attribute.
+  const scriptRegex = /<script(?![^>]*\ssrc=)[^>]*>([\s\S]*?)<\/script>/gi;
   let match;
   while ((match = scriptRegex.exec(html)) !== null) {
-    const content = match[1].trim();
-    if (content.length > 0) scripts.push(content);
+    // Hash the RAW bytes between the tags — browsers hash the exact
+    // document bytes, so trimming here would silently break the CSP.
+    // Empty content is skipped only because hashing "" is meaningless,
+    // not because whitespace is insignificant.
+    const content = match[1];
+    if (content.trim().length > 0) scripts.push(content);
   }
 
-  // Match <style>...</style> WITHOUT href (inline only)
-  const styleRegex = /<style(?![^>]*\bhref\b)[^>]*>([\s\S]*?)<\/style>/gi;
+  // Match all <style>...</style> blocks. <style> elements cannot have an
+  // href attribute, so no exclusion lookahead is needed (a data-href-style
+  // attribute would otherwise be misdetected, same class of bug as src).
+  const styleRegex = /<style[^>]*>([\s\S]*?)<\/style>/gi;
   while ((match = styleRegex.exec(html)) !== null) {
-    const content = match[1].trim();
-    if (content.length > 0) styles.push(content);
+    const content = match[1];
+    if (content.trim().length > 0) styles.push(content);
   }
 
   return { scripts, styles };
