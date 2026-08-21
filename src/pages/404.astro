@@ -1,0 +1,74 @@
+---
+/**
+ * Root 404 Error Page
+ * ===================
+ * Served for any URL outside the /{locale}/ namespace (e.g. /nonexistent,
+ * typo'd assets, stale external links). Static hosts look for a root-level
+ * 404 document ("dist/404.html" via the finalizeDist integration), so this
+ * page is what users actually see instead of the host's plain error.
+ *
+ * Locale is unknowable at build time here, so the page is bilingual by
+ * design: English primary with Georgian secondary text and navigation to
+ * both locales. Marked noindex to keep soft-404s out of search indexes.
+ */
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/layout/Header.astro";
+import Footer from "@/components/layout/Footer.astro";
+import LinkButton from "@/components/ui/LinkButton.astro";
+import { SITE } from "@/config";
+
+export const prerender = true;
+---
+
+<Layout title={`404 Not Found | ${SITE.title}`} description="Page not found.">
+  <meta slot="head" name="robots" content="noindex" />
+
+  <Header />
+
+  <main
+    id="main-content"
+    class="mx-auto flex max-w-3xl flex-1 flex-col items-center justify-center px-4 py-12"
+  >
+    <div class="mb-8 flex flex-col items-center justify-center text-center">
+      <h1 class="text-fluid-6xl font-bold text-accent">404</h1>
+      <span aria-hidden="true" class="text-xl">¯\_(ツ)_/¯</span>
+      <p class="mt-4 text-2xl sm:text-3xl">Page Not Found</p>
+      <p class="mt-2 text-text-secondary">გვერდი ვერ მოიძებნა</p>
+      <p class="mt-2 text-text-secondary">
+        The page you're looking for doesn't exist or has been moved.
+      </p>
+    </div>
+
+    <nav
+      aria-label="Helpful links / სასარგებლო ბმულები"
+      class="w-full max-w-md"
+    >
+      <ul class="flex flex-col gap-3">
+        <li>
+          <LinkButton
+            href="/en/"
+            class="flex w-full items-center justify-center gap-2 rounded-lg border border-border bg-muted px-4 py-3 transition-colors hover:border-accent hover:bg-accent/10"
+          >
+            English homepage
+          </LinkButton>
+        </li>
+        <li>
+          <LinkButton
+            href="/ka/"
+            class="flex w-full items-center justify-center gap-2 rounded-lg border border-border bg-muted px-4 py-3 transition-colors hover:border-accent hover:bg-accent/10"
+          >
+            ქართული მთავარი გვერდი
+          </LinkButton>
+        </li>
+      </ul>
+    </nav>
+  </main>
+
+  <Footer />
+</Layout>
+
+<style>
+  main {
+    min-height: 60svh;
+  }
+</style>

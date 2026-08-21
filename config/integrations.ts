@@ -4,6 +4,7 @@ import sitemap, { ChangeFreqEnum } from "@astrojs/sitemap";
 import Sonda from "sonda/astro";
 import expressiveCode from "astro-expressive-code";
 import { envValidationIntegration } from "../src/integrations/envValidation";
+import { finalizeDistIntegration } from "../src/integrations/finalizeDist";
 import { FEATURES } from "../src/config";
 import { DEFAULT_LANG, LOCALE_CODES } from "../src/i18n/config";
 
@@ -16,6 +17,7 @@ export function getIntegrations() {
 
   const integrations = [
     envValidationIntegration(),
+    finalizeDistIntegration(),
     sitemap({
       // SEO: Filter configuration - exclude pages that shouldn't be indexed
       filter: page => {
