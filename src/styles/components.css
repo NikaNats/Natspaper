@@ -72,7 +72,11 @@
   header {
     @apply relative z-50 w-full bg-transparent transition-colors duration-300;
   }
-  main:not(.article-container) {
+  /* Main.astro-managed pages set [data-width] and constrain themselves via
+     --main-max-width on .main-wrapper (see src/layouts/Main.astro). Capping
+     them here would override that system, pinning content to 720px and making
+     the wide/multi-column layouts (e.g. 3xl:grid-cols-2 post grid) unreachable. */
+  main:not(.article-container):not([data-width]) {
     @apply relative z-0 mx-auto w-full flex-1 px-4;
     max-width: var(--main-width);
   }

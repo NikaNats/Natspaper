@@ -13,6 +13,15 @@
 /* Only apply styles when the primary input mechanism can hover (i.e., a mouse) */
 @custom-variant mouse (@media (hover: hover));
 
+/* Ultra-wide breakpoints (3xl/4xl).
+   Tailwind v4 does not read tailwind.config.ts screens without @config,
+   so these must be declared natively or the 3xl:/4xl: utilities never
+   generate (they were silently dead code since the v4 migration). */
+@theme {
+  --breakpoint-3xl: 1920px;
+  --breakpoint-4xl: 2560px;
+}
+
 /* Map CSS Variables to Tailwind Utility Classes */
 @theme inline {
   --color-background: var(--background);
