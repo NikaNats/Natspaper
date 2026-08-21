@@ -5,10 +5,13 @@ WORKDIR /app
 # Disable Husky in Docker builds
 ENV HUSKY=0
 
-# Install git for remark-modified-time plugin and corepack for pnpm v11
+# Install git for remark-modified-time plugin and enable corepack.
+# pnpm version is NOT pinned here: corepack reads the `packageManager`
+# field from package.json (single source of truth) at invocation time,
+# keeping Docker, CI, CD and local dev on exactly the same version.
+ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0
 RUN apk add --no-cache git && \
-    corepack enable && \
-    corepack prepare pnpm@11.17.0 --activate
+    corepack enable
 
 # IMPORTANT: COPY pnpm-workspace.yaml so pnpm v11 reads allowBuilds settings!
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
