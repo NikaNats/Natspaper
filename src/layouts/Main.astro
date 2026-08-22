@@ -98,14 +98,12 @@ const hasSidebar = Astro.slots.has("sidebar");
  * Formula: min(100% - edge-padding, max-width)
  * This eliminates the need for media queries - content automatically
  * has breathing room on small screens without explicit breakpoints.
+ *
+ * Applied via per-mode classes (main-layout--{narrow|wide|full}) instead of an
+ * inline style custom property: CSP style-src without 'unsafe-inline' blocks
+ * style attributes, which silently disabled these widths on production.
  */
-const widthConfig: Record<WidthMode, string> = {
-  narrow: "min(100% - 2rem, 48rem)", // 768px max, 1rem edge padding
-  wide: "min(100% - 2rem, 72rem)", // 1152px max, 1rem edge padding
-  full: "min(100% - 1rem, 100%)", // Full width, 0.5rem edge padding
-};
 
-const maxWidth = widthConfig[width];
 const layoutClass =
   hasSidebar || layout === "with-sidebar" ? "with-sidebar" : "";
 ---
@@ -115,8 +113,7 @@ const layoutClass =
   data-width={width}
   data-layout={layout}
   id="main-content"
-  class:list={["main-layout", layoutClass]}
-  style={`--main-max-width: ${maxWidth};`}
+  class:list={["main-layout", `main-layout--${width}`, layoutClass]}
 >
   <!-- Full-bleed hero slot - breaks out of content constraints -->
   <slot name="hero" />
@@ -182,9 +179,21 @@ const layoutClass =
 
   .main-wrapper {
     display: flex;
-    width: var(--main-max-width);
     margin-inline: auto;
     gap: 2rem;
+  }
+
+  /* Width modes — class-based (CSP-safe; no inline style attributes) */
+  .main-layout--narrow .main-wrapper {
+    width: min(100% - 2rem, 48rem); /* 768px max, 1rem edge padding */
+  }
+
+  .main-layout--wide .main-wrapper {
+    width: min(100% - 2rem, 72rem); /* 1152px max, 1rem edge padding */
+  }
+
+  .main-layout--full .main-wrapper {
+    width: min(100% - 1rem, 100%); /* Full width, 0.5rem edge padding */
   }
 
   .main-content {
