@@ -50,8 +50,10 @@ import { FEATURES } from "@/config";
  * - narrow: 42rem (672px) - Default, optimal for reading prose
  * - wide: 72rem (1152px) - For dashboards, galleries, multi-column layouts
  * - full: 100% - Full viewport width with fluid edge padding
+ * - app: 768px - Matches the header container (max-w-app) so page content
+ *   aligns edge-to-edge with the site chrome
  */
-type WidthMode = "narrow" | "wide" | "full";
+type WidthMode = "narrow" | "wide" | "full" | "app";
 
 /**
  * Layout Modes:
@@ -194,6 +196,15 @@ const layoutClass =
 
   .main-layout--full .main-wrapper {
     width: min(100% - 1rem, 100%); /* Full width, 0.5rem edge padding */
+  }
+
+  /* Mirrors the header container (max-w-app: 768px + 1rem inner padding)
+     so page content aligns edge-to-edge with the site chrome.
+     Uses px on purpose: max-w-app is px-based, and rem would scale with
+     root font-size and misalign with the header. */
+  .main-layout--app .main-wrapper {
+    width: min(100%, 768px);
+    padding-inline: 1rem;
   }
 
   .main-content {
