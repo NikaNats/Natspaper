@@ -68,15 +68,12 @@ const pageContent = pageContentByLocale[locale];
     width="wide"
   >
     {
-      /* 
-      Responsive Post Grid:
-      - Mobile (default): Single column stack for optimal readability
-      - Tablet (md+): Still single column for article previews
-      - Ultra-wide (3xl+): 2 columns to utilize horizontal space
-      - 4K (4xl+): 3 columns for maximum screen real estate
-    */
+      /*
+      Responsive Post Layout:
+      - Single vertical column at all breakpoints for optimal readability
+      */
     }
-    <ul class="grid gap-6 3xl:grid-cols-2 3xl:gap-8 4xl:grid-cols-3">
+    <ul class="flex flex-col gap-6">
       {
         page.data.map(item => {
           // Calculate word count for reading time
