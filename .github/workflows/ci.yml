@@ -184,6 +184,16 @@ jobs:
           PUBLIC_SENTRY_ENVIRONMENT: preview
           PUBLIC_SENTRY_TRACES_SAMPLE_RATE: 0.1
 
+      # CSP drift guard: build:prod regenerates vercel.json hashes from the
+      # built HTML. If they differ from the committed file, production would
+      # block inline scripts/styles (CSP hash mismatch). Fail fast here.
+      - name: Verify CSP Hashes Are Fresh
+        run: |
+          git diff --exit-code -- vercel.json || {
+            echo "::error::vercel.json is stale — committed CSP hashes do not match this build. Run 'pnpm run generate-csp' locally and commit the result."
+            exit 1
+          }
+
       - name: Analyze Bundle Size
         id: bundle-analysis
         run: |
