@@ -205,12 +205,15 @@ function findHtmlFiles(dir) {
 
 // Mirrors scripts/generate-csp-hashes.js: raw bytes between tags,
 // excluding only real src attributes (\ssrc= — not data-src etc.).
+// HTML comments are stripped first (they may contain literal "<script>"
+// text which would otherwise corrupt the extraction, same as the generator).
 const INLINE_SCRIPT_REGEX = /<script(?![^>]*\ssrc=)[^>]*>([\s\S]*?)<\/script>/gi;
 
 function extractInlineScripts(html) {
+  const clean = html.replace(/<!--[\s\S]*?-->/g, "");
   const scripts = [];
   let match;
-  while ((match = INLINE_SCRIPT_REGEX.exec(html)) !== null) {
+  while ((match = INLINE_SCRIPT_REGEX.exec(clean)) !== null) {
     if (match[1].trim().length > 0) scripts.push(match[1]);
   }
   INLINE_SCRIPT_REGEX.lastIndex = 0;

@@ -36,6 +36,13 @@ function findHtmlFiles(dir) {
 
 // ── 2. Extract inline script/style contents ─────────────────────────
 function extractInlineContents(html) {
+  // Strip HTML comments FIRST. Comments may legitimately contain the literal
+  // text "<script>" (e.g. JSDoc-style notes rendered into output); a naive
+  // regex otherwise matches inside the comment and hashes everything from
+  // there to the next </script> instead of the real script bytes — producing
+  // CSP hashes that never match what the browser executes.
+  const clean = html.replace(/<!--[\s\S]*?-->/g, "");
+
   const scripts = [];
   const styles = [];
 
@@ -45,7 +52,7 @@ function extractInlineContents(html) {
   // would wrongly exclude inline scripts carrying that attribute.
   const scriptRegex = /<script(?![^>]*\ssrc=)[^>]*>([\s\S]*?)<\/script>/gi;
   let match;
-  while ((match = scriptRegex.exec(html)) !== null) {
+  while ((match = scriptRegex.exec(clean)) !== null) {
     // Hash the RAW bytes between the tags — browsers hash the exact
     // document bytes, so trimming here would silently break the CSP.
     // Empty content is skipped only because hashing "" is meaningless,
@@ -58,7 +65,7 @@ function extractInlineContents(html) {
   // href attribute, so no exclusion lookahead is needed (a data-href-style
   // attribute would otherwise be misdetected, same class of bug as src).
   const styleRegex = /<style[^>]*>([\s\S]*?)<\/style>/gi;
-  while ((match = styleRegex.exec(html)) !== null) {
+  while ((match = styleRegex.exec(clean)) !== null) {
     const content = match[1];
     if (content.trim().length > 0) styles.push(content);
   }
@@ -103,6 +110,13 @@ const scriptSrc = [
 ].join(" ");
 
 const styleSrc = [
+  // 'unsafe-inline' is REQUIRED here: Astro's View Transitions router
+  // (ClientRouter) injects <style> elements into the DOM at runtime during
+  // client-side navigation (router.js / swap-functions.js). Their content is
+  // generated in the browser and cannot be precomputed as hashes. Style-only
+  // injection is a low-severity vector (no script execution); keeping
+  // script-src strictly hash-based is the security-relevant boundary.
+  "'unsafe-inline'",
   ...styleHashes,
   "'self'",
   "https://fonts.googleapis.com",
