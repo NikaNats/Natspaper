@@ -101,23 +101,28 @@ console.log(`   HTML files scanned: ${htmlFiles.length}`);
 console.log(`   Unique script hashes: ${scriptHashes.size}`);
 console.log(`   Unique style hashes: ${styleHashes.size}`);
 
-// ── 5. Build new CSP (Hardened: removed unsafe-inline, data: and wasm-unsafe-eval)
+// ── 5. Build new CSP ────────────────────────────────────────────────
+// script-src: strictly hash-based for all inline scripts. `data:` is
+// required by Astro's ClientRouter, which re-executes swapped module
+// scripts via an empty `data:application/javascript,` URI during
+// client-side navigation. (Tradeoff: data: URIs widen the script source
+// surface — acceptable here because inline scripts remain hash-gated.)
 const scriptSrc = [
   ...scriptHashes,
   "'self'",
+  "data:",
   "https://giscus.app",
   "https://va.vercel-scripts.com",
 ].join(" ");
 
+// style-src: 'unsafe-inline' ONLY, with NO hash sources.
+// W3C CSP3: the presence of any hash/nonce source in a directive makes
+// browsers IGNORE 'unsafe-inline'. Astro's View Transitions router injects
+// <style> elements at runtime during DOM swaps (router.js /
+// swap-functions.js); their content cannot be precomputed, so keeping
+// hashes here would re-disable 'unsafe-inline' and block every transition.
 const styleSrc = [
-  // 'unsafe-inline' is REQUIRED here: Astro's View Transitions router
-  // (ClientRouter) injects <style> elements into the DOM at runtime during
-  // client-side navigation (router.js / swap-functions.js). Their content is
-  // generated in the browser and cannot be precomputed as hashes. Style-only
-  // injection is a low-severity vector (no script execution); keeping
-  // script-src strictly hash-based is the security-relevant boundary.
   "'unsafe-inline'",
-  ...styleHashes,
   "'self'",
   "https://fonts.googleapis.com",
   "https://giscus.app",
