@@ -65,8 +65,12 @@ const pageContent = pageContentByLocale[locale];
 
 <Layout title={pageContent.title}>
   <Header />
-  <Main pageTitle={pageContent.pageTitle} pageDesc={pageContent.pageDesc}>
-    <ul class="mx-auto mt-8 flex max-w-3xl flex-wrap gap-3">
+  <Main
+    pageTitle={pageContent.pageTitle}
+    pageDesc={pageContent.pageDesc}
+    width="app"
+  >
+    <ul class="mt-8 flex w-full flex-wrap gap-3">
       {
         tags.map(({ tag, tagName, count }) => (
           <li>

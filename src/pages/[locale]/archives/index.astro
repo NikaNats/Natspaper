@@ -102,7 +102,11 @@ const pageContent = pageContentByLocale[locale];
 
 <Layout title={pageContent.title}>
   <Header />
-  <Main pageTitle={pageContent.pageTitle} pageDesc={pageContent.pageDesc}>
+  <Main
+    pageTitle={pageContent.pageTitle}
+    pageDesc={pageContent.pageDesc}
+    width="app"
+  >
     <div class="mt-8 space-y-12">
       {
         Object.entries(

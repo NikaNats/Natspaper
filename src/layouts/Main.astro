@@ -90,7 +90,9 @@ interface ArrayTitleProp extends BaseProps {
 export type Props = StringTitleProp | ArrayTitleProp;
 
 const { props } = Astro;
-const { width = "narrow", layout = "default", hideTitle = false } = props;
+// "app" is the default so every page shares the header's exact 768px
+// container (max-w-app + 1rem inner padding) for site-wide alignment.
+const { width = "app", layout = "default", hideTitle = false } = props;
 
 const backUrl = FEATURES.showBackButton ? Astro.url.pathname : "/";
 const hasSidebar = Astro.slots.has("sidebar");

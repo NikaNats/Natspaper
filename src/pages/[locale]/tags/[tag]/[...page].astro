@@ -78,6 +78,7 @@ const pageContent = pageContentByLocale[locale as Lang];
     pageTitle={[`${pageContent.tagPrefix}`, `${tagName}`]}
     titleTransition={tag}
     pageDesc={pageContent.desc(tagName)}
+    width="app"
   >
     <h1
       slot="title"
