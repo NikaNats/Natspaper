@@ -35,16 +35,9 @@ In this section, you will find instructions on how to add support for LaTeX in y
    pnpm install rehype-katex remark-math katex
    ```
 
-2. Update the Astro configuration to use these plugins:
+2. Update the Astro configuration to compile LaTeX directly to native **W3C MathML Core**:
 
-   <!--
-      Expressive Code Feature:
-      - title="astro.config.ts": Adds a file tab UI
-      - ins={9-11, 13}: Highlights lines 9-11 and 13 in green (showing additions)
-   -->
-
-   ```ts title="astro.config.ts" ins={9-11, 13}
-   // ...
+   ```ts title="astro.config.ts"
    import remarkMath from "remark-math";
    import rehypeKatex from "rehype-katex";
 
@@ -56,7 +49,16 @@ In this section, you will find instructions on how to add support for LaTeX in y
          [remarkToc, { heading: "(table of contents|შინაარსის ცხრილი)" }],
          [remarkCollapse, { test: "(Table of contents|შინაარსის ცხრილი)" }],
        ],
-       rehypePlugins: [rehypeKatex],
+       rehypePlugins: [
+         [
+           rehypeKatex,
+           {
+             output: "mathml",
+             strict: true,
+             throwOnError: false,
+           },
+         ],
+       ],
        shikiConfig: {
          // For more themes, visit https://shiki.style/themes
          themes: { light: "min-light", dark: "night-owl" },
@@ -67,58 +69,10 @@ In this section, you will find instructions on how to add support for LaTeX in y
    });
    ```
 
-3. **Import KaTeX CSS in your post layout file**
-
-   To ensure KaTeX styles are loaded efficiently only on pages that need them, import the CSS directly into your post layout (e.g., `src/layouts/PostDetails.astro`). This enables automatic code-splitting and bundling optimization by Astro's build tool.
-
-   <!--
-      Expressive Code Feature:
-      - {6}: Highlights line 6 neutrally (focus attention)
-      - title="...": Adds file context
-   -->
-
-   ```astro title="src/layouts/PostDetails.astro" {6}
-   ---
-   import { render, type CollectionEntry } from "astro:content";
-   import Layout from "@/layouts/Layout.astro";
-   // ... other imports
-
-   import "katex/dist/katex.min.css";
-
-   export interface Props {
-     // ...
-   }
-   ---
-   ```
-
-   This approach is superior to linking external CDN stylesheets because:
-   - **No render-blocking**: The CSS is bundled with your page JavaScript, not fetched separately
-   - **Code-splitting**: CSS is only loaded on pages that actually use math equations
-   - **Automatic optimization**: Astro minifies and optimizes the CSS automatically
-   - **Offline support**: No external CDN dependency—everything is self-hosted
-
-4. As the last step, add a text-color for `katex` in `typography.css`.
-
-   <!--
-      Expressive Code Feature:
-      - ins={7-9}: Highlights the added CSS rule in green
-   -->
-
-   ```css title="src/styles/typography.css" ins={7-9}
-   @plugin "@tailwindcss/typography";
-
-   @layer base {
-     /* other classes */
-
-     /* Katex text color */
-     .prose .katex-display {
-       @apply text-foreground;
-     }
-
-     /* ===== Code Blocks & Syntax Highlighting ===== */
-     /* other classes */
-   }
-   ```
+   This approach offers key advantages:
+   - **Zero CSS bundle overhead**: Removes `katex.min.css` completely.
+   - **Native rendering**: Rendered directly by modern browser engines using OpenType MATH tables.
+   - **Full Accessibility**: Screen readers pronounce math elements natively.
 
 And _voilà_, this setup allows you to write LaTeX equations in your Markdown files, which will be rendered properly when the site is built. Once you do it, the rest of the document will appear rendered correctly.
 

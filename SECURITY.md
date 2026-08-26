@@ -39,11 +39,11 @@ frame-ancestors 'none';
 
 ### External Resources
 
-| Resource        | Source                 | Security               |
-| --------------- | ---------------------- | ---------------------- |
-| Giscus Comments | `https://giscus.app`   | SRI hash verified      |
-| Google Fonts    | `fonts.googleapis.com` | CSP-restricted         |
-| KaTeX Math      | Bundled locally        | No external dependency |
+| Resource         | Source                          | Security                           |
+| ---------------- | ------------------------------- | ---------------------------------- |
+| Giscus Comments  | `https://giscus.app`            | Isolated iframe, CSP restricted    |
+| Vercel Analytics | `https://va.vercel-scripts.com` | Script-src hash verified           |
+| MathML Equations | Native Browser Engine           | Zero external fonts or stylesheets |
 
 ### Input Handling
 

@@ -32,7 +32,18 @@ export default defineConfig({
 
   markdown: {
     remarkPlugins: [remarkModifiedTime, remarkMath],
-    rehypePlugins: [rehypeKatex],
+    rehypePlugins: [
+      [
+        rehypeKatex,
+        {
+          // Output only pure W3C MathML Core markup (<math>, <mrow>, <mfrac>, etc.)
+          // Suppresses all legacy .katex-html DOM overhead
+          output: "mathml",
+          strict: true,
+          throwOnError: false,
+        },
+      ],
+    ],
   },
 
   vite: getViteConfig(),

@@ -133,3 +133,24 @@ test.describe("Critical User Journey: Blog Posts", () => {
     await expect(blogPage.postCards.first()).toBeVisible();
   });
 });
+
+test.describe("W3C MathML Core Verification", () => {
+  test("should render native MathML tags without legacy KaTeX HTML spans", async ({ page }) => {
+    await page.goto("/en/posts/how-to-add-latex-equations-in-blog-posts");
+    await page.waitForLoadState("networkidle");
+
+    // 1. Assert presence of native <math> elements
+    const mathNodes = page.locator("article math");
+    const count = await mathNodes.count();
+    expect(count).toBeGreaterThan(0);
+
+    // 2. Validate semantic MathML sub-elements (<mi>, <mo>, <mfrac>, <msup>)
+    const firstMath = mathNodes.first();
+    await expect(firstMath).toBeVisible();
+    await expect(firstMath.locator("mi, mo, mn, msup").first()).toBeAttached();
+
+    // 3. Ensure no legacy KaTeX span classes exist in the DOM
+    const legacySpans = page.locator(".katex-html, .katex-display, .vlist-t");
+    expect(await legacySpans.count()).toBe(0);
+  });
+});
