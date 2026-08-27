@@ -6,6 +6,10 @@ export default defineConfig({
     alias: {
       "@": path.resolve(__dirname, "./src"),
       "@tests": path.resolve(__dirname, "./tests"),
+      "@mongodb-js/zstandard": path.resolve(
+        __dirname,
+        "./shims/zstandard/index.mjs"
+      ),
       // Astro virtual modules are not available in the Vitest environment.
       // These stubs provide the minimum surface area required by source files
       // under test.  Extend the stub files if new imports are needed.

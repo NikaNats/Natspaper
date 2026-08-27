@@ -5,7 +5,8 @@
   "compilerOptions": {
     "paths": {
       "@/*": ["./src/*"],
-      "@tests/*": ["./tests/*"]
+      "@tests/*": ["./tests/*"],
+      "@mongodb-js/zstandard": ["./shims/zstandard/index.mjs"]
     },
 
     // --- Type Safety (Strict) ---
