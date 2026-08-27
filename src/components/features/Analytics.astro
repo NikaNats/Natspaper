@@ -131,6 +131,17 @@ const isDev = import.meta.env.DEV;
 -->
 <script is:inline define:vars={{ isDev }}>
   (function () {
+    // ── Fix VM58:2 startTime crash — skip Speed Insights in dev/localhost ────
+    // Speed Insights script is only served by Vercel prod edge (/_vercel/...).
+    // In `astro dev` / localhost it 404s and its internal PerformanceObserver
+    // (`et.reportAllChanges` reading `entry.startTime`) throws.
+    if (isDev) return;
+    if (
+      window.location.hostname === "localhost" ||
+      window.location.hostname === "127.0.0.1"
+    )
+      return;
+
     // ── Guard: run the bootstrap logic only once per browser session ──────────
     if (window.__siInit) return;
     window.__siInit = true;
@@ -140,7 +151,6 @@ const isDev = import.meta.env.DEV;
     s.src = "/_vercel/speed-insights/script.js";
     s.async = true;
     s.defer = true;
-    if (isDev) s.setAttribute("data-debug", "true");
     // Silently swallow blocked-by-ad-blocker / net errors — these are
     // expected when the user has an ad blocker enabled and are not actionable.
     s.onerror = function () {};
