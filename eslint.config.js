@@ -1,3 +1,4 @@
+// eslint.config.js
 import eslintPluginAstro from "eslint-plugin-astro";
 import globals from "globals";
 import tseslint from "typescript-eslint";
@@ -68,6 +69,7 @@ export default [
       ".vercel/**",
       ".sonda/**",
       "scripts/**",
+      "shims/**",
       "node_modules/**",
       "playwright-report/**",
       "test-results/**",
