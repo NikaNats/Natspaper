@@ -23,10 +23,15 @@ const toc = headings.filter(h => h.depth >= 2 && h.depth <= 3);
           <span class="text-sm font-bold tracking-wide uppercase">
             Table of Contents
           </span>
-          <IconChevronRight class="size-5 text-text-secondary transition-transform duration-300 group-open:rotate-90" />
+          <IconChevronRight
+            class="size-5 text-text-secondary transition-transform duration-300 group-open:rotate-90"
+            aria-hidden="true"
+          />
         </summary>
 
+        {/* W3C DPUB-ARIA 1.1: Landmark for Table of Contents navigation */}
         <nav
+          role={"doc-toc" as astroHTML.JSX.AriaRole}
           class="px-4 pt-[clamp(0.875rem,2.5vw,1.25rem)] pb-4"
           aria-label="Mobile Table of Contents"
         >

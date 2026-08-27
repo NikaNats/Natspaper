@@ -13,7 +13,8 @@
  * @see https://docs.astro.build/en/guides/content-collections/
  */
 
-import { defineCollection, z } from "astro:content"; // <-- დააბრუნეთ 'z' აქ
+import { defineCollection } from "astro:content";
+import { z } from "astro/zod";
 import { glob } from "astro/loaders";
 import { SITE } from "./config";
 
@@ -34,7 +35,7 @@ const schemas = {
     ),
 
   /** URL that must be absolute */
-  absoluteUrl: z.string().url("Must be a valid absolute URL"),
+  absoluteUrl: z.string().url(),
 
   /** IANA timezone string */
   timezone: z.string().refine(
@@ -73,7 +74,6 @@ const schemas = {
  * All fields are documented for contributor clarity.
  */
 const blog = defineCollection({
-  // Astro v6 Content Layer ლოდერი, რომელიც კითხულობს ყველა .md და .mdx ფაილს
   loader: glob({ pattern: "**/*.{md,mdx}", base: "./src/content/blog" }),
   schema: ({ image }) =>
     z.object({
@@ -120,7 +120,7 @@ const blog = defineCollection({
 
       /**
        * Tags for categorization and filtering
-       * At least one tag is recommended for discoverability
+       * At least one tag is required for discoverability
        * @default ["others"]
        */
       tags: z
@@ -203,14 +203,3 @@ const blog = defineCollection({
 });
 
 export const collections = { blog };
-
-/**
- * Type exports for use in components
- * Note: For proper type inference, use CollectionEntry<"blog"> from astro:content
- * This provides the complete type including slug, id, and rendered content.
- *
- * @example
- * import type { CollectionEntry } from "astro:content";
- * const post: CollectionEntry<"blog"> = await getEntry("blog", "my-post");
- * const { title, description } = post.data; // Fully typed frontmatter
- */

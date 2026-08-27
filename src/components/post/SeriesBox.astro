@@ -1,9 +1,10 @@
 ---
+// src/components/post/SeriesBox.astro
 import { getI18n } from "@/i18n";
 import type { PostWithFallback } from "@/utils/post/repository";
 import { getLastPathSegment } from "@/utils/core/slugify";
 
-interface Props {
+export interface Props {
   seriesParts: PostWithFallback[];
   currentPostId: string;
   locale: string;
@@ -15,7 +16,8 @@ const seriesData = seriesParts[0]?.post.data.series;
 const currentIndex = seriesParts.findIndex(p => p.post.id === currentPostId);
 ---
 
-<aside
+<section
+  role={"doc-part" as unknown as astroHTML.JSX.AriaRole}
   class="my-10 overflow-hidden rounded-2xl border border-accent/20 bg-muted/30 shadow-sm print:hidden"
   aria-labelledby="series-heading"
 >
@@ -26,7 +28,14 @@ const currentIndex = seriesParts.findIndex(p => p.post.id === currentPostId);
     >
       {t("post.series")}
     </span>
-    <h2 class="mt-1 text-xl font-bold text-foreground">{seriesData?.title}</h2>
+
+    <h2
+      role={"doc-subtitle" as unknown as astroHTML.JSX.AriaRole}
+      class="mt-1 text-xl font-bold text-foreground"
+    >
+      {seriesData?.title}
+    </h2>
+
     <p class="text-sm text-text-secondary">
       {
         t("post.seriesPartOf", {
@@ -85,4 +94,4 @@ const currentIndex = seriesParts.findIndex(p => p.post.id === currentPostId);
       }
     </ul>
   </nav>
-</aside>
+</section>

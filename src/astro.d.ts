@@ -5,7 +5,7 @@ export {};
 
 /**
  * W3C Digital Publishing WAI-ARIA Module 1.1 (DPUB-ARIA 1.1)
- * Official Recommendation
+ * Official Recommendation (June 2025 / 2026)
  * @see https://www.w3.org/TR/dpub-aria-1.1/
  */
 export type DPubAriaRole =
@@ -54,27 +54,9 @@ export type DPubAriaRole =
 declare global {
   type DPubAriaRoleType = DPubAriaRole;
 
-  // 1. Extend Astro's native HTML & ARIA namespaces for all .astro templates
+  // 1. Extend Astro's native HTML namespace (Used in all .astro components)
   namespace astroHTML.JSX {
-    interface AriaAttributes {
-      role?:
-        | DPubAriaRole
-        | astroHTML.JSX.AriaRole
-        | (string & {})
-        | null
-        | undefined;
-    }
-
     interface HTMLAttributes {
-      role?:
-        | DPubAriaRole
-        | astroHTML.JSX.AriaRole
-        | (string & {})
-        | null
-        | undefined;
-    }
-
-    interface DOMAttributes {
       role?:
         | DPubAriaRole
         | astroHTML.JSX.AriaRole

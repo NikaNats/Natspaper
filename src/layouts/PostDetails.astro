@@ -11,7 +11,7 @@ import {
   getPostUrl,
 } from "@/utils/post";
 import { PostRepository } from "@/utils/post/repository";
-import type { BreadcrumbItem } from "@/types"; // <--- 1. Import the type
+import type { BreadcrumbItem } from "@/types";
 
 // Components
 import Layout from "@/layouts/Layout.astro";
@@ -25,8 +25,6 @@ import TableOfContents from "@/components/post/TableOfContents.astro";
 import MobileTableOfContents from "@/components/post/MobileTableOfContents.astro";
 import SeriesBox from "@/components/post/SeriesBox.astro";
 import Bibliography from "@/components/post/Bibliography.astro";
-
-// REMOVED: import "katex/dist/katex.min.css";
 
 export interface Props {
   post: CollectionEntry<"blog">;
@@ -55,10 +53,8 @@ const { Content, headings } = await render(post);
 const locale = (Astro.currentLocale as Lang) || "en";
 const { t, tTag } = getI18n(locale);
 const readingTimeText = getReadingTimeDisplay(post.body || "");
+
 // Dynamic OG images are keyed by the SOURCE locale of the entry
-// ([slug].png.ts only generates images for posts in each locale's own
-// collection). A fallback-rendered post must therefore reference its
-// original locale's image, mirroring the canonical URL logic below.
 const ogImage = resolveOgImageUrl(
   initOgImage,
   post.slug,
@@ -71,21 +67,19 @@ const seriesParts = post.data.series
   ? await PostRepository.getSeries(post.data.series.id, locale)
   : [];
 
-// 3. Breadcrumb Navigation Logic (Fixed Redeclaration & Typing)
+// 3. Breadcrumb Navigation Logic
 const postsHref = locale === "en" ? "/en/posts" : `/${locale}/posts`;
 const breadcrumbItems: BreadcrumbItem[] = [
-  // <--- 2. Explicitly type the array
   { label: t("nav.home"), href: `/${locale}` },
   { label: t("nav.posts"), href: postsHref },
 ];
 
 if (post.data.series) {
-  // Use series title, but truncate if too long for breadcrumbs
   const seriesTitle =
     post.data.series.title.length > 30
       ? post.data.series.title.substring(0, 27) + "..."
       : post.data.series.title;
-  breadcrumbItems.push({ label: seriesTitle }); // No href needed for text-only
+  breadcrumbItems.push({ label: seriesTitle });
 }
 breadcrumbItems.push({ label: title });
 
@@ -141,6 +135,9 @@ const originalLangName = originalLocale
   ? LANGUAGES[originalLocale as Lang]
   : "";
 const contentLang = isFallback && originalLocale ? originalLocale : locale;
+
+// ✅ Type-safe DPUB-ARIA role without `any` (satisfies both astro check and eslint)
+const docNoticeRole = "doc-notice" as unknown as astroHTML.JSX.AriaRole;
 ---
 
 <Layout
@@ -159,27 +156,6 @@ const contentLang = isFallback && originalLocale ? originalLocale : locale;
 >
   <Header />
 
-  <!--
-  RESPONSIVE ARTICLE LAYOUT - Centering Strategy
-  ================================================
-  Uses a three-layer centering approach for optimal readability:
-  
-  1. OUTER WRAPPER (.article-layout)
-     - Container queries for component-level responsiveness
-     - Fluid horizontal padding that scales with viewport
-     - Centers the entire article block
-  
-  2. CONTENT CONTAINER (.article-container)
-     - Fixed 720px width for optimal line length
-     - Centered within the outer wrapper
-     - Responsive vertical spacing
-  
-  3. DESKTOP SIDEBAR (TOC)
-     - Positioned outside content flow on xl+ screens
-     - Sticky positioning for scroll-following
-     - Hidden on mobile/tablet for cleaner mobile experience
-  -->
-
   <div class="article-layout">
     <!-- Desktop Sidebar (TOC) -->
     <aside class="article-sidebar" aria-label="Table of contents">
@@ -193,10 +169,14 @@ const contentLang = isFallback && originalLocale ? originalLocale : locale;
       <!-- Breadcrumb Navigation -->
       <Breadcrumb items={breadcrumbItems} class="mb-4" />
 
-      <!-- Fallback Notice -->
+      <!-- W3C DPUB-ARIA 1.1: doc-notice role on <section> -->
       {
         isFallback && (
-          <div class="mb-8 flex items-center gap-3 rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-700 dark:text-amber-400">
+          <section
+            role={docNoticeRole}
+            aria-label="Language availability notice"
+            class="mb-8 flex items-center gap-3 rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-700 dark:text-amber-400"
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               class="size-5 shrink-0"
@@ -206,6 +186,7 @@ const contentLang = isFallback && originalLocale ? originalLocale : locale;
               stroke-width="2"
               stroke-linecap="round"
               stroke-linejoin="round"
+              aria-hidden="true"
             >
               <circle cx="12" cy="12" r="10" />
               <line x1="12" y1="16" x2="12" y2="12" />
@@ -216,7 +197,7 @@ const contentLang = isFallback && originalLocale ? originalLocale : locale;
                 ? `ეს სტატია ჯერ არ არის თარგმნილი ქართულად. ნაჩვენებია ${originalLangName} ვერსია.`
                 : `This content is not available in your language. Showing ${originalLangName} version.`}
             </span>
-          </div>
+          </section>
         )
       }
 
@@ -229,8 +210,7 @@ const contentLang = isFallback && originalLocale ? originalLocale : locale;
         {readingTimeText}
       />
 
-      <!-- 2. Restore logic: Hide ONLY when sidebar appears (xl/2xl breakpoint) -->
-      <!-- Using 'xl:hidden' or matching your sidebar breakpoint (min-width: 80rem) -->
+      <!-- Mobile Table of Contents -->
       <div class="block xl:hidden">
         <MobileTableOfContents headings={headings} />
       </div>
@@ -272,26 +252,15 @@ const contentLang = isFallback && originalLocale ? originalLocale : locale;
 </Layout>
 
 <style>
-  /* ==========================================================================
-     RESPONSIVE ARTICLE LAYOUT - Simple Centering Strategy
-     ==========================================================================
-     Clean, simple layout that:
-     - Centers content at fixed 720px width
-     - Uses absolute positioning for sidebar
-     - Works consistently across all resolutions
-     ========================================================================== */
-
   .article-layout {
-    /* Layout positioning - centered container */
     position: relative;
     width: 100%;
-    max-width: calc(var(--main-width) + 2rem); /* 720px content + padding */
+    max-width: calc(var(--main-width) + 2rem);
     margin-inline: auto;
     padding-inline: 1rem;
     padding-block: 2rem 3rem;
   }
 
-  /* Remove padding once we have enough space for full width */
   @media (min-width: 752px) {
     .article-layout {
       max-width: var(--main-width);
@@ -299,48 +268,24 @@ const contentLang = isFallback && originalLocale ? originalLocale : locale;
     }
   }
 
-  /* ==========================================================================
-     MAIN CONTENT CONTAINER
-     ========================================================================== */
-
   .article-container {
-    /* Full width within the centered container */
     width: 100%;
-
-    /* Critical: Prevent overflow from wide children (code blocks, tables) */
     min-width: 0;
   }
 
-  /* ==========================================================================
-     DESKTOP SIDEBAR (Table of Contents)
-     ========================================================================== */
-
   .article-sidebar {
-    /* Hidden by default on mobile/tablet */
     display: none;
   }
 
   .article-sidebar__inner {
-    /* Sticky positioning */
     position: sticky;
     top: calc(var(--header-height, 64px) + 1.5rem);
-
-    /* Visual styling */
-    /* opacity: 0.7 removed — required for WCAG 1.4.3 contrast on toc-link text */
     opacity: 1;
     transition: opacity 0.2s ease;
   }
 
-  /* ==========================================================================
-     DESKTOP LAYOUT - Absolute Positioned Sidebar
-     ==========================================================================
-     Uses absolute positioning to place sidebar outside content flow.
-     This keeps main content perfectly centered regardless of sidebar.
-     ========================================================================== */
-
   @media (min-width: 80rem) {
     .article-sidebar {
-      /* Absolute position to the left of centered content */
       display: block;
       position: absolute;
       top: 2rem;
@@ -351,17 +296,12 @@ const contentLang = isFallback && originalLocale ? originalLocale : locale;
     }
   }
 
-  /* Extra wide screens - Larger sidebar */
   @media (min-width: 100rem) {
     .article-sidebar {
       width: 16rem;
       margin-right: 4rem;
     }
   }
-
-  /* ==========================================================================
-     REDUCED MOTION
-     ========================================================================== */
 
   @media (prefers-reduced-motion: reduce) {
     .article-sidebar__inner {
@@ -373,10 +313,8 @@ const contentLang = isFallback && originalLocale ? originalLocale : locale;
 <script>
   import { featureManager } from "@/utils/features/FeatureManager";
 
-  // Lifecycle Event Manager
   const init = () => {
     featureManager.initializeFeatures();
-    // Reset scroll only on navigation, logic handled by listener type
     if (document.documentElement.scrollTop > 0)
       window.scrollTo({ left: 0, top: 0, behavior: "instant" });
   };

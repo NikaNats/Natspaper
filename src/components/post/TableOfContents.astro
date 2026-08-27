@@ -17,7 +17,9 @@ const toc = headings.filter(h => h.depth >= 2 && h.depth <= 3);
 
 {
   toc.length > 0 && (
+    /* W3C DPUB-ARIA 1.1: doc-toc landmark for Table of Contents navigation */
     <nav
+      role={"doc-toc" as unknown as astroHTML.JSX.AriaRole}
       class="toc-nav transition-opacity duration-500"
       aria-label="Table of Contents"
     >

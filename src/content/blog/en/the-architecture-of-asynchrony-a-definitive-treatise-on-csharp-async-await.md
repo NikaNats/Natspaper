@@ -35,7 +35,7 @@ references:
     url: "https://learn.microsoft.com/en-us/dotnet/standard/asynchronous-programming-patterns/task-based-asynchronous-pattern-tap"
 ---
 
-The introduction of the Task-based Asynchronous Pattern (TAP) <a href="#ref-microsoft-tap"><sup>[4]</sup></a> via the `async` and `await` keywords in C# 5.0 marked a paradigm shift in managed software development. It transitioned the industry from complex, callback-heavy architectures to a structured, linear style of programming that preserves logical flow while maximizing hardware utilization.
+The introduction of the Task-based Asynchronous Pattern (TAP) <a href="#ref-microsoft-tap" role="doc-biblioref"><sup>[4]</sup></a> via the `async` and `await` keywords in C# 5.0 marked a paradigm shift in managed software development. It transitioned the industry from complex, callback-heavy architectures to a structured, linear style of programming that preserves logical flow while maximizing hardware utilization.
 
 However, the simplicity of the syntax—sprinkling a few keywords onto a method signature—belies the immense complexity occurring beneath the surface. To truly master asynchronous programming in .NET, one must look beyond the abstraction. One must understand the compiler transformations, the allocation strategies of the runtime, the flow of execution contexts, and the physical interaction with hardware interrupts.
 
@@ -48,11 +48,6 @@ To understand the elegance of `async`/`await`, one must appreciate the chaos tha
 ### 1.1 The Asynchronous Programming Model (APM)
 
 In the era of .NET 1.0, developers utilized the APM, also known as the `Begin`/`End` pattern. This required splitting a logical operation into two methods and passing an `AsyncCallback` delegate.
-
-<!--
-   Expressive Code Feature:
-   - title="LegacyAPM.cs": Contextualizes the code
--->
 
 ```csharp title="LegacyAPM.cs"
 // The "Dark Ages" of .NET 1.0
@@ -112,7 +107,7 @@ Consider the algorithm for making breakfast:
 
 ## Part 3: The Compiler Transformation
 
-When you compile an `async` method, the Roslyn compiler performs a radical transformation <a href="#ref-toub2023"><sup>[1]</sup></a>. It does not leave your code as a standard method. It converts it into a `struct` implementing the `IAsyncStateMachine` interface.
+When you compile an `async` method, the Roslyn compiler performs a radical transformation <a href="#ref-toub2023" role="doc-biblioref"><sup>[1]</sup></a>. It does not leave your code as a standard method. It converts it into a `struct` implementing the `IAsyncStateMachine` interface.
 
 ### 3.1 Anatomy of the State Machine
 
@@ -131,11 +126,6 @@ public async Task CopyStreamAsync(Stream source, Stream destination)
 ```
 
 The compiler generates a structure that looks roughly like this (simplified for clarity):
-
-<!--
-   Expressive Code Feature:
-   - ins={6, 9, 13, 23-25}: Highlights key state machine components
--->
 
 ```csharp title="GeneratedStateMachine.cs" ins={6, 9, 13, 23-25}
 private struct <CopyStreamAsync>d__0 : IAsyncStateMachine
@@ -158,7 +148,6 @@ private struct <CopyStreamAsync>d__0 : IAsyncStateMachine
 
     public void MoveNext()
     {
-        // The body of your method is moved here, wrapped in a try/catch
         try
         {
             switch (<>1__state)
@@ -167,31 +156,29 @@ private struct <CopyStreamAsync>d__0 : IAsyncStateMachine
                 case 1: goto STATE_WRITE_COMPLETE;
             }
 
-            // Allocating buffer (Original code)
             <buffer>5__2 = new byte[0x1000];
 
             START_LOOP:
-            // Call ReadAsync
             var awaiter = source.ReadAsync(<buffer>5__2, ...).GetAwaiter();
 
-            if (!awaiter.IsCompleted) // Optimization: Hot Path
+            if (!awaiter.IsCompleted)
             {
-                <>1__state = 0; // Remember we are waiting for Read
+                <>1__state = 0;
                 <>u__1 = awaiter;
                 <>t__builder.AwaitUnsafeOnCompleted(ref awaiter, ref this);
-                return; // SUSPEND: Return thread to caller
+                return;
             }
 
             STATE_READ_COMPLETE:
             <numRead>5__3 = awaiter.GetResult();
             if (<numRead>5__3 == 0) goto DONE;
 
-            // Call WriteAsync ... (Similar logic for Write)
+            // Call WriteAsync ...
         }
         catch (Exception ex)
         {
             <>1__state = -2;
-            <>t__builder.SetException(ex); // Store exception in Task
+            <>t__builder.SetException(ex);
         }
     }
 }
@@ -224,7 +211,7 @@ Modern .NET uses a specialized generic class: `AsyncStateMachineBox<TStateMachin
 
 ## Part 4: The Hardware Reality ("There Is No Thread")
 
-One of the most persistent myths is that `async` works by spawning a background thread to "wait" for the operation. **This is false.** For I/O-bound operations, there is absolutely no thread watching, waiting, or blocking <a href="#ref-cleary2013"><sup>[2]</sup></a>..
+One of the most persistent myths is that `async` works by spawning a background thread to "wait" for the operation. **This is false.** For I/O-bound operations, there is absolutely no thread watching, waiting, or blocking <a href="#ref-cleary2013" role="doc-biblioref"><sup>[2]</sup></a>.
 
 Let us trace the lifecycle of `await fileStream.ReadAsync()` down to the silicon:
 
@@ -284,7 +271,7 @@ async Task<string> GetDataAsync()
 
 ### 5.3 ConfigureAwait(false)
 
-The solution for library authors <a href="#ref-fruhauff2022"><sup>[3]</sup></a> is `ConfigureAwait(false)`.
+The solution for library authors <a href="#ref-fruhauff2022" role="doc-biblioref"><sup>[3]</sup></a> is `ConfigureAwait(false)`.
 
 - **Mechanism:** It passes a boolean flag to the awaiter logic.
 - **Effect:** It tells the runtime: "I do not need to resume on the captured context. Any ThreadPool thread is fine."
@@ -321,7 +308,7 @@ Modern .NET allows implementing `IValueTaskSource`. This allows a backing object
 
 ## Part 7: Best Practices and Patterns
 
-Mastering asynchrony requires strict adherence to established patterns <a href="#ref-fruhauff2022"><sup>[3:1]</sup></a>:
+Mastering asynchrony requires strict adherence to established patterns <a href="#ref-fruhauff2022" role="doc-biblioref"><sup>[3:1]</sup></a>:
 
 ### 7.1 Async Void
 
@@ -356,11 +343,6 @@ await Task.Run(() => service.DoCpuWork());
 In previous versions of .NET, processing tasks as they completed required complex logic using `Task.WhenAny` in a loop, which was O(N^2) in complexity regarding the list handling.
 
 .NET 9 introduces `Task.WhenEach`, enabling efficient streaming processing:
-
-<!--
-   Expressive Code Feature:
-   - title="ModernIteration.cs"
--->
 
 ```csharp title="ModernIteration.cs"
 List<Task<int>> tasks = StartDownloads();

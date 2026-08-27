@@ -1,7 +1,8 @@
 ---
-import { getI18n, type Lang } from "@/i18n"; // <--- 1. Import the Lang type
+// src/components/post/Bibliography.astro
+import { getI18n, type Lang } from "@/i18n";
 
-interface Reference {
+export interface Reference {
   id: string;
   title: string;
   author: string;
@@ -11,12 +12,18 @@ interface Reference {
   doi?: string;
 }
 
+export interface Props {
+  references: Reference[];
+  locale?: string;
+}
+
 const { references, locale } = Astro.props;
-// 2. Cast 'locale' to 'Lang' instead of 'any'
 const { t } = getI18n(locale as Lang);
 ---
 
+<!-- W3C DPUB-ARIA 1.1: Landmark for academic references -->
 <section
+  role={"doc-bibliography" as unknown as astroHTML.JSX.AriaRole}
   class="mt-[clamp(4rem,10vh,7rem)] pt-[clamp(1.5rem,3vh,2.75rem)] print:mt-8"
   aria-labelledby="refs-heading"
 >
@@ -31,7 +38,6 @@ const { t } = getI18n(locale as Lang);
           id={`ref-${ref.id}`}
           class="group flex gap-4 text-sm leading-relaxed text-text-secondary"
         >
-          {/* Citation Number */}
           <span class="flex h-6 w-8 shrink-0 items-center justify-center rounded bg-muted font-mono text-[10px] font-bold text-accent transition-colors group-target:bg-accent group-target:text-white">
             [{index + 1}]
           </span>
@@ -62,6 +68,7 @@ const { t } = getI18n(locale as Lang);
                     fill="none"
                     stroke="currentColor"
                     stroke-width="2"
+                    aria-hidden="true"
                   >
                     <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3" />
                   </svg>
@@ -81,18 +88,13 @@ const { t } = getI18n(locale as Lang);
 </section>
 
 <style>
-  /*
-     PROFESSIONAL HIGHLIGHT LOGIC
-     Uses modern CSS color-mix for high-performance transparency
-     without needing raw RGB triplets.
-  */
   li:target {
     outline: 2px solid color-mix(in srgb, var(--color-accent) 20%, transparent);
     background-color: color-mix(in srgb, var(--color-accent) 5%, transparent);
     margin-inline: -0.5rem;
     padding-inline: 0.5rem;
     border-radius: 0.5rem;
-    scroll-margin-top: 120px; /* Offset for sticky header + breathing room */
+    scroll-margin-top: 120px;
     transition: background-color 0.3s ease;
   }
 </style>

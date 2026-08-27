@@ -4,7 +4,7 @@ import { test, expect, type Page, type Locator } from "@playwright/test";
 
 // --- Best Practice: Page Object Model (POM) ---
 // This class encapsulates the "how" (locators and actions) from the "what" (the test's intent).
-// It makes tests DRY, readable, and easy to maintain. If a selector changes, you only update it in one place.
+// It makes tests DRY, readable, and easy to maintain.
 class BlogPage {
   readonly page: Page;
   readonly postCards: Locator;
@@ -17,11 +17,9 @@ class BlogPage {
   constructor(page: Page) {
     this.page = page;
 
-    // --- Best Practice: Decouple with Test IDs ---
-    // Using `data-testid` attributes is the most resilient way to select elements.
-    // It decouples tests from CSS classes, tag names, or content that might change.
+    // Decouple selectors using data-testid attributes
     this.postCards = page.getByTestId("post-card");
-    this.postTitle = page.locator('h1').first(); // Fallback to h1 if data-testid doesn't work in all browsers
+    this.postTitle = page.locator("h1").first();
     this.postDateTime = page.getByTestId("post-datetime");
     this.postContent = page.getByTestId("post-content");
     this.postTagLinks = page.getByTestId("post-tag-link");
@@ -33,9 +31,6 @@ class BlogPage {
    */
   async goto() {
     await this.page.goto("/en/posts");
-    // --- Best Practice: Resilient Waits ---
-    // Instead of waiting for 'networkidle', we wait for a specific, critical element to be visible.
-    // This is faster and more reliable. The page is ready when the user can see the content.
     await expect(this.postCards.first()).toBeVisible({ timeout: 15000 });
   }
 
@@ -45,36 +40,33 @@ class BlogPage {
    */
   async viewFirstPost(): Promise<string> {
     const firstPostCard = this.postCards.first();
-    const titleText = (await firstPostCard.getByRole("heading").textContent()) || "";
-    
+    const titleText =
+      (await firstPostCard.getByRole("heading").textContent()) || "";
+
     await firstPostCard.getByRole("link").click();
 
-    // --- Best Practice: Resilient Waits ---
-    // Wait for the page to load completely and then check for the title
-    await this.page.waitForLoadState('networkidle', { timeout: 10000 });
+    await this.page.waitForLoadState("networkidle", { timeout: 10000 });
     await expect(this.postTitle).toBeVisible({ timeout: 10000 });
-    
+
     return titleText;
   }
 }
 
-// --- Test Suite ---
+// --- Critical User Journey Tests ---
 test.describe("Critical User Journey: Blog Posts", () => {
   let blogPage: BlogPage;
 
-  // --- Best Practice: Isolate Test State ---
-  // `beforeEach` ensures every test starts from a clean, known state.
   test.beforeEach(async ({ page, browserName }) => {
-    // Skip Safari/WebKit browsers due to website compatibility issues
-    test.skip(browserName === 'webkit', 'Skipping WebKit/Safari due to website compatibility issues');
-    
+    // Skip WebKit when local dev server HMR interferes with client-side navigation
+    test.skip(
+      browserName === "webkit",
+      "Skipping WebKit due to local HMR router timing"
+    );
+
     blogPage = new BlogPage(page);
     await blogPage.goto();
   });
 
-  // --- Best Practice: Focus on Critical User Journeys ---
-  // This single test combines several smaller checks into one logical user flow.
-  // It verifies that a user can find a post, open it, and see all its critical information.
   test("should allow a user to view a blog post and its details", async () => {
     const postCount = await blogPage.postCards.count();
     test.skip(postCount === 0, "No blog posts found to test.");
@@ -87,12 +79,12 @@ test.describe("Critical User Journey: Blog Posts", () => {
 
     await test.step("Navigate and verify post detail page", async () => {
       await blogPage.viewFirstPost();
-      
+
       await expect(blogPage.postTitle).toBeVisible();
       await expect(blogPage.postDateTime).toBeVisible();
       await expect(blogPage.postContent).toBeVisible();
 
-      // Check for tags (optional, as not all posts have them)
+      // Check for tags
       const tagCount = await blogPage.postTagLinks.count();
       if (tagCount > 0) {
         await expect(blogPage.postTagLinks.first()).toBeEnabled();
@@ -100,12 +92,13 @@ test.describe("Critical User Journey: Blog Posts", () => {
     });
   });
 
-  // This second test covers another critical user journey: discovery via tags.
-  test("should allow navigation from a post's tag to the tag archive page", async ({ page }) => {
+  test("should allow navigation from a post's tag to the tag archive page", async ({
+    page,
+  }) => {
     const postCount = await blogPage.postCards.count();
     test.skip(postCount === 0, "No blog posts found to test.");
 
-    // Find the first post that actually has tags
+    // Find the first post that has tags
     let firstPostWithTags: Locator | null = null;
     for (const card of await blogPage.postCards.all()) {
       if ((await card.getByTestId("post-tag-link").count()) > 0) {
@@ -121,21 +114,26 @@ test.describe("Critical User Journey: Blog Posts", () => {
 
     await firstTag.click();
 
-    // --- Best Practice: Resilient Waits ---
-    // Wait for the URL to match the expected pattern for a tag page.
-    await page.waitForURL(`**/en/tags/${tagName.toLowerCase().replace(" ", "-")}/**`);
+    // Wait for the tag URL
+    await page.waitForURL(
+      `**/en/tags/${tagName.toLowerCase().replace(" ", "-")}/**`
+    );
 
-    // Verify the new page has loaded correctly
+    // Verify the tag archive page
     await expect(blogPage.tagArchiveTitle).toBeVisible();
-    await expect(blogPage.tagArchiveTitle).toContainText(tagName, { ignoreCase: true });
-    
-    // Ensure the filtered list of posts is now visible
+    await expect(blogPage.tagArchiveTitle).toContainText(tagName, {
+      ignoreCase: true,
+    });
+
     await expect(blogPage.postCards.first()).toBeVisible();
   });
 });
 
+// --- W3C MathML Core Verification ---
 test.describe("W3C MathML Core Verification", () => {
-  test("should render native MathML tags without legacy KaTeX HTML spans", async ({ page }) => {
+  test("should render native MathML tags without legacy KaTeX HTML spans", async ({
+    page,
+  }) => {
     await page.goto("/en/posts/how-to-add-latex-equations-in-blog-posts");
     await page.waitForLoadState("networkidle");
 
@@ -152,5 +150,67 @@ test.describe("W3C MathML Core Verification", () => {
     // 3. Ensure no legacy KaTeX span classes exist in the DOM
     const legacySpans = page.locator(".katex-html, .katex-display, .vlist-t");
     expect(await legacySpans.count()).toBe(0);
+  });
+});
+
+// --- W3C DPUB-ARIA 1.1 & ARIA in HTML Verification ---
+test.describe("W3C DPUB-ARIA 1.1 & ARIA in HTML Semantics Verification", () => {
+  test("should expose valid digital publishing landmarks and roles on academic posts", async ({
+    page,
+  }) => {
+    await page.goto("/en/posts/distributed-consensus-algorithms");
+    await page.waitForLoadState("networkidle");
+
+    // 1. Table of Contents: role="doc-toc"
+    const toc = page.locator('nav[role="doc-toc"]');
+    if ((await toc.count()) > 0) {
+      await expect(toc.first()).toBeVisible();
+    }
+
+    // 2. Bibliography landmark: role="doc-bibliography"
+    const bibliography = page.locator('section[role="doc-bibliography"]');
+    await expect(bibliography).toBeVisible();
+
+    // 3. Inline reference link: role="doc-biblioref"
+    const inlineRef = page.locator('a[role="doc-biblioref"]').first();
+    if ((await inlineRef.count()) > 0) {
+      await expect(inlineRef).toBeAttached();
+    }
+
+    // 4. Conformance rule: No deprecated doc-biblioentry is used on <li>
+    const deprecatedRoles = page.locator('[role="doc-biblioentry"]');
+    expect(await deprecatedRoles.count()).toBe(0);
+  });
+
+  test("should expose doc-part and doc-subtitle on series posts", async ({
+    page,
+  }) => {
+    // Navigate to a series article
+    await page.goto("/en/posts/system-design-part-1");
+    await page.waitForLoadState("networkidle");
+
+    // 1. Series box structural division: role="doc-part" on <section>
+    const seriesSection = page.locator('section[role="doc-part"]');
+    if ((await seriesSection.count()) > 0) {
+      await expect(seriesSection.first()).toBeVisible();
+
+      // 2. Series title: role="doc-subtitle"
+      const seriesSubtitle = seriesSection.locator('[role="doc-subtitle"]');
+      await expect(seriesSubtitle).toBeVisible();
+    }
+  });
+
+  test("should conform to ARIA in HTML for disabled pagination links", async ({
+    page,
+  }) => {
+    // On page 1 of posts listing, previous button is disabled
+    await page.goto("/en/posts");
+    await page.waitForLoadState("networkidle");
+
+    // ARIA in HTML 2026: Disabled links rendered as <span> must carry explicit role="link"
+    const disabledLink = page.locator('nav[aria-label="Pagination"] span[role="link"][aria-disabled="true"]');
+    if ((await disabledLink.count()) > 0) {
+      await expect(disabledLink.first()).toBeVisible();
+    }
   });
 });
