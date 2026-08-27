@@ -42,9 +42,8 @@ export const GET: APIRoute = () => {
     status: 200,
     headers: {
       "Content-Type": "application/json",
-      // Short cache to ensure monitors get fresh responses
-      // but still leverage Edge caching
-      "Cache-Control": "public, max-age=60, s-maxage=60",
+      // RFC 9111 Section 5.2.2.6: no-transform preserves payload integrity for uptime monitors
+      "Cache-Control": "public, max-age=60, s-maxage=60, no-transform",
     },
   });
 };

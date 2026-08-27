@@ -20,11 +20,11 @@ RUN pnpm install --no-frozen-lockfile
 COPY . .
 RUN pnpm run build:prod
 
-# Runtime stage: High-performance, lightweight Nginx web server
+# Runtime stage: Nginx with RFC 9111 Caching configuration
 FROM nginx:alpine-slim AS runtime
 
-# Copy static HTML files
 COPY --from=base /app/dist /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Fix permissions for non-root nginx user
 RUN chown -R nginx:nginx /usr/share/nginx/html && \

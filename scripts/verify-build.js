@@ -377,6 +377,34 @@ try {
   addError(`CSP: consistency check failed — ${err.message}`);
 }
 
+// ── RFC 9111 HTTP Caching Header Validation ──────────────────────────
+log("\n⚡ RFC 9111 HTTP Caching Validation:");
+try {
+  const vercelConfig = JSON.parse(
+    fs.readFileSync(path.join(projectRoot, "vercel.json"), "utf8")
+  );
+
+  const astroHeaders = vercelConfig.headers.find(h => h.source === "/_astro/(.*)");
+  const globalHeaders = vercelConfig.headers.find(h => h.source === "/(.*)");
+
+  const astroCache = astroHeaders?.headers.find(h => h.key === "Cache-Control")?.value || "";
+  const globalCache = globalHeaders?.headers.find(h => h.key === "Cache-Control")?.value || "";
+
+  if (astroCache.includes("immutable") && astroCache.includes("max-age=31536000")) {
+    addPass("RFC 9111: Immutable asset caching verified (/_astro/*)");
+  } else {
+    addError("RFC 9111: Missing immutable Cache-Control on /_astro/(.*)");
+  }
+
+  if (globalCache.includes("must-revalidate") && globalCache.includes("s-maxage=86400")) {
+    addPass("RFC 9111: Revalidating Edge Cache verified for HTML pages (/(.*))");
+  } else {
+    addWarning("RFC 9111: HTML Cache-Control recommended: must-revalidate with s-maxage");
+  }
+} catch (err) {
+  addError(`RFC 9111: Caching header check failed — ${err.message}`);
+}
+
 // ── 6. Build Size Analysis ───────────────────────────────────────────
 log("\n📊 Build Size Analysis:");
 const distSize = getDirectorySize(distDir);
