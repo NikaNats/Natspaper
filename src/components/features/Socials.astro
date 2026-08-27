@@ -44,6 +44,7 @@ const { links, centered = false } = Astro.props;
           class="p-2 transition-transform sm:p-1 mouse:hover:-translate-y-1 mouse:hover:rotate-6"
           title={linkTitle}
           ariaLabel={linkTitle}
+          rel="me noopener noreferrer"
         >
           <Icon class="inline-block size-6 scale-125 fill-transparent stroke-current stroke-2 opacity-90 group-hover:fill-transparent sm:scale-110" />
           <span class="sr-only">{linkTitle}</span>

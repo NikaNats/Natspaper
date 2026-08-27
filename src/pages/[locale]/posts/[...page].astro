@@ -46,12 +46,12 @@ const pageContentByLocale: Record<
   { title: string; pageTitle: string; pageDesc: string }
 > = {
   en: {
-    title: `Posts | ${SITE.title}`,
+    title: `Posts (Page ${page.currentPage}) | ${SITE.title}`,
     pageTitle: "Posts",
     pageDesc: "All the articles I've posted.",
   },
   ka: {
-    title: `პოსტები | ${SITE.title}`,
+    title: `პოსტები (გვერდი ${page.currentPage}) | ${SITE.title}`,
     pageTitle: "პოსტები",
     pageDesc: "ყველა სტატია რომელიც მე დავაპოსტე.",
   },
@@ -61,6 +61,25 @@ const pageContent = pageContentByLocale[locale];
 ---
 
 <Layout title={pageContent.title}>
+  <!-- RFC 8288: Sequential Navigation Links for Crawlers and User Agents -->
+  {
+    page.url.prev && (
+      <link
+        slot="head"
+        rel="prev"
+        href={new URL(page.url.prev, Astro.site).href}
+      />
+    )
+  }
+  {
+    page.url.next && (
+      <link
+        slot="head"
+        rel="next"
+        href={new URL(page.url.next, Astro.site).href}
+      />
+    )
+  }
   <Header />
   <Main
     pageTitle={pageContent.pageTitle}
