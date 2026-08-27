@@ -1,17 +1,8 @@
 ---
-/**
- * SEO Component
- * =============
- * Handles all SEO-related meta tags including:
- * - Title and description
- * - Canonical URL (self-referencing for current locale)
- * - Hreflang tags for language alternates
- * - Open Graph (og:locale, og:title, og:description, og:image)
- * - Twitter Card meta tags
- * - Article timestamps
- */
+// src/components/features/Seo.astro (excerpt)
 import { SITE } from "@/config";
 import { SUPPORTED_LANGS, LOCALE_CODES, type Lang } from "@/i18n/config";
+import { canonicalizeLanguageTag, toOpenGraphLocale } from "@/utils/i18n/bcp47";
 import { getRelativeLocaleUrl } from "astro:i18n";
 
 export interface Props {
@@ -21,11 +12,6 @@ export interface Props {
   canonicalURL?: string;
   pubDatetime?: Date;
   modDatetime?: Date | null;
-  /**
-   * When true, instructs crawlers not to index this page.
-   * Used for locale-fallback pages where the canonical points to a different locale,
-   * preventing Crawl Budget waste and Google Search Console indexing conflicts.
-   */
   noindex?: boolean;
 }
 
@@ -39,48 +25,34 @@ const {
   noindex = false,
 } = Astro.props;
 
-// Use site defaults as fallbacks
 const title = pageTitle ? `${pageTitle} | ${SITE.title}` : SITE.title;
 const description = pageDescription ?? SITE.desc;
-
-// Determine current locale with fallback
 const currentLocale = (Astro.currentLocale as Lang) ?? "en";
 
-// Build canonical URL for current page (self-referencing)
 const canonicalURL =
   pageCanonicalURL ?? new URL(Astro.url.pathname, Astro.site).href;
-
-// Construct the final OG image URL
 const socialImageURL = new URL(pageOgImage ?? SITE.ogImage, Astro.url.origin)
   .href;
 
-// Build og:locale value (e.g., "en_US", "ka_GE")
-const ogLocale = LOCALE_CODES[currentLocale]?.replace("-", "_") ?? "en_US";
-
-// SEO: Determine og:type based on page type
-// "article" for blog posts (has pubDatetime), "website" for all other pages
+// RFC 5646 Canonical language tag for document
+const bcp47Language =
+  LOCALE_CODES[currentLocale] ?? canonicalizeLanguageTag(currentLocale);
+const ogLocale = toOpenGraphLocale(bcp47Language);
 const ogType = pubDatetime ? "article" : "website";
 
-// SEO: Truncate title to 60 chars (Google SERP truncation)
 const truncatedTitle = title.length > 60 ? `${title.slice(0, 57)}...` : title;
-
-// SEO: Cap description at 160 chars for meta description
 const truncatedDescription =
   description.length > 160 ? `${description.slice(0, 157)}...` : description;
 
-/**
- * Generate hreflang alternate URLs for all supported languages
- * Each page should point to its counterpart in other languages
- */
 function getHreflangAlternates(): Array<{ lang: string; href: string }> {
   const pathname = Astro.url.pathname;
-  // Extract path segment after locale (e.g., "/en/posts/my-post" -> "/posts/my-post")
   const pathWithoutLocale = pathname.replace(
     new RegExp(`^/(${SUPPORTED_LANGS.join("|")})`),
     ""
   );
 
   return SUPPORTED_LANGS.map(lang => ({
+    // RFC 5646: Use exact BCP 47 tag for hreflang
     lang: LOCALE_CODES[lang] ?? lang,
     href: new URL(getRelativeLocaleUrl(lang, pathWithoutLocale), Astro.site)
       .href,
@@ -95,7 +67,6 @@ const hreflangAlternates = getHreflangAlternates();
 <meta name="title" content={truncatedTitle} />
 <meta name="description" content={truncatedDescription} />
 
-<!-- SEO: Robots directive -->
 <meta
   name="robots"
   content={noindex
@@ -103,16 +74,15 @@ const hreflangAlternates = getHreflangAlternates();
     : "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"}
 />
 
-<!-- Canonical URL (self-referencing for current locale) -->
+<!-- Canonical URL -->
 <link rel="canonical" href={canonicalURL} />
 
-<!-- Hreflang Tags for Language Alternates -->
+<!-- RFC 5646 Hreflang Alternates -->
 {
   hreflangAlternates.map(({ lang, href }) => (
     <link rel="alternate" hreflang={lang} href={href} />
   ))
 }
-<!-- x-default points to the default language version -->
 <link
   rel="alternate"
   hreflang="x-default"
@@ -122,14 +92,14 @@ const hreflangAlternates = getHreflangAlternates();
   ).href}
 />
 
-<!-- Open Graph / Facebook -->
+<!-- Open Graph Protocol with normalized locales -->
 <meta property="og:type" content={ogType} />
 <meta property="og:locale" content={ogLocale} />
 {
   SUPPORTED_LANGS.filter(lang => lang !== currentLocale).map(lang => (
     <meta
       property="og:locale:alternate"
-      content={LOCALE_CODES[lang]?.replace("-", "_") ?? lang}
+      content={toOpenGraphLocale(LOCALE_CODES[lang] ?? lang)}
     />
   ))
 }
@@ -157,7 +127,7 @@ const hreflangAlternates = getHreflangAlternates();
   )
 }
 
-<!-- Twitter -->
+<!-- Twitter Card -->
 <meta property="twitter:card" content="summary_large_image" />
 <meta property="twitter:url" content={canonicalURL} />
 <meta property="twitter:title" content={truncatedTitle} />

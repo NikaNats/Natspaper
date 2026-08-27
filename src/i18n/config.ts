@@ -1,30 +1,33 @@
+// src/i18n/config.ts
+import { canonicalizeLanguageTag } from "@/utils/i18n/bcp47";
+
 /**
- * Internationalization (i18n) Configuration
- * Single Source of Truth for languages and locale settings.
+ * Master Internationalization (i18n) Configuration
+ * Conforms strictly to IETF RFC 5646 (BCP 47).
  */
 
-// 1. Define the languages map first to derive types from it
 export const LANGUAGES = {
   en: "English",
   ka: "ქართული",
 } as const;
 
-// 2. Derive the type from the object keys
 export type Lang = keyof typeof LANGUAGES;
 
-// 3. Define the default language
 export const DEFAULT_LANG: Lang = "en";
 
-// 4. Generate helper arrays for config consumption
 export const SUPPORTED_LANGS = Object.keys(LANGUAGES) as Lang[];
 
-// 5. Define locale codes for HTML lang attribute (optional, if different from keys)
+/**
+ * RFC 5646 Canonical Language Tags
+ * - "en-US": English as used in the United States
+ * - "ka-GE": Georgian as used in Georgia
+ */
 export const LOCALE_CODES: Record<Lang, string> = {
-  en: "en-US",
-  ka: "ka-GE",
+  en: canonicalizeLanguageTag("en-US"),
+  ka: canonicalizeLanguageTag("ka-GE"),
 };
 
-// Legacy exports for backward compatibility
+// Aliases for backward compatibility
 export const defaultLang = DEFAULT_LANG;
 export const languages = LANGUAGES;
 export const supportedLangs = SUPPORTED_LANGS;

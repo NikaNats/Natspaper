@@ -6,6 +6,7 @@ import { ClientRouter } from "astro:transitions";
 import { SITE, FEATURES } from "@/config";
 import "@/styles/global.css";
 import { getI18n, type Lang, LOCALE_CODES } from "@/i18n";
+import { canonicalizeLanguageTag } from "@/utils/i18n/bcp47";
 
 // ASTRO 6: Font configuration via experimental.fonts not available
 // Re-adding manual @fontsource imports for Astro 6 compatibility
@@ -37,6 +38,8 @@ const PUBLIC_GOOGLE_SITE_VERIFICATION = import.meta.env
 const { t } = getI18n(Astro.currentLocale as Lang);
 const currentLocale = (Astro.currentLocale ?? "en") as Lang;
 const localeCode = LOCALE_CODES[currentLocale] ?? "en-US";
+const bcp47Language =
+  LOCALE_CODES[currentLocale] ?? canonicalizeLanguageTag(currentLocale);
 
 // The props interface remains the same, as it's the public API for the layout.
 export interface Props {
@@ -144,7 +147,7 @@ if (isBlogPost && pubDatetime) {
 <!doctype html>
 <html
   dir={SITE.dir}
-  lang={Astro.currentLocale ?? SITE.lang ?? "en"}
+  lang={bcp47Language}
   class:list={[{ "scroll-smooth": scrollSmooth }]}
 >
   <head>

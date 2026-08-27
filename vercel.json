@@ -30,6 +30,24 @@
   ],
   "headers": [
     {
+      "source": "/en/(.*)",
+      "headers": [
+        {
+          "key": "Content-Language",
+          "value": "en-US"
+        }
+      ]
+    },
+    {
+      "source": "/ka/(.*)",
+      "headers": [
+        {
+          "key": "Content-Language",
+          "value": "ka-GE"
+        }
+      ]
+    },
+    {
       "source": "/robots.txt",
       "headers": [
         {
