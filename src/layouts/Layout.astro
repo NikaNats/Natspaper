@@ -174,11 +174,18 @@ if (isBlogPost && pubDatetime) {
 
     <!-- Other essential head tags -->
     <link rel="sitemap" href="/sitemap-index.xml" />
+    <!-- Syndication Feeds: Dual RSS 2.0 and RFC 4287 Atom Autodiscovery -->
     <link
       rel="alternate"
       type="application/rss+xml"
-      title={SITE.title}
+      title={`${SITE.title} - RSS Feed (${currentLocale.toUpperCase()})`}
       href={new URL(`${currentLocale}/rss.xml`, Astro.site)}
+    />
+    <link
+      rel="alternate"
+      type="application/atom+xml"
+      title={`${SITE.title} - Atom Feed (${currentLocale.toUpperCase()})`}
+      href={new URL(`${currentLocale}/atom.xml`, Astro.site)}
     />
 
     {

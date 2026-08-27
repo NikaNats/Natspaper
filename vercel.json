@@ -6,6 +6,11 @@
       "permanent": true
     },
     {
+      "source": "/atom.xml",
+      "destination": "/en/atom.xml",
+      "permanent": true
+    },
+    {
       "source": "/",
       "has": [
         {

@@ -101,6 +101,8 @@ const REQUIRED_ARTIFACTS = [
   "dist/sitemap-index.xml",
   "dist/en/rss.xml",
   "dist/ka/rss.xml",
+  "dist/en/atom.xml",
+  "dist/ka/atom.xml",
   "dist/en/404/index.html",
   "dist/ka/404/index.html",
   "dist/404.html",
