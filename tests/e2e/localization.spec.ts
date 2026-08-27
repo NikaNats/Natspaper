@@ -65,9 +65,9 @@ test.describe("Localization - Language Switching", () => {
     // URL should change to /ka/
     await expect(page).toHaveURL(/\/ka\//);
 
-    // HTML lang attribute should update
+    // HTML lang attribute should update (RFC 5646 BCP47 canonical)
     const html = page.locator("html");
-    await expect(html).toHaveAttribute("lang", "ka");
+    await expect(html).toHaveAttribute("lang", "ka-GE");
   });
 
   test("should switch from Georgian to English", async ({ page }) => {
@@ -88,9 +88,9 @@ test.describe("Localization - Language Switching", () => {
     // URL should change to /en/
     await expect(page).toHaveURL(/\/en\//);
 
-    // HTML lang attribute should update
+    // HTML lang attribute should update (RFC 5646 BCP47 canonical)
     const html = page.locator("html");
-    await expect(html).toHaveAttribute("lang", "en");
+    await expect(html).toHaveAttribute("lang", "en-US");
   });
 
 test("should preserve current page path when switching language", async ({
@@ -174,9 +174,9 @@ test.describe("Localization - Content Translation", () => {
     await page.goto("/ka/");
     await page.waitForLoadState("networkidle");
 
-    // HTML lang should be Georgian
+    // HTML lang should be Georgian (RFC 5646 BCP47 canonical)
     const html = page.locator("html");
-    await expect(html).toHaveAttribute("lang", "ka");
+    await expect(html).toHaveAttribute("lang", "ka-GE");
 
     // Page should have content (may be in Georgian script)
     const mainContent = page.locator("main");
@@ -225,9 +225,9 @@ test.describe("Localization - URL Structure", () => {
     // Navigate to non-existent English page
     await page.goto("/en/non-existent-page-12345");
     
-    // Should still be in English locale context
+    // Should still be in English locale context (RFC 5646 BCP47 canonical)
     const html = page.locator("html");
-    await expect(html).toHaveAttribute("lang", "en");
+    await expect(html).toHaveAttribute("lang", "en-US");
   });
 });
 
@@ -237,7 +237,7 @@ test.describe("Localization - Accessibility", () => {
     await page.waitForLoadState("networkidle");
 
     const html = page.locator("html");
-    await expect(html).toHaveAttribute("lang", "en");
+    await expect(html).toHaveAttribute("lang", "en-US");
   });
 
   test("should have correct dir attribute for LTR languages", async ({
