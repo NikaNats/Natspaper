@@ -76,12 +76,12 @@ const HTML_CONTENT_CHECKS = [
   },
 ];
 
-// ── SEO Content Validation ───────────────────────────────────────────
+// ── SEO Content Validation (RFC 9309 & Sitemaps) ──────────────────────
 const SEO_CONTENT_CHECKS = [
   {
     file: "dist/robots.txt",
-    markers: ["User-agent:", "Sitemap:"],
-    description: "robots.txt must contain User-agent and Sitemap directives",
+    markers: ["User-agent:", "Allow:", "Disallow:", "Sitemap:", "sitemap-index.xml"],
+    description: "robots.txt must conform to RFC 9309 ABNF grammar and define sitemap index",
   },
   {
     file: "dist/sitemap-index.xml",

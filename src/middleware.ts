@@ -1,30 +1,19 @@
-/**
- * Astro Middleware - Request handling
- *
- * This middleware handles:
- * 1. SEO: X-Robots-Tag noindex for Vercel preview deployments
- *
- * For more info on middleware:
- * @see https://docs.astro.build/en/guides/middleware/
- */
-
+// src/middleware.ts
 import { defineMiddleware } from "astro:middleware";
 
 /**
- * SEO: Prevent search engine indexing of preview/staging environments
+ * HTTP Protocol Middleware: RFC 9309 & Search Engine Hygiene
  *
- * Vercel preview deployments have VERCEL_ENV !== "production"
- * This adds X-Robots-Tag: noindex to prevent indexing non-production content
- *
- * @see https://developers.google.com/search/docs/crawling-indexing/block-indexing
+ * For non-production deployments (Vercel previews, staging, development),
+ * injects RFC 8288 / Google Search compliant X-Robots-Tag headers to prevent
+ * accidental duplicate content indexing.
  */
 export const onRequest = defineMiddleware(async (_, next) => {
   const response = await next();
 
-  // Add noindex header for non-production Vercel environments
   const vercelEnv = import.meta.env.VERCEL_ENV;
   if (vercelEnv && vercelEnv !== "production") {
-    response.headers.set("X-Robots-Tag", "noindex, nofollow");
+    response.headers.set("X-Robots-Tag", "noindex, nofollow, noarchive");
   }
 
   return response;
