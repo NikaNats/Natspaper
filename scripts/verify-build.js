@@ -405,6 +405,62 @@ try {
   addError(`RFC 9111: Caching header check failed — ${err.message}`);
 }
 
+// ── RFC 6797 HSTS Security Header Validation ─────────────────────────
+log("\n🔒 RFC 6797 HSTS Validation:");
+try {
+  const vercelConfig = JSON.parse(
+    fs.readFileSync(path.join(projectRoot, "vercel.json"), "utf8")
+  );
+
+  const globalHeaders = vercelConfig.headers.find(h => h.source === "/(.*)");
+  const hstsHeader = globalHeaders?.headers.find(h => h.key === "Strict-Transport-Security")?.value || "";
+
+  const maxAgeMatch = hstsHeader.match(/max-age=(\d+)/i);
+  const maxAge = maxAgeMatch ? parseInt(maxAgeMatch[1], 10) : 0;
+  const hasSubDomains = /includesubdomains/i.test(hstsHeader);
+  const hasPreload = /preload/i.test(hstsHeader);
+
+  // Criteria check (RFC 6797 & hstspreload.org)
+  if (maxAge >= 31536000 && hasSubDomains && hasPreload) {
+    addPass(`RFC 6797: Valid HSTS header (max-age=${maxAge}, includeSubDomains, preload)`);
+  } else {
+    if (maxAge < 31536000) {
+      addError(`RFC 6797: HSTS max-age must be at least 31536000 seconds (got: ${maxAge})`);
+    }
+    if (!hasSubDomains) {
+      addError("RFC 6797: Missing includeSubDomains directive");
+    }
+    if (!hasPreload) {
+      addWarning("RFC 6797: Missing preload directive for hstspreload.org eligibility");
+    }
+  }
+} catch (err) {
+  addError(`RFC 6797: HSTS verification failed — ${err.message}`);
+}
+
+// ── RFC 8878 Zstandard Compression Validation ────────────────────────
+log("\n🗜️ RFC 8878 Zstandard Validation:");
+try {
+  const htmlZst = path.join(distDir, "en/index.html.zst");
+  const uncompressedHtml = path.join(distDir, "en/index.html");
+
+  if (fs.existsSync(htmlZst)) {
+    const rawSize = fs.statSync(uncompressedHtml).size;
+    const zstdSize = fs.statSync(htmlZst).size;
+    const ratio = ((1 - zstdSize / rawSize) * 100).toFixed(1);
+
+    if (zstdSize < rawSize) {
+      addPass(`RFC 8878: en/index.html.zst exists (${zstdSize}B, ${ratio}% compression ratio)`);
+    } else {
+      addWarning("RFC 8878: .zst file is larger than uncompressed source");
+    }
+  } else {
+    addWarning("RFC 8878: No .zst pre-compressed assets found (optional for dev builds)");
+  }
+} catch (err) {
+  addError(`RFC 8878: Zstd verification check failed — ${err.message}`);
+}
+
 // ── 6. Build Size Analysis ───────────────────────────────────────────
 log("\n📊 Build Size Analysis:");
 const distSize = getDirectorySize(distDir);

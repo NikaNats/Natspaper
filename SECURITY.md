@@ -37,6 +37,16 @@ frame-ancestors 'none';
 | `Referrer-Policy`           | `strict-origin-when-cross-origin`              | Controls referrer information leakage |
 | `Permissions-Policy`        | `camera=(), microphone=(), geolocation=()`     | Disables sensitive browser features   |
 
+### Transport Security (RFC 6797 HSTS)
+
+Natspaper strictly enforces HTTP Strict Transport Security:
+
+- **Header**: `Strict-Transport-Security: max-age=63072000; includeSubDomains; preload`
+- **Duration**: 2 Years (`63,072,000` seconds)
+- **Subdomain Protection**: Applied to all subdomains via `includeSubDomains`
+- **Preload Status**: Configured for the global browser preload registry (`hstspreload.org`)
+- **Transport**: All plaintext HTTP traffic is permanently redirected to HTTPS (301) at the edge before any content is transferred.
+
 ### External Resources
 
 | Resource         | Source                          | Security                           |
