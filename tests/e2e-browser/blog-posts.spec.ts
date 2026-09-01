@@ -161,10 +161,21 @@ test.describe("W3C DPUB-ARIA 1.1 & ARIA in HTML Semantics Verification", () => {
     await page.goto("/en/posts/distributed-consensus-algorithms");
     await page.waitForLoadState("networkidle");
 
-    // 1. Table of Contents: role="doc-toc"
+    // 1. Table of Contents: role="doc-toc" must be attached to DOM
     const toc = page.locator('nav[role="doc-toc"]');
     if ((await toc.count()) > 0) {
-      await expect(toc.first()).toBeVisible();
+      await expect(toc.first()).toBeAttached();
+
+      // On desktop, the sidebar is visible; on mobile, the collapsible details container is visible
+      const sidebar = page.locator(".article-sidebar");
+      if (await sidebar.isVisible()) {
+        await expect(sidebar.locator('nav[role="doc-toc"]')).toBeVisible();
+      } else {
+        const mobileDetails = page.locator('details:has(nav[role="doc-toc"])');
+        if ((await mobileDetails.count()) > 0) {
+          await expect(mobileDetails.first()).toBeVisible();
+        }
+      }
     }
 
     // 2. Bibliography landmark: role="doc-bibliography"
