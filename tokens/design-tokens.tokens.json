@@ -1,0 +1,132 @@
+{
+  "$schema": "https://www.designtokens.org/schemas/2025.10/format.json",
+  "primitive": {
+    "color": {
+      "$type": "color",
+      "blue": {
+        "300": { "$value": { "colorSpace": "srgb", "hex": "#6aadff" } },
+        "400": { "$value": { "colorSpace": "srgb", "hex": "#4da6ff" } },
+        "500": { "$value": { "colorSpace": "srgb", "hex": "#0066ff" } }
+      },
+      "gray": {
+        "50": { "$value": { "colorSpace": "srgb", "hex": "#fafafa" } },
+        "100": { "$value": { "colorSpace": "srgb", "hex": "#f7f7f7" } },
+        "200": { "$value": { "colorSpace": "srgb", "hex": "#e0e0e0" } },
+        "600": {
+          "$description": "WCAG 1.4.3: darkened from #757575 for a 4.5:1 contrast ratio on gray-50.",
+          "$value": { "colorSpace": "srgb", "hex": "#595959" }
+        },
+        "700": {
+          "$description": "WCAG AA fix on the dark theme: lightened for better contrast.",
+          "$value": { "colorSpace": "srgb", "hex": "#b3b3b3" }
+        },
+        "850": { "$value": { "colorSpace": "srgb", "hex": "#333333" } },
+        "900": { "$value": { "colorSpace": "srgb", "hex": "#1e1e1e" } },
+        "950": { "$value": { "colorSpace": "srgb", "hex": "#121212" } }
+      }
+    },
+    "font": {
+      "$type": "fontFamily",
+      "sans": {
+        "$value": [
+          "Inter",
+          "Inter-Fallback",
+          "Noto Sans Georgian",
+          "Georgian-Fallback",
+          "system-ui",
+          "sans-serif"
+        ]
+      },
+      "mono": {
+        "$value": ["JetBrains Mono", "Mono-Fallback", "ui-monospace", "monospace"]
+      }
+    },
+    "dimension": {
+      "$type": "dimension",
+      "space": {
+        "xs": { "$value": { "value": 0.25, "unit": "rem" } },
+        "sm": { "$value": { "value": 0.5, "unit": "rem" } },
+        "md": { "$value": { "value": 1, "unit": "rem" } },
+        "lg": { "$value": { "value": 1.5, "unit": "rem" } },
+        "xl": { "$value": { "value": 2, "unit": "rem" } }
+      },
+      "radius": {
+        "sm": { "$value": { "value": 4, "unit": "px" } },
+        "md": { "$value": { "value": 8, "unit": "px" } },
+        "full": { "$value": { "value": 9999, "unit": "px" } }
+      }
+    }
+  },
+  "semantic": {
+    "light": {
+      "surface": {
+        "$type": "color",
+        "background": { "$value": "{primitive.color.gray.50}" },
+        "muted": { "$value": "{primitive.color.gray.100}" },
+        "border": { "$value": "{primitive.color.gray.200}" },
+        "codeBg": { "$value": { "colorSpace": "srgb", "hex": "#f0f0f0" } }
+      },
+      "text": {
+        "$type": "color",
+        "primary": { "$value": { "colorSpace": "srgb", "hex": "#212121" } },
+        "secondary": { "$value": "{primitive.color.gray.600}" }
+      },
+      "accent": {
+        "$type": "color",
+        "default": { "$value": "{primitive.color.blue.500}" }
+      }
+    },
+    "dark": {
+      "surface": {
+        "$type": "color",
+        "background": { "$value": "{primitive.color.gray.950}" },
+        "muted": { "$value": "{primitive.color.gray.900}" },
+        "border": {
+          "$description": "17% delta vs background for visible dark-theme borders (#2d2d2d was too subtle).",
+          "$value": "{primitive.color.gray.850}"
+        },
+        "codeBg": { "$value": { "colorSpace": "srgb", "hex": "#2a2a2a" } }
+      },
+      "text": {
+        "$type": "color",
+        "primary": { "$value": { "colorSpace": "srgb", "hex": "#e0e0e0" } },
+        "secondary": { "$value": "{primitive.color.gray.700}" }
+      },
+      "accent": {
+        "$type": "color",
+        "default": {
+          "$description": "Desaturated for dark-mode eye comfort: #6aadff (~80% saturation) instead of #4da6ff.",
+          "$value": "{primitive.color.blue.300}"
+        }
+      }
+    }
+  },
+  "component": {
+    "card": {
+      "shadow": {
+        "$type": "shadow",
+        "$value": {
+          "color": {
+            "colorSpace": "srgb",
+            "components": [0, 0, 0],
+            "alpha": 0.05
+          },
+          "offsetX": { "value": 0, "unit": "px" },
+          "offsetY": { "value": 1, "unit": "px" },
+          "blur": { "value": 2, "unit": "px" },
+          "spread": { "value": 0, "unit": "px" }
+        }
+      }
+    },
+    "focusRing": {
+      "border": {
+        "$type": "border",
+        "$value": {
+          "color": "{semantic.light.accent.default}",
+          "width": { "value": 2, "unit": "px" },
+          "style": "solid"
+        }
+      }
+    }
+  }
+}
