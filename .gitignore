@@ -64,7 +64,3 @@ test-results/
 *.sublime-project
 .DS_Store
 Thumbs.db
-
-
-# Generated design tokens (run: pnpm build:tokens)
-src/styles/tokens.generated.css
