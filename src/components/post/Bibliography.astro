@@ -75,7 +75,9 @@ const { t } = getI18n(locale as Lang);
                 </a>
               )}
               {ref.doi && (
-                <span class="font-mono text-[10px] opacity-60">
+                /* No opacity: --text-secondary at 60% fails WCAG 1.4.3
+                   contrast (2.72:1) and DOIs are real content. */
+                <span class="font-mono text-[10px] text-text-secondary">
                   {t("post.doi")}: {ref.doi}
                 </span>
               )}

@@ -395,3 +395,87 @@ test.describe("Accessibility - ARIA", () => {
     expect(criticalViolations).toHaveLength(0);
   });
 });
+
+// Fixture post with multi-level headings (drives doc-toc), academic
+// references (drives doc-bibliography), and footer tags (drives the mobile
+// touch-target checks).
+const POST_URL = "/en/posts/distributed-consensus-algorithms";
+
+test.describe("ISO 9241-210 & DPUB-ARIA Ergonomics", () => {
+
+  test("main article preserves DPUB-ARIA landmarks and heading hierarchy", async ({ page }) => {
+    await page.goto(POST_URL);
+    await page.waitForLoadState("networkidle");
+
+    // ISO 9241-110 self-descriptiveness: structural landmarks that tell
+    // readers where they are (W3C DPUB-ARIA 1.1). Articles legitimately
+    // expose two doc-toc landmarks (desktop rail + mobile sheet).
+    await expect(page.locator('nav[role="doc-toc"]').first()).toBeAttached();
+    await expect(
+      page.locator('section[role="doc-bibliography"]').first()
+    ).toBeAttached();
+
+    // Heading hierarchy inside the article must not skip levels.
+    const accessibilityScanResults = await new AxeBuilder({ page })
+      .withRules(["heading-order", "page-has-heading-one"])
+      .analyze();
+    expect(accessibilityScanResults.violations).toHaveLength(0);
+  });
+
+  test("article page meets WCAG 2.2 AA", async ({ page }) => {
+    await page.goto(POST_URL);
+    await page.waitForLoadState("networkidle");
+
+    const accessibilityScanResults = await new AxeBuilder({ page })
+      .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"])
+      .analyze();
+
+    const criticalViolations = accessibilityScanResults.violations.filter(
+      violation =>
+        violation.impact === "critical" || violation.impact === "serious"
+    );
+
+    if (criticalViolations.length > 0) {
+      console.error("WCAG 2.2 AA violations found:");
+      criticalViolations.forEach(violation => {
+        console.error(`- ${violation.id}: ${violation.description}`);
+        violation.nodes.forEach(node => {
+          console.error(`    Target: ${node.target.join(", ")}`);
+        });
+      });
+    }
+
+    expect(criticalViolations).toHaveLength(0);
+  });
+});
+
+test.describe("Accessibility - Mobile Ergonomics", () => {
+  test.use({
+    viewport: { width: 375, height: 667 }, // iPhone SE
+  });
+
+  test("tag links meet WCAG 2.5.8 minimum target size on mobile", async ({ page }) => {
+    // Tag pills render in the post footer (and summary cards), not the
+    // mobile listing page, so measure them on the article page.
+    await page.goto(POST_URL);
+    await page.waitForLoadState("networkidle");
+
+    // Tag pills are inline metadata links (~34px tall by design), so they are
+    // held to the WCAG 2.2 AA Target Size Minimum (24px) rather than the
+    // 44px AAA threshold used for primary controls above.
+    const tagLinks = page.locator('[data-testid="post-tag-link"]');
+    const count = await tagLinks.count();
+
+    expect(count).toBeGreaterThan(0);
+    for (let i = 0; i < Math.min(count, 5); i++) {
+      const tagLink = tagLinks.nth(i);
+      if (await tagLink.isVisible()) {
+        const box = await tagLink.boundingBox();
+        if (box) {
+          expect(box.width).toBeGreaterThanOrEqual(24);
+          expect(box.height).toBeGreaterThanOrEqual(24);
+        }
+      }
+    }
+  });
+});
