@@ -6,7 +6,18 @@
   .app-prose {
     @apply prose prose-neutral dark:prose-invert;
     @apply text-foreground marker:text-accent;
-    font-family: var(--font-inter), sans-serif;
+    font-family: var(--font-inter), var(--font-georgian), sans-serif;
+
+    /*
+     * CSS Fonts Level 5: x-height aspect normalization.
+     * 0.5459 is Inter's measured sxHeight/unitsPerEm (1118/2048) from the
+     * shipped binaries. Fonts later in the stack (Noto Sans Georgian for
+     * Mkhedruli runs, system fallbacks) get scaled to the same optical
+     * x-height, so mixed Latin/Georgian/monospace prose keeps one rhythm.
+     * The single-value numeric form is the broadly supported syntax;
+     * engines without support ignore it (status-quo rendering).
+     */
+    font-size-adjust: 0.5459;
 
     /* 
      * Optimal line-height: 1.6 for body text
@@ -47,6 +58,9 @@
     h6,
     th {
       @apply relative scroll-mt-20 font-bold text-foreground;
+      /* Normalize heading fallbacks by cap-height (two-value form; engines
+         without it drop the declaration and inherit the ex-height value) */
+      font-size-adjust: cap-height from-font;
       letter-spacing: -0.02em;
       line-height: 1.2;
       text-wrap: balance; /* Modern CSS for better heading line breaks */
@@ -319,6 +333,9 @@
     :not(pre) > code {
       @apply rounded bg-muted px-1.5 py-0.5 text-[0.9em] text-foreground before:hidden after:hidden;
       font-family: var(--font-jetbrains-mono), monospace;
+      /* Match inline code x-height to surrounding Inter prose */
+      font-size-adjust: 0.5459;
+      font-variant-numeric: tabular-nums;
     }
     pre {
       @apply my-6 overflow-x-auto rounded-lg border border-border p-4;
@@ -337,6 +354,9 @@
         "DejaVu Math TeX Gyre", math, serif;
       color: var(--color-foreground);
       font-size: 1.05em;
+      /* Insulate MathML/KaTeX from prose aspect scaling: math fonts have
+         their own metric model and font-size-adjust would distort formulas */
+      font-size-adjust: none;
       letter-spacing: normal;
       direction: ltr;
     }
@@ -374,6 +394,36 @@
       border: 1px dashed #b53a2a;
       border-radius: 4px;
       padding: 2px 6px;
+    }
+
+    /* ==========================================================================
+       ACADEMIC CITATIONS, SUPERSCRIPTS & SUBSCRIPTS
+       ==========================================================================
+       Citation refs (role="doc-biblioref"), footnote markers and math indices
+       must not inflate the line box. Raising/lowering via relative offsets on
+       a zero-line-height inline box keeps the vertical rhythm of the
+       surrounding paragraph untouched. The webfonts ship no OpenType
+       sups/subs features, so font-variant-position would depend on synthesis
+       — this deterministic method renders identically everywhere.
+       ========================================================================== */
+    a[role="doc-biblioref"],
+    sup,
+    sub {
+      font-size-adjust: none;
+      line-height: 0;
+      position: relative;
+      vertical-align: baseline;
+    }
+
+    sup,
+    a[role="doc-biblioref"] sup {
+      font-size: 0.75em;
+      top: -0.5em;
+    }
+
+    sub {
+      font-size: 0.75em;
+      bottom: -0.25em;
     }
 
     /* 
@@ -450,7 +500,8 @@
 
   .main-heading {
     @apply leading-tight font-bold;
-    font-family: var(--font-inter), sans-serif;
+    font-family: var(--font-inter), var(--font-georgian), sans-serif;
+    font-size-adjust: cap-height from-font;
     /**
      * Enhanced Fluid Typography for Main Headings
      * ============================================

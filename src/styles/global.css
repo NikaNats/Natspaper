@@ -20,6 +20,23 @@
 @theme {
   --breakpoint-3xl: 1920px;
   --breakpoint-4xl: 2560px;
+
+  /* Font family tokens (Tailwind v4 reads @theme, not tailwind.config.ts).
+     Each token pairs a webfont with its metric-matched local fallback face
+     (@font-face overrides in base.css) for zero-CLS font swaps. Generic
+     families are deliberately NOT inside these tokens: composed stacks like
+     `var(--font-inter), var(--font-georgian), system-ui` must never let a
+     generic font (Windows system-ui contains Georgian glyphs) shadow
+     Noto Sans Georgian. */
+  --font-inter: "Inter", "Inter-Fallback";
+  --font-georgian: "Noto Sans Georgian", "Georgian-Fallback";
+  --font-jetbrains-mono: "JetBrains Mono", "Mono-Fallback";
+
+  /* Route the Tailwind font utilities through the same tokens. Without the
+     --font-sans override, `font-sans` (used on <body>) resolved to Tailwind's
+     default system stack because --font-inter was previously never declared. */
+  --font-sans: var(--font-inter), var(--font-georgian), system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, monospace;
 }
 
 /* Map CSS Variables to Tailwind Utility Classes */
