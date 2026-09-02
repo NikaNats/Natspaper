@@ -13,6 +13,7 @@
     "build:prod": "pnpm build:tokens && cross-env NODE_ENV=production astro check && astro build && npm run generate-csp && npm run compress:zstd && npm run verify-build",
     "preview": "cross-env NODE_ENV=production astro preview",
     "verify-build": "node scripts/verify-build.js",
+    "audit:apca": "node scripts/audit-apca.js",
     "sync": "astro sync",
     "astro": "astro",
     "format:check": "pnpm build:tokens && prettier --check .",
@@ -30,7 +31,7 @@
     "test:e2e:headed": "playwright test --headed",
     "test:e2e:debug": "playwright test --debug",
     "test:e2e:chrome": "playwright test --project=chromium",
-    "test:all": "pnpm test:run && pnpm test:e2e",
+    "test:all": "pnpm build:tokens && pnpm run audit:apca && pnpm test:run && pnpm test:e2e",
     "security:audit": "pnpm audit --audit-level=high",
     "prepare": "node scripts/build-tokens.js && husky"
   },

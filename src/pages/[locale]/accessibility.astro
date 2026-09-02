@@ -1,0 +1,206 @@
+---
+/**
+ * Accessibility Statement (Locale-aware)
+ * Publishes the site's visual-contrast conformance model (APCA 0.0.98G-4g /
+ * WCAG 3.0 candidate method) alongside the legacy WCAG 2.x baseline.
+ */
+import type { GetStaticPaths } from "astro";
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/layout/Header.astro";
+import Footer from "@/components/layout/Footer.astro";
+import Main from "@/layouts/Main.astro";
+import { SITE } from "@/config";
+import { SUPPORTED_LANGS, DEFAULT_LANG } from "@/i18n/config";
+import type { Lang } from "@/i18n";
+
+export const getStaticPaths = (() => {
+  return SUPPORTED_LANGS.map(locale => ({
+    params: { locale },
+  }));
+}) satisfies GetStaticPaths;
+
+export const prerender = true;
+
+const locale = (
+  SUPPORTED_LANGS.includes(Astro.params.locale as Lang)
+    ? Astro.params.locale
+    : DEFAULT_LANG
+) as Lang;
+
+const contentByLocale: Record<
+  Lang,
+  {
+    title: string;
+    description: string;
+    pageTitle: string;
+  }
+> = {
+  en: {
+    title: `Accessibility Statement | ${SITE.title}`,
+    description:
+      "How Natspaper evaluates visual contrast: APCA 0.0.98G-4g and the APCA Readability Criterion, alongside WCAG 2.2 AA.",
+    pageTitle: "Accessibility & Visual Contrast",
+  },
+  ka: {
+    title: `ხელმისაწვდომობის განცხადება | ${SITE.title}`,
+    description:
+      "როგორ აფასებს Natspaper ვიზუალურ კონტრასტს: APCA 0.0.98G-4g და APCA Readability Criterion, WCAG 2.2 AA-სთან ერთად.",
+    pageTitle: "ხელმისაწვდომობა და ვიზუალური კონტრასტი",
+  },
+};
+
+const content = contentByLocale[locale];
+---
+
+<Layout title={content.title} description={content.description}>
+  <Header />
+  <Main pageTitle={content.pageTitle} width="narrow">
+    <article class="app-prose">
+      {
+        locale === "en" ? (
+          <>
+            <h2>APCA Readability &amp; WCAG 3.0 Statement</h2>
+            <p>
+              This website evaluates the visual contrast of its text and
+              non-text elements using the{" "}
+              <strong>Accessible Perceptual Contrast Algorithm (APCA)</strong>,
+              version <code>0.0.98G-4g</code>, the candidate contrast method for{" "}
+              <a
+                href="https://www.w3.org/TR/wcag3/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                W3C WCAG 3.0
+              </a>
+              , verified against the{" "}
+              <a
+                href="https://readtech.org/ARC/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                APCA Readability Criterion (ARC)
+              </a>{" "}
+              Bronze conformance level.
+            </p>
+
+            <h3>Regarding WCAG 2.x vs. WCAG 3.0</h3>
+            <p>
+              Contemporary vision science shows that legacy WCAG 2.x
+              mathematical contrast ratios (SC 1.4.3) do not accurately model
+              how human vision perceives text on self-illuminated displays,
+              particularly in dark mode. This site continues to satisfy WCAG 2.2
+              AA color-contrast requirements, and additionally adopts APCA
+              because it models spatial frequency (font weight and optical size)
+              and reverse-polarity halation, which materially improves
+              real-world readability.
+            </p>
+            <p>
+              Under{" "}
+              <strong>
+                US Access Board Section 508 § E101.2 (Equivalent Facilitation)
+              </strong>
+              , alternative designs that result in equal or greater
+              accessibility are explicitly permitted; APCA-based evaluation is
+              adopted here on that basis.
+            </p>
+
+            <h3>Visual Contrast Thresholds Applied</h3>
+            <ul>
+              <li>
+                <strong>Lc 90 (preferred)</strong>: body prose in both light and
+                dark themes.
+              </li>
+              <li>
+                <strong>Lc 75 (minimum)</strong>: secondary text and large
+                metadata.
+              </li>
+              <li>
+                <strong>Lc 60 (content text)</strong>: headings and interactive
+                navigation links.
+              </li>
+              <li>
+                <strong>Lc 45 (large/emphasis text)</strong>: display headings
+                and accent-colored elements with mixed roles.
+              </li>
+            </ul>
+            <p>
+              These thresholds are enforced automatically: every build audits
+              the design-token palette against the APCA algorithm, and
+              regressions fail continuous integration.
+            </p>
+          </>
+        ) : (
+          <>
+            <h2>APCA-ის წაკითხვადობა და WCAG 3.0</h2>
+            <p>
+              ეს ვებსაიტი აფასებს ტექსტისა და არატექსტური ელემენტების ვიზუალურ
+              კონტრასტს{" "}
+              <strong>Accessible Perceptual Contrast Algorithm (APCA)</strong>
+              -ით, ვერსია <code>0.0.98G-4g</code>, რომელიც{" "}
+              <a
+                href="https://www.w3.org/TR/wcag3/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                W3C WCAG 3.0
+              </a>
+              -ის კანდიდატ მეთოდს წარმოადგენს და შემოწმებულია{" "}
+              <a
+                href="https://readtech.org/ARC/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                APCA Readability Criterion (ARC)
+              </a>{" "}
+              Bronze დონეზე.
+            </p>
+
+            <h3>WCAG 2.x და WCAG 3.0</h3>
+            <p>
+              თანამედროვე მეცნიერება აჩვენებს, რომ WCAG 2.x-ის მათემატიკური
+              კონტრასტის კოეფიციენტი (SC 1.4.3) ზუსტად არ ასახავს ადამიანის
+              ხედვის აღქმას თვითგანათებულ ეკრანებზე, განსაკუთრებით მუქ თემაში.
+              საიტი აგრძელებს WCAG 2.2 AA მოთხოვნების დაკმაყოფილებას და
+              დამატებით იყენებს APCA-ს, რომელიც ითვალისწინებს შრიფტის სისქეს,
+              ზომას და მუქი თემის თავისებურებებს.
+            </p>
+            <p>
+              <strong>
+                US Access Board Section 508 § E101.2-ის (Equivalent
+                Facilitation)
+              </strong>{" "}
+              შესაბამისად, დაშვებულია ალტერნატიული მიდგომები, რომლებიც
+              უზრუნველყოფენ თანაბარ ან უკეთეს ხელმისაწვდომობას — სწორედ ამ
+              საფუძველზეა აქ მიღებული APCA-ზე დაფუძნებული შეფასება.
+            </p>
+
+            <h3>კონტრასტის ზღვრული მნიშვნელობები</h3>
+            <ul>
+              <li>
+                <strong>Lc 90 (სასურველი)</strong>: ძირითადი ტექსტი ღია და მუქ
+                თემაში.
+              </li>
+              <li>
+                <strong>Lc 75 (მინიმალური)</strong>: მეორადი ტექსტი და დიდი
+                მეტამონაცემები.
+              </li>
+              <li>
+                <strong>Lc 60 (კონტენტის ტექსტი)</strong>: სათაურები და
+                ნავიგაციის ბმულები.
+              </li>
+              <li>
+                <strong>Lc 45 (დიდი/აქცენტური ტექსტი)</strong>: სადისპლეი
+                სათაურები და აქცენტის ფერის ელემენტები.
+              </li>
+            </ul>
+            <p>
+              ეს ზღვრები ავტომატურად კონტროლდება: ყოველი build ამოწმებს
+              დიზაინ-ტოკენების პალიტრას APCA ალგორითმით.
+            </p>
+          </>
+        )
+      }
+    </article>
+  </Main>
+  <Footer />
+</Layout>
