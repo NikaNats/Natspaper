@@ -368,7 +368,11 @@
       padding-block: 0.75rem;
       padding-inline: 1rem;
       border-radius: 0.5rem;
-      background-color: color-mix(in srgb, var(--color-muted) 35%, transparent);
+      background-color: color-mix(
+        in oklab,
+        var(--color-muted) 35%,
+        transparent
+      );
 
       /* Mobile viewport safety: horizontal scroll containment */
       overflow-x: auto;

@@ -32,14 +32,16 @@ describe("DTCG 2025.10 Design Tokens Format Specification", () => {
     const rawContent = fs.readFileSync(TOKENS_PATH, "utf8");
     const compiledCss = compileTokens(rawContent);
 
-    expect(compiledCss).toContain("--background: #fafafa;");
-    expect(compiledCss).toContain("--accent: #0066ff;");
-    expect(compiledCss).toContain("--border: #e0e0e0;");
+    // CSS Color 5 OKLCH values are byte-exact conversions of the original
+    // sRGB palette (origin hexes preserved in each token's $extensions).
+    expect(compiledCss).toContain("--background: oklch(0.9851 0 0);");
+    expect(compiledCss).toContain("--accent: oklch(0.5635 0.2408 260.82);");
+    expect(compiledCss).toContain("--border: oklch(0.9067 0 0);");
 
     // Dark mode semantic tokens
     expect(compiledCss).toContain('html[data-theme="dark"] {');
-    expect(compiledCss).toContain("--background: #121212;");
-    expect(compiledCss).toContain("--accent: #6aadff;");
+    expect(compiledCss).toContain("--background: oklch(0.1822 0 0);");
+    expect(compiledCss).toContain("--accent: oklch(0.7379 0.1379 254.36);");
   });
 
   it("emits the exact CSS variable contract the stylesheets consume", () => {
@@ -59,10 +61,10 @@ describe("DTCG 2025.10 Design Tokens Format Specification", () => {
     ]) {
       expect(compiledCss).toContain(varName);
     }
-    expect(compiledCss).toContain("--foreground: #212121;");
-    expect(compiledCss).toContain("--code-bg: #f0f0f0;");
+    expect(compiledCss).toContain("--foreground: oklch(0.2478 0 0);");
+    expect(compiledCss).toContain("--code-bg: oklch(0.9551 0 0);");
     expect(compiledCss).toMatch(
-      /html\[data-theme="dark"\] \{[^}]*--foreground: #e0e0e0;/
+      /html\[data-theme="dark"\] \{[^}]*--foreground: oklch\(0\.9067 0 0\);/
     );
   });
 

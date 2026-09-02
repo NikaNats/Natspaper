@@ -193,17 +193,17 @@ const hiddenTagsCount = tags.length - MAX_TAGS;
     border-radius: 1rem;
 
     /* Premium border treatment */
-    border: 2px solid color-mix(in srgb, var(--color-accent) 30%, transparent);
+    border: 2px solid color-mix(in oklab, var(--color-accent) 30%, transparent);
 
     /* Layered background */
     background:
       linear-gradient(
         135deg,
-        color-mix(in srgb, var(--color-accent) 5%, transparent) 0%,
+        color-mix(in oklab, var(--color-accent) 5%, transparent) 0%,
         transparent 50%,
-        color-mix(in srgb, var(--color-accent) 3%, transparent) 100%
+        color-mix(in oklab, var(--color-accent) 3%, transparent) 100%
       ),
-      color-mix(in srgb, var(--color-muted) 40%, transparent);
+      color-mix(in oklab, var(--color-muted) 40%, transparent);
 
     /* GPU-accelerated transforms */
     transform: translateZ(0);
@@ -219,10 +219,10 @@ const hiddenTagsCount = tags.length - MAX_TAGS;
   /* Hover & Focus States */
   .featured-card__link:hover .featured-card__article,
   .featured-card__link:focus-visible .featured-card__article {
-    border-color: color-mix(in srgb, var(--color-accent) 60%, transparent);
+    border-color: color-mix(in oklab, var(--color-accent) 60%, transparent);
     box-shadow:
-      0 8px 32px -8px color-mix(in srgb, var(--color-accent) 20%, transparent),
-      0 4px 16px -4px color-mix(in srgb, var(--color-accent) 10%, transparent);
+      0 8px 32px -8px color-mix(in oklab, var(--color-accent) 20%, transparent),
+      0 4px 16px -4px color-mix(in oklab, var(--color-accent) 10%, transparent);
     transform: translateY(-4px) translateZ(0);
   }
 
@@ -254,7 +254,7 @@ const hiddenTagsCount = tags.length - MAX_TAGS;
     inset-inline-end: -10%;
     width: clamp(6rem, 4rem + 10vw, 12rem);
     height: clamp(6rem, 4rem + 10vw, 12rem);
-    background: color-mix(in srgb, var(--color-accent) 20%, transparent);
+    background: color-mix(in oklab, var(--color-accent) 20%, transparent);
   }
 
   .featured-card__orb--secondary {
@@ -262,7 +262,7 @@ const hiddenTagsCount = tags.length - MAX_TAGS;
     inset-inline-start: -5%;
     width: clamp(4rem, 3rem + 6vw, 8rem);
     height: clamp(4rem, 3rem + 6vw, 8rem);
-    background: color-mix(in srgb, var(--color-accent) 15%, transparent);
+    background: color-mix(in oklab, var(--color-accent) 15%, transparent);
   }
 
   .featured-card__link:hover .featured-card__orb,
@@ -288,13 +288,13 @@ const hiddenTagsCount = tags.length - MAX_TAGS;
     padding-inline: clamp(0.625rem, 0.5rem + 0.375vw, 0.875rem);
     padding-block: clamp(0.25rem, 0.2rem + 0.15vw, 0.375rem);
     border-radius: 9999px;
-    background: color-mix(in srgb, var(--color-accent) 15%, transparent);
+    background: color-mix(in oklab, var(--color-accent) 15%, transparent);
     transition: background-color 0.2s ease;
   }
 
   .featured-card__link:hover .featured-card__ribbon,
   .featured-card__link:focus-visible .featured-card__ribbon {
-    background: color-mix(in srgb, var(--color-accent) 25%, transparent);
+    background: color-mix(in oklab, var(--color-accent) 25%, transparent);
   }
 
   .featured-card__ribbon-icon {
@@ -377,7 +377,7 @@ const hiddenTagsCount = tags.length - MAX_TAGS;
     padding-inline: clamp(0.5rem, 0.375rem + 0.25vw, 0.625rem);
     padding-block: clamp(0.1875rem, 0.125rem + 0.125vw, 0.25rem);
     border-radius: 9999px;
-    background: color-mix(in srgb, var(--color-accent) 10%, transparent);
+    background: color-mix(in oklab, var(--color-accent) 10%, transparent);
     font-size: clamp(0.6875rem, 0.625rem + 0.125vw, 0.75rem);
     font-weight: 500;
     color: var(--color-accent);
@@ -388,7 +388,7 @@ const hiddenTagsCount = tags.length - MAX_TAGS;
 
   .featured-card__link:hover .featured-card__tag,
   .featured-card__link:focus-visible .featured-card__tag {
-    background: color-mix(in srgb, var(--color-accent) 20%, transparent);
+    background: color-mix(in oklab, var(--color-accent) 20%, transparent);
   }
 
   .featured-card__tag-overflow {
@@ -408,7 +408,7 @@ const hiddenTagsCount = tags.length - MAX_TAGS;
     margin-block-start: clamp(1rem, 0.75rem + 0.5vw, 1.5rem);
     padding-block-start: clamp(0.75rem, 0.5rem + 0.5vw, 1rem);
     border-block-start: 1px solid
-      color-mix(in srgb, var(--color-border) 30%, transparent);
+      color-mix(in oklab, var(--color-border) 30%, transparent);
   }
 
   .featured-card__cta-text {

@@ -44,18 +44,29 @@ const SEMANTIC_VAR_NAMES = {
 };
 
 /**
- * Serialize a DTCG color value (hex form or colorSpace/components form).
+ * Serialize a DTCG color value to CSS Color Module Level 5 notation.
+ * OKLCH tokens (computed byte-exact from the original sRGB hexes, origin
+ * kept in each token's $extensions) serialize natively; the sRGB hex form
+ * remains supported for legacy tokens.
  */
 function colorToCss(val) {
-  if (val && typeof val === "object" && "hex" in val) {
-    return val.hex;
-  }
-  if (val && typeof val === "object" && "components" in val) {
-    const [r, g, b] = val.components.map((c) => Math.round(c * 255));
-    const alpha = val.alpha !== undefined ? val.alpha : 1;
-    return alpha < 1
-      ? `rgba(${r}, ${g}, ${b}, ${alpha})`
-      : `rgb(${r}, ${g}, ${b})`;
+  if (val && typeof val === "object") {
+    if (val.colorSpace === "oklch" && Array.isArray(val.components)) {
+      const [l, c, h] = val.components;
+      const alpha =
+        val.alpha !== undefined && val.alpha < 1 ? ` / ${val.alpha}` : "";
+      return `oklch(${l} ${c} ${h}${alpha})`;
+    }
+    if ("hex" in val) {
+      return val.hex;
+    }
+    if ("components" in val) {
+      const [r, g, b] = val.components.map((c) => Math.round(c * 255));
+      const alpha = val.alpha !== undefined ? val.alpha : 1;
+      return alpha < 1
+        ? `rgba(${r}, ${g}, ${b}, ${alpha})`
+        : `rgb(${r}, ${g}, ${b})`;
+    }
   }
   return val;
 }

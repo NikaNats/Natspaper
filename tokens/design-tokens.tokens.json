@@ -4,25 +4,58 @@
     "color": {
       "$type": "color",
       "blue": {
-        "300": { "$value": { "colorSpace": "srgb", "hex": "#6aadff" } },
-        "400": { "$value": { "colorSpace": "srgb", "hex": "#4da6ff" } },
-        "500": { "$value": { "colorSpace": "srgb", "hex": "#0066ff" } }
+        "300": {
+          "$description": "Dark-theme accent (desaturated for low ambient light).",
+          "$extensions": { "com.natspaper.srgb": "#6aadff" },
+          "$value": { "colorSpace": "oklch", "components": [0.7379, 0.1379, 254.36] }
+        },
+        "400": {
+          "$description": "Retired 100%-saturation dark accent; kept for reference.",
+          "$extensions": { "com.natspaper.srgb": "#4da6ff" },
+          "$value": { "colorSpace": "oklch", "components": [0.7112, 0.1559, 250.96] }
+        },
+        "500": {
+          "$extensions": { "com.natspaper.srgb": "#0066ff" },
+          "$value": { "colorSpace": "oklch", "components": [0.5635, 0.2408, 260.82] }
+        }
       },
       "gray": {
-        "50": { "$value": { "colorSpace": "srgb", "hex": "#fafafa" } },
-        "100": { "$value": { "colorSpace": "srgb", "hex": "#f7f7f7" } },
-        "200": { "$value": { "colorSpace": "srgb", "hex": "#e0e0e0" } },
+        "50": {
+          "$extensions": { "com.natspaper.srgb": "#fafafa" },
+          "$value": { "colorSpace": "oklch", "components": [0.9851, 0, 0] }
+        },
+        "100": {
+          "$extensions": { "com.natspaper.srgb": "#f7f7f7" },
+          "$value": { "colorSpace": "oklch", "components": [0.9761, 0, 0] }
+        },
+        "200": {
+          "$extensions": { "com.natspaper.srgb": "#e0e0e0" },
+          "$value": { "colorSpace": "oklch", "components": [0.9067, 0, 0] }
+        },
         "600": {
           "$description": "WCAG 1.4.3: darkened from #757575 for a 4.5:1 contrast ratio on gray-50.",
-          "$value": { "colorSpace": "srgb", "hex": "#595959" }
+          "$extensions": { "com.natspaper.srgb": "#595959" },
+          "$value": { "colorSpace": "oklch", "components": [0.464, 0, 0] }
         },
         "700": {
           "$description": "WCAG AA fix on the dark theme: lightened for better contrast.",
-          "$value": { "colorSpace": "srgb", "hex": "#b3b3b3" }
+          "$extensions": { "com.natspaper.srgb": "#b3b3b3" },
+          "$value": { "colorSpace": "oklch", "components": [0.7668, 0, 0] }
         },
-        "850": { "$value": { "colorSpace": "srgb", "hex": "#333333" } },
-        "900": { "$value": { "colorSpace": "srgb", "hex": "#1e1e1e" } },
-        "950": { "$value": { "colorSpace": "srgb", "hex": "#121212" } }
+        "850": {
+          "$description": "17% delta vs dark background for visible borders without harshness.",
+          "$extensions": { "com.natspaper.srgb": "#333333" },
+          "$value": { "colorSpace": "oklch", "components": [0.3211, 0, 0] }
+        },
+        "900": {
+          "$extensions": { "com.natspaper.srgb": "#1e1e1e" },
+          "$value": { "colorSpace": "oklch", "components": [0.235, 0, 0] }
+        },
+        "950": {
+          "$description": "Deep dark surface: OLED-safe, avoids harsh pure-black contrast.",
+          "$extensions": { "com.natspaper.srgb": "#121212" },
+          "$value": { "colorSpace": "oklch", "components": [0.1822, 0, 0] }
+        }
       }
     },
     "font": {
@@ -64,11 +97,17 @@
         "background": { "$value": "{primitive.color.gray.50}" },
         "muted": { "$value": "{primitive.color.gray.100}" },
         "border": { "$value": "{primitive.color.gray.200}" },
-        "codeBg": { "$value": { "colorSpace": "srgb", "hex": "#f0f0f0" } }
+        "codeBg": {
+          "$extensions": { "com.natspaper.srgb": "#f0f0f0" },
+          "$value": { "colorSpace": "oklch", "components": [0.9551, 0, 0] }
+        }
       },
       "text": {
         "$type": "color",
-        "primary": { "$value": { "colorSpace": "srgb", "hex": "#212121" } },
+        "primary": {
+          "$extensions": { "com.natspaper.srgb": "#212121" },
+          "$value": { "colorSpace": "oklch", "components": [0.2478, 0, 0] }
+        },
         "secondary": { "$value": "{primitive.color.gray.600}" }
       },
       "accent": {
@@ -81,21 +120,24 @@
         "$type": "color",
         "background": { "$value": "{primitive.color.gray.950}" },
         "muted": { "$value": "{primitive.color.gray.900}" },
-        "border": {
-          "$description": "17% delta vs background for visible dark-theme borders (#2d2d2d was too subtle).",
-          "$value": "{primitive.color.gray.850}"
-        },
-        "codeBg": { "$value": { "colorSpace": "srgb", "hex": "#2a2a2a" } }
+        "border": { "$value": "{primitive.color.gray.850}" },
+        "codeBg": {
+          "$extensions": { "com.natspaper.srgb": "#2a2a2a" },
+          "$value": { "colorSpace": "oklch", "components": [0.285, 0, 0] }
+        }
       },
       "text": {
         "$type": "color",
-        "primary": { "$value": { "colorSpace": "srgb", "hex": "#e0e0e0" } },
+        "primary": {
+          "$extensions": { "com.natspaper.srgb": "#e0e0e0" },
+          "$value": { "colorSpace": "oklch", "components": [0.9067, 0, 0] }
+        },
         "secondary": { "$value": "{primitive.color.gray.700}" }
       },
       "accent": {
         "$type": "color",
         "default": {
-          "$description": "Desaturated for dark-mode eye comfort: #6aadff (~80% saturation) instead of #4da6ff.",
+          "$description": "Desaturated for dark-mode eye comfort (~80% saturation).",
           "$value": "{primitive.color.blue.300}"
         }
       }
