@@ -161,6 +161,34 @@
      UI ELEMENTS
      ========================================================================== */
 
+  /* ==========================================================================
+     W3C Scroll-driven Animations: Reading Progress Bar
+     ==========================================================================
+     progressBar.ts (JS) creates the bar and updates width on scroll for
+     fallback engines and test runners. On engines supporting scroll-driven
+     animations this block takes over: the inline width is neutralized with
+     !important and progress is driven by a compositor-accelerated scaleX()
+     on the scroll timeline — no main-thread scroll work.
+     ========================================================================== */
+  @keyframes grow-reading-progress {
+    from {
+      transform: scaleX(0);
+    }
+    to {
+      transform: scaleX(1);
+    }
+  }
+
+  @supports (animation-timeline: scroll()) {
+    .progress-bar {
+      /* Neutralize the JS inline width; the timeline drives progress */
+      width: 100% !important;
+      transform-origin: 0% 50%;
+      animation: grow-reading-progress linear;
+      animation-timeline: scroll(root block);
+    }
+  }
+
   /* Elements */
   .tag {
     @apply mr-2 mb-2 inline-flex items-center rounded-full border border-transparent bg-muted px-3 py-1 text-sm text-foreground transition-colors;

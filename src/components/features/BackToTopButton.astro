@@ -7,9 +7,8 @@ import { FEATURES } from "@/config"; // Import configuration
 <div
   id="btt-btn-container"
   data-threshold={FEATURES.backToTopThreshold}
-  data-visible="false"
   class:list={[
-    "fixed end-4 bottom-8 z-50 transition-opacity transition-transform duration-500 motion-reduce:transition-none",
+    "fixed end-4 bottom-8 z-50 transition-all duration-300 motion-reduce:transition-none",
     "md:sticky md:end-auto md:float-end md:me-1",
   ]}
 >
@@ -38,25 +37,77 @@ import { FEATURES } from "@/config"; // Import configuration
   </button>
 </div>
 
-{/* NEW: Component-scoped styles for visibility */}
 <style>
-  #btt-btn-container {
-    opacity: 0;
-    transform: translateY(3.5rem); /* Equivalent to translate-y-14 */
+  /*
+   * W3C Scroll-driven Animations: the button reveal and the mobile radial
+   * progress ring are driven by the scroll timeline on supporting engines
+   * (compositor-side, no JS scroll handlers). --btt-progress must be a
+   * registered custom property for the conic-gradient to animate.
+   * The reveal keyframes mirror FEATURES.backToTopThreshold (0.3).
+   */
+  @property --btt-progress {
+    syntax: "<percentage>";
+    inherits: false;
+    initial-value: 0%;
   }
-  #btt-btn-container[data-visible="true"] {
-    opacity: 1;
-    transform: translateY(0);
+
+  @keyframes btt-radial-fill {
+    to {
+      --btt-progress: 100%;
+    }
+  }
+
+  @keyframes reveal-back-to-top {
+    0%,
+    25% {
+      opacity: 0;
+      transform: translateY(3.5rem);
+      pointer-events: none;
+    }
+    35%,
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+  }
+
+  /* Modern engines: pure CSS scroll timeline */
+  @supports (animation-timeline: scroll()) {
+    #btt-btn-container {
+      animation: reveal-back-to-top linear both;
+      animation-timeline: scroll(root block);
+    }
+
+    #progress-indicator {
+      background-image: conic-gradient(
+        var(--color-accent) var(--btt-progress),
+        transparent var(--btt-progress)
+      );
+      animation: btt-radial-fill linear;
+      animation-timeline: scroll(root block);
+    }
+  }
+
+  /* Fallback for engines without CSS scroll timelines: JS sets data-visible */
+  @supports not (animation-timeline: scroll()) {
+    #btt-btn-container {
+      opacity: 0;
+      transform: translateY(3.5rem);
+      pointer-events: none;
+    }
+    #btt-btn-container[data-visible="true"] {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
   }
 </style>
 
 <script is:inline data-astro-rerun>
   function initBackToTop() {
-    // REFACTORED: Get threshold from data attribute (sourced from config)
-
-    // REFACTORED: Scope all queries to this component instance
     const container = document.getElementById("btt-btn-container");
-    if (!container || container.dataset.initialized) return; // Early exit if not found or already initialized
+    if (!container || container.dataset.initialized) return;
 
     const button = container.querySelector("[data-button='back-to-top']");
     const progressIndicator = container.querySelector("#progress-indicator");
@@ -64,7 +115,6 @@ import { FEATURES } from "@/config"; // Import configuration
       container.dataset.threshold || "0.3"
     );
 
-    // NEW: Use modern, smooth scrolling API with reduced motion support
     button.addEventListener("click", () => {
       // WCAG 2.3.3: Respect user's motion preference
       const prefersReducedMotion = window.matchMedia(
@@ -76,38 +126,52 @@ import { FEATURES } from "@/config"; // Import configuration
       });
     });
 
-    const handleScroll = () => {
-      const { scrollTop, scrollHeight, clientHeight } =
-        document.documentElement;
-      const scrollTotal = scrollHeight - clientHeight;
+    // Attach the JS scroll handler ONLY when scroll-driven animations are
+    // unavailable (legacy engines, test runners). On modern engines the CSS
+    // scroll timeline owns both the reveal and the radial fill.
+    const hasNativeScrollTimeline =
+      typeof CSS !== "undefined" &&
+      CSS.supports &&
+      CSS.supports("animation-timeline", "scroll()");
 
-      // Prevent division by zero on pages with no scroll
-      if (scrollTotal <= 0) {
-        container.dataset.visible = "false";
-        return;
-      }
+    if (!hasNativeScrollTimeline) {
+      const handleScroll = () => {
+        const { scrollTop, scrollHeight, clientHeight } =
+          document.documentElement;
+        const scrollTotal = scrollHeight - clientHeight;
 
-      const scrollPercent = (scrollTop / scrollTotal) * 100;
+        // Prevent division by zero on pages with no scroll
+        if (scrollTotal <= 0) {
+          container.dataset.visible = "false";
+          return;
+        }
 
-      // REFACTORED: Simplified style update
-      progressIndicator.style.backgroundImage = `conic-gradient(var(--accent) ${scrollPercent}%, transparent ${scrollPercent}%)`;
+        const scrollPercent = (scrollTop / scrollTotal) * 100;
 
-      // REFACTORED: Declarative state change
-      const isVisible = scrollTop / scrollTotal > VISIBILITY_THRESHOLD;
-      container.dataset.visible = isVisible.toString();
-    };
+        if (progressIndicator) {
+          progressIndicator.style.backgroundImage = `conic-gradient(var(--accent) ${scrollPercent}%, transparent ${scrollPercent}%)`;
+        }
 
-    // Performance: Use requestAnimationFrame for smooth scroll handling
-    let ticking = false;
-    document.addEventListener("scroll", () => {
-      if (!ticking) {
-        window.requestAnimationFrame(() => {
-          handleScroll();
-          ticking = false;
-        });
-        ticking = true;
-      }
-    });
+        const isVisible = scrollTop / scrollTotal > VISIBILITY_THRESHOLD;
+        container.dataset.visible = isVisible.toString();
+      };
+
+      // Performance: Use requestAnimationFrame for smooth scroll handling
+      let ticking = false;
+      document.addEventListener(
+        "scroll",
+        () => {
+          if (!ticking) {
+            window.requestAnimationFrame(() => {
+              handleScroll();
+              ticking = false;
+            });
+            ticking = true;
+          }
+        },
+        { passive: true }
+      );
+    }
 
     // Mark as initialized to prevent re-attaching listeners on page transitions
     container.dataset.initialized = "true";

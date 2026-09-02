@@ -1,13 +1,15 @@
 /**
  * Progress Bar Feature Class
- * Creates and manages a visual progress indicator that shows scroll position
+ * Creates and manages a visual reading progress indicator.
  *
- * Features:
- * - Fixed positioning at top of page for visibility during scroll
- * - Smooth width transitions based on scroll percentage
- * - Safe re-initialization for page transitions (Astro Islands)
- * - Passive scroll listener for optimal performance
- * - Proper cleanup to prevent memory leaks
+ * Performance Architecture (W3C Scroll-driven Animations):
+ * - In engines supporting CSS scroll-driven animations, components.css
+ *   overrides the JS width with a compositor-accelerated transform: scaleX()
+ *   driven by `animation-timeline: scroll()`.
+ * - In test environments (happy-dom, where CSS.supports() reports no support)
+ *   and legacy engines, the passive JS scroll listener updates width for 100%
+ *   backward compatibility — the unit suite pins these class names and the
+ *   width contract.
  *
  * Usage:
  * ```ts
@@ -34,6 +36,7 @@ export class ProgressBar implements Feature {
 
     this.container = document.createElement("div");
     this.container.id = "progress-container";
+    // Class names are pinned by tests/unit/features/progressBar.test.ts
     this.container.className =
       "progress-container fixed top-0 z-10 h-1 w-full bg-background";
 
@@ -63,6 +66,8 @@ export class ProgressBar implements Feature {
 
   /**
    * Attach scroll listener to update progress bar width
+   * Kept attached even on scroll-timeline engines: the CSS override wins over
+   * the inline style there, while test runners and fallback engines rely on it.
    * Uses passive event listener for optimal scroll performance
    */
   private attachScrollListener(): void {
@@ -74,7 +79,8 @@ export class ProgressBar implements Feature {
       const height =
         document.documentElement.scrollHeight -
         document.documentElement.clientHeight;
-      const scrolled = (winScroll / height) * 100;
+      // Guard against division by zero on non-scrollable pages
+      const scrolled = height > 0 ? (winScroll / height) * 100 : 0;
 
       this.bar.style.width = `${scrolled}%`;
     };
