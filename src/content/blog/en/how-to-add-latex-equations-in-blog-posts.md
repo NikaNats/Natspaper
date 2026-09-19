@@ -10,17 +10,7 @@ description: Learn how to add LaTeX equations in Astro blog posts using Markdown
 
 This document demonstrates how to use LaTeX equations in your Markdown files for AstroPaper. LaTeX is a powerful typesetting system often used for mathematical and scientific documents.
 
-<!--
-  PERFORMANCE FIX:
-  This hero-adjacent figure sits above the fold (LCP candidate), so it uses
-  an explicit <img> with loading="eager" + fetchpriority="high" (same
-  convention as the homepage profile image in Hero.astro). Astro still
-  processes local <img> sources in Markdown through the image pipeline
-  (WebP/AVIF, responsive sizes, injected dimensions); below-the-fold
-  figures elsewhere keep Markdown syntax for automatic lazy loading.
--->
-
-<img src="../../../assets/images/latex-equations-blackboard.jpeg" alt="Close-up of complex equations on a chalkboard, showcasing chemistry and math symbols" loading="eager" fetchpriority="high" decoding="async" />
+![Close-up of complex equations on a chalkboard, showcasing chemistry and math symbols](../../../assets/images/latex-equations-blackboard.jpeg)
 
 _Photo by [Vitaly Gariev](https://www.pexels.com/photo/close-up-of-complicated-equations-written-on-a-blackboard-22690748/)_
 
@@ -95,19 +85,14 @@ For more complex equations or when you want the equation to be displayed on its 
 
 The Gaussian integral:
 
-```latex
 $$ \int_{-\infty}^{\infty} e^{-x^2} dx = \sqrt{\pi} $$
-```
 
 The definition of the Riemann zeta function:
 
-```latex
 $$ \zeta(s) = \sum_{n=1}^{\infty} \frac{1}{n^s} $$
-```
 
 Maxwell's equations in differential form:
 
-```latex
 $$
 \begin{aligned}
 \nabla \cdot \mathbf{E} &= \frac{\rho}{\varepsilon_0} \\
@@ -116,7 +101,6 @@ $$
 \nabla \times \mathbf{B} &= \mu_0\left(\mathbf{J} + \varepsilon_0 \frac{\partial \mathbf{E}}{\partial t}\right)
 \end{aligned}
 $$
-```
 
 ---
 
