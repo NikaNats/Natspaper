@@ -34,8 +34,21 @@ const schemas = {
       "Slug must be lowercase with hyphens only"
     ),
 
-  /** URL that must be absolute */
-  absoluteUrl: z.string().url(),
+  /**
+   * Standards-compliant absolute URL validator
+   * Replaces deprecated z.string().url() with native WHATWG URL parser
+   */
+  absoluteUrl: z.string().refine(
+    value => {
+      try {
+        const parsed = new URL(value);
+        return parsed.protocol === "http:" || parsed.protocol === "https:";
+      } catch {
+        return false;
+      }
+    },
+    { message: "Must be a valid absolute HTTP or HTTPS URL" }
+  ),
 
   /** IANA timezone string */
   timezone: z.string().refine(
@@ -59,7 +72,20 @@ const schemas = {
     author: z.string(),
     year: z.number().int(),
     journal: z.string().optional(),
-    url: z.string().url().optional(),
+    url: z
+      .string()
+      .refine(
+        value => {
+          try {
+            const parsed = new URL(value);
+            return parsed.protocol === "http:" || parsed.protocol === "https:";
+          } catch {
+            return false;
+          }
+        },
+        { message: "Must be a valid absolute URL" }
+      )
+      .optional(),
     doi: z
       .string()
       .optional()

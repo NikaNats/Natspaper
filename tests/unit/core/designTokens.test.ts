@@ -84,7 +84,7 @@ describe("DTCG 2025.10 Design Tokens Format Specification", () => {
       },
     };
 
-    expect(() => compileTokens(invalidCircularTokens)).toThrowError(
+    expect(() => compileTokens(invalidCircularTokens)).toThrow(
       /Circular reference detected/
     );
   });
@@ -101,7 +101,7 @@ describe("DTCG 2025.10 Design Tokens Format Specification", () => {
       },
     };
 
-    expect(() => compileTokens(invalidMissingTokens)).toThrowError(
+    expect(() => compileTokens(invalidMissingTokens)).toThrow(
       /Unresolvable token reference/
     );
   });
@@ -118,7 +118,7 @@ describe("DTCG 2025.10 Design Tokens Format Specification", () => {
       },
     };
 
-    expect(() => compileTokens(unmappedTokens)).toThrowError(
+    expect(() => compileTokens(unmappedTokens)).toThrow(
       /Unmapped semantic token/
     );
   });
