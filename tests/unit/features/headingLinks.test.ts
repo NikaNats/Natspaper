@@ -148,7 +148,7 @@ describe("Heading Links Feature", () => {
     expect(links.length).toBeGreaterThan(initialCount);
   });
 
-  it("should handle headings without id gracefully", () => {
+  it("should skip headings without id (never emit href=\"#\" anchors)", () => {
     document.body.innerHTML = `
       <h2>Heading without ID</h2>
       <h3 id="with-id">Heading with ID</h3>
@@ -156,12 +156,20 @@ describe("Heading Links Feature", () => {
 
     headingLinks.init();
 
-    const h2 = document.querySelector("h2") as HTMLElement;
-    const h2Link = h2.querySelector("a.heading-link") as HTMLAnchorElement;
+    // Id-less headings (card titles, sidebar labels) get no anchor: "#" +
+    // "" is a broken link that jumps to the top and fails href audits.
+    expect(document.querySelector("h2 a.heading-link")).toBeFalsy();
 
-    expect(h2Link).toBeTruthy();
-    // Link href will be empty if heading has no id
-    expect(h2Link.href).toBe("http://localhost:3000/#");
+    const withId = document.querySelector(
+      "h3 a.heading-link"
+    ) as HTMLAnchorElement;
+    expect(withId).toBeTruthy();
+    expect(withId.getAttribute("href")).toBe("#with-id");
+
+    // Global invariant: no bare "#" hrefs anywhere in the document.
+    for (const a of document.querySelectorAll("a.heading-link")) {
+      expect((a as HTMLAnchorElement).getAttribute("href")).not.toBe("#");
+    }
   });
 
   it("should append link to end of heading element", () => {

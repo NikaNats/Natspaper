@@ -34,6 +34,10 @@ export class HeadingLinks implements Feature {
     );
 
     for (const heading of headings) {
+      // Headings without an id (card titles, sidebar labels) cannot be
+      // link targets: "#" + "" produces href="#" — a broken link that jumps
+      // to the top of the page and trips accessibility checkers. Skip them.
+      if (!(heading as HTMLElement).id) continue;
       this.attachLinkToHeading(heading as HTMLElement);
     }
   }
