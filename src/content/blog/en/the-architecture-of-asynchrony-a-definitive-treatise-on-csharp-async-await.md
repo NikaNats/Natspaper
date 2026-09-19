@@ -35,7 +35,7 @@ references:
     url: "https://learn.microsoft.com/en-us/dotnet/standard/asynchronous-programming-patterns/task-based-asynchronous-pattern-tap"
 ---
 
-The introduction of the Task-based Asynchronous Pattern (TAP) <a href="#ref-microsoft-tap" role="doc-biblioref"><sup>[4]</sup></a> via the `async` and `await` keywords in C# 5.0 marked a paradigm shift in managed software development. It transitioned the industry from complex, callback-heavy architectures to a structured, linear style of programming that preserves logical flow while maximizing hardware utilization.
+The introduction of the Task-based Asynchronous Pattern (TAP) <a href="#ref-microsoft-tap" class="citation-ref" aria-label="Reference [4]"><sup>[4]</sup></a> via the `async` and `await` keywords in C# 5.0 marked a paradigm shift in managed software development. It transitioned the industry from complex, callback-heavy architectures to a structured, linear style of programming that preserves logical flow while maximizing hardware utilization.
 
 However, the simplicity of the syntax—sprinkling a few keywords onto a method signature—belies the immense complexity occurring beneath the surface. To truly master asynchronous programming in .NET, one must look beyond the abstraction. One must understand the compiler transformations, the allocation strategies of the runtime, the flow of execution contexts, and the physical interaction with hardware interrupts.
 
@@ -107,7 +107,7 @@ Consider the algorithm for making breakfast:
 
 ## Part 3: The Compiler Transformation
 
-When you compile an `async` method, the Roslyn compiler performs a radical transformation <a href="#ref-toub2023" role="doc-biblioref"><sup>[1]</sup></a>. It does not leave your code as a standard method. It converts it into a `struct` implementing the `IAsyncStateMachine` interface.
+When you compile an `async` method, the Roslyn compiler performs a radical transformation <a href="#ref-toub2023" class="citation-ref" aria-label="Reference [1]"><sup>[1]</sup></a>. It does not leave your code as a standard method. It converts it into a `struct` implementing the `IAsyncStateMachine` interface.
 
 ### 3.1 Anatomy of the State Machine
 
@@ -211,7 +211,7 @@ Modern .NET uses a specialized generic class: `AsyncStateMachineBox<TStateMachin
 
 ## Part 4: The Hardware Reality ("There Is No Thread")
 
-One of the most persistent myths is that `async` works by spawning a background thread to "wait" for the operation. **This is false.** For I/O-bound operations, there is absolutely no thread watching, waiting, or blocking <a href="#ref-cleary2013" role="doc-biblioref"><sup>[2]</sup></a>.
+One of the most persistent myths is that `async` works by spawning a background thread to "wait" for the operation. **This is false.** For I/O-bound operations, there is absolutely no thread watching, waiting, or blocking <a href="#ref-cleary2013" class="citation-ref" aria-label="Reference [2]"><sup>[2]</sup></a>.
 
 Let us trace the lifecycle of `await fileStream.ReadAsync()` down to the silicon:
 
@@ -271,7 +271,7 @@ async Task<string> GetDataAsync()
 
 ### 5.3 ConfigureAwait(false)
 
-The solution for library authors <a href="#ref-fruhauff2022" role="doc-biblioref"><sup>[3]</sup></a> is `ConfigureAwait(false)`.
+The solution for library authors <a href="#ref-fruhauff2022" class="citation-ref" aria-label="Reference [3]"><sup>[3]</sup></a> is `ConfigureAwait(false)`.
 
 - **Mechanism:** It passes a boolean flag to the awaiter logic.
 - **Effect:** It tells the runtime: "I do not need to resume on the captured context. Any ThreadPool thread is fine."
@@ -308,7 +308,7 @@ Modern .NET allows implementing `IValueTaskSource`. This allows a backing object
 
 ## Part 7: Best Practices and Patterns
 
-Mastering asynchrony requires strict adherence to established patterns <a href="#ref-fruhauff2022" role="doc-biblioref"><sup>[3:1]</sup></a>:
+Mastering asynchrony requires strict adherence to established patterns <a href="#ref-fruhauff2022" class="citation-ref" aria-label="Reference [3], second citation"><sup>[3:1]</sup></a>:
 
 ### 7.1 Async Void
 

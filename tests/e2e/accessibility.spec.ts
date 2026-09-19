@@ -396,23 +396,23 @@ test.describe("Accessibility - ARIA", () => {
   });
 });
 
-// Fixture post with multi-level headings (drives doc-toc), academic
-// references (drives doc-bibliography), and footer tags (drives the mobile
-// touch-target checks).
+// Fixture post with multi-level headings (drives the TOC landmarks), academic
+// references (drives the bibliography region), and footer tags (drives the
+// mobile touch-target checks).
 const POST_URL = "/en/posts/distributed-consensus-algorithms";
 
-test.describe("ISO 9241-210 & DPUB-ARIA Ergonomics", () => {
+test.describe("ISO 9241-210 Native Landmark Ergonomics", () => {
 
-  test("main article preserves DPUB-ARIA landmarks and heading hierarchy", async ({ page }) => {
+  test("main article preserves native landmarks and heading hierarchy", async ({ page }) => {
     await page.goto(POST_URL);
     await page.waitForLoadState("networkidle");
 
     // ISO 9241-110 self-descriptiveness: structural landmarks that tell
-    // readers where they are (W3C DPUB-ARIA 1.1). Articles legitimately
-    // expose two doc-toc landmarks (desktop rail + mobile sheet).
-    await expect(page.locator('nav[role="doc-toc"]').first()).toBeAttached();
+    // readers where they are (named native landmarks). Articles legitimately
+    // expose two TOC landmarks (desktop rail + mobile sheet).
+    await expect(page.locator('nav[aria-label^="Table of"]').first()).toBeAttached();
     await expect(
-      page.locator('section[role="doc-bibliography"]').first()
+      page.locator('section[aria-labelledby="refs-heading"]').first()
     ).toBeAttached();
 
     // Heading hierarchy inside the article must not skip levels.

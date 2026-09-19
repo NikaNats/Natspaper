@@ -33,7 +33,7 @@ references:
 
 In the realm of distributed systems, consensus represents the holy grail of coordination. When multiple processes must agree on a single value despite network partitions, message delays, and node failures, we enter the domain of distributed consensus algorithms.
 
-The problem was first formally articulated by Leslie Lamport in his seminal work on the Byzantine Generals Problem <a href="#ref-lamport1998" role="doc-biblioref"><sup>[1]</sup></a>. This paper established the theoretical foundations that would guide decades of research in fault-tolerant distributed systems.
+The problem was first formally articulated by Leslie Lamport in his seminal work on the Byzantine Generals Problem <a href="#ref-lamport1998" class="citation-ref" aria-label="Reference [1]"><sup>[1]</sup></a>. This paper established the theoretical foundations that would guide decades of research in fault-tolerant distributed systems.
 
 ## The Consensus Problem
 
@@ -45,11 +45,11 @@ At its core, consensus requires that a group of processes agree on a value, even
 
 ### Paxos: The Foundation
 
-Lamport's Paxos algorithm, introduced in 1998 <a href="#ref-lamport1998" role="doc-biblioref"><sup>[1]</sup></a>, provides a solution to the consensus problem in asynchronous networks. The algorithm operates in phases, using proposers, acceptors, and learners to achieve agreement.
+Lamport's Paxos algorithm, introduced in 1998 <a href="#ref-lamport1998" class="citation-ref" aria-label="Reference [1]"><sup>[1]</sup></a>, provides a solution to the consensus problem in asynchronous networks. The algorithm operates in phases, using proposers, acceptors, and learners to achieve agreement.
 
 ### Raft: Understandability First
 
-While Paxos is theoretically elegant, its complexity has hindered widespread adoption. Diego Ongaro and John Ousterhout's Raft algorithm <a href="#ref-ongaro2014" role="doc-biblioref"><sup>[2]</sup></a> addresses this by prioritizing understandability over theoretical minimalism.
+While Paxos is theoretically elegant, its complexity has hindered widespread adoption. Diego Ongaro and John Ousterhout's Raft algorithm <a href="#ref-ongaro2014" class="citation-ref" aria-label="Reference [2]"><sup>[2]</sup></a> addresses this by prioritizing understandability over theoretical minimalism.
 
 Raft decomposes consensus into three subproblems:
 
@@ -67,7 +67,7 @@ When network partitions occur, systems face the CAP theorem's impossible trinity
 
 ### Performance Optimization
 
-Howard's work on synchronization primitives <a href="#ref-howard1997" role="doc-biblioref"><sup>[3]</sup></a> provides valuable insights for optimizing consensus implementations. The key insight is that synchronization overhead grows quadratically with contention, making leader-based approaches like Raft more scalable than fully symmetric protocols like Paxos.
+Howard's work on synchronization primitives <a href="#ref-howard1997" class="citation-ref" aria-label="Reference [3]"><sup>[3]</sup></a> provides valuable insights for optimizing consensus implementations. The key insight is that synchronization overhead grows quadratically with contention, making leader-based approaches like Raft more scalable than fully symmetric protocols like Paxos.
 
 ## Conclusion
 

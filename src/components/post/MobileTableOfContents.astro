@@ -23,11 +23,7 @@ const toc = headings.filter(h => h.depth >= 2 && h.depth <= 3);
             ›
           </span>
         </summary>
-        <nav
-          role={"doc-toc" as unknown as astroHTML.JSX.AriaRole}
-          class="px-2 pt-3 pb-2"
-          aria-label="Table of contents"
-        >
+        <nav class="px-2 pt-3 pb-2" aria-label="Table of contents">
           <ul class="flex flex-col gap-2">
             {toc.map(heading => (
               <li class:list={[{ "ps-4": heading.depth === 3 }]}>

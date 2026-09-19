@@ -89,7 +89,7 @@ describe("W3C CSS Fonts Module Level 5 Integration", () => {
     // MathML/KaTeX must be insulated from prose aspect scaling.
     expect(typographyCss).toMatch(/math\s*\{[\s\S]*?font-size-adjust:\s*none/);
     // Academic citation superscripts keep the line grid intact.
-    expect(typographyCss).toContain('a[role="doc-biblioref"]');
+    expect(typographyCss).toContain("a.citation-ref");
     expect(typographyCss).toContain("line-height: 0;");
   });
 });

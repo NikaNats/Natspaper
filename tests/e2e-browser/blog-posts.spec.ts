@@ -153,61 +153,67 @@ test.describe("W3C MathML Core Verification", () => {
   });
 });
 
-// --- W3C DPUB-ARIA 1.1 & ARIA in HTML Verification ---
-test.describe("W3C DPUB-ARIA 1.1 & ARIA in HTML Semantics Verification", () => {
-  test("should expose valid digital publishing landmarks and roles on academic posts", async ({
+// --- Native landmark & ARIA in HTML Verification ---
+// Publishing landmarks use implicit semantics (named nav/section) instead of
+// DPUB-ARIA doc-* roles: universally exposed to AT and accepted by every
+// role table, with zero landmark-navigability loss.
+test.describe("Native Landmark & ARIA in HTML Semantics Verification", () => {
+  test("should expose named native landmarks on academic posts", async ({
     page,
   }) => {
     await page.goto("/en/posts/distributed-consensus-algorithms");
     await page.waitForLoadState("networkidle");
 
-    // 1. Table of Contents: role="doc-toc" must be attached to DOM
-    const toc = page.locator('nav[role="doc-toc"]');
+    // 1. Table of Contents: named navigation landmark must be attached to DOM
+    const toc = page.locator('nav[aria-label="Table of Contents"], nav[aria-label="Table of contents"]');
     if ((await toc.count()) > 0) {
       await expect(toc.first()).toBeAttached();
 
       // On desktop, the sidebar is visible; on mobile, the collapsible details container is visible
       const sidebar = page.locator(".article-sidebar");
       if (await sidebar.isVisible()) {
-        await expect(sidebar.locator('nav[role="doc-toc"]')).toBeVisible();
+        await expect(sidebar.locator("nav[aria-label]").first()).toBeVisible();
       } else {
-        const mobileDetails = page.locator('details:has(nav[role="doc-toc"])');
+        const mobileDetails = page.locator("details:has(nav[aria-label])");
         if ((await mobileDetails.count()) > 0) {
           await expect(mobileDetails.first()).toBeVisible();
         }
       }
     }
 
-    // 2. Bibliography landmark: role="doc-bibliography"
-    const bibliography = page.locator('section[role="doc-bibliography"]');
+    // 2. Bibliography landmark: named region via aria-labelledby
+    const bibliography = page.locator('section[aria-labelledby="refs-heading"]');
     await expect(bibliography).toBeVisible();
 
-    // 3. Inline reference link: role="doc-biblioref"
-    const inlineRef = page.locator('a[role="doc-biblioref"]').first();
+    // 3. Inline reference links carry accessible names and fragment targets
+    const inlineRef = page.locator("a.citation-ref").first();
     if ((await inlineRef.count()) > 0) {
       await expect(inlineRef).toBeAttached();
+      await expect(inlineRef).toHaveAttribute("href", /^#ref-/);
+      const name = await inlineRef.getAttribute("aria-label");
+      expect(name).toBeTruthy();
     }
 
-    // 4. Conformance rule: No deprecated doc-biblioentry is used on <li>
-    const deprecatedRoles = page.locator('[role="doc-biblioentry"]');
-    expect(await deprecatedRoles.count()).toBe(0);
+    // 4. Audit-clean contract: no doc-* roles anywhere on the page
+    expect(await page.locator('[role^="doc-"]').count()).toBe(0);
   });
 
-  test("should expose doc-part and doc-subtitle on series posts", async ({
+  test("should expose the series box as a named region on series posts", async ({
     page,
   }) => {
     // Navigate to a series article
     await page.goto("/en/posts/system-design-part-1");
     await page.waitForLoadState("networkidle");
 
-    // 1. Series box structural division: role="doc-part" on <section>
-    const seriesSection = page.locator('section[role="doc-part"]');
+    // 1. Series box structural division: region named by its heading
+    const seriesSection = page.locator('section[aria-labelledby="series-heading"]');
     if ((await seriesSection.count()) > 0) {
       await expect(seriesSection.first()).toBeVisible();
 
-      // 2. Series title: role="doc-subtitle"
-      const seriesSubtitle = seriesSection.locator('[role="doc-subtitle"]');
-      await expect(seriesSubtitle).toBeVisible();
+      // 2. Series title is a plain heading (no role override)
+      const seriesTitle = seriesSection.locator("h2").first();
+      await expect(seriesTitle).toBeVisible();
+      expect(await seriesTitle.getAttribute("role")).toBeNull();
     }
   });
 

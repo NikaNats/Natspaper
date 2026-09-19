@@ -445,10 +445,11 @@
     }
 
     /* ==========================================================================
-       SUPERSCRIPT ISOLATION: zero-height only for bibliographic citations.
-       Native MathML exponents (<msup>) retain browser math layout geometry.
+       SUPERSCRIPT ISOLATION: zero-height only for bibliographic citations
+       (.citation-ref anchors in post markdown). Native MathML exponents
+       (<msup>) retain browser math layout geometry.
        ========================================================================== */
-    a[role="doc-biblioref"] {
+    a.citation-ref {
       font-size: 0.75em;
       line-height: 0;
       vertical-align: baseline;

@@ -370,8 +370,9 @@
     break-inside: avoid;
   }
 
-  /* Bibliographic link destinations printed selectively */
-  article a[href^="http"]:not([role="doc-biblioref"])::after {
+  /* External link destinations printed inline (citation anchors use
+     fragment hrefs, so they never match this rule) */
+  article a[href^="http"]::after {
     content: " (" attr(href) ")";
     font-size: 80%;
     color: #444444;
