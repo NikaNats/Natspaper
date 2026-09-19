@@ -112,6 +112,62 @@ export function getReadingTimeDisplay(
   return includeWordCount ? formatReadingTime(result) : result.displayText;
 }
 
+export interface CalibratedReadingTime {
+  estimatedMinutes: number;
+  displayText: string;
+  wordCount: number;
+  isDense: boolean;
+}
+
+export function calculateAcademicReadingTime(
+  markdown: string
+): CalibratedReadingTime {
+  if (!markdown || typeof markdown !== "string") {
+    return {
+      estimatedMinutes: 1,
+      displayText: "About 1 min read",
+      wordCount: 0,
+      isDense: false,
+    };
+  }
+  // 1. Separate code blocks and equations from running prose
+  const codeBlockCount = (markdown.match(/```[\s\S]*?```/g) || []).length;
+  const equationCount = (markdown.match(/\$\$[\s\S]*?\$\$/g) || []).length;
+
+  // Clean markdown to count words
+  const cleanProse = markdown
+    .replace(/```[\s\S]*?```/g, "")
+    .replace(/\$\$[\s\S]*?\$\$/g, "")
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1");
+
+  const words = cleanProse
+    .trim()
+    .split(/\s+/)
+    .filter(w => w.length > 0).length;
+
+  // Reading rates:
+  // - Prose: 200 words/min
+  // - Equations: 1 minute per complex derivation/block
+  // - Code blocks: 1.5 minutes per code block
+  const proseMinutes = words / 200;
+  const mathMinutes = equationCount * 1.0;
+  const codeMinutes = codeBlockCount * 1.5;
+
+  const totalMinutes = Math.max(
+    1,
+    Math.ceil(proseMinutes + mathMinutes + codeMinutes)
+  );
+  const isDense = mathMinutes + codeMinutes > proseMinutes;
+
+  return {
+    estimatedMinutes: totalMinutes,
+    wordCount: words,
+    isDense,
+    // Add explicit uncertainty marker ("About ...")
+    displayText: `About ${totalMinutes} min read${isDense ? " (Technical)" : ""}`,
+  };
+}
+
 /**
  * Calculate reading time from word count
  *

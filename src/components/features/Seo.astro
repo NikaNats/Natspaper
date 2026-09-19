@@ -59,7 +59,15 @@ function getHreflangAlternates(): Array<{ lang: string; href: string }> {
   }));
 }
 
-const hreflangAlternates = getHreflangAlternates();
+let hreflangAlternates = getHreflangAlternates();
+// Honest SEO: fallback content must not be advertised as a valid translation.
+// When noindex (locale fallback), prune non-canonical alternates and keep only
+// the English original + x-default to avoid duplicate-content indexing.
+if (noindex) {
+  hreflangAlternates = hreflangAlternates.filter(
+    ({ lang }) => lang === "en-US"
+  );
+}
 ---
 
 <!-- General Meta Tags -->

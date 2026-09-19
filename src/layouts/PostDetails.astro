@@ -3,7 +3,7 @@
 import { render, type CollectionEntry } from "astro:content";
 import { SITE, FEATURES } from "@/config";
 import { getI18n } from "@/i18n";
-import { LANGUAGES, type Lang } from "@/i18n/config";
+import { type Lang } from "@/i18n/config";
 import {
   resolveOgImageUrl,
   getAdjacentPosts,
@@ -25,6 +25,7 @@ import TableOfContents from "@/components/post/TableOfContents.astro";
 import MobileTableOfContents from "@/components/post/MobileTableOfContents.astro";
 import SeriesBox from "@/components/post/SeriesBox.astro";
 import Bibliography from "@/components/post/Bibliography.astro";
+import ProvenanceBlock from "@/components/post/ProvenanceBlock.astro";
 
 export interface Props {
   post: CollectionEntry<"blog">;
@@ -125,19 +126,19 @@ const seriesSchema = post.data.series
     }
   : null;
 
-// 7. SEO: Handle Fallback Canonical
+// 7. SEO: Handle Fallback Canonical + decoupled chrome vs body language
 const canonicalURL =
   isFallback && originalLocale
     ? new URL(getPostUrl(originalLocale, post.slug), SITE.website).href
     : frontmatterCanonical;
 
-const originalLangName = originalLocale
-  ? LANGUAGES[originalLocale as Lang]
-  : "";
-const contentLang = isFallback && originalLocale ? originalLocale : locale;
-
-// ✅ Type-safe DPUB-ARIA role without `any` (satisfies both astro check and eslint)
-const docNoticeRole = "doc-notice" as unknown as astroHTML.JSX.AriaRole;
+// Chrome language (UI) vs body language (document semantics)
+const toBcp47 = (l: string) => (l === "ka" ? "ka-GE" : "en-US");
+const contentLang = toBcp47(
+  isFallback && originalLocale ? originalLocale : locale
+);
+const docLang = isFallback ? "en-US" : toBcp47(locale);
+const uiLangTag = toBcp47(locale);
 ---
 
 <Layout
@@ -153,6 +154,7 @@ const docNoticeRole = "doc-notice" as unknown as astroHTML.JSX.AriaRole;
   scrollSmooth
   seriesSchema={seriesSchema}
   noindex={isFallback}
+  htmlLang={docLang}
 >
   <Header />
 
@@ -169,13 +171,14 @@ const docNoticeRole = "doc-notice" as unknown as astroHTML.JSX.AriaRole;
       <!-- Breadcrumb Navigation -->
       <Breadcrumb items={breadcrumbItems} class="mb-4" />
 
-      <!-- W3C DPUB-ARIA 1.1: doc-notice role on <section> -->
+      <!-- Language-availability notice: role=note landmark, tagged with the UI locale -->
       {
         isFallback && (
-          <section
-            role={docNoticeRole}
+          <aside
+            role="note"
             aria-label="Language availability notice"
-            class="mb-8 flex items-center gap-3 rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-700 dark:text-amber-400"
+            lang={uiLangTag}
+            class="fallback-disclaimer mx-auto my-4 mb-8 max-w-app rounded-lg border border-border bg-subtle p-4 text-sm"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -192,12 +195,17 @@ const docNoticeRole = "doc-notice" as unknown as astroHTML.JSX.AriaRole;
               <line x1="12" y1="16" x2="12" y2="12" />
               <line x1="12" y1="8" x2="12.01" y2="8" />
             </svg>
-            <span>
+            <p class="font-semibold text-foreground">
               {locale === "ka"
-                ? `ეს სტატია ჯერ არ არის თარგმნილი ქართულად. ნაჩვენებია ${originalLangName} ვერსია.`
-                : `This content is not available in your language. Showing ${originalLangName} version.`}
-            </span>
-          </section>
+                ? "სტატია ხელმისაწვდომია მხოლოდ ინგლისურ ენაზე"
+                : "Article only available in English"}
+            </p>
+            <p class="mt-1 text-text-secondary">
+              {locale === "ka"
+                ? "თქვენ იმყოფებით ქართულენოვან ინტერფეისში, თუმცა წინამდებარე პუბლიკაცია წარმოდგენილია ორიგინალ ენაზე."
+                : "Site navigation remains in your selected language, but the body content is served in the original language."}
+            </p>
+          </aside>
         )
       }
 
@@ -234,6 +242,18 @@ const docNoticeRole = "doc-notice" as unknown as astroHTML.JSX.AriaRole;
           <Bibliography references={post.data.references} locale={locale} />
         )
       }
+
+      <ProvenanceBlock
+        title={title}
+        author={author}
+        pubDate={pubDatetime}
+        modDate={modDatetime}
+        canonicalUrl={typeof canonicalURL === "string"
+          ? canonicalURL
+          : ((canonicalURL as unknown as URL)?.toString?.() ??
+            new URL(Astro.url.pathname, SITE.website).href)}
+        slug={(post.slug ?? post.id).replace(/\//g, "_")}
+      />
 
       <PostFooter
         {tags}
@@ -284,15 +304,25 @@ const docNoticeRole = "doc-notice" as unknown as astroHTML.JSX.AriaRole;
     transition: opacity 0.2s ease;
   }
 
-  @media (min-width: 80rem) {
+  /* Only mount TOC when viewport can support layout without narrowing prose (81rem = 1296px) */
+  @media (min-width: 81rem) {
     .article-sidebar {
       display: block;
       position: absolute;
       top: 2rem;
       right: 100%;
-      width: 14rem;
+      width: var(--rail-width, 14rem);
       height: 100%;
-      margin-right: 3rem;
+      margin-right: var(--rail-gap, 2.5rem);
+    }
+    .article-sidebar__inner {
+      position: sticky;
+      top: 6rem;
+      width: var(--rail-width, 14rem);
+      height: fit-content;
+      max-height: calc(100vh - 8rem);
+      overflow-y: auto;
+      overscroll-behavior: contain;
     }
   }
 

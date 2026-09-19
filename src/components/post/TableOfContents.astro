@@ -64,60 +64,65 @@ const toc = headings.filter(h => h.depth >= 2 && h.depth <= 3);
    * Uses IntersectionObserver for high performance (no scroll event listeners)
    * Ensures TOC works perfectly with Astro View Transitions
    */
-  function initTOC() {
+  function initScrollSpy() {
     const nav = document.querySelector(".toc-nav");
     const links = document.querySelectorAll(".toc-link");
     const indicator = document.getElementById("toc-indicator");
 
-    if (!nav || !links.length || !indicator) return;
+    if (!nav || !links.length) return;
 
     // Fade in navigation once JS is ready
     nav.classList.remove("opacity-0");
 
+    const headings = Array.from(
+      document.querySelectorAll<HTMLElement>("article h2, article h3")
+    );
+    const tocLinks = new Map<string, HTMLAnchorElement>();
+    document.querySelectorAll<HTMLAnchorElement>(".toc-link").forEach(link => {
+      const id = link.getAttribute("href")?.slice(1);
+      if (id) tocLinks.set(id, link);
+    });
+
+    if (headings.length === 0 || tocLinks.size === 0) return;
+
+    let activeHeadingId: string | null = null;
+
     const observer = new IntersectionObserver(
       entries => {
-        entries.forEach(entry => {
+        for (const entry of entries) {
           if (entry.isIntersecting) {
-            updateActiveLink(entry.target.id);
+            activeHeadingId = entry.target.id;
+            break;
           }
-        });
+        }
+        updateActiveLink();
       },
-      {
-        rootMargin: "-10% 0px -80% 0px", // Trigger when element is near top of viewport
-        threshold: 0,
-      }
+      { rootMargin: "-80px 0px -70% 0px", threshold: 0 }
     );
 
-    // Observe all content headings
-    document.querySelectorAll("h2, h3, h4").forEach(h => observer.observe(h));
+    headings.forEach(h => observer.observe(h));
 
-    function updateActiveLink(id: string) {
-      if (!id) return;
-
-      // 1. Update text colors and styles
-      links.forEach(link => {
-        const isMatch = link.getAttribute("href") === `#${id}`;
-
-        // Toggle active classes
-        link.classList.toggle("text-accent", isMatch);
-        link.classList.toggle("font-medium", isMatch);
-
-        // Toggle inactive classes
-        link.classList.toggle("text-text-secondary", !isMatch);
-        link.classList.toggle("hover:text-foreground", !isMatch);
-
-        // 2. Move the indicator
-        if (isMatch && indicator) {
+    function updateActiveLink() {
+      if (!activeHeadingId) return;
+      tocLinks.forEach((link, id) => {
+        const isCurrent = id === activeHeadingId;
+        link.classList.toggle("text-accent", isCurrent);
+        link.classList.toggle("font-medium", isCurrent);
+        if (isCurrent) {
+          link.setAttribute("aria-current", "location");
           const listItem = link.closest("li");
-          if (listItem instanceof HTMLElement) {
+          if (listItem instanceof HTMLElement && indicator) {
             indicator.style.opacity = "1";
-            indicator.style.top = `${listItem.offsetTop}px`;
+            indicator.style.top = `${(listItem as HTMLElement).offsetTop}px`;
             indicator.style.height = `${link.getBoundingClientRect().height}px`;
           }
+        } else {
+          link.removeAttribute("aria-current");
         }
       });
     }
   }
+  const initTOC = initScrollSpy;
 
   // Run on initial page load and after View Transitions
   document.addEventListener("astro:page-load", initTOC);

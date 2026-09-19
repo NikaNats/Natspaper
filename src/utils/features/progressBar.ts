@@ -37,12 +37,13 @@ export class ProgressBar implements Feature {
     this.container = document.createElement("div");
     this.container.id = "progress-container";
     // Class names are pinned by tests/unit/features/progressBar.test.ts
+    // progress-bar-container/fill are the compositor-only article-scoped contract.
     this.container.className =
-      "progress-container fixed top-0 z-10 h-1 w-full bg-background";
+      "progress-container progress-bar-container fixed top-0 z-10 h-1 w-full bg-background";
 
     this.bar = document.createElement("div");
     this.bar.id = "myBar";
-    this.bar.className = "progress-bar h-1 w-0 bg-accent";
+    this.bar.className = "progress-bar progress-bar-fill h-1 w-0 bg-accent";
 
     this.container.appendChild(this.bar);
     document.body.appendChild(this.container);
@@ -74,15 +75,41 @@ export class ProgressBar implements Feature {
     this.scrollListener = () => {
       if (!this.bar) return;
 
-      const winScroll =
-        document.body.scrollTop || document.documentElement.scrollTop;
-      const height =
-        document.documentElement.scrollHeight -
-        document.documentElement.clientHeight;
-      // Guard against division by zero on non-scrollable pages
-      const scrolled = height > 0 ? (winScroll / height) * 100 : 0;
+      // Prefer article-scoped geometry so late-loading widgets (e.g. Giscus
+      // iframe) expanding root scroll height don't make progress jump back.
+      const article = document.getElementById("article");
+      let scrolled = 0;
+      if (article) {
+        const rect = article.getBoundingClientRect();
+        const total = rect.height - window.innerHeight;
+        const consumed = Math.min(Math.max(-rect.top, 0), Math.max(total, 0));
+        scrolled = total > 0 ? (consumed / total) * 100 : 0;
+        // Fall back to document geometry when article metrics are degenerate
+        // (e.g. happy-dom test runner with zero layout boxes).
+        if (
+          !Number.isFinite(scrolled) ||
+          (scrolled === 0 && rect.height === 0)
+        ) {
+          const winScroll =
+            document.body.scrollTop || document.documentElement.scrollTop;
+          const height =
+            document.documentElement.scrollHeight -
+            document.documentElement.clientHeight;
+          scrolled = height > 0 ? (winScroll / height) * 100 : 0;
+        }
+      } else {
+        const winScroll =
+          document.body.scrollTop || document.documentElement.scrollTop;
+        const height =
+          document.documentElement.scrollHeight -
+          document.documentElement.clientHeight;
+        // Guard against division by zero on non-scrollable pages
+        scrolled = height > 0 ? (winScroll / height) * 100 : 0;
+      }
 
       this.bar.style.width = `${scrolled}%`;
+      // Keep compositor transform in sync for the view-timeline contract.
+      this.bar.style.transform = `scaleX(${scrolled / 100})`;
     };
 
     document.addEventListener("scroll", this.scrollListener, { passive: true });

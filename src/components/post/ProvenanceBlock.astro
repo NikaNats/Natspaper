@@ -1,0 +1,79 @@
+---
+export interface Props {
+  title: string;
+  author: string;
+  pubDate: Date;
+  modDate?: Date | null;
+  canonicalUrl: string;
+  slug: string;
+}
+const { title, author, pubDate, modDate, canonicalUrl, slug } = Astro.props;
+
+const bibtex = `@article{nats_${slug},
+  author = {${author}},
+  title = {${title}},
+  url = {${canonicalUrl}},
+  year = {${pubDate.getFullYear()}},
+  month = {${pubDate.toLocaleString("en-US", { month: "short" }).toLowerCase()}}
+}`;
+---
+
+<div
+  class="provenance-block my-8 rounded-lg border border-border bg-subtle p-4 text-xs text-text-secondary"
+>
+  <div
+    class="mb-3 flex flex-wrap justify-between gap-2 border-b border-border pb-3"
+  >
+    <span
+      >Published: <time datetime={pubDate.toISOString()}
+        >{pubDate.toLocaleDateString("en-US", { dateStyle: "long" })}</time
+      ></span
+    >
+    {
+      modDate && (
+        <span>
+          Substantial Revision:{" "}
+          <time datetime={modDate.toISOString()}>
+            {modDate.toLocaleDateString("en-US", { dateStyle: "long" })}
+          </time>
+        </span>
+      )
+    }
+  </div>
+
+  <div class="flex items-center justify-between">
+    <span class="font-semibold tracking-wider uppercase"
+      >Cite this treatise</span
+    >
+    <button
+      class="copy-bibtex-btn rounded border border-border px-2.5 py-1 text-foreground hover:bg-muted focus-visible:outline-accent"
+      data-bibtex={bibtex}
+    >
+      Copy BibTeX
+    </button>
+  </div>
+</div>
+
+<script>
+  function setupBibtexButtons() {
+    document
+      .querySelectorAll<HTMLButtonElement>(".copy-bibtex-btn")
+      .forEach(btn => {
+        btn.addEventListener("click", async () => {
+          const text = btn.dataset.bibtex;
+          if (!text) return;
+          try {
+            await navigator.clipboard.writeText(text);
+          } catch {
+            return;
+          }
+          const original = btn.textContent;
+          btn.textContent = "Copied!";
+          setTimeout(() => {
+            btn.textContent = original;
+          }, 2000);
+        });
+      });
+  }
+  document.addEventListener("astro:page-load", setupBibtexButtons);
+</script>

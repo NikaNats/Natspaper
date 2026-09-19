@@ -51,6 +51,7 @@
   --color-accent: var(--accent);
   --color-muted: var(--muted);
   --color-border: var(--border);
+  --color-subtle: var(--muted);
   --color-text-secondary: var(--text-secondary);
   --color-code-bg: var(--code-bg);
 

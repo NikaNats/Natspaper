@@ -24,7 +24,7 @@ const { t } = getI18n(locale as Lang);
 <!-- W3C DPUB-ARIA 1.1: Landmark for academic references -->
 <section
   role={"doc-bibliography" as unknown as astroHTML.JSX.AriaRole}
-  class="mt-[clamp(4rem,10vh,7rem)] pt-[clamp(1.5rem,3vh,2.75rem)] print:mt-8"
+  class="bibliography-section mt-16 border-t border-border pt-8 print:mt-8"
   aria-labelledby="refs-heading"
 >
   <h2 id="refs-heading" class="mb-6 text-xl font-bold text-foreground">
@@ -34,54 +34,45 @@ const { t } = getI18n(locale as Lang);
   <ol class="list-none space-y-4 p-0">
     {
       references.map((ref: Reference, index: number) => (
-        <li
-          id={`ref-${ref.id}`}
-          class="group flex gap-4 text-sm leading-relaxed text-text-secondary"
-        >
-          <span class="flex h-6 w-8 shrink-0 items-center justify-center rounded bg-muted font-mono text-[10px] font-bold text-accent transition-colors group-target:bg-accent group-target:text-white">
-            [{index + 1}]
-          </span>
-
-          <div class="flex flex-col gap-1">
-            <span class="font-medium text-foreground">
-              {ref.author}. ({ref.year}).
-            </span>
-            <cite class="font-semibold text-foreground/90 not-italic">
-              {ref.title}.
-            </cite>
-            {ref.journal && (
-              <span class="text-text-secondary italic">{ref.journal}.</span>
+        <li id={`ref-${ref.id}`} class="flex gap-3 text-sm text-text-secondary">
+          <span class="font-mono text-accent select-none">[{index + 1}]</span>
+          <div class="flex-1">
+            <p class="inline text-foreground">
+              <span class="font-medium">{ref.author}</span> ({ref.year}).{" "}
+              <cite class="italic">{ref.title}</cite>. {ref.journal}
+            </p>
+            {ref.doi && (
+              <span class="mt-1 block font-mono text-xs">
+                DOI:{" "}
+                <a
+                  href={`https://doi.org/${ref.doi}`}
+                  class="text-accent underline"
+                >
+                  {ref.doi}
+                </a>
+              </span>
             )}
-
-            <div class="mt-1 flex flex-wrap gap-3">
-              {ref.url && (
+            {ref.url && (
+              <span class="mt-1 block text-xs">
                 <a
                   href={ref.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  class="flex items-center gap-1 text-xs text-accent hover:underline"
+                  class="text-accent underline"
                 >
                   {t("post.viewSource")}
-                  <svg
-                    class="size-3"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    aria-hidden="true"
-                  >
-                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3" />
-                  </svg>
                 </a>
-              )}
-              {ref.doi && (
-                /* No opacity: --text-secondary at 60% fails WCAG 1.4.3
-                   contrast (2.72:1) and DOIs are real content. */
-                <span class="font-mono text-[10px] text-text-secondary">
-                  {t("post.doi")}: {ref.doi}
-                </span>
-              )}
-            </div>
+              </span>
+            )}
+            <span class="ms-2 inline-flex gap-1 text-xs text-accent">
+              <a
+                href={`#cite-${ref.id}`}
+                aria-label={`Back to citation ${index + 1} in text`}
+                class="hover:underline"
+              >
+                ↩ back to text
+              </a>
+            </span>
           </div>
         </li>
       ))

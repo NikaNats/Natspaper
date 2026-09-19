@@ -13,8 +13,10 @@ export {
 export {
   calculateReadingTime,
   calculateReadingTimeFromWords,
+  calculateAcademicReadingTime,
   formatReadingTime,
   getReadingTimeDisplay,
 } from "./readingTime";
+export type { CalibratedReadingTime } from "./readingTime";
 export { getPostTitleTransitionName } from "./getPostTitleTransitionName";
 export { getPostSlug, getPostUrl } from "./postUrl";

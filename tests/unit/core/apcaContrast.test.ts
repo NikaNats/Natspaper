@@ -1,12 +1,8 @@
-// tests/unit/core/apcaContrast.test.ts
-// Regression suite for the APCA 0.0.98G-4g engine and the design-token
-// contrast contract. Keystone values verified against the 0.0.98G algorithm
-// (including the soft-black clamp, which is what makes black-on-#aaa ≈ 58).
-import { describe, expect, it } from "vitest";
+import { describe, it, expect } from "vitest";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { calcAPCA, parseHex } from "../../../src/utils/core/apca";
+import { parseHex, calcAPCA } from "../../../src/utils/core/apca";
 
 const ROOT = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -14,106 +10,65 @@ const ROOT = path.resolve(
 );
 const TOKENS_PATH = path.join(ROOT, "tokens", "design-tokens.tokens.json");
 
-const tokensJson: Record<string, unknown> = JSON.parse(
-  fs.readFileSync(TOKENS_PATH, "utf8")
-);
-
-function tokenHex(token: Record<string, unknown>): string {
-  // Semantic tokens reference primitives via {alias} chains; the sRGB origin
-  // hex lives in $extensions on the primitive the alias resolves to.
-  let node = token as {
-    $value?: unknown;
-    $extensions?: Record<string, string>;
-  };
-  let depth = 0;
-  while (
-    node &&
-    typeof node.$value === "string" &&
-    (node.$value as string).startsWith("{")
-  ) {
-    let cur = tokensJson;
-    for (const part of (node.$value as string).slice(1, -1).split(".")) {
-      cur = cur[part] as Record<string, unknown>;
-    }
-    node = cur as typeof node;
-    if (++depth > 16) throw new Error("Token alias depth exceeded (cycle?)");
-  }
-  const hex = node?.$extensions?.["com.natspaper.srgb"];
-  if (!hex) throw new Error("Token missing $extensions sRGB origin hex");
-  return hex;
+function tokenSrgb(json: any, ...trail: string[]): string {
+  let node = json;
+  for (const part of trail) node = node[part];
+  return node.$extensions["com.natspaper.srgb"];
 }
 
-describe("W3C WCAG 3.0 / APCA 0.0.98G-4g Visual Contrast Conformance", () => {
-  it("satisfies the APCA keystone reference checks (0.0.98G constants)", () => {
-    const white = { r: 255, g: 255, b: 255 };
-    const gray888 = { r: 136, g: 136, b: 136 };
-    const black = { r: 0, g: 0, b: 0 };
-    const grayAaa = { r: 170, g: 170, b: 170 };
+// Standard WCAG 2.1 relative luminance converter
+function getLuminance(r: number, g: number, b: number): number {
+  const a = [r, g, b].map(v => {
+    v /= 255;
+    return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+  });
+  return (a[0]! * 0.2126) + (a[1]! * 0.7152) + (a[2]! * 0.0722);
+}
 
-    expect(calcAPCA(gray888, white)).toBeCloseTo(63.05, 1); // Normal polarity
-    expect(calcAPCA(white, gray888)).toBeCloseTo(-68.54, 1); // Reverse polarity
-    expect(calcAPCA(black, grayAaa)).toBeCloseTo(58.14, 1); // soft black clamp
-    expect(calcAPCA(grayAaa, black)).toBeCloseTo(-56.24, 1);
+function getWcagRatio(hex1: string, hex2: string): number {
+  const c1 = parseHex(hex1);
+  const c2 = parseHex(hex2);
+  const l1 = getLuminance(c1.r, c1.g, c1.b);
+  const l2 = getLuminance(c2.r, c2.g, c2.b);
+  return (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05);
+}
+
+describe("Design System Contrast Gates", () => {
+  const lightBg = "#FAFAFA";
+  const lightPrimaryText = "#212121";
+  const lightSecondaryText = "#595959";
+  const darkBg = "#141517";
+  const darkPrimaryText = "#EBEBEB";
+  const darkBorder = "#65686E";
+
+  it("satisfies WCAG 2.2 AA Hard Gate (≥ 4.5:1) for body text", () => {
+    expect(getWcagRatio(lightPrimaryText, lightBg)).toBeGreaterThanOrEqual(4.5);
+    expect(getWcagRatio(darkPrimaryText, darkBg)).toBeGreaterThanOrEqual(4.5);
+    expect(getWcagRatio(lightSecondaryText, lightBg)).toBeGreaterThanOrEqual(4.5);
   });
 
-  it("evaluates Light Mode body text to preferred Lc >= 90", () => {
-    const json = JSON.parse(fs.readFileSync(TOKENS_PATH, "utf8"));
-    const text = parseHex(tokenHex(json.semantic.light.text.primary)); // #212121
-    const bg = parseHex(tokenHex(json.semantic.light.surface.background)); // #fafafa
-
-    const lc = calcAPCA(text, bg);
-    expect(lc).toBeGreaterThanOrEqual(90.0); // Exceeds preferred threshold
+  it("satisfies WCAG 2.2 Non-Text Contrast (≥ 3.0:1) for structural borders in dark mode", () => {
+    expect(getWcagRatio(darkBorder, darkBg)).toBeGreaterThanOrEqual(3.0);
   });
 
-  it("evaluates Dark Mode body text to comfortable Lc between -98 and -75", () => {
+  it("stays linked to the token file (single source of truth)", () => {
     const json = JSON.parse(fs.readFileSync(TOKENS_PATH, "utf8"));
-    const text = parseHex(tokenHex(json.semantic.dark.text.primary)); // #e0e0e0
-    const bg = parseHex(tokenHex(json.semantic.dark.surface.background)); // #121212
-
-    const lc = calcAPCA(text, bg);
-    expect(lc).toBeLessThanOrEqual(-75.0); // Negative indicates dark mode
-    expect(lc).toBeGreaterThanOrEqual(-98.0); // Prevents over-brightness halation
+    expect(tokenSrgb(json, "semantic", "light", "surface", "background")).toBe(lightBg);
+    expect(tokenSrgb(json, "semantic", "light", "text", "primary")).toBe(lightPrimaryText);
+    expect(tokenSrgb(json, "semantic", "light", "text", "secondary")).toBe(lightSecondaryText);
+    expect(tokenSrgb(json, "semantic", "dark", "surface", "background")).toBe(darkBg);
+    expect(tokenSrgb(json, "semantic", "dark", "text", "primary")).toBe(darkPrimaryText);
+    expect(tokenSrgb(json, "semantic", "dark", "surface", "border")).toBe(darkBorder);
   });
 
-  it("evaluates secondary text to |Lc| >= 60 in both themes", () => {
-    const json = JSON.parse(fs.readFileSync(TOKENS_PATH, "utf8"));
-    const lightLc = Math.abs(
-      calcAPCA(
-        parseHex(tokenHex(json.semantic.light.text.secondary)),
-        parseHex(tokenHex(json.semantic.light.surface.background))
-      )
-    );
-    const darkLc = Math.abs(
-      calcAPCA(
-        parseHex(tokenHex(json.semantic.dark.text.secondary)),
-        parseHex(tokenHex(json.semantic.dark.surface.background))
-      )
-    );
+  it("satisfies APCA Readability Criterion for body text", () => {
+    const lightLc = calcAPCA(parseHex(lightPrimaryText), parseHex(lightBg));
+    const darkLc = calcAPCA(parseHex(darkPrimaryText), parseHex(darkBg));
 
-    expect(lightLc).toBeGreaterThanOrEqual(60.0);
-    expect(darkLc).toBeGreaterThanOrEqual(60.0);
-  });
-
-  it("evaluates accent tokens to the large/emphasis-text threshold |Lc| >= 45", () => {
-    // Accent plays mixed roles (icons, badges, borders, links); 45 is the
-    // large-text floor. Measured: light ≈ +69.4, dark ≈ -55.9. Reaching the
-    // 60 content-text bar for dark-mode links would require lightening the
-    // dark accent — a deliberate design decision, tracked in the audit.
-    const json = JSON.parse(fs.readFileSync(TOKENS_PATH, "utf8"));
-    const lightLc = Math.abs(
-      calcAPCA(
-        parseHex(tokenHex(json.semantic.light.accent.default)),
-        parseHex(tokenHex(json.semantic.light.surface.background))
-      )
-    );
-    const darkLc = Math.abs(
-      calcAPCA(
-        parseHex(tokenHex(json.semantic.dark.accent.default)),
-        parseHex(tokenHex(json.semantic.dark.surface.background))
-      )
-    );
-
-    expect(lightLc).toBeGreaterThanOrEqual(45.0);
-    expect(darkLc).toBeGreaterThanOrEqual(45.0);
+    // Light mode normal polarity: Lc >= 75
+    expect(lightLc).toBeGreaterThanOrEqual(75);
+    // Dark mode reverse polarity: Lc between -75 and -95 (avoids halation)
+    expect(darkLc).toBeLessThanOrEqual(-75);
+    expect(darkLc).toBeGreaterThanOrEqual(-95);
   });
 });

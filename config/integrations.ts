@@ -5,6 +5,7 @@ import Sonda from "sonda/astro";
 import expressiveCode from "astro-expressive-code";
 import { envValidationIntegration } from "../src/integrations/envValidation";
 import { finalizeDistIntegration } from "../src/integrations/finalizeDist";
+import { validateMathMLIntegration } from "../src/integrations/validateMathML";
 import { FEATURES } from "../src/config";
 import { DEFAULT_LANG, LOCALE_CODES } from "../src/i18n/config";
 
@@ -18,6 +19,7 @@ export function getIntegrations() {
   const integrations = [
     envValidationIntegration(),
     finalizeDistIntegration(),
+    validateMathMLIntegration(),
     sitemap({
       // SEO: Filter configuration - exclude pages that shouldn't be indexed
       filter: page => {

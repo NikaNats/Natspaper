@@ -49,14 +49,14 @@ describe("W3C CSS Color Module Level 5 & OKLCH Implementation", () => {
   it("compiles OKLCH format to CSS Custom Properties", () => {
     const compiledCss = compileTokens(read("tokens/design-tokens.tokens.json"));
 
-    // Light theme
-    expect(compiledCss).toContain("--accent: oklch(0.5635 0.2408 260.82);");
-    expect(compiledCss).toContain("--background: oklch(0.9851 0 0);");
+    // Light theme (dual-gate opaque surfaces)
+    expect(compiledCss).toContain("--accent: oklch(0.52 0.2 260);");
+    expect(compiledCss).toContain("--background: oklch(0.985 0.002 260);");
 
-    // Dark theme
+    // Dark theme (near-black OLED-safe)
     expect(compiledCss).toContain('html[data-theme="dark"] {');
-    expect(compiledCss).toContain("--accent: oklch(0.7379 0.1379 254.36);");
-    expect(compiledCss).toContain("--background: oklch(0.1822 0 0);");
+    expect(compiledCss).toContain("--accent: oklch(0.72 0.13 255);");
+    expect(compiledCss).toContain("--background: oklch(0.18 0.006 260);");
   });
 
   it("emits every semantic color natively in oklch() (no bare hex fallbacks)", () => {

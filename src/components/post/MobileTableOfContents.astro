@@ -1,46 +1,39 @@
 ---
-// src/components/post/MobileTableOfContents.astro
-// Mobile-optimized, collapsible Table of Contents using native <details> element
-// Lightweight, performant, and requires minimal JavaScript
-
 import type { MarkdownHeading } from "astro";
-import IconChevronRight from "@/assets/icons/IconChevronRight.svg";
-
 export interface Props {
   headings: MarkdownHeading[];
 }
-
 const { headings } = Astro.props;
-// Filter headings (h2 and h3 only)
 const toc = headings.filter(h => h.depth >= 2 && h.depth <= 3);
 ---
 
 {
   toc.length > 0 && (
-    <div class="mb-8 xl:hidden">
-      <details class="group rounded-xl border border-border/60 bg-muted/30 transition-colors open:bg-muted/50">
-        <summary class="flex cursor-pointer list-none items-center justify-between p-4 font-medium text-foreground transition-colors duration-200 hover:bg-muted/60 focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none">
-          <span class="text-sm font-bold tracking-wide uppercase">
-            Table of Contents
-          </span>
-          <IconChevronRight
-            class="size-5 text-text-secondary transition-transform duration-300 group-open:rotate-90"
+    <div class="mobile-toc-container mb-8 xl:hidden">
+      <details
+        id="mobile-toc-details"
+        class="group rounded-xl border border-border bg-subtle p-3"
+      >
+        <summary class="flex min-h-[48px] cursor-pointer list-none items-center justify-between px-2 font-semibold text-foreground focus-visible:outline-accent [&::-webkit-details-marker]:hidden">
+          <span>On this page</span>
+          <span
+            class="chevron transition-transform group-open:rotate-90"
             aria-hidden="true"
-          />
+          >
+            ›
+          </span>
         </summary>
-
-        {/* W3C DPUB-ARIA 1.1: Landmark for Table of Contents navigation */}
         <nav
-          role={"doc-toc" as astroHTML.JSX.AriaRole}
-          class="px-4 pt-[clamp(0.875rem,2.5vw,1.25rem)] pb-4"
-          aria-label="Mobile Table of Contents"
+          role={"doc-toc" as unknown as astroHTML.JSX.AriaRole}
+          class="px-2 pt-3 pb-2"
+          aria-label="Table of contents"
         >
           <ul class="flex flex-col gap-2">
             {toc.map(heading => (
-              <li class:list={[{ "pl-4": heading.depth === 3 }]}>
+              <li class:list={[{ "ps-4": heading.depth === 3 }]}>
                 <a
                   href={`#${heading.slug}`}
-                  class="block rounded px-2 py-1 text-sm text-text-secondary no-underline transition-colors hover:text-accent focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 active:text-accent"
+                  class="mobile-toc-link block py-2 text-sm text-text-secondary no-underline hover:text-foreground focus-visible:outline-accent"
                 >
                   {heading.text}
                 </a>
@@ -54,28 +47,45 @@ const toc = headings.filter(h => h.depth >= 2 && h.depth <= 3);
 }
 
 <script>
-  /**
-   * Auto-close mobile TOC when a link is clicked
-   * Improves UX by automatically returning focus to content
-   */
-  function initMobileTOC() {
-    const detailsElements = document.querySelectorAll(
-      "div.xl\\:hidden > details"
-    );
+  function setupMobileToc() {
+    const details = document.getElementById(
+      "mobile-toc-details"
+    ) as HTMLDetailsElement | null;
+    if (!details) return;
 
-    detailsElements.forEach(details => {
-      details.addEventListener("click", e => {
-        // If a link inside the details was clicked, close it
-        if ((e.target as HTMLElement).closest("a")) {
-          // Use setTimeout to ensure the navigation happens first
-          setTimeout(() => {
+    details
+      .querySelectorAll<HTMLAnchorElement>(".mobile-toc-link")
+      .forEach(link => {
+        link.addEventListener("click", event => {
+          const href = link.getAttribute("href");
+          if (!href?.startsWith("#")) return;
+
+          event.preventDefault();
+          const targetId = href.slice(1);
+          const targetEl = document.getElementById(targetId);
+
+          if (targetEl) {
+            // 1. Close disclosure cleanly
             details.removeAttribute("open");
-          }, 0);
-        }
-      });
-    });
-  }
 
-  // Run on initial page load and after View Transitions
-  document.addEventListener("astro:page-load", initMobileTOC);
+            // 2. Adjust target scroll margin for sticky header
+            const reduceMotion = window.matchMedia(
+              "(prefers-reduced-motion: reduce)"
+            ).matches;
+            targetEl.style.scrollMarginBlockStart = "5rem";
+            targetEl.scrollIntoView({
+              behavior: reduceMotion ? "auto" : "smooth",
+            });
+
+            // 3. Move keyboard focus to destination heading without visual outline
+            targetEl.setAttribute("tabindex", "-1");
+            targetEl.focus({ preventScroll: true });
+
+            // 4. Update browser history cleanly without double-jump
+            history.pushState(null, "", href);
+          }
+        });
+      });
+  }
+  document.addEventListener("astro:page-load", setupMobileToc);
 </script>

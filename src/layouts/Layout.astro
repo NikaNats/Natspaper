@@ -63,6 +63,8 @@ export interface Props {
    * crawlers skip locale-fallback pages and avoid indexing conflicts.
    */
   noindex?: boolean;
+  /** Explicit document language (BCP 47). Decouples chrome locale from body content language. */
+  htmlLang?: string;
 }
 
 const {
@@ -79,6 +81,7 @@ const {
   wordCount,
   seriesSchema,
   noindex = false,
+  htmlLang,
 } = Astro.props;
 
 // Build social image URL
@@ -147,7 +150,7 @@ if (isBlogPost && pubDatetime) {
 <!doctype html>
 <html
   dir={SITE.dir}
-  lang={bcp47Language}
+  lang={htmlLang ?? bcp47Language}
   class:list={[{ "scroll-smooth": scrollSmooth }]}
 >
   <head>

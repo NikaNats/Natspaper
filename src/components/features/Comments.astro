@@ -72,6 +72,33 @@ const giscusLang = SUPPORTED_GISCUS_LANGS.has(locale) ? locale : "en";
   (function () {
     let giscusLoaded = false;
 
+    function syncCurrentTheme() {
+      const theme =
+        document.documentElement.getAttribute("data-theme") === "dark"
+          ? "dark"
+          : "light";
+      updateGiscusTheme(theme);
+    }
+
+    // Guard against duplicate registration across Astro View Transitions
+    // (mirrors the handleGiscusThemeChange pattern below).
+    if (!window.handleGiscusMessage) {
+      window.handleGiscusMessage = function (event) {
+        if (event.origin !== "https://giscus.app") return;
+        if (event.data && typeof event.data === "object" && event.data.giscus) {
+          if (event.data.giscus.discussion || event.data.giscus.viewer) {
+            syncCurrentTheme();
+          }
+        }
+      };
+      window.addEventListener("message", window.handleGiscusMessage);
+    }
+    document.addEventListener("theme-changed", function (e) {
+      const t = e && e.detail && e.detail.theme;
+      if (t === "dark" || t === "light") updateGiscusTheme(t);
+      else syncCurrentTheme();
+    });
+
     /**
      * Helper to determine the correct theme URL.
      */
@@ -86,8 +113,12 @@ const giscusLang = SUPPORTED_GISCUS_LANGS.has(locale) ? locale : "en";
         : `${origin}/styles/giscus-light.css${cacheBuster}`;
     }
 
-    function updateGiscusTheme() {
-      const theme = document.documentElement.dataset.theme || "light";
+    function updateGiscusTheme(explicitTheme) {
+      const theme =
+        explicitTheme ||
+        document.documentElement.dataset.theme ||
+        document.documentElement.getAttribute("data-theme") ||
+        "light";
       const giscusTheme = getThemeUrl(theme);
       const iframe = document.querySelector("iframe.giscus-frame");
       // Only send message if iframe exists and has loaded (src set)

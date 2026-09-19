@@ -67,6 +67,33 @@
     U+2215, U+FEFF, U+FFFD;
 }
 
+:root {
+  /* Tier 1: Application Frame - Shell constraints */
+  --frame-max-width: 48rem; /* 768px */
+  --frame-gutter-fluid: clamp(1rem, 0.75rem + 1.25vw, 2rem);
+  --frame-padding-inline: max(
+    var(--frame-gutter-fluid),
+    env(safe-area-inset-left)
+  );
+
+  /* Tier 2: Prose Measure - Ergonomic reading column */
+  --prose-max-width: 42rem; /* 672px - optimal line length for Inter & Noto Sans Georgian */
+  --prose-measure: min(100%, var(--prose-max-width));
+
+  /* Tier 3: Breakout Measure - Code matrices, wide tables, derivation steps */
+  --breakout-max-width: 58rem; /* 928px */
+  --breakout-bleed: calc(
+    (var(--breakout-max-width) - var(--prose-max-width)) / 2
+  );
+
+  /* Rail Navigation Budget */
+  --rail-width: 14rem;
+  --rail-gap: 2.5rem;
+  /* Minimum viewport width allowing rail without pinching prose:
+     768px frame + (rail 224px + gap 40px) * 2 = 1296px */
+  --rail-viewport-threshold: 81rem;
+}
+
 @layer base {
   html {
     @apply scroll-smooth bg-background;
@@ -238,31 +265,129 @@
   max-width: 768px; /* 732px inner width after px-4 (18px * 2) padding */
 }
 
-/* --- PRINT STYLES --- */
+/* Three-tier geometry: breakout measure for wide displays, tables, proofs */
+.post-content > .breakout-wide {
+  width: min(100% + (var(--breakout-bleed) * 2), 100vw - 2rem);
+  margin-inline-start: max(
+    calc(var(--breakout-bleed) * -1),
+    calc((100% - 100vw + 2rem) / 2)
+  );
+  margin-inline-end: max(
+    calc(var(--breakout-bleed) * -1),
+    calc((100% - 100vw + 2rem) / 2)
+  );
+}
+
+/* Density stratification: reference + apparatus zones */
+.post-content pre,
+.post-content table,
+.post-content math[display="block"] {
+  margin-block: 1.5rem;
+}
+
+.provenance-block,
+.series-box,
+.bibliography-section {
+  line-height: 1.5;
+}
+
+/* Windows High Contrast / Forced Colors support */
+@media (forced-colors: active) {
+  :focus-visible {
+    outline: 3px solid Highlight !important;
+  }
+  a {
+    text-decoration: underline !important;
+  }
+  .active-nav {
+    border-bottom: 2px solid Highlight;
+  }
+}
+
+/* --- SCHOLARLY PRINT STYLESHEET --- */
+@page {
+  margin: 20mm 15mm 20mm 15mm;
+  size: a4 portrait;
+}
+
 @media print {
+  html,
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+    font-size: 11pt !important;
+    line-height: 1.5 !important;
+  }
+
+  /* Suppress interface chrome */
   header,
   footer,
+  nav,
+  .progress-bar-container,
+  .progress-container,
+  #btt-btn-container,
+  .toc-rail,
+  .toc-nav,
+  .article-sidebar,
+  .mobile-toc-container,
+  .copy-bibtex-btn,
+  .fallback-disclaimer,
+  .giscus-wrapper,
   button,
   .no-print {
     display: none !important;
   }
-  body {
-    @apply bg-white text-black;
+
+  /* Unravel main containers */
+  main,
+  article,
+  .post-content {
+    max-width: 100% !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
   }
-  html {
-    font-size: 12pt;
+
+  /* Mathematical rendering fidelity */
+  math {
+    color: #000000 !important;
   }
-  a {
-    text-decoration: none;
-    color: black;
-  }
-  a[href^="http"]:after {
-    content: " (" attr(href) ")";
-    @apply text-xs text-gray-600;
-  }
-  pre,
-  code {
-    @apply border border-gray-300 whitespace-pre-wrap;
+
+  .equation-wrapper {
     page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  /* Code blocks: wrap without horizontal clipping */
+  pre,
+  .astro-code {
+    border: 1px solid #cccccc !important;
+    background: #f8f9fa !important;
+    color: #000000 !important;
+    white-space: pre-wrap !important;
+    word-break: break-all !important;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  /* Bibliographic link destinations printed selectively */
+  article a[href^="http"]:not([role="doc-biblioref"])::after {
+    content: " (" attr(href) ")";
+    font-size: 80%;
+    color: #444444;
+  }
+
+  /* Preserve heading integrity across pages */
+  h1,
+  h2,
+  h3 {
+    page-break-after: avoid;
+    break-after: avoid;
+    color: #000000 !important;
+  }
+
+  figure {
+    page-break-inside: avoid;
+    break-inside: avoid;
   }
 }

@@ -42,7 +42,7 @@
  */
 ---
 
-<meta name="theme-color" content="" />
+<meta name="theme-color" content="#141517" />
 
 <!-- Critical inline styles to prevent FOUC -->
 <style is:inline>
@@ -89,27 +89,41 @@
 -->
 <script is:inline>
   (function () {
-    // First, check if user has a saved theme preference
-    let theme;
-    if (typeof localStorage !== "undefined") {
-      const savedTheme = localStorage.getItem("theme");
-      if (savedTheme) {
-        theme = savedTheme;
-      } else if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
-        theme = "dark";
-      } else {
-        theme = "light";
-      }
-    } else {
-      // Fallback if localStorage is unavailable
-      theme = window.matchMedia("(prefers-color-scheme: dark)").matches
-        ? "dark"
-        : "light";
-    }
+    try {
+      const saved = localStorage.getItem("theme");
+      const prefersDark = window.matchMedia(
+        "(prefers-color-scheme: dark)"
+      ).matches;
+      const activeTheme =
+        saved === "dark" || saved === "light"
+          ? saved
+          : prefersDark
+            ? "dark"
+            : "light";
 
-    // Apply theme immediately to prevent flash
-    document.documentElement.dataset.theme = theme;
-    window.initialTheme = theme;
+      document.documentElement.setAttribute("data-theme", activeTheme);
+      document.documentElement.classList.toggle("dark", activeTheme === "dark");
+      document.documentElement.style.colorScheme = activeTheme;
+      window.initialTheme = activeTheme;
+
+      // Update dynamic browser address bar theme-color
+      const meta = document.querySelector('meta[name="theme-color"]');
+      if (meta) {
+        meta.setAttribute(
+          "content",
+          activeTheme === "dark" ? "#141517" : "#fafafa"
+        );
+      }
+    } catch {
+      // In private browsing or sandboxed contexts, fall back silently to system preference
+      const fallbackDark = window.matchMedia(
+        "(prefers-color-scheme: dark)"
+      ).matches;
+      document.documentElement.setAttribute(
+        "data-theme",
+        fallbackDark ? "dark" : "light"
+      );
+    }
   })();
 </script>
 
