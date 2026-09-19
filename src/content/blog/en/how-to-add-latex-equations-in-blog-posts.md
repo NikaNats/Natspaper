@@ -12,14 +12,15 @@ This document demonstrates how to use LaTeX equations in your Markdown files for
 
 <!--
   PERFORMANCE FIX:
-  Replaced raw HTML <img> with Markdown syntax.
-  Astro will now automatically:
-  1. Convert this to WebP/AVIF (Format Optimization)
-  2. Generate multiple sizes (Responsive Images)
-  3. Lazy load it with decoding="async"
+  This hero-adjacent figure sits above the fold (LCP candidate), so it uses
+  an explicit <img> with loading="eager" + fetchpriority="high" (same
+  convention as the homepage profile image in Hero.astro). Astro still
+  processes local <img> sources in Markdown through the image pipeline
+  (WebP/AVIF, responsive sizes, injected dimensions); below-the-fold
+  figures elsewhere keep Markdown syntax for automatic lazy loading.
 -->
 
-![Close-up of complex equations on a chalkboard, showcasing chemistry and math symbols](../../../assets/images/latex-equations-blackboard.jpeg)
+<img src="../../../assets/images/latex-equations-blackboard.jpeg" alt="Close-up of complex equations on a chalkboard, showcasing chemistry and math symbols" loading="eager" fetchpriority="high" decoding="async" />
 
 _Photo by [Vitaly Gariev](https://www.pexels.com/photo/close-up-of-complicated-equations-written-on-a-blackboard-22690748/)_
 
