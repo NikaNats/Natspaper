@@ -218,8 +218,8 @@ const uiLangTag = toBcp47(locale);
         {readingTimeText}
       />
 
-      <!-- Mobile Table of Contents -->
-      <div class="block xl:hidden">
+      <!-- Mobile Table of Contents (mirrors the 81rem rail threshold: no TOC gap) -->
+      <div class="block min-[81rem]:hidden">
         <MobileTableOfContents headings={headings} />
       </div>
 
