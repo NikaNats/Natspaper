@@ -7,6 +7,7 @@ import { DEFAULT_LANG, SUPPORTED_LANGS } from "./src/i18n/config";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 import { remarkModifiedTime } from "./src/lib/remark-modified-time.mjs";
+import { rehypeEagerFirstImage } from "./src/lib/rehype-eager-first-image.mjs";
 import vercel from "@astrojs/vercel";
 
 const siteUrl = process.env.SITE_WEBSITE || SITE.website;
@@ -43,6 +44,10 @@ export default defineConfig({
           throwOnError: false,
         },
       ],
+      // First content image per document is the LCP candidate: eager + high
+      // priority. Must run as a rehype plugin (hast <img> nodes) so Markdown
+      // authors get correct loading without dropping into raw HTML.
+      rehypeEagerFirstImage,
     ],
   },
 

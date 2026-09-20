@@ -1,14 +1,6 @@
 /* src/styles/typography.css */
 @plugin "@tailwindcss/typography";
 
-@font-face {
-  font-family: "STIX Two Math";
-  src: url("/fonts/STIXTwoMath-Regular.woff2") format("woff2");
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
-}
-
 @layer base {
   /* Mixed inline Latin runs inside Georgian prose (top-level: must not nest
      inside .app-prose or the selector would be scoped incorrectly) */
@@ -370,8 +362,12 @@
     /* ==========================================================================
        W3C MathML Core Typography & Layout (STIX Two Math contract)
        ========================================================================== */
-
-    /* Root Math Element */
+    /* Root Math Element.
+       NOTE: no @font-face is declared here on purpose. A previous
+       declaration pointed at /fonts/STIXTwoMath-Regular.woff2, which was
+       never bundled, so every math page issued a 404. The stack below
+       resolves to locally installed OpenType MATH fonts (or the generic
+       `math` family); only re-add an @font-face together with the file. */
     math {
       font-family: "STIX Two Math", "Cambria Math", "Latin Modern Math", math;
       color: var(--color-foreground);
