@@ -1,5 +1,5 @@
 ---
-import { GISCUS } from "@/config";
+import { GISCUS, SITE } from "@/config";
 
 export interface Props {
   locale?: string;
@@ -40,7 +40,9 @@ const SUPPORTED_GISCUS_LANGS = new Set([
   "zh-CN",
   "zh-TW",
 ]);
+
 const giscusLang = SUPPORTED_GISCUS_LANGS.has(locale) ? locale : "en";
+const siteWebsite = SITE.website.replace(/\/$/, "");
 ---
 
 {
@@ -57,6 +59,7 @@ const giscusLang = SUPPORTED_GISCUS_LANGS.has(locale) ? locale : "en";
       data-giscus-input-position={GISCUS.inputPosition}
       data-giscus-lang={giscusLang}
       data-giscus-loading={GISCUS.loading}
+      data-site-url={siteWebsite}
     >
       <div class="giscus" />
     </div>
@@ -65,82 +68,68 @@ const giscusLang = SUPPORTED_GISCUS_LANGS.has(locale) ? locale : "en";
 
 <script is:inline>
   /**
-   * PERFORMANCE: Lazy-load Giscus comments using IntersectionObserver
-   * This defers loading ~150KB of JS until user scrolls near the comments section,
-   * improving TBT (Total Blocking Time) and LCP.
+   * Giscus lazy-loader with academic theme synchronization.
+   * - Defers ~150KB of JS until the comments section nears the viewport.
+   * - Injects the resolved custom-CSS theme URL up front (no unstyled flash).
+   * - Routes localhost theme fetches to the production origin, which
+   *   giscus.app cannot reach on a private loopback address.
+   * - Theme URLs carry no timestamp cache-buster so edge CDNs can cache them.
    */
   (function () {
     let giscusLoaded = false;
 
-    function syncCurrentTheme() {
-      const theme =
-        document.documentElement.getAttribute("data-theme") === "dark"
-          ? "dark"
-          : "light";
-      updateGiscusTheme(theme);
-    }
+    function getThemeUrl(theme, wrapper) {
+      const isLocal =
+        window.location.hostname === "localhost" ||
+        window.location.hostname === "127.0.0.1";
 
-    // Guard against duplicate registration across Astro View Transitions
-    // (mirrors the handleGiscusThemeChange pattern below).
-    if (!window.handleGiscusMessage) {
-      window.handleGiscusMessage = function (event) {
-        if (event.origin !== "https://giscus.app") return;
-        if (event.data && typeof event.data === "object" && event.data.giscus) {
-          if (event.data.giscus.discussion || event.data.giscus.viewer) {
-            syncCurrentTheme();
-          }
-        }
-      };
-      window.addEventListener("message", window.handleGiscusMessage);
-    }
-    document.addEventListener("theme-changed", function (e) {
-      const t = e && e.detail && e.detail.theme;
-      if (t === "dark" || t === "light") updateGiscusTheme(t);
-      else syncCurrentTheme();
-    });
+      // giscus.app runs on an external server and cannot access localhost URLs.
+      // During development, fall back to the live domain so custom styles load properly.
+      const productionOrigin = wrapper
+        ? wrapper.dataset.siteUrl
+        : "https://natspaper.vercel.app";
+      const baseOrigin = isLocal ? productionOrigin : window.location.origin;
 
-    /**
-     * Helper to determine the correct theme URL.
-     */
-    function getThemeUrl(theme) {
-      const origin = window.location.origin;
-      if (origin.includes("localhost") || origin.includes("127.0.0.1")) {
-        return theme === "dark" ? "noborder_gray" : "noborder_light";
-      }
-      const cacheBuster = `?v=${Date.now()}`;
       return theme === "dark"
-        ? `${origin}/styles/giscus-dark.css${cacheBuster}`
-        : `${origin}/styles/giscus-light.css${cacheBuster}`;
+        ? `${baseOrigin}/styles/giscus-dark.css`
+        : `${baseOrigin}/styles/giscus-light.css`;
+    }
+
+    function getCurrentTheme() {
+      return (
+        document.documentElement.dataset.theme ||
+        document.documentElement.getAttribute("data-theme") ||
+        "light"
+      );
     }
 
     function updateGiscusTheme(explicitTheme) {
-      const theme =
-        explicitTheme ||
-        document.documentElement.dataset.theme ||
-        document.documentElement.getAttribute("data-theme") ||
-        "light";
-      const giscusTheme = getThemeUrl(theme);
+      const theme = explicitTheme || getCurrentTheme();
+      const wrapper = document.querySelector(".giscus-wrapper");
+      const giscusTheme = getThemeUrl(theme, wrapper);
       const iframe = document.querySelector("iframe.giscus-frame");
-      // Only send message if iframe exists and has loaded (src set)
-      if (!iframe || !iframe.src || !iframe.contentWindow) return;
+
+      if (!iframe || !iframe.contentWindow) return;
+
       try {
         iframe.contentWindow.postMessage(
           { giscus: { setConfig: { theme: giscusTheme } } },
           "https://giscus.app"
         );
       } catch {
-        // Ignore postMessage errors (iframe may not be ready)
+        // Suppress postMessage transport errors if iframe is navigating
       }
     }
 
     function loadGiscus() {
       if (giscusLoaded) return;
-      giscusLoaded = true;
-
       const wrapper = document.querySelector(".giscus-wrapper");
       if (!wrapper) return;
 
-      // Read configuration from data attributes
+      giscusLoaded = true;
+      const theme = getCurrentTheme();
+      const initialThemeUrl = getThemeUrl(theme, wrapper);
+
       const script = document.createElement("script");
       script.src = "https://giscus.app/client.js";
       // SECURITY: SRI hash ensures script integrity (generate new hash when updating Giscus)
@@ -150,6 +139,9 @@ const giscusLang = SUPPORTED_GISCUS_LANGS.has(locale) ? locale : "en";
       //   "sha384-" + [Convert]::ToBase64String($hash)
       script.integrity =
         "sha384-UwLZGbJGvkTzz0719+xEzUm/idqwzs0yZN8aB9Se5vUXHbyRyDWw9yqZTIsOsJ7x";
+      script.crossOrigin = "anonymous";
+      script.async = true;
+
       script.setAttribute("data-repo", wrapper.dataset.giscusRepo || "");
       script.setAttribute("data-repo-id", wrapper.dataset.giscusRepoId || "");
       script.setAttribute(
@@ -177,60 +169,73 @@ const giscusLang = SUPPORTED_GISCUS_LANGS.has(locale) ? locale : "en";
         "data-input-position",
         wrapper.dataset.giscusInputPosition || "bottom"
       );
-      script.setAttribute("data-theme", "transparent_dark");
+      script.setAttribute("data-theme", initialThemeUrl);
       script.setAttribute("data-lang", wrapper.dataset.giscusLang || "en");
       script.setAttribute(
         "data-loading",
         wrapper.dataset.giscusLoading || "lazy"
       );
-      script.crossOrigin = "anonymous";
-      script.async = true;
 
       wrapper.appendChild(script);
     }
 
-    // --- Event Handling (Prevent Memory Leaks) ---
+    // Bi-directional message synchronization with the Giscus iframe.
+    // Guarded so Astro View Transitions don't stack duplicate listeners.
+    if (!window.handleGiscusMessage) {
+      window.handleGiscusMessage = function (event) {
+        if (event.origin !== "https://giscus.app") return;
+        if (event.data && typeof event.data === "object" && event.data.giscus) {
+          if (event.data.giscus.discussion || event.data.giscus.viewer) {
+            updateGiscusTheme();
+          }
+        }
+      };
+      window.addEventListener("message", window.handleGiscusMessage);
+    }
+
+    // Listen to theme toggle changes triggered by public/toggle-theme.js
     if (window.handleGiscusThemeChange) {
       document.removeEventListener(
         "theme-changed",
         window.handleGiscusThemeChange
       );
     }
-    window.handleGiscusThemeChange = updateGiscusTheme;
+    window.handleGiscusThemeChange = function (e) {
+      const theme =
+        e && e.detail && e.detail.theme ? e.detail.theme : getCurrentTheme();
+      updateGiscusTheme(theme);
+    };
     document.addEventListener("theme-changed", window.handleGiscusThemeChange);
 
-    // --- Lazy Loading with IntersectionObserver ---
-    const giscusWrapper = document.querySelector(".giscus-wrapper");
-    if (giscusWrapper) {
-      // Use IntersectionObserver to load Giscus when near viewport
+    // Performance: initialize via IntersectionObserver 200px before scrolling into view
+    const wrapper = document.querySelector(".giscus-wrapper");
+    if (wrapper) {
       const observer = new IntersectionObserver(
-        entries => {
-          entries.forEach(entry => {
+        function (entries) {
+          entries.forEach(function (entry) {
             if (entry.isIntersecting) {
               loadGiscus();
               observer.disconnect();
             }
           });
         },
-        { rootMargin: "200px" } // Start loading 200px before visible
+        { rootMargin: "200px" }
       );
-      observer.observe(giscusWrapper);
+      observer.observe(wrapper);
 
-      // Watch for iframe load to apply theme
-      const giscusContainer = giscusWrapper.querySelector(".giscus");
+      // Apply theme as soon as the iframe completes DOM insertion
+      const giscusContainer = wrapper.querySelector(".giscus");
       if (giscusContainer) {
-        const mutationObserver = new MutationObserver(mutations => {
-          mutations.forEach(mutation => {
+        const mutationObserver = new MutationObserver(function (mutations) {
+          mutations.forEach(function (mutation) {
             if (
               mutation.addedNodes.length > 0 &&
               mutation.addedNodes[0].tagName === "IFRAME" &&
               mutation.addedNodes[0].classList.contains("giscus-frame")
             ) {
-              // Wait for iframe to fully load before sending theme message
               const iframe = mutation.addedNodes[0];
-              iframe.addEventListener("load", () => {
-                // Small delay to ensure giscus app is ready to receive messages
-                setTimeout(updateGiscusTheme, 100);
+              iframe.addEventListener("load", function () {
+                setTimeout(updateGiscusTheme, 120);
               });
               mutationObserver.disconnect();
             }
@@ -249,5 +254,6 @@ const giscusLang = SUPPORTED_GISCUS_LANGS.has(locale) ? locale : "en";
   }
   .giscus-wrapper :global(.giscus-frame) {
     width: 100%;
+    border: none;
   }
 </style>

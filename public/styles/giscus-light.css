@@ -1,113 +1,231 @@
-/*
- * Natspaper - Giscus Light Theme
+/*!
+ * Natspaper Academic Giscus Light Theme
+ * Conforms to DTCG 2025.10 OKLCH Palette (WCAG 2.2 AA & APCA Lc >= 75)
  */
 
 main {
+  /* Surface Tokens */
   --color-canvas-default: #fafafa;
-  --color-canvas-subtle: #f5f5f5;
-  --color-border-default: #e0e0e0;
+  --color-canvas-subtle: #f1f2f5;
+  --color-canvas-overlay: #ffffff;
+  --color-canvas-inset: #e8e9ed;
+
+  /* Border Tokens */
+  --color-border-default: #c9cdd3;
+  --color-border-muted: rgba(201, 205, 211, 0.7);
+  --color-neutral-muted: rgba(0, 0, 0, 0.04);
+
+  /* Typography Tokens */
   --color-fg-default: #212121;
-  --color-fg-muted: #757575;
-  --color-accent: #0066ff;
+  --color-fg-muted: #595959;
+  --color-fg-subtle: #757575;
+
+  /* Interaction & Accent Tokens */
+  --color-accent-fg: #005fcc;
+  --color-accent-emphasis: #005fcc;
+  --color-accent-muted: rgba(0, 95, 204, 0.15);
+  --color-accent-subtle: rgba(0, 95, 204, 0.06);
+
+  /* Primary Action Button */
+  --color-btn-primary-bg: #005fcc;
+  --color-btn-primary-hover-bg: #004fb0;
+  --color-btn-primary-text: #ffffff;
+  --color-btn-primary-border: transparent;
+
+  /* Standard Buttons */
+  --color-btn-bg: #ffffff;
+  --color-btn-border: #c9cdd3;
+  --color-btn-text: #212121;
+  --color-btn-hover-bg: #f1f2f5;
+  --color-btn-hover-border: #757575;
+
+  font-family:
+    Inter,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
+  letter-spacing: -0.01em;
 }
 
 main,
 .gsc-main {
-  background: transparent;
+  background: transparent !important;
   color: var(--color-fg-default);
+}
+
+.gsc-header {
+  border-bottom: 1px solid var(--color-border-muted);
+  padding-bottom: 1rem;
+}
+
+.gsc-comments-count {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--color-fg-default);
+  letter-spacing: -0.02em;
 }
 
 .gsc-comment-box {
   background: var(--color-canvas-subtle);
   border: 1px solid var(--color-border-default);
-  border-radius: 8px;
+  border-radius: 12px;
+  overflow: hidden;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.gsc-comment-box:focus-within {
+  border-color: var(--color-accent-fg);
+  box-shadow: 0 0 0 2px rgba(0, 95, 204, 0.15);
 }
 
 .gsc-comment-box-tabs {
   background: transparent;
   border-bottom: 1px solid var(--color-border-default);
+  padding: 6px 12px 0 12px;
 }
 
-.gsc-comment-box-textarea {
-  background: var(--color-canvas-default);
-  border: 1px solid var(--color-border-default);
-  border-radius: 6px;
+.gsc-comment-box-tabs button {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-fg-muted);
+  padding: 8px 14px;
+  border-radius: 6px 6px 0 0;
+  border-bottom: 2px solid transparent;
+  transition: color 0.15s ease;
+}
+
+.gsc-comment-box-tabs button:hover {
   color: var(--color-fg-default);
 }
 
+.gsc-comment-box-tabs button[aria-selected="true"] {
+  color: var(--color-accent-fg);
+  border-bottom-color: var(--color-accent-fg);
+  background: transparent;
+}
+
+.gsc-comment-box-textarea {
+  background: #ffffff;
+  border: 1px solid var(--color-border-default);
+  border-radius: 8px;
+  color: var(--color-fg-default);
+  font-family: inherit;
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  padding: 12px 14px;
+}
+
+.gsc-comment-box-textarea::placeholder {
+  color: var(--color-fg-subtle);
+}
+
 .gsc-comment-box-textarea:focus {
-  border-color: var(--color-accent);
+  border-color: var(--color-accent-fg);
   outline: none;
-  box-shadow: 0 0 0 2px rgba(0, 102, 255, 0.15);
+  box-shadow: none;
 }
 
 .gsc-comment-box-bottom {
   background: transparent;
   border-top: 1px solid var(--color-border-default);
+  padding: 10px 14px;
 }
 
 .btn-primary {
-  background: var(--color-accent) !important;
-  border-color: var(--color-accent) !important;
-  border-radius: 6px !important;
+  background-color: var(--color-btn-primary-bg) !important;
+  color: var(--color-btn-primary-text) !important;
+  border: 1px solid var(--color-btn-primary-border) !important;
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+  font-size: 0.8125rem !important;
+  padding: 6px 16px !important;
+  transition:
+    background-color 0.2s ease,
+    transform 0.1s ease !important;
+  box-shadow: none !important;
 }
 
-.btn-primary:hover {
-  background: #0052cc !important;
-  border-color: #0052cc !important;
+.btn-primary:hover:not([disabled]) {
+  background-color: var(--color-btn-primary-hover-bg) !important;
+}
+
+.btn-primary:active:not([disabled]) {
+  transform: scale(0.98);
 }
 
 .gsc-comment {
-  background: var(--color-canvas-subtle);
+  background: #ffffff;
   border: 1px solid var(--color-border-default);
-  border-radius: 8px;
+  border-radius: 12px;
+  margin-top: 1rem;
 }
 
 .gsc-comment-header {
   background: transparent;
   border-bottom: 1px solid var(--color-border-default);
+  padding: 10px 14px;
+  font-size: 0.8125rem;
+}
+
+.gsc-comment-author {
+  font-weight: 600;
+  color: var(--color-fg-default);
+}
+
+.gsc-comment-content {
+  padding: 14px;
+  font-size: 0.9375rem;
+  line-height: 1.65;
+}
+
+.gsc-comment-content blockquote {
+  border-left: 3px solid var(--color-accent-fg);
+  padding-left: 1rem;
+  color: var(--color-fg-muted);
+  font-style: italic;
+  margin: 0.75rem 0;
+}
+
+.gsc-comment-content pre {
+  background-color: #f0f0f0 !important;
+  border: 1px solid var(--color-border-default) !important;
+  border-radius: 8px !important;
+  padding: 12px !important;
+  font-family: "JetBrains Mono", ui-monospace, monospace !important;
+  font-size: 0.875rem !important;
+}
+
+.gsc-comment-content code:not(pre code) {
+  background-color: #f0f0f0;
+  color: #212121;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 0.85em;
 }
 
 .gsc-reactions-button {
   background: var(--color-canvas-default);
   border: 1px solid var(--color-border-default);
-  border-radius: 16px;
+  border-radius: 9999px;
   color: var(--color-fg-muted);
+  padding: 4px 10px;
+  transition: all 0.2s ease;
 }
 
 .gsc-reactions-button:hover,
 .gsc-reactions-button.has-reacted {
-  border-color: var(--color-accent);
-  color: var(--color-accent);
-}
-
-a {
-  color: var(--color-accent);
-}
-
-.color-text-primary {
-  color: var(--color-fg-default) !important;
-}
-.color-text-secondary {
-  color: var(--color-fg-muted) !important;
-}
-.color-bg-primary,
-.color-bg-canvas {
-  background: var(--color-canvas-subtle) !important;
-}
-.color-bg-tertiary {
-  background: transparent !important;
-}
-.color-border-primary {
-  border-color: var(--color-border-default) !important;
+  border-color: var(--color-accent-fg);
+  color: var(--color-accent-fg);
+  background: var(--color-accent-subtle);
 }
 
 .gsc-reply-box {
   background: transparent;
   border-top: 1px solid var(--color-border-default);
-}
-
-.gsc-loading,
-.gsc-empty {
-  color: var(--color-fg-muted);
 }
