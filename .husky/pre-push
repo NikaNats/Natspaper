@@ -2,6 +2,17 @@
 echo "▶ pre-push: production build..."
 pnpm build:prod
 
+# The build regenerates committed artifacts (vercel.json CSP hashes,
+# src/styles/tokens.generated.css). If they differ afterwards, the push
+# would deploy code the CSP does not allow (blocked inline scripts), so
+# refuse and ask for them to be committed first.
+echo "▶ pre-push: generated files must be committed..."
+if ! git diff --exit-code -- vercel.json src/styles/tokens.generated.css > /dev/null; then
+  echo "✖ vercel.json or tokens.generated.css changed during the build."
+  echo "  Commit the regenerated files and push again."
+  exit 1
+fi
+
 echo "▶ pre-push: E2E tests..."
 pnpm test:e2e --project=chromium
 
