@@ -1,5 +1,11 @@
 ---
 import { GISCUS, SITE } from "@/config";
+// ?url imports emit fingerprinted files (cache-busting on every edit) and
+// resolve to their public URLs. Fingerprinting matters here: giscus.app and
+// edge CDNs cache theme CSS aggressively, so a content hash in the filename
+// is the only reliable invalidation when the theme changes.
+import giscusDarkUrl from "@/assets/giscus-dark.css?url";
+import giscusLightUrl from "@/assets/giscus-light.css?url";
 
 export interface Props {
   locale?: string;
@@ -60,6 +66,8 @@ const siteWebsite = SITE.website.replace(/\/$/, "");
       data-giscus-lang={giscusLang}
       data-giscus-loading={GISCUS.loading}
       data-site-url={siteWebsite}
+      data-giscus-dark-url={giscusDarkUrl}
+      data-giscus-light-url={giscusLightUrl}
     >
       <div class="giscus" />
     </div>
@@ -89,10 +97,14 @@ const siteWebsite = SITE.website.replace(/\/$/, "");
         ? wrapper.dataset.siteUrl
         : "https://natspaper.vercel.app";
       const baseOrigin = isLocal ? productionOrigin : window.location.origin;
+      // Fingerprinted asset paths (data attributes); the content hash in the
+      // filename busts browser, edge, and giscus.app caches on every edit.
+      const path =
+        theme === "dark"
+          ? wrapper.dataset.giscusDarkUrl
+          : wrapper.dataset.giscusLightUrl;
 
-      return theme === "dark"
-        ? `${baseOrigin}/styles/giscus-dark.css`
-        : `${baseOrigin}/styles/giscus-light.css`;
+      return `${baseOrigin}${path}`;
     }
 
     function getCurrentTheme() {
@@ -104,8 +116,9 @@ const siteWebsite = SITE.website.replace(/\/$/, "");
     }
 
     function updateGiscusTheme(explicitTheme) {
-      const theme = explicitTheme || getCurrentTheme();
       const wrapper = document.querySelector(".giscus-wrapper");
+      if (!wrapper) return;
+      const theme = explicitTheme || getCurrentTheme();
       const giscusTheme = getThemeUrl(theme, wrapper);
       const iframe = document.querySelector("iframe.giscus-frame");
 
