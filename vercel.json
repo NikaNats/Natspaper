@@ -38,7 +38,7 @@
         },
         {
           "key": "Link",
-          "value": "</fonts/inter-latin-700-normal.woff>; rel=\"preload\"; as=\"font\"; type=\"font/woff\"; crossorigin, </en/atom.xml>; rel=\"alternate\"; type=\"application/atom+xml\"; title=\"Atom Feed\", </en/rss.xml>; rel=\"alternate\"; type=\"application/rss+xml\"; title=\"RSS Feed\""
+          "value": "</en/atom.xml>; rel=\"alternate\"; type=\"application/atom+xml\"; title=\"Atom Feed\", </en/rss.xml>; rel=\"alternate\"; type=\"application/rss+xml\"; title=\"RSS Feed\""
         }
       ]
     },
@@ -51,7 +51,7 @@
         },
         {
           "key": "Link",
-          "value": "</fonts/inter-latin-700-normal.woff>; rel=\"preload\"; as=\"font\"; type=\"font/woff\"; crossorigin, </ka/atom.xml>; rel=\"alternate\"; type=\"application/atom+xml\"; title=\"Atom Feed\", </ka/rss.xml>; rel=\"alternate\"; type=\"application/rss+xml\"; title=\"RSS Feed\""
+          "value": "</ka/atom.xml>; rel=\"alternate\"; type=\"application/atom+xml\"; title=\"Atom Feed\", </ka/rss.xml>; rel=\"alternate\"; type=\"application/rss+xml\"; title=\"RSS Feed\""
         }
       ]
     },
