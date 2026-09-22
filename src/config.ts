@@ -107,6 +107,7 @@ export const SOCIALS: SocialLink[] = [
 export const NAVIGATION: NavigationItem[] = [
   { href: "/posts", text: "nav.posts" },
   { href: "/tags", text: "nav.tags" },
+  { href: "/about", text: "nav.about" },
   { href: "/archives", text: "nav.archives" },
 ];
 

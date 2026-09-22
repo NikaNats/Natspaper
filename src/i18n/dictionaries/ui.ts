@@ -13,6 +13,7 @@ export const ui = {
     // Navigation
     "nav.posts": "Posts",
     "nav.tags": "Tags",
+    "nav.about": "About",
     "nav.archives": "Archives",
     "nav.openMenu": "Open Menu",
     "nav.closeMenu": "Close Menu",
@@ -81,6 +82,7 @@ export const ui = {
     // Navigation - keeping "post" and "tag" in English
     "nav.posts": "Posts",
     "nav.tags": "Tags",
+    "nav.about": "შესახებ",
     "nav.archives": "არქივი",
     "nav.openMenu": "მენიუს გახსნა",
     "nav.closeMenu": "მენიუს დახურვა",

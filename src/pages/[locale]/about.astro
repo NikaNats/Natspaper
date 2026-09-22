@@ -1,0 +1,680 @@
+---
+/**
+ * About page (Locale-aware) — built from CV.
+ * Route: /{locale}/about
+ */
+import type { GetStaticPaths } from "astro";
+import { Picture } from "astro:assets";
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/layout/Header.astro";
+import Footer from "@/components/layout/Footer.astro";
+import Main from "@/layouts/Main.astro";
+import { SUPPORTED_LANGS, DEFAULT_LANG } from "@/i18n/config";
+import type { Lang } from "@/i18n";
+import { aboutData } from "@/data/about";
+import profilePic from "@/assets/images/me.jpeg";
+import IconGitHub from "@/assets/icons/IconGitHub.svg";
+import IconLinkedin from "@/assets/icons/IconLinkedin.svg";
+import IconMail from "@/assets/icons/IconMail.svg";
+
+export const getStaticPaths = (() => {
+  return SUPPORTED_LANGS.map(locale => ({
+    params: { locale },
+  }));
+}) satisfies GetStaticPaths;
+
+export const prerender = true;
+
+const locale = (
+  SUPPORTED_LANGS.includes(Astro.params.locale as Lang)
+    ? Astro.params.locale
+    : DEFAULT_LANG
+) as Lang;
+
+const content = aboutData[locale];
+const rawPhoneNumber = content.phone.replace(/[^\d+]/g, "");
+---
+
+<Layout title={content.title} description={content.description}>
+  <Header />
+  <Main pageTitle={content.pageTitle} width="wide" hideTitle>
+    <div class="about">
+      {/* ── Hero ─────────────────────────────────────────── */}
+      <section class="about-hero" aria-labelledby="about-name">
+        <div class="about-hero-photo">
+          <Picture
+            src={profilePic}
+            formats={["avif", "webp"]}
+            widths={[160, 220, 280]}
+            sizes="160px"
+            alt={content.name}
+            width={160}
+            height={160}
+            loading="eager"
+            fetchpriority="high"
+            decoding="sync"
+          />
+        </div>
+        <div class="about-hero-body">
+          <p class="about-eyebrow">{content.eyebrow}</p>
+          <h1 id="about-name" class="about-name">{content.name}</h1>
+          <p class="about-role">{content.role}</p>
+
+          {/* ტელეფონის ნომერი: გარდაქმნილია კლიკებად tel: ბმულად */}
+          <p class="about-location">
+            {content.location} ·
+            <a
+              href={`tel:${rawPhoneNumber}`}
+              class="about-phone-link"
+              aria-label={`Call ${content.phone}`}
+            >
+              {content.phone}
+            </a>
+          </p>
+
+          <div class="about-actions">
+            <a
+              class="about-btn about-btn-primary"
+              href={`mailto:${content.email}`}
+            >
+              <IconMail class="about-btn-icon" aria-hidden="true" />
+              {content.contactLabels.email}
+            </a>
+            <a
+              class="about-btn"
+              href="https://linkedin.com/in/nika-natsvlishvili"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <IconLinkedin class="about-btn-icon" aria-hidden="true" />
+              {content.contactLabels.linkedin}
+            </a>
+            <a
+              class="about-btn"
+              href="https://github.com/NikaNats"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <IconGitHub class="about-btn-icon" aria-hidden="true" />
+              {content.contactLabels.github}
+            </a>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Stats ────────────────────────────────────────── */}
+      <section aria-label={content.statsLabel}>
+        <ul class="about-stats">
+          {
+            content.stats.map(s => (
+              <li class="about-stat">
+                <span class="about-stat-value">{s.value}</span>
+                <span class="about-stat-label">{s.label}</span>
+              </li>
+            ))
+          }
+        </ul>
+      </section>
+
+      {/* ── Summary ──────────────────────────────────────── */}
+      <section class="about-block" aria-labelledby="about-summary">
+        <h2 id="about-summary" class="about-h2">{content.summaryTitle}</h2>
+        <p class="about-lead">{content.summary}</p>
+      </section>
+
+      {/* ── Skills ───────────────────────────────────────── */}
+      <section class="about-block" aria-labelledby="about-skills">
+        <div class="about-head">
+          <h2 id="about-skills" class="about-h2">{content.skillsTitle}</h2>
+          <p class="about-sub">{content.skillsSub}</p>
+        </div>
+        <div class="about-grid-2">
+          {
+            content.skillGroups.map(g => (
+              <div class="about-card">
+                <h3 class="about-h3">{g.title}</h3>
+                <div class="about-pills">
+                  {g.items.map(item => (
+                    <span class="about-pill">{item}</span>
+                  ))}
+                </div>
+              </div>
+            ))
+          }
+        </div>
+      </section>
+
+      {/* ── Experience ───────────────────────────────────── */}
+      <section class="about-block" aria-labelledby="about-exp">
+        <div class="about-head">
+          <h2 id="about-exp" class="about-h2">{content.expTitle}</h2>
+          <p class="about-sub">{content.expSub}</p>
+        </div>
+        <ol class="about-timeline">
+          {
+            content.jobs.map(job => (
+              <li class="about-job">
+                <span class="about-dot" aria-hidden="true" />
+                <article class="about-card about-job-card">
+                  <p class="about-period">{job.period}</p>
+                  <h3 class="about-h3">{job.role}</h3>
+                  <p class="about-company">{job.company}</p>
+                  <p class="about-meta">{job.location}</p>
+                  <ul class="about-points">
+                    {job.points.map(p => (
+                      <li>
+                        <strong>{p.title}:</strong> {p.text}
+                      </li>
+                    ))}
+                  </ul>
+                </article>
+              </li>
+            ))
+          }
+        </ol>
+      </section>
+
+      {/* ── Education ────────────────────────────────────── */}
+      <section class="about-block" aria-labelledby="about-edu">
+        <h2 id="about-edu" class="about-h2">{content.eduTitle}</h2>
+        <div class="about-grid-2">
+          {
+            content.education.map(e => (
+              <article class="about-card">
+                <p class="about-period">{e.period}</p>
+                <h3 class="about-h3">{e.degree}</h3>
+                <p class="about-company">{e.school}</p>
+                {e.detail && <p class="about-meta">{e.detail}</p>}
+              </article>
+            ))
+          }
+        </div>
+      </section>
+
+      {/* ── Certs ────────────────────────────────────────── */}
+      <section class="about-block" aria-labelledby="about-certs">
+        <div class="about-head">
+          <h2 id="about-certs" class="about-h2">{content.certsTitle}</h2>
+          <p class="about-sub">{content.certsSub}</p>
+        </div>
+        <div class="about-grid-2">
+          {
+            content.certs.map(c => (
+              <a
+                class="about-card about-link-card"
+                href={c.href}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <span class="about-cert-name">
+                  {c.name}
+                  <span aria-hidden="true" class="about-ext">
+                    ↗
+                  </span>
+                </span>
+                <span class="about-meta">{c.desc}</span>
+              </a>
+            ))
+          }
+        </div>
+      </section>
+
+      {/* ── Award ────────────────────────────────────────── */}
+      <section class="about-award" aria-labelledby="about-award">
+        <p class="about-award-kicker">{content.awardOrg}</p>
+        <h2 id="about-award" class="about-h2">{content.awardTitle}</h2>
+        <ul class="about-points">
+          {
+            content.awardPoints.map(p => (
+              <li>
+                <strong>{p.title}:</strong> {p.text}
+              </li>
+            ))
+          }
+        </ul>
+      </section>
+    </div>
+  </Main>
+  <Footer />
+</Layout>
+
+<style>
+  .about {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(2rem, 1rem + 3vw, 3.5rem);
+    padding-block: 0.5rem 2rem;
+  }
+
+  /* Hero */
+  .about-hero {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.25rem;
+    padding: clamp(1.25rem, 1rem + 2vw, 2rem);
+    border: 1px solid var(--color-border);
+    border-radius: 1.25rem;
+    background:
+      radial-gradient(
+        60% 120% at 100% 0%,
+        color-mix(in oklab, var(--color-accent) 12%, transparent),
+        transparent 70%
+      ),
+      var(--color-background);
+  }
+  @media (min-width: 640px) {
+    .about-hero {
+      flex-direction: row;
+      align-items: center;
+      gap: 1.75rem;
+    }
+  }
+  .about-hero-photo :global(img) {
+    width: 7rem;
+    height: 7rem;
+    border-radius: 9999px;
+    object-fit: cover;
+    outline: 2px solid color-mix(in oklab, var(--color-accent) 50%, transparent);
+    box-shadow: 0 0 40px -12px var(--color-accent);
+  }
+  .about-eyebrow {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--color-accent);
+    margin: 0 0 0.35rem;
+  }
+  .about-name {
+    font-size: clamp(1.75rem, 1.25rem + 3vw, 2.75rem);
+    line-height: 1.1;
+    letter-spacing: -0.025em;
+    margin: 0;
+    color: var(--color-foreground);
+    text-wrap: balance;
+  }
+  .about-role {
+    font-size: clamp(1rem, 0.9rem + 0.5vw, 1.2rem);
+    font-weight: 600;
+    margin: 0.4rem 0 0.15rem;
+    background: linear-gradient(
+      135deg,
+      var(--color-accent),
+      color-mix(in oklab, var(--color-accent) 55%, #a855f7)
+    );
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .about-location {
+    color: var(--color-text-secondary);
+    font-size: 0.9375rem;
+    margin: 0;
+  }
+
+  /* ტელეფონის ბმულის სტილი */
+  .about-phone-link {
+    color: inherit;
+    text-decoration: none;
+    transition: color 0.15s ease;
+  }
+  .about-phone-link:hover {
+    color: var(--color-accent);
+  }
+  .about-phone-link:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  .about-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-top: 1rem;
+  }
+  .about-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.55rem 1rem;
+    border-radius: 9999px;
+    border: 1px solid var(--color-border);
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-foreground);
+    text-decoration: none;
+    background: color-mix(in oklab, var(--color-accent) 6%, transparent);
+    transition:
+      transform 0.2s ease,
+      border-color 0.2s ease,
+      background 0.2s ease;
+  }
+  .about-btn:hover {
+    transform: translateY(-1px);
+    border-color: color-mix(in oklab, var(--color-accent) 55%, transparent);
+  }
+  .about-btn-primary {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+    color: #fff;
+  }
+  .about-btn-icon {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  /* Stats */
+  .about-stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  @media (min-width: 48rem) {
+    .about-stats {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+  .about-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 0.3rem;
+    min-block-size: 5.5rem;
+    padding: 1rem 1.1rem;
+    border: 1px solid var(--color-border);
+    border-radius: 1rem;
+    background: color-mix(in oklab, var(--color-muted) 45%, transparent);
+  }
+  .about-stat-value {
+    font-size: clamp(1.5rem, 1.2rem + 1.5vw, 2rem);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--color-accent);
+    line-height: 1;
+    font-variant-numeric: tabular-nums lining-nums;
+  }
+  .about-stat-label {
+    font-size: 0.8125rem;
+    line-height: 1.45;
+    color: var(--color-text-secondary);
+    text-wrap: balance;
+  }
+
+  /* Blocks */
+  .about-block {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .about-head {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  .about-h2 {
+    font-size: clamp(1.4rem, 1.1rem + 1.5vw, 2rem);
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+    margin: 0;
+    color: var(--color-foreground);
+  }
+  .about-sub {
+    color: var(--color-text-secondary);
+    margin: 0;
+  }
+  .about-lead {
+    font-size: clamp(1.02rem, 0.95rem + 0.4vw, 1.15rem);
+    line-height: 1.7;
+    color: var(--color-foreground);
+    margin: 0;
+    max-width: 44rem;
+    border-left: 3px solid var(--color-accent);
+    padding-left: 1rem;
+  }
+
+  /* Cards */
+  .about-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.9rem;
+  }
+  @media (min-width: 640px) {
+    .about-grid-2 {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  .about-card {
+    border: 1px solid var(--color-border);
+    border-radius: 1rem;
+    padding: 1.1rem 1.15rem;
+    background: var(--color-background);
+    transition:
+      border-color 0.2s ease,
+      transform 0.2s ease;
+  }
+  .about-h3 {
+    font-size: 1.02rem;
+    margin: 0 0 0.35rem;
+    color: var(--color-foreground);
+  }
+  .about-company {
+    font-weight: 600;
+    margin: 0;
+    color: var(--color-foreground);
+  }
+  .about-meta {
+    color: var(--color-text-secondary);
+    font-size: 0.9rem;
+    margin: 0.25rem 0 0;
+  }
+  .about-period {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+    background: color-mix(in oklab, var(--color-accent) 10%, transparent);
+    border: 1px solid color-mix(in oklab, var(--color-accent) 25%, transparent);
+    border-radius: 9999px;
+    padding: 0.2rem 0.65rem;
+    margin: 0 0 0.6rem;
+  }
+  .about-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    margin-top: 0.65rem;
+  }
+
+  /* Skill Pills: დამატებულია cursor: default და user-select: none */
+  .about-pill {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    padding: 0.3rem 0.7rem;
+    border-radius: 9999px;
+    border: 1px solid var(--color-border);
+    background: var(--color-muted);
+    color: var(--color-text-secondary);
+    cursor: default;
+    user-select: none;
+  }
+
+  /* Timeline */
+  .about-timeline {
+    position: relative;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .about-timeline::before {
+    content: "";
+    position: absolute;
+    left: 0.55rem;
+    top: 1.75rem;
+    bottom: 1.75rem;
+    width: 2px;
+    border-radius: 2px;
+    background: color-mix(
+      in oklab,
+      var(--color-accent) 30%,
+      var(--color-border)
+    );
+  }
+  .about-job {
+    position: relative;
+    padding-left: 1.75rem;
+  }
+  .about-dot {
+    position: absolute;
+    left: 0.2rem;
+    top: 1.6rem;
+    width: 0.8rem;
+    height: 0.8rem;
+    border-radius: 9999px;
+    background: var(--color-accent);
+    border: 2px solid var(--color-background);
+    box-shadow: 0 0 0 4px
+      color-mix(in oklab, var(--color-accent) 18%, transparent);
+  }
+  .about-job-card:hover {
+    border-color: color-mix(in oklab, var(--color-accent) 45%, transparent);
+  }
+  .about-points {
+    margin: 0.7rem 0 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+    color: var(--color-foreground);
+    font-size: 0.95rem;
+    line-height: 1.6;
+  }
+  .about-points li {
+    position: relative;
+    padding-left: 1rem;
+  }
+  .about-points li::before {
+    content: "▸";
+    position: absolute;
+    left: 0;
+    color: var(--color-accent);
+  }
+
+  /* Links */
+  .about-link-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    text-decoration: none;
+  }
+  .about-link-card:hover {
+    border-color: color-mix(in oklab, var(--color-accent) 50%, transparent);
+    transform: translateY(-2px);
+  }
+  .about-link-card:focus-visible,
+  .about-btn:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
+  }
+  .about-cert-name {
+    font-weight: 700;
+    color: var(--color-foreground);
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .about-ext {
+    color: var(--color-accent);
+  }
+
+  /* Award */
+  .about-award {
+    border-radius: 1.25rem;
+    padding: clamp(1.25rem, 1rem + 2vw, 2rem);
+    color: var(--color-foreground);
+    background:
+      radial-gradient(
+        80% 140% at 0% 0%,
+        color-mix(in oklab, var(--color-accent) 14%, transparent),
+        transparent 60%
+      ),
+      color-mix(in oklab, var(--color-muted) 40%, var(--color-background));
+    border: 1px solid color-mix(in oklab, var(--color-accent) 40%, transparent);
+  }
+  html[data-theme="dark"] .about-award {
+    color: #fff;
+    background:
+      radial-gradient(
+        80% 140% at 0% 0%,
+        rgba(168, 85, 247, 0.45),
+        transparent 60%
+      ),
+      radial-gradient(
+        70% 120% at 100% 100%,
+        rgba(0, 102, 255, 0.5),
+        transparent 60%
+      ),
+      #0b0b12;
+  }
+  .about-award .about-h2 {
+    color: inherit;
+  }
+  .about-award-kicker {
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+    margin: 0 0 0.4rem;
+  }
+  html[data-theme="dark"] .about-award-kicker {
+    color: rgba(255, 255, 255, 0.8);
+  }
+  .about-award .about-points {
+    color: inherit;
+  }
+  html[data-theme="dark"] .about-award .about-points {
+    color: rgba(255, 255, 255, 0.92);
+  }
+  .about-award .about-points li::before {
+    color: var(--color-accent);
+  }
+  html[data-theme="dark"] .about-award .about-points li::before {
+    color: #fff;
+  }
+
+  /* Accessibility Overrides */
+  @media (prefers-contrast: more) {
+    .about-award,
+    .about-card,
+    .about-stat {
+      border-width: 2px;
+    }
+  }
+  @media (forced-colors: active) {
+    .about-dot {
+      box-shadow: none;
+      border: 2px solid CanvasText;
+    }
+    .about-timeline::before {
+      background: CanvasText;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .about-btn:hover,
+    .about-link-card:hover {
+      transform: none;
+    }
+  }
+</style>

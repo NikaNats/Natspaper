@@ -2,7 +2,7 @@
   "name": "natspaper",
   "type": "module",
   "version": "1.0.0",
-  "packageManager": "pnpm@11.17.0",
+  "packageManager": "pnpm@12.5.1",
   "scripts": {
     "build:tokens": "node scripts/build-tokens.js",
     "dev": "pnpm build:tokens && cross-env NODE_ENV=development astro dev",
