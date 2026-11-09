@@ -72,9 +72,11 @@ const content = contentByLocale[locale];
 
 <Layout
   title={content.title}
-  description={locale === "en"
-    ? "The page you're looking for doesn't exist. Try searching or browsing our archives."
-    : "თქვენ ის გვერდი არ მოიძებნა. სცადეთ ძებნა ან თქვენი არქივების დათვალიერება."}
+  description={
+    locale === "en"
+      ? "The page you're looking for doesn't exist. Try searching or browsing our archives."
+      : "თქვენ ის გვერდი არ მოიძებნა. სცადეთ ძებნა ან თქვენი არქივების დათვალიერება."
+  }
 >
   <Header />
 
@@ -84,14 +86,14 @@ const content = contentByLocale[locale];
   >
     <div class="mb-8 flex flex-col items-center justify-center text-center">
       <h1 class="text-fluid-6xl font-bold text-accent">{content.heading}</h1>
-      <span aria-hidden="true" class="text-xl">¯\_(ツ)_/¯</span>
+      <span aria-hidden="true" class="text-xl">
+        ¯\_(ツ)_/¯
+      </span>
       <p class="mt-4 text-2xl sm:text-3xl">{content.subheading}</p>
       <p class="mt-2 text-text-secondary">
-        {
-          locale === "en"
-            ? "The page you're looking for doesn't exist or has been moved."
-            : "ის გვერდი, რომელსაც ეძებთ, არ არსებობს ან გადატანილი აქვს."
-        }
+        {locale === "en"
+          ? "The page you're looking for doesn't exist or has been moved."
+          : "ის გვერდი, რომელსაც ეძებთ, არ არსებობს ან გადატანილი აქვს."}
       </p>
     </div>
 
@@ -100,9 +102,7 @@ const content = contentByLocale[locale];
       aria-label={locale === "en" ? "Helpful links" : "სასარგებლო ბმულები"}
       class="w-full max-w-md"
     >
-      <p
-        class="mb-4 text-center text-sm font-medium tracking-wide text-text-secondary uppercase"
-      >
+      <p class="mb-4 text-center text-sm font-medium tracking-wide text-text-secondary uppercase">
         {content.tryText}
       </p>
       <ul class="flex flex-col gap-3">
@@ -142,9 +142,7 @@ const content = contentByLocale[locale];
               stroke-linecap="round"
               stroke-linejoin="round"
             >
-              <path
-                d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"
-              ></path>
+              <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"></path>
             </svg>
             {content.browse}
           </LinkButton>

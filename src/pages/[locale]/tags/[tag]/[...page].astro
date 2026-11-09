@@ -89,22 +89,20 @@ const pageContent = pageContentByLocale[locale as Lang];
       {`${pageContent.tagPrefix}${tag}`}
     </h1>
     <ul class="space-y-6">
-      {
-        page.data
-          .filter(item => item !== undefined)
-          .map(item => (
-            <PostSummaryCard
-              title={item.data.title}
-              description={item.data.description}
-              pubDatetime={item.data.pubDatetime}
-              modDatetime={item.data.modDatetime}
-              timezone={item.data.timezone}
-              slug={getLastPathSegment(item.slug)}
-              isFallback={item.isFallback}
-              originalLocale={item.originalLocale}
-            />
-          ))
-      }
+      {page.data
+        .filter(item => item !== undefined)
+        .map(item => (
+          <PostSummaryCard
+            title={item.data.title}
+            description={item.data.description}
+            pubDatetime={item.data.pubDatetime}
+            modDatetime={item.data.modDatetime}
+            timezone={item.data.timezone}
+            slug={getLastPathSegment(item.slug)}
+            isFallback={item.isFallback}
+            originalLocale={item.originalLocale}
+          />
+        ))}
     </ul>
   </Main>
 

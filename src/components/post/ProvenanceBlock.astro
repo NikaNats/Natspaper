@@ -18,33 +18,28 @@ const bibtex = `@article{nats_${slug},
 }`;
 ---
 
-<div
-  class="provenance-block my-8 rounded-lg border border-border bg-subtle p-4 text-xs text-text-secondary"
->
-  <div
-    class="mb-3 flex flex-wrap justify-between gap-2 border-b border-border pb-3"
-  >
-    <span
-      >Published: <time datetime={pubDate.toISOString()}
-        >{pubDate.toLocaleDateString("en-US", { dateStyle: "long" })}</time
-      ></span
-    >
-    {
-      modDate && (
-        <span>
-          Substantial Revision:{" "}
-          <time datetime={modDate.toISOString()}>
-            {modDate.toLocaleDateString("en-US", { dateStyle: "long" })}
-          </time>
-        </span>
-      )
-    }
+<div class="provenance-block my-8 rounded-lg border border-border bg-subtle p-4 text-xs text-text-secondary">
+  <div class="mb-3 flex flex-wrap justify-between gap-2 border-b border-border pb-3">
+    <span>
+      Published:{" "}
+      <time datetime={pubDate.toISOString()}>
+        {pubDate.toLocaleDateString("en-US", { dateStyle: "long" })}
+      </time>
+    </span>
+    {modDate && (
+      <span>
+        Substantial Revision:{" "}
+        <time datetime={modDate.toISOString()}>
+          {modDate.toLocaleDateString("en-US", { dateStyle: "long" })}
+        </time>
+      </span>
+    )}
   </div>
 
   <div class="flex items-center justify-between">
-    <span class="font-semibold tracking-wider uppercase"
-      >Cite this treatise</span
-    >
+    <span class="font-semibold tracking-wider uppercase">
+      Cite this treatise
+    </span>
     <button
       class="copy-bibtex-btn rounded border border-border px-2.5 py-1 text-foreground hover:bg-muted focus-visible:outline-accent"
       data-bibtex={bibtex}

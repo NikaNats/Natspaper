@@ -62,9 +62,7 @@ const formattedDate = formatDate(datetime.toDate(), currentLocale, "short");
     class:list={["inline-block size-5 min-w-5", { "scale-90": size === "sm" }]}
   />
 
-  {
-    /* REFACTORED: Apply sizing classes to a single parent span to avoid repetition (DRY principle). */
-  }
+  {/* REFACTORED: Apply sizing classes to a single parent span to avoid repetition (DRY principle). */}
   <span class:list={["text-sm", { "sm:text-base": size === "lg" }]}>
     {isModified && `${t("post.updated")} `}
     <time datetime={datetime.toISOString()}>{formattedDate}</time>

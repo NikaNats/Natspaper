@@ -94,34 +94,30 @@ const heroContent = heroContentByLocale[
       profileAlt={locale === "en" ? "Nika Natsvlishvili" : "ნიკა ნაცვლიშვილი"}
       techStack={heroContent.techStack}
     >
-      {
-        socials.length > 0 && (
-          <div slot="socials">
-            <Socials links={socials} />
-          </div>
-        )
-      }
+      {socials.length > 0 && (
+        <div slot="socials">
+          <Socials links={socials} />
+        </div>
+      )}
     </Hero>
 
-    {
-      featuredPosts.length > 0 && (
-        <section
-          id="featured-posts"
-          class="w-full pt-[clamp(4rem,10vh,7.5rem)] pb-[clamp(2.5rem,8vh,5rem)]"
-        >
-          <h2 class="mb-6 text-2xl font-bold">{t("hero.featuredPosts")}</h2>
-          <ul class="grid gap-4 sm:grid-cols-2">
-            {featuredPosts.map(({ data, id, body }) => (
-              <FeaturedPostCard
-                href={getPostUrl(locale, id)}
-                frontmatter={data}
-                body={body}
-              />
-            ))}
-          </ul>
-        </section>
-      )
-    }
+    {featuredPosts.length > 0 && (
+      <section
+        id="featured-posts"
+        class="w-full pt-[clamp(4rem,10vh,7.5rem)] pb-[clamp(2.5rem,8vh,5rem)]"
+      >
+        <h2 class="mb-6 text-2xl font-bold">{t("hero.featuredPosts")}</h2>
+        <ul class="grid gap-4 sm:grid-cols-2">
+          {featuredPosts.map(({ data, id, body }) => (
+            <FeaturedPostCard
+              href={getPostUrl(locale, id)}
+              frontmatter={data}
+              body={body}
+            />
+          ))}
+        </ul>
+      </section>
+    )}
   </main>
   <Footer />
 </Layout>

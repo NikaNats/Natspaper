@@ -86,35 +86,25 @@ const {
         {name}
       </h1>
 
-      <p class="hero__tagline">
-        {tagline}
-      </p>
+      <p class="hero__tagline">{tagline}</p>
 
-      {
-        additionalContent.map(content => (
-          <p
-            class="hero__description hero__description--additional"
-            set:html={content}
-          />
-        ))
-      }
+      {additionalContent.map(content => (
+        <p
+          class="hero__description hero__description--additional"
+          set:html={content}
+        />
+      ))}
 
       <!-- Tech Stack Pills -->
-      {
-        techStack.length > 0 && (
-          <div
-            class="hero__tech-stack"
-            role="list"
-            aria-label="Technology stack"
-          >
-            {techStack.map(tech => (
-              <span class="hero__tech-pill" role="listitem">
-                {tech}
-              </span>
-            ))}
-          </div>
-        )
-      }
+      {techStack.length > 0 && (
+        <div class="hero__tech-stack" role="list" aria-label="Technology stack">
+          {techStack.map(tech => (
+            <span class="hero__tech-pill" role="listitem">
+              {tech}
+            </span>
+          ))}
+        </div>
+      )}
 
       <!-- Social Links Slot -->
       <div class="hero__socials">

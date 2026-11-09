@@ -24,14 +24,12 @@ const PUBLIC_GOOGLE_SITE_VERIFICATION = import.meta.env
     <meta name="robots" content="noindex, nofollow" />
 
     <!-- FIX: This is what Google Search Console is looking for -->
-    {
-      PUBLIC_GOOGLE_SITE_VERIFICATION && (
-        <meta
-          name="google-site-verification"
-          content={PUBLIC_GOOGLE_SITE_VERIFICATION}
-        />
-      )
-    }
+    {PUBLIC_GOOGLE_SITE_VERIFICATION && (
+      <meta
+        name="google-site-verification"
+        content={PUBLIC_GOOGLE_SITE_VERIFICATION}
+      />
+    )}
 
     <!-- 1. Canonical: Tells Google "The real content is at /en/" -->
     <link rel="canonical" href={destination} />

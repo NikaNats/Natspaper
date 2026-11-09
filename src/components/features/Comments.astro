@@ -51,28 +51,26 @@ const giscusLang = SUPPORTED_GISCUS_LANGS.has(locale) ? locale : "en";
 const siteWebsite = SITE.website.replace(/\/$/, "");
 ---
 
-{
-  isEnabled && (
-    <div
-      class="giscus-wrapper"
-      data-giscus-repo={GISCUS.repo}
-      data-giscus-repo-id={GISCUS.repoId}
-      data-giscus-category={GISCUS.category}
-      data-giscus-category-id={GISCUS.categoryId}
-      data-giscus-mapping={GISCUS.mapping}
-      data-giscus-reactions-enabled={GISCUS.reactionsEnabled ? "1" : "0"}
-      data-giscus-emit-metadata={GISCUS.emitMetadata ? "1" : "0"}
-      data-giscus-input-position={GISCUS.inputPosition}
-      data-giscus-lang={giscusLang}
-      data-giscus-loading={GISCUS.loading}
-      data-site-url={siteWebsite}
-      data-giscus-dark-url={giscusDarkUrl}
-      data-giscus-light-url={giscusLightUrl}
-    >
-      <div class="giscus" />
-    </div>
-  )
-}
+{isEnabled && (
+  <div
+    class="giscus-wrapper"
+    data-giscus-repo={GISCUS.repo}
+    data-giscus-repo-id={GISCUS.repoId}
+    data-giscus-category={GISCUS.category}
+    data-giscus-category-id={GISCUS.categoryId}
+    data-giscus-mapping={GISCUS.mapping}
+    data-giscus-reactions-enabled={GISCUS.reactionsEnabled ? "1" : "0"}
+    data-giscus-emit-metadata={GISCUS.emitMetadata ? "1" : "0"}
+    data-giscus-input-position={GISCUS.inputPosition}
+    data-giscus-lang={giscusLang}
+    data-giscus-loading={GISCUS.loading}
+    data-site-url={siteWebsite}
+    data-giscus-dark-url={giscusDarkUrl}
+    data-giscus-light-url={giscusLightUrl}
+  >
+    <div class="giscus" />
+  </div>
+)}
 
 <script is:inline>
   /**

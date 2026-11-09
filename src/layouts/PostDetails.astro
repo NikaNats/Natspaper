@@ -172,42 +172,40 @@ const uiLangTag = toBcp47(locale);
       <Breadcrumb items={breadcrumbItems} class="mb-4" />
 
       <!-- Language-availability notice: role=note landmark, tagged with the UI locale -->
-      {
-        isFallback && (
-          <aside
-            role="note"
-            aria-label="Language availability notice"
-            lang={uiLangTag}
-            class="fallback-disclaimer mx-auto my-4 mb-8 max-w-app rounded-lg border border-border bg-subtle p-4 text-sm"
+      {isFallback && (
+        <aside
+          role="note"
+          aria-label="Language availability notice"
+          lang={uiLangTag}
+          class="fallback-disclaimer mx-auto my-4 mb-8 max-w-app rounded-lg border border-border bg-subtle p-4 text-sm"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="size-5 shrink-0"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              class="size-5 shrink-0"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              aria-hidden="true"
-            >
-              <circle cx="12" cy="12" r="10" />
-              <line x1="12" y1="16" x2="12" y2="12" />
-              <line x1="12" y1="8" x2="12.01" y2="8" />
-            </svg>
-            <p class="font-semibold text-foreground">
-              {locale === "ka"
-                ? "სტატია ხელმისაწვდომია მხოლოდ ინგლისურ ენაზე"
-                : "Article only available in English"}
-            </p>
-            <p class="mt-1 text-text-secondary">
-              {locale === "ka"
-                ? "თქვენ იმყოფებით ქართულენოვან ინტერფეისში, თუმცა წინამდებარე პუბლიკაცია წარმოდგენილია ორიგინალ ენაზე."
-                : "Site navigation remains in your selected language, but the body content is served in the original language."}
-            </p>
-          </aside>
-        )
-      }
+            <circle cx="12" cy="12" r="10" />
+            <line x1="12" y1="16" x2="12" y2="12" />
+            <line x1="12" y1="8" x2="12.01" y2="8" />
+          </svg>
+          <p class="font-semibold text-foreground">
+            {locale === "ka"
+              ? "სტატია ხელმისაწვდომია მხოლოდ ინგლისურ ენაზე"
+              : "Article only available in English"}
+          </p>
+          <p class="mt-1 text-text-secondary">
+            {locale === "ka"
+              ? "თქვენ იმყოფებით ქართულენოვან ინტერფეისში, თუმცა წინამდებარე პუბლიკაცია წარმოდგენილია ორიგინალ ენაზე."
+              : "Site navigation remains in your selected language, but the body content is served in the original language."}
+          </p>
+        </aside>
+      )}
 
       <PostHero
         slug={post.slug}
@@ -223,35 +221,33 @@ const uiLangTag = toBcp47(locale);
         <MobileTableOfContents headings={headings} />
       </div>
 
-      {
-        seriesParts.length > 0 && (
-          <SeriesBox
-            seriesParts={seriesParts}
-            currentPostId={post.id}
-            locale={locale}
-          />
-        )
-      }
+      {seriesParts.length > 0 && (
+        <SeriesBox
+          seriesParts={seriesParts}
+          currentPostId={post.id}
+          locale={locale}
+        />
+      )}
 
       <PostContent contentLang={contentLang}>
         <Content />
       </PostContent>
 
-      {
-        post.data.references && post.data.references.length > 0 && (
-          <Bibliography references={post.data.references} locale={locale} />
-        )
-      }
+      {post.data.references && post.data.references.length > 0 && (
+        <Bibliography references={post.data.references} locale={locale} />
+      )}
 
       <ProvenanceBlock
         title={title}
         author={author}
         pubDate={pubDatetime}
         modDate={modDatetime}
-        canonicalUrl={typeof canonicalURL === "string"
-          ? canonicalURL
-          : ((canonicalURL as unknown as URL)?.toString?.() ??
-            new URL(Astro.url.pathname, SITE.website).href)}
+        canonicalUrl={
+          typeof canonicalURL === "string"
+            ? canonicalURL
+            : ((canonicalURL as unknown as URL)?.toString?.() ??
+              new URL(Astro.url.pathname, SITE.website).href)
+        }
         slug={(post.slug ?? post.id).replace(/\//g, "_")}
       />
 

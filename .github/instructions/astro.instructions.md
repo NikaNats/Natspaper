@@ -67,8 +67,9 @@ Prefer native Web Components encapsulated in `<script>` — **not** scattered li
 
 ```astro
 <mobile-menu>
-  <button slot="trigger" data-testid="menu-trigger">{i18n.t("nav.menu")}</button
-  >
+  <button slot="trigger" data-testid="menu-trigger">
+    {i18n.t("nav.menu")}
+  </button>
 </mobile-menu>
 
 <script>

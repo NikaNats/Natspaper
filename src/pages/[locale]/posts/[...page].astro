@@ -62,58 +62,50 @@ const pageContent = pageContentByLocale[locale];
 
 <Layout title={pageContent.title}>
   <!-- RFC 8288: Sequential Navigation Links for Crawlers and User Agents -->
-  {
-    page.url.prev && (
-      <link
-        slot="head"
-        rel="prev"
-        href={new URL(page.url.prev, Astro.site).href}
-      />
-    )
-  }
-  {
-    page.url.next && (
-      <link
-        slot="head"
-        rel="next"
-        href={new URL(page.url.next, Astro.site).href}
-      />
-    )
-  }
+  {page.url.prev && (
+    <link
+      slot="head"
+      rel="prev"
+      href={new URL(page.url.prev, Astro.site).href}
+    />
+  )}
+  {page.url.next && (
+    <link
+      slot="head"
+      rel="next"
+      href={new URL(page.url.next, Astro.site).href}
+    />
+  )}
   <Header />
   <Main
     pageTitle={pageContent.pageTitle}
     pageDesc={pageContent.pageDesc}
     width="app"
   >
-    {
-      /*
+    {/*
       Responsive Post Layout:
       - Single vertical column at all breakpoints for optimal readability
-      */
-    }
+      */}
     <ul class="flex flex-col gap-6">
-      {
-        page.data.map(item => {
-          // Calculate word count for reading time
-          const wordCount = item.body?.split(/\s+/).length || 0;
-          return (
-            <PostSummaryCard
-              title={item.data.title}
-              description={item.data.description}
-              pubDatetime={item.data.pubDatetime}
-              modDatetime={item.data.modDatetime}
-              timezone={item.data.timezone}
-              slug={getLastPathSegment(item.slug)}
-              wordCount={wordCount}
-              tags={item.data.tags}
-              featured={item.data.featured}
-              isFallback={item.isFallback}
-              originalLocale={item.originalLocale}
-            />
-          );
-        })
-      }
+      {page.data.map(item => {
+        // Calculate word count for reading time
+        const wordCount = item.body?.split(/\s+/).length || 0;
+        return (
+          <PostSummaryCard
+            title={item.data.title}
+            description={item.data.description}
+            pubDatetime={item.data.pubDatetime}
+            modDatetime={item.data.modDatetime}
+            timezone={item.data.timezone}
+            slug={getLastPathSegment(item.slug)}
+            wordCount={wordCount}
+            tags={item.data.tags}
+            featured={item.data.featured}
+            isFallback={item.isFallback}
+            originalLocale={item.originalLocale}
+          />
+        );
+      })}
     </ul>
   </Main>
 
