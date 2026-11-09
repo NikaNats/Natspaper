@@ -89,11 +89,30 @@ if (htmlFiles.length === 0) {
 const scriptHashes = new Set();
 const styleHashes = new Set();
 
+// Inline *module* scripts make Astro's ClientRouter inject a
+// `data:application/javascript,` sentinel, which this CSP (no `data:` in
+// script-src) blocks. Fail the build rather than ship broken navigation.
+const inlineModuleRegex = /<script(?![^>]*\ssrc=)[^>]*\stype=["']?module["']?[^>]*>/i;
+const inlineModuleOffenders = [];
+
 for (const file of htmlFiles) {
   const html = fs.readFileSync(file, "utf8");
+  if (inlineModuleRegex.test(html.replace(/<!--[\s\S]*?-->/g, ""))) {
+    inlineModuleOffenders.push(path.relative(projectRoot, file));
+  }
   const { scripts, styles } = extractInlineContents(html);
   scripts.forEach(s => scriptHashes.add(cspHash(s)));
   styles.forEach(s => styleHashes.add(cspHash(s)));
+}
+
+if (inlineModuleOffenders.length > 0) {
+  console.error(
+    `❌ ${inlineModuleOffenders.length} HTML file(s) contain inline <script type="module">, ` +
+      `which requires 'data:' in script-src for Astro's ClientRouter.\n` +
+      `   Keep processed scripts external (config/vite.ts assetsInlineLimit) or use is:inline.\n` +
+      inlineModuleOffenders.slice(0, 10).map(f => `   - ${f}`).join("\n")
+  );
+  process.exit(1);
 }
 
 console.log(`🔐 CSP Hash Generation`);
@@ -102,15 +121,14 @@ console.log(`   Unique script hashes: ${scriptHashes.size}`);
 console.log(`   Unique style hashes: ${styleHashes.size}`);
 
 // ── 5. Build new CSP ────────────────────────────────────────────────
-// script-src: strictly hash-based for all inline scripts. `data:` is
-// required by Astro's ClientRouter, which re-executes swapped module
-// scripts via an empty `data:application/javascript,` URI during
-// client-side navigation. (Tradeoff: data: URIs widen the script source
-// surface — acceptable here because inline scripts remain hash-gated.)
+// script-src: hash-gated inline scripts + same-origin files. No `data:`:
+// it would let any injected `<script src="data:...">` run and defeat the
+// hashes. Astro's ClientRouter only needs `data:` for its inline-module
+// sentinel, which is never emitted because config/vite.ts keeps processed
+// scripts external (assetsInlineLimit) — enforced below.
 const scriptSrc = [
   ...scriptHashes,
   "'self'",
-  "data:",
   "https://giscus.app",
   "https://va.vercel-scripts.com",
 ].join(" ");
@@ -136,6 +154,7 @@ const newCsp = [
   "font-src 'self' data: https://fonts.gstatic.com",
   "connect-src 'self' https://giscus.app https://va.vercel-scripts.com https://vitals.vercel-insights.com",
   "frame-src https://giscus.app",
+  "object-src 'none'",
   "frame-ancestors 'none'",
   "base-uri 'self'",
   "form-action 'self'",
