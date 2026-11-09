@@ -9,6 +9,7 @@ import rehypeKatex from "rehype-katex";
 import { remarkModifiedTime } from "./src/lib/remark-modified-time.mjs";
 import { rehypeEagerFirstImage } from "./src/lib/rehype-eager-first-image.mjs";
 import vercel from "@astrojs/vercel";
+import { unified } from "@astrojs/markdown-remark";
 
 const siteUrl = process.env.SITE_WEBSITE || SITE.website;
 
@@ -32,23 +33,27 @@ export default defineConfig({
   integrations: getIntegrations(),
 
   markdown: {
-    remarkPlugins: [remarkModifiedTime, remarkMath],
-    rehypePlugins: [
-      [
-        rehypeKatex,
-        {
-          // Output only pure W3C MathML Core markup (<math>, <mrow>, <mfrac>, etc.)
-          // Suppresses all legacy .katex-html DOM overhead
-          output: "mathml",
-          strict: true,
-          throwOnError: false,
-        },
+    // Keep the remark/rehype pipeline (KaTeX + custom plugins); Astro 7.4
+    // deprecated top-level `markdown.*Plugins` in favour of a processor.
+    processor: unified({
+      remarkPlugins: [remarkModifiedTime, remarkMath],
+      rehypePlugins: [
+        [
+          rehypeKatex,
+          {
+            // Output only pure W3C MathML Core markup (<math>, <mrow>, <mfrac>, etc.)
+            // Suppresses all legacy .katex-html DOM overhead
+            output: "mathml",
+            strict: true,
+            throwOnError: false,
+          },
+        ],
+        // First content image per document is the LCP candidate: eager + high
+        // priority. Must run as a rehype plugin (hast <img> nodes) so Markdown
+        // authors get correct loading without dropping into raw HTML.
+        rehypeEagerFirstImage,
       ],
-      // First content image per document is the LCP candidate: eager + high
-      // priority. Must run as a rehype plugin (hast <img> nodes) so Markdown
-      // authors get correct loading without dropping into raw HTML.
-      rehypeEagerFirstImage,
-    ],
+    }),
   },
 
   vite: getViteConfig(),
