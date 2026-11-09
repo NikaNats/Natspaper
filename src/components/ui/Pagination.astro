@@ -26,42 +26,40 @@ const {
 const { t } = getI18n(Astro.currentLocale as Lang);
 ---
 
-{
-  totalPages > 1 && (
-    <nav
-      class:list={[
-        "mt-auto mb-8 flex items-center justify-center gap-4",
-        className,
-      ]}
-      aria-label="Pagination"
-      data-testid="pagination"
+{totalPages > 1 && (
+  <nav
+    class:list={[
+      "mt-auto mb-8 flex items-center justify-center gap-4",
+      className,
+    ]}
+    aria-label="Pagination"
+    data-testid="pagination"
+  >
+    {/* SEO: rel="prev" tells search engines about pagination sequence */}
+    <LinkButton
+      href={prevUrl}
+      class:list={["select-none", { "opacity-50": !prevUrl }]}
+      ariaLabel={t("pagination.previousPage")}
+      rel={prevUrl ? "prev" : undefined}
     >
-      {/* SEO: rel="prev" tells search engines about pagination sequence */}
-      <LinkButton
-        href={prevUrl}
-        class:list={["select-none", { "opacity-50": !prevUrl }]}
-        ariaLabel={t("pagination.previousPage")}
-        rel={prevUrl ? "prev" : undefined}
-      >
-        <IconArrowLeft class="inline-block rtl:rotate-180" />
-        {t("pagination.prev")}
-      </LinkButton>
+      <IconArrowLeft class="inline-block rtl:rotate-180" />
+      {t("pagination.prev")}
+    </LinkButton>
 
-      {/* IMPROVED UX: The text is now more descriptive and accessible. */}
-      <span class="text-sm text-text-secondary">
-        {t("pagination.pageOf", { current: currentPage, total: totalPages })}
-      </span>
+    {/* IMPROVED UX: The text is now more descriptive and accessible. */}
+    <span class="text-sm text-text-secondary">
+      {t("pagination.pageOf", { current: currentPage, total: totalPages })}
+    </span>
 
-      {/* SEO: rel="next" tells search engines about pagination sequence */}
-      <LinkButton
-        href={nextUrl}
-        class:list={["select-none", { "opacity-50": !nextUrl }]}
-        ariaLabel={t("pagination.nextPage")}
-        rel={nextUrl ? "next" : undefined}
-      >
-        {t("pagination.next").replace("→", "").trim()}
-        <IconArrowRight class="inline-block rtl:rotate-180" />
-      </LinkButton>
-    </nav>
-  )
-}
+    {/* SEO: rel="next" tells search engines about pagination sequence */}
+    <LinkButton
+      href={nextUrl}
+      class:list={["select-none", { "opacity-50": !nextUrl }]}
+      ariaLabel={t("pagination.nextPage")}
+      rel={nextUrl ? "next" : undefined}
+    >
+      {t("pagination.next").replace("→", "").trim()}
+      <IconArrowRight class="inline-block rtl:rotate-180" />
+    </LinkButton>
+  </nav>
+)}

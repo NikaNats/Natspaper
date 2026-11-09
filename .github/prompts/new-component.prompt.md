@@ -60,9 +60,7 @@ const { locale } = Astro.props;
 const i18n = getI18n(locale);
 ---
 
-<custom-element data-testid="<component-name>">
-  <!-- markup -->
-</custom-element>
+<custom-element data-testid="<component-name>"><!-- markup --></custom-element>
 
 <script>
   class CustomElement extends HTMLElement {

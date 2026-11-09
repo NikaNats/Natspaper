@@ -28,66 +28,60 @@ const currentIndex = seriesParts.findIndex(p => p.post.id === currentPostId);
       {t("post.series")}
     </span>
 
-    <h2 class="mt-1 text-xl font-bold text-foreground">
-      {seriesData?.title}
-    </h2>
+    <h2 class="mt-1 text-xl font-bold text-foreground">{seriesData?.title}</h2>
 
     <p class="text-sm text-text-secondary">
-      {
-        t("post.seriesPartOf", {
-          current: currentIndex + 1,
-          total: seriesParts.length,
-        })
-      }
+      {t("post.seriesPartOf", {
+        current: currentIndex + 1,
+        total: seriesParts.length,
+      })}
     </p>
   </div>
 
   <nav class="px-4 pt-4 pb-4" aria-label="Series parts">
     <ul class="space-y-1">
-      {
-        seriesParts.map((part, index) => {
-          const isCurrent = part.post.id === currentPostId;
-          const slug = getLastPathSegment(part.post.slug);
-          // The current part is not a link: an <a> without href is not
-          // keyboard-focusable as a link and fails anchor audits. A plain
-          // <span> with aria-current keeps the list semantics intact.
-          const itemClasses = [
-            "no-underline",
-            "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all",
-            isCurrent
-              ? "cursor-default bg-accent/10 font-semibold text-accent"
-              : "text-text-secondary hover:bg-muted hover:text-foreground",
-          ];
-          const badgeClasses = [
-            "flex h-5 w-5 shrink-0 items-center justify-center rounded-full border text-[10px] transition-colors",
-            isCurrent ? "border-accent bg-accent text-white" : "border-border",
-          ];
+      {seriesParts.map((part, index) => {
+        const isCurrent = part.post.id === currentPostId;
+        const slug = getLastPathSegment(part.post.slug);
+        // The current part is not a link: an <a> without href is not
+        // keyboard-focusable as a link and fails anchor audits. A plain
+        // <span> with aria-current keeps the list semantics intact.
+        const itemClasses = [
+          "no-underline",
+          "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all",
+          isCurrent
+            ? "cursor-default bg-accent/10 font-semibold text-accent"
+            : "text-text-secondary hover:bg-muted hover:text-foreground",
+        ];
+        const badgeClasses = [
+          "flex h-5 w-5 shrink-0 items-center justify-center rounded-full border text-[10px] transition-colors",
+          isCurrent ? "border-accent bg-accent text-white" : "border-border",
+        ];
 
-          return (
-            <li>
-              {isCurrent ? (
-                <span class:list={itemClasses} aria-current="page">
-                  <span class:list={badgeClasses}>{index + 1}</span>
-                  <span class="flex-1 truncate">{part.post.data.title}</span>
-                  <span class="text-[9px] tracking-widest uppercase opacity-60">
-                    Current
-                  </span>
+        return (
+          <li>
+            {isCurrent ? (
+              <span class:list={itemClasses} aria-current="page">
+                <span class:list={badgeClasses}>{index + 1}</span>
+                <span class="flex-1 truncate">{part.post.data.title}</span>
+                <span class="text-[9px] tracking-widest uppercase opacity-60">
+                  Current
                 </span>
-              ) : (
-                <a href={`/${locale}/posts/${slug}`} class:list={itemClasses}>
-                  <span class:list={badgeClasses}>{index + 1}</span>
-                  <span class="flex-1 truncate">{part.post.data.title}</span>
-                  {part.isFallback && (
-                    <span class="rounded border border-amber-500/50 bg-amber-500/5 px-1.5 py-0.5 text-[9px] font-bold text-amber-600 uppercase">
-                      {part.originalLocale}
-                    </span>
-                  )}
-                </a>
-              )}
-            </li>
-          );
-        })
-      }
+              </span>
+            ) : (
+              <a href={`/${locale}/posts/${slug}`} class:list={itemClasses}>
+                <span class:list={badgeClasses}>{index + 1}</span>
+                <span class="flex-1 truncate">{part.post.data.title}</span>
+                {part.isFallback && (
+                  <span class="rounded border border-amber-500/50 bg-amber-500/5 px-1.5 py-0.5 text-[9px] font-bold text-amber-600 uppercase">
+                    {part.originalLocale}
+                  </span>
+                )}
+              </a>
+            )}
+          </li>
+        );
+      })}
     </ul>
   </nav>
 </section>

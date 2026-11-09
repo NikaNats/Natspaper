@@ -70,17 +70,17 @@ const hiddenTagsCount = tags.length - MAX_TAGS;
       <div
         class="featured-card__orb featured-card__orb--primary"
         aria-hidden="true"
-      >
-      </div>
+      ></div>
       <div
         class="featured-card__orb featured-card__orb--secondary"
         aria-hidden="true"
-      >
-      </div>
+      ></div>
 
       {/* Featured ribbon */}
       <div class="featured-card__ribbon">
-        <span class="featured-card__ribbon-icon" aria-hidden="true">⭐</span>
+        <span class="featured-card__ribbon-icon" aria-hidden="true">
+          ⭐
+        </span>
         <span class="featured-card__ribbon-text">Featured</span>
       </div>
 
@@ -101,27 +101,23 @@ const hiddenTagsCount = tags.length - MAX_TAGS;
         </div>
 
         {/* Description */}
-        <p class="featured-card__description">
-          {description}
-        </p>
+        <p class="featured-card__description">{description}</p>
 
         {/* Tags */}
-        {
-          visibleTags.length > 0 && (
-            <div class="featured-card__tags" role="list" aria-label="Post tags">
-              {visibleTags.map((tag: string) => (
-                <span class="featured-card__tag" role="listitem">
-                  #{tag}
-                </span>
-              ))}
-              {hiddenTagsCount > 0 && (
-                <span class="featured-card__tag-overflow">
-                  +{hiddenTagsCount}
-                </span>
-              )}
-            </div>
-          )
-        }
+        {visibleTags.length > 0 && (
+          <div class="featured-card__tags" role="list" aria-label="Post tags">
+            {visibleTags.map((tag: string) => (
+              <span class="featured-card__tag" role="listitem">
+                #{tag}
+              </span>
+            ))}
+            {hiddenTagsCount > 0 && (
+              <span class="featured-card__tag-overflow">
+                +{hiddenTagsCount}
+              </span>
+            )}
+          </div>
+        )}
 
         {/* Read more indicator */}
         <div class="featured-card__cta">

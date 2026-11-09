@@ -196,14 +196,12 @@ if (isBlogPost && pubDatetime) {
       href={new URL(`${currentLocale}/atom.xml`, Astro.site)}
     />
 
-    {
-      PUBLIC_GOOGLE_SITE_VERIFICATION && (
-        <meta
-          name="google-site-verification"
-          content={PUBLIC_GOOGLE_SITE_VERIFICATION}
-        />
-      )
-    }
+    {PUBLIC_GOOGLE_SITE_VERIFICATION && (
+      <meta
+        name="google-site-verification"
+        content={PUBLIC_GOOGLE_SITE_VERIFICATION}
+      />
+    )}
 
     <!-- Enable View Transitions -->
     <slot name="head" />
@@ -212,7 +210,10 @@ if (isBlogPost && pubDatetime) {
 
   <body>
     <!-- WCAG 2.4.1: Skip to Main Content link for keyboard navigation -->
-    <a href="#main-content" class="skip-link"> {t("nav.skipToContent")} </a>
+    <a href="#main-content" class="skip-link">
+      {" "}
+      {t("nav.skipToContent")}{" "}
+    </a>
 
     <slot />
 

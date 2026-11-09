@@ -7,40 +7,38 @@ const { headings } = Astro.props;
 const toc = headings.filter(h => h.depth >= 2 && h.depth <= 3);
 ---
 
-{
-  toc.length > 0 && (
-    <div class="mobile-toc-container mb-8 min-[81rem]:hidden">
-      <details
-        id="mobile-toc-details"
-        class="group rounded-xl border border-border bg-subtle p-3"
-      >
-        <summary class="flex min-h-[48px] cursor-pointer list-none items-center justify-between px-2 font-semibold text-foreground focus-visible:outline-accent [&::-webkit-details-marker]:hidden">
-          <span>On this page</span>
-          <span
-            class="chevron transition-transform group-open:rotate-90"
-            aria-hidden="true"
-          >
-            ›
-          </span>
-        </summary>
-        <nav class="px-2 pt-3 pb-2" aria-label="Table of contents">
-          <ul class="flex flex-col gap-2">
-            {toc.map(heading => (
-              <li class:list={[{ "ps-4": heading.depth === 3 }]}>
-                <a
-                  href={`#${heading.slug}`}
-                  class="mobile-toc-link block py-2 text-sm text-text-secondary no-underline hover:text-foreground focus-visible:outline-accent"
-                >
-                  {heading.text}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </nav>
-      </details>
-    </div>
-  )
-}
+{toc.length > 0 && (
+  <div class="mobile-toc-container mb-8 min-[81rem]:hidden">
+    <details
+      id="mobile-toc-details"
+      class="group rounded-xl border border-border bg-subtle p-3"
+    >
+      <summary class="flex min-h-[48px] cursor-pointer list-none items-center justify-between px-2 font-semibold text-foreground focus-visible:outline-accent [&::-webkit-details-marker]:hidden">
+        <span>On this page</span>
+        <span
+          class="chevron transition-transform group-open:rotate-90"
+          aria-hidden="true"
+        >
+          ›
+        </span>
+      </summary>
+      <nav class="px-2 pt-3 pb-2" aria-label="Table of contents">
+        <ul class="flex flex-col gap-2">
+          {toc.map(heading => (
+            <li class:list={[{ "ps-4": heading.depth === 3 }]}>
+              <a
+                href={`#${heading.slug}`}
+                class="mobile-toc-link block py-2 text-sm text-text-secondary no-underline hover:text-foreground focus-visible:outline-accent"
+              >
+                {heading.text}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+    </details>
+  </div>
+)}
 
 <script>
   function setupMobileToc() {

@@ -23,10 +23,10 @@ const mockRender = vi.fn(() => ({
 }));
 
 vi.mock("@resvg/resvg-js", () => {
-  const MockResvg = vi.fn(() => ({
-    render: mockRender,
-    free: mockFree,
-  }));
+  // Invoked with `new`, so it must be a regular function (not an arrow).
+  const MockResvg = vi.fn(function () {
+    return { render: mockRender, free: mockFree };
+  });
   return { Resvg: MockResvg };
 });
 
@@ -124,7 +124,8 @@ describe("generateOgImages — Memory Management & Error Recovery", () => {
     const result = await generateOgImageForPost(makeFakePost("ok"));
 
     expect(result).toBeInstanceOf(Uint8Array);
-    expect(result.length).toBeGreaterThan(0);
+    // The rendered bytes, not the 1x1 fallback PNG.
+    expect(Array.from(result)).toEqual([0x89, 0x50, 0x4e, 0x47]);
   });
 
   it("calls postOgImage template with the post object", async () => {

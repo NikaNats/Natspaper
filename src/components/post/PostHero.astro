@@ -38,7 +38,9 @@ const { slug, title, pubDatetime, modDatetime, timezone, readingTimeText } =
   </h1>
   <div class="post-hero__meta">
     <Datetime {pubDatetime} {modDatetime} {timezone} size="sm" />
-    <span class="post-hero__divider" aria-hidden="true">/</span>
+    <span class="post-hero__divider" aria-hidden="true">
+      /
+    </span>
     <ReadingTime text={readingTimeText} size="sm" />
   </div>
 </header>

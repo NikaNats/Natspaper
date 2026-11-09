@@ -124,13 +124,11 @@ const IconComponent = icons[name];
 const isHidden = ariaHidden ?? !ariaLabel;
 ---
 
-{
-  IconComponent && (
-    <IconComponent
-      class:list={["inline-block shrink-0", sizeClasses[size], className]}
-      aria-hidden={isHidden}
-      aria-label={ariaLabel}
-      role={ariaLabel ? "img" : undefined}
-    />
-  )
-}
+{IconComponent && (
+  <IconComponent
+    class:list={["inline-block shrink-0", sizeClasses[size], className]}
+    aria-hidden={isHidden}
+    aria-label={ariaLabel}
+    role={ariaLabel ? "img" : undefined}
+  />
+)}

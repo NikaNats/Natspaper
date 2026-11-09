@@ -32,42 +32,40 @@ const { t } = getI18n(locale as Lang);
   </h2>
 
   <ol class="list-none space-y-4 p-0">
-    {
-      references.map((ref: Reference, index: number) => (
-        <li id={`ref-${ref.id}`} class="flex gap-3 text-sm text-text-secondary">
-          <span class="font-mono text-accent select-none">[{index + 1}]</span>
-          <div class="flex-1">
-            <p class="inline text-foreground">
-              <span class="font-medium">{ref.author}</span> ({ref.year}).{" "}
-              <cite class="italic">{ref.title}</cite>. {ref.journal}
-            </p>
-            {ref.doi && (
-              <span class="mt-1 block font-mono text-xs">
-                DOI:{" "}
-                <a
-                  href={`https://doi.org/${ref.doi}`}
-                  class="text-accent underline"
-                >
-                  {ref.doi}
-                </a>
-              </span>
-            )}
-            {ref.url && (
-              <span class="mt-1 block text-xs">
-                <a
-                  href={ref.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="text-accent underline"
-                >
-                  {t("post.viewSource")}
-                </a>
-              </span>
-            )}
-          </div>
-        </li>
-      ))
-    }
+    {references.map((ref: Reference, index: number) => (
+      <li id={`ref-${ref.id}`} class="flex gap-3 text-sm text-text-secondary">
+        <span class="font-mono text-accent select-none">[{index + 1}]</span>
+        <div class="flex-1">
+          <p class="inline text-foreground">
+            <span class="font-medium">{ref.author}</span> ({ref.year}).{" "}
+            <cite class="italic">{ref.title}</cite>. {ref.journal}
+          </p>
+          {ref.doi && (
+            <span class="mt-1 block font-mono text-xs">
+              DOI:{" "}
+              <a
+                href={`https://doi.org/${ref.doi}`}
+                class="text-accent underline"
+              >
+                {ref.doi}
+              </a>
+            </span>
+          )}
+          {ref.url && (
+            <span class="mt-1 block text-xs">
+              <a
+                href={ref.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="text-accent underline"
+              >
+                {t("post.viewSource")}
+              </a>
+            </span>
+          )}
+        </div>
+      </li>
+    ))}
   </ol>
 </section>
 

@@ -7,33 +7,31 @@ const URL = Astro.url;
 const { t } = getI18n(Astro.currentLocale as Lang);
 ---
 
-{
-  SHARE_LINKS.length > 0 && (
-    <div class="flex flex-col items-center justify-center gap-2 sm:items-start">
-      <span class="text-xs font-medium tracking-wider text-text-secondary uppercase">
-        {t("post.shareThisPost")}
-      </span>
-      <div class="flex flex-wrap justify-center gap-1 sm:justify-start">
-        {SHARE_LINKS.map(social => {
-          const Icon = social.icon;
-          const linkTitle =
-            typeof social.linkTitle === "function"
-              ? social.linkTitle()
-              : social.linkTitle;
+{SHARE_LINKS.length > 0 && (
+  <div class="flex flex-col items-center justify-center gap-2 sm:items-start">
+    <span class="text-xs font-medium tracking-wider text-text-secondary uppercase">
+      {t("post.shareThisPost")}
+    </span>
+    <div class="flex flex-wrap justify-center gap-1 sm:justify-start">
+      {SHARE_LINKS.map(social => {
+        const Icon = social.icon;
+        const linkTitle =
+          typeof social.linkTitle === "function"
+            ? social.linkTitle()
+            : social.linkTitle;
 
-          return (
-            <LinkButton
-              href={`${social.href + URL}`}
-              class="p-2 text-text-secondary transition-all hover:text-accent mouse:hover:-translate-y-0.5"
-              title={linkTitle}
-              ariaLabel={linkTitle}
-            >
-              <Icon class="size-6" />
-              <span class="sr-only">{linkTitle}</span>
-            </LinkButton>
-          );
-        })}
-      </div>
+        return (
+          <LinkButton
+            href={`${social.href + URL}`}
+            class="p-2 text-text-secondary transition-all hover:text-accent mouse:hover:-translate-y-0.5"
+            title={linkTitle}
+            ariaLabel={linkTitle}
+          >
+            <Icon class="size-6" />
+            <span class="sr-only">{linkTitle}</span>
+          </LinkButton>
+        );
+      })}
     </div>
-  )
-}
+  </div>
+)}

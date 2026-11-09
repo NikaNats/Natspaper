@@ -95,6 +95,15 @@ const { t } = getI18n(locale as Lang);
 </style>
 
 <script>
+  // Prevent the page behind the open menu from scrolling. <html> sets
+  // overflow-x, so <body>'s overflow no longer propagates to the viewport and
+  // the root element is the real scroll container: lock both.
+  const setScrollLock = (locked: boolean) => {
+    const value = locked ? "hidden" : "";
+    document.documentElement.style.overflow = value;
+    document.body.style.overflow = value;
+  };
+
   // Define custom element to encapsulate logic naturally
   class MobileMenu extends HTMLElement {
     constructor() {
@@ -159,13 +168,11 @@ const { t } = getI18n(locale as Lang);
         overlay.setAttribute("data-state", state);
         openBtn.setAttribute("aria-expanded", isOpen.toString());
 
-        // Lock body scroll prevents background scrolling
+        setScrollLock(isOpen);
         if (isOpen) {
-          document.body.style.overflow = "hidden";
           // WCAG 2.4.3: Move focus to close button when menu opens
           requestAnimationFrame(() => closeBtn.focus());
         } else {
-          document.body.style.overflow = "";
           // Return focus to open button, but only if the element is still
           // connected (guard against page crash during View Transitions navigation)
           requestAnimationFrame(() => {
@@ -195,7 +202,7 @@ const { t } = getI18n(locale as Lang);
         link.addEventListener("click", () => {
           overlay.setAttribute("data-state", "closed");
           openBtn.setAttribute("aria-expanded", "false");
-          document.body.style.overflow = "";
+          setScrollLock(false);
         });
       });
 
@@ -236,6 +243,6 @@ const { t } = getI18n(locale as Lang);
     if (btn) {
       btn.setAttribute("aria-expanded", "false");
     }
-    document.body.style.overflow = "";
+    setScrollLock(false);
   });
 </script>

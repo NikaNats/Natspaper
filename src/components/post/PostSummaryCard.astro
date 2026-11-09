@@ -89,24 +89,20 @@ const hiddenTagsCount = tags.length - MAX_TAGS;
       ]}
     >
       {/* Featured Badge */}
-      {
-        featured && (
-          <div class="post-card__badge">
-            <span aria-hidden="true">✨</span>
-            <span>{t("post.featured")}</span>
-          </div>
-        )
-      }
+      {featured && (
+        <div class="post-card__badge">
+          <span aria-hidden="true">✨</span>
+          <span>{t("post.featured")}</span>
+        </div>
+      )}
 
       {/* Language Fallback Badge */}
-      {
-        isFallback && originalLocale && (
-          <div class="post-card__badge post-card__badge--language">
-            <span aria-hidden="true">🌍</span>
-            <span>{LANGUAGES[originalLocale]}</span>
-          </div>
-        )
-      }
+      {isFallback && originalLocale && (
+        <div class="post-card__badge post-card__badge--language">
+          <span aria-hidden="true">🌍</span>
+          <span>{LANGUAGES[originalLocale]}</span>
+        </div>
+      )}
 
       {/* Title */}
       <Heading
@@ -123,25 +119,21 @@ const hiddenTagsCount = tags.length - MAX_TAGS;
       </div>
 
       {/* Description */}
-      <p class="post-card__description">
-        {description}
-      </p>
+      <p class="post-card__description">{description}</p>
 
       {/* Tags */}
-      {
-        visibleTags.length > 0 && (
-          <div class="post-card__tags" role="list" aria-label="Post tags">
-            {visibleTags.map(tag => (
-              <span class="post-card__tag" role="listitem">
-                #{tag}
-              </span>
-            ))}
-            {hiddenTagsCount > 0 && (
-              <span class="post-card__tag-overflow">+{hiddenTagsCount}</span>
-            )}
-          </div>
-        )
-      }
+      {visibleTags.length > 0 && (
+        <div class="post-card__tags" role="list" aria-label="Post tags">
+          {visibleTags.map(tag => (
+            <span class="post-card__tag" role="listitem">
+              #{tag}
+            </span>
+          ))}
+          {hiddenTagsCount > 0 && (
+            <span class="post-card__tag-overflow">+{hiddenTagsCount}</span>
+          )}
+        </div>
+      )}
     </article>
   </a>
 </li>

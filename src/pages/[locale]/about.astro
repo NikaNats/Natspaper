@@ -57,7 +57,9 @@ const rawPhoneNumber = content.phone.replace(/[^\d+]/g, "");
         </div>
         <div class="about-hero-body">
           <p class="about-eyebrow">{content.eyebrow}</p>
-          <h1 id="about-name" class="about-name">{content.name}</h1>
+          <h1 id="about-name" class="about-name">
+            {content.name}
+          </h1>
           <p class="about-role">{content.role}</p>
 
           {/* ტელეფონის ნომერი: გარდაქმნილია კლიკებად tel: ბმულად */}
@@ -105,132 +107,132 @@ const rawPhoneNumber = content.phone.replace(/[^\d+]/g, "");
       {/* ── Stats ────────────────────────────────────────── */}
       <section aria-label={content.statsLabel}>
         <ul class="about-stats">
-          {
-            content.stats.map(s => (
-              <li class="about-stat">
-                <span class="about-stat-value">{s.value}</span>
-                <span class="about-stat-label">{s.label}</span>
-              </li>
-            ))
-          }
+          {content.stats.map(s => (
+            <li class="about-stat">
+              <span class="about-stat-value">{s.value}</span>
+              <span class="about-stat-label">{s.label}</span>
+            </li>
+          ))}
         </ul>
       </section>
 
       {/* ── Summary ──────────────────────────────────────── */}
       <section class="about-block" aria-labelledby="about-summary">
-        <h2 id="about-summary" class="about-h2">{content.summaryTitle}</h2>
+        <h2 id="about-summary" class="about-h2">
+          {content.summaryTitle}
+        </h2>
         <p class="about-lead">{content.summary}</p>
       </section>
 
       {/* ── Skills ───────────────────────────────────────── */}
       <section class="about-block" aria-labelledby="about-skills">
         <div class="about-head">
-          <h2 id="about-skills" class="about-h2">{content.skillsTitle}</h2>
+          <h2 id="about-skills" class="about-h2">
+            {content.skillsTitle}
+          </h2>
           <p class="about-sub">{content.skillsSub}</p>
         </div>
         <div class="about-grid-2">
-          {
-            content.skillGroups.map(g => (
-              <div class="about-card">
-                <h3 class="about-h3">{g.title}</h3>
-                <div class="about-pills">
-                  {g.items.map(item => (
-                    <span class="about-pill">{item}</span>
-                  ))}
-                </div>
+          {content.skillGroups.map(g => (
+            <div class="about-card">
+              <h3 class="about-h3">{g.title}</h3>
+              <div class="about-pills">
+                {g.items.map(item => (
+                  <span class="about-pill">{item}</span>
+                ))}
               </div>
-            ))
-          }
+            </div>
+          ))}
         </div>
       </section>
 
       {/* ── Experience ───────────────────────────────────── */}
       <section class="about-block" aria-labelledby="about-exp">
         <div class="about-head">
-          <h2 id="about-exp" class="about-h2">{content.expTitle}</h2>
+          <h2 id="about-exp" class="about-h2">
+            {content.expTitle}
+          </h2>
           <p class="about-sub">{content.expSub}</p>
         </div>
         <ol class="about-timeline">
-          {
-            content.jobs.map(job => (
-              <li class="about-job">
-                <span class="about-dot" aria-hidden="true" />
-                <article class="about-card about-job-card">
-                  <p class="about-period">{job.period}</p>
-                  <h3 class="about-h3">{job.role}</h3>
-                  <p class="about-company">{job.company}</p>
-                  <p class="about-meta">{job.location}</p>
-                  <ul class="about-points">
-                    {job.points.map(p => (
-                      <li>
-                        <strong>{p.title}:</strong> {p.text}
-                      </li>
-                    ))}
-                  </ul>
-                </article>
-              </li>
-            ))
-          }
+          {content.jobs.map(job => (
+            <li class="about-job">
+              <span class="about-dot" aria-hidden="true" />
+              <article class="about-card about-job-card">
+                <p class="about-period">{job.period}</p>
+                <h3 class="about-h3">{job.role}</h3>
+                <p class="about-company">{job.company}</p>
+                <p class="about-meta">{job.location}</p>
+                <ul class="about-points">
+                  {job.points.map(p => (
+                    <li>
+                      <strong>{p.title}:</strong> {p.text}
+                    </li>
+                  ))}
+                </ul>
+              </article>
+            </li>
+          ))}
         </ol>
       </section>
 
       {/* ── Education ────────────────────────────────────── */}
       <section class="about-block" aria-labelledby="about-edu">
-        <h2 id="about-edu" class="about-h2">{content.eduTitle}</h2>
+        <h2 id="about-edu" class="about-h2">
+          {content.eduTitle}
+        </h2>
         <div class="about-grid-2">
-          {
-            content.education.map(e => (
-              <article class="about-card">
-                <p class="about-period">{e.period}</p>
-                <h3 class="about-h3">{e.degree}</h3>
-                <p class="about-company">{e.school}</p>
-                {e.detail && <p class="about-meta">{e.detail}</p>}
-              </article>
-            ))
-          }
+          {content.education.map(e => (
+            <article class="about-card">
+              <p class="about-period">{e.period}</p>
+              <h3 class="about-h3">{e.degree}</h3>
+              <p class="about-company">{e.school}</p>
+              {e.detail && <p class="about-meta">{e.detail}</p>}
+            </article>
+          ))}
         </div>
       </section>
 
       {/* ── Certs ────────────────────────────────────────── */}
       <section class="about-block" aria-labelledby="about-certs">
         <div class="about-head">
-          <h2 id="about-certs" class="about-h2">{content.certsTitle}</h2>
+          <h2 id="about-certs" class="about-h2">
+            {content.certsTitle}
+          </h2>
           <p class="about-sub">{content.certsSub}</p>
         </div>
         <div class="about-grid-2">
-          {
-            content.certs.map(c => (
-              <a
-                class="about-card about-link-card"
-                href={c.href}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <span class="about-cert-name">
-                  {c.name}
-                  <span aria-hidden="true" class="about-ext">
-                    ↗
-                  </span>
+          {content.certs.map(c => (
+            <a
+              class="about-card about-link-card"
+              href={c.href}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <span class="about-cert-name">
+                {c.name}
+                <span aria-hidden="true" class="about-ext">
+                  ↗
                 </span>
-                <span class="about-meta">{c.desc}</span>
-              </a>
-            ))
-          }
+              </span>
+              <span class="about-meta">{c.desc}</span>
+            </a>
+          ))}
         </div>
       </section>
 
       {/* ── Award ────────────────────────────────────────── */}
       <section class="about-award" aria-labelledby="about-award">
         <p class="about-award-kicker">{content.awardOrg}</p>
-        <h2 id="about-award" class="about-h2">{content.awardTitle}</h2>
+        <h2 id="about-award" class="about-h2">
+          {content.awardTitle}
+        </h2>
         <ul class="about-points">
-          {
-            content.awardPoints.map(p => (
-              <li>
-                <strong>{p.title}:</strong> {p.text}
-              </li>
-            ))
-          }
+          {content.awardPoints.map(p => (
+            <li>
+              <strong>{p.title}:</strong> {p.text}
+            </li>
+          ))}
         </ul>
       </section>
     </div>

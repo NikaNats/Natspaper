@@ -23,69 +23,60 @@ const { t } = getI18n(locale);
   data-testid="nav-menu"
 >
   {/* Dynamically render main nav links from configuration */}
-  {
-    NAVIGATION.filter(link => link.href !== "/archives").map(link => (
-      <li>
-        <a
-          href={`/${locale}${link.href}`}
-          class:list={{
-            "active-nav text-accent": isActive(currentPath, link.href, locale),
-          }}
-          class="flex min-h-12 items-center rounded-md px-4 py-2 font-sans text-2xl font-bold tracking-wide text-foreground no-underline transition-colors hover:bg-muted hover:text-accent focus:outline-none md:min-h-9 md:px-2 md:py-1 md:text-sm md:font-medium md:tracking-normal"
-        >
-          {t(link.text as UIKey)} {/* Use i18n key from config */}
-        </a>
-      </li>
-    ))
-  }
-  {
-    FEATURES.showArchives && (
-      <li>
-        <LinkButton
-          href={`/${locale}/archives`}
-          class:list={[
-            "flex min-h-12 min-w-12 items-center justify-center rounded-md p-2 text-foreground transition-colors hover:bg-muted hover:text-accent focus:outline-none md:min-h-9 md:min-w-9 md:p-2.5",
-            {
-              "active-nav text-accent": isActive(
-                currentPath,
-                "/archives",
-                locale
-              ),
-            },
-          ]}
-          ariaLabel={t("nav.archives")}
-          title={t("nav.archives")}
-          data-testid="nav-archives"
-        >
-          <IconArchive class="size-7 md:size-5" aria-hidden="true" />
-          <span class="sr-only">{t("nav.archives")}</span>
-        </LinkButton>
-      </li>
-    )
-  }
-  {
-    FEATURES.lightAndDarkMode && (
-      <li>
-        <button
-          id="theme-btn"
-          data-testid="theme-toggle"
-          class="inline-flex min-h-12 min-w-12 items-center justify-center rounded-md p-2 text-foreground transition-colors hover:bg-muted hover:text-accent focus:outline-none md:min-h-9 md:min-w-9 md:p-2.5"
-          title="Toggle light & dark theme"
-          aria-label="Toggle theme"
-          aria-live="polite"
-        >
-          <IconMoon
-            class="hidden size-7 md:size-5 dark:block"
-            aria-hidden="true"
-          />
-          <IconSunHigh
-            class="size-7 md:size-5 dark:hidden"
-            aria-hidden="true"
-          />
-        </button>
-      </li>
-    )
-  }
+  {NAVIGATION.filter(link => link.href !== "/archives").map(link => (
+    <li>
+      <a
+        href={`/${locale}${link.href}`}
+        class:list={{
+          "active-nav text-accent": isActive(currentPath, link.href, locale),
+        }}
+        class="flex min-h-12 items-center rounded-md px-4 py-2 font-sans text-2xl font-bold tracking-wide text-foreground no-underline transition-colors hover:bg-muted hover:text-accent focus:outline-none md:min-h-9 md:px-2 md:py-1 md:text-sm md:font-medium md:tracking-normal"
+      >
+        {t(link.text as UIKey)} {/* Use i18n key from config */}
+      </a>
+    </li>
+  ))}
+  {FEATURES.showArchives && (
+    <li>
+      <LinkButton
+        href={`/${locale}/archives`}
+        class:list={[
+          "flex min-h-12 min-w-12 items-center justify-center rounded-md p-2 text-foreground transition-colors hover:bg-muted hover:text-accent focus:outline-none md:min-h-9 md:min-w-9 md:p-2.5",
+          {
+            "active-nav text-accent": isActive(
+              currentPath,
+              "/archives",
+              locale
+            ),
+          },
+        ]}
+        ariaLabel={t("nav.archives")}
+        title={t("nav.archives")}
+        data-testid="nav-archives"
+      >
+        <IconArchive class="size-7 md:size-5" aria-hidden="true" />
+        <span class="sr-only">{t("nav.archives")}</span>
+      </LinkButton>
+    </li>
+  )}
+  {FEATURES.lightAndDarkMode && (
+    <li>
+      <button
+        id="theme-btn"
+        data-testid="theme-toggle"
+        class="inline-flex min-h-12 min-w-12 items-center justify-center rounded-md p-2 text-foreground transition-colors hover:bg-muted hover:text-accent focus:outline-none md:min-h-9 md:min-w-9 md:p-2.5"
+        title="Toggle light & dark theme"
+        aria-label="Toggle theme"
+        aria-live="polite"
+      >
+        <IconMoon
+          class="hidden size-7 md:size-5 dark:block"
+          aria-hidden="true"
+        />
+        <IconSunHigh class="size-7 md:size-5 dark:hidden" aria-hidden="true" />
+      </button>
+    </li>
+  )}
   <li>
     <LanguagePicker links={otherLanguageLinks} />
   </li>

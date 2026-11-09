@@ -127,30 +127,26 @@ const layoutClass =
       <!-- Before title slot (breadcrumbs, back links, etc.) -->
       <slot name="before-title" />
 
-      {
-        !hideTitle &&
-          ("titleTransition" in props ? (
-            <h1 class="main-heading mb-6">
-              {props.pageTitle[0]}
-              <span transition:name={props.titleTransition}>
-                {props.pageTitle[1]}
-              </span>
-            </h1>
-          ) : (
-            <h1 class="main-heading mb-6">{props.pageTitle}</h1>
-          ))
-      }
+      {!hideTitle &&
+        ("titleTransition" in props ? (
+          <h1 class="main-heading mb-6">
+            {props.pageTitle[0]}
+            <span transition:name={props.titleTransition}>
+              {props.pageTitle[1]}
+            </span>
+          </h1>
+        ) : (
+          <h1 class="main-heading mb-6">{props.pageTitle}</h1>
+        ))}
 
       <!-- After title slot (metadata, reading time, etc.) -->
       <slot name="after-title" />
 
-      {
-        props.pageDesc && (
-          <p class="mb-8 text-lg leading-relaxed text-text-secondary">
-            {props.pageDesc}
-          </p>
-        )
-      }
+      {props.pageDesc && (
+        <p class="mb-8 text-lg leading-relaxed text-text-secondary">
+          {props.pageDesc}
+        </p>
+      )}
 
       <!-- Before content slot (author info, share buttons, etc.) -->
       <slot name="before-content" />
@@ -163,13 +159,11 @@ const layoutClass =
     </div>
 
     <!-- Sidebar slot for secondary content -->
-    {
-      hasSidebar && (
-        <aside class="main-sidebar">
-          <slot name="sidebar" />
-        </aside>
-      )
-    }
+    {hasSidebar && (
+      <aside class="main-sidebar">
+        <slot name="sidebar" />
+      </aside>
+    )}
   </div>
 </main>
 
