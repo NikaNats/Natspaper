@@ -13,10 +13,11 @@ import { test, expect, devices } from '@playwright/test';
  * - Accessibility (ARIA attributes, screen reader support)
  */
 
-// Set mobile viewport for these tests
-test.use({
-  ...devices['iPhone 12'],
-});
+// Emulate an iPhone 12 (viewport, touch, UA) on the project's own browser.
+// The device preset also sets `defaultBrowserType: 'webkit'`, which would
+// launch WebKit inside the chromium project; CI only installs Chromium.
+const { defaultBrowserType: _webkit, ...iPhone12 } = devices['iPhone 12'];
+test.use(iPhone12);
 
 test.describe('Mobile Menu - Interaction', () => {
   test.beforeEach(async ({ page }) => {
@@ -160,8 +161,11 @@ test.describe('Mobile Menu - Scroll Lock', () => {
     // Open menu
     await menuBtn.click();
 
-    // Attempt to scroll (should not work)
-    await page.evaluate(() => window.scrollBy(0, 100));
+    // Attempt a user scroll. `overflow: hidden` blocks user scrolling but,
+    // per CSSOM, still allows programmatic window.scrollBy(), so the lock
+    // must be exercised with a real wheel gesture.
+    await page.mouse.wheel(0, 100);
+    await page.waitForTimeout(100);
     const scrollAfterAttempt = await page.evaluate(() => window.scrollY);
 
     // Scroll should not have changed
@@ -323,26 +327,16 @@ test.describe('Mobile Menu - View Transitions', () => {
     await menuBtn.click();
     await expect(menuOverlay).toHaveAttribute('data-state', 'open');
 
-    // Get the first same-locale nav link's href for interception
+    // Click the link and read the menu state in the same synchronous task,
+    // i.e. before the router starts navigating. (Aborting the request instead
+    // made the router fall back to a full navigation to an error page, which
+    // raced the assertion.)
     const navLink = page.locator('#mobile-menu-overlay a').first();
-    const href = await navLink.getAttribute('href');
-
-    if (href && href !== '#') {
-      // Intercept the navigation so the page stays alive for the assertion.
-      // The click handler sets data-state="closed" synchronously before navigation.
-      await page.route(`**${href}**`, route => route.abort());
-
-      // Click may trigger a navigation error due to abort — ignore it
-      await navLink.click().catch(() => undefined);
-
-      // Menu JS click handler sets data-state="closed" synchronously;
-      // read it immediately, no navigation wait needed.
-      const dataState = await menuOverlay.getAttribute('data-state');
-      expect(dataState).not.toBe('open');
-
-      // Clean up route interception
-      await page.unroute(`**${href}**`);
-    }
+    const stateAfterClick = await navLink.evaluate((link: HTMLAnchorElement) => {
+      link.click();
+      return document.querySelector('#mobile-menu-overlay')?.getAttribute('data-state');
+    });
+    expect(stateAfterClick).toBe('closed');
   });
 
   test('should not leave menu stuck open after navigation', async ({ page }) => {
