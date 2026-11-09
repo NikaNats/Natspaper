@@ -152,7 +152,12 @@ test.describe('Mobile Menu - Scroll Lock', () => {
     expect(closedOverflow).not.toBe('hidden');
   });
 
-  test('should prevent background scrolling while menu is open', async ({ page }) => {
+  test('should prevent background scrolling while menu is open', async ({ page, browserName }) => {
+    // Playwright cannot send wheel events to WebKit when `isMobile` is set
+    // (the iPhone 12 preset above), so this gesture-based check runs on
+    // Chromium only. The overflow test above still covers WebKit.
+    test.skip(browserName === 'webkit', 'mouse.wheel is unsupported in mobile WebKit');
+
     const menuBtn = page.locator('#menu-btn');
 
     // Add a test to verify scroll position doesn't change

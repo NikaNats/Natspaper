@@ -45,7 +45,7 @@ const { t } = getI18n(locale as Lang);
               DOI:{" "}
               <a
                 href={`https://doi.org/${ref.doi}`}
-                class="text-accent underline"
+                class="inline-flex min-h-6 items-center text-accent underline"
               >
                 {ref.doi}
               </a>
@@ -57,7 +57,7 @@ const { t } = getI18n(locale as Lang);
                 href={ref.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                class="text-accent underline"
+                class="inline-flex min-h-6 items-center text-accent underline"
               >
                 {t("post.viewSource")}
               </a>
