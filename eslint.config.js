@@ -69,7 +69,6 @@ export default [
       ".vercel/**",
       ".sonda/**",
       "scripts/**",
-      "shims/**",
       "node_modules/**",
       "playwright-report/**",
       "test-results/**",

@@ -21,6 +21,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
+import zlib from "node:zlib";
 import { fileURLToPath } from "node:url";
 
 // ── CLI Argument Parsing ─────────────────────────────────────────────
@@ -449,8 +450,21 @@ try {
     const zstdSize = fs.statSync(htmlZst).size;
     const ratio = ((1 - zstdSize / rawSize) * 100).toFixed(1);
 
-    if (zstdSize < rawSize) {
-      addPass(`RFC 8878: en/index.html.zst exists (${zstdSize}B, ${ratio}% compression ratio)`);
+    // Decode with a real zstd decoder: a matching magic number alone is not
+    // proof (a deflate stream with a faked header once shipped here).
+    let decodesExactly = false;
+    try {
+      decodesExactly = zlib
+        .zstdDecompressSync(fs.readFileSync(htmlZst))
+        .equals(fs.readFileSync(uncompressedHtml));
+    } catch {
+      decodesExactly = false;
+    }
+
+    if (!decodesExactly) {
+      addError("RFC 8878: en/index.html.zst is not valid zstd of en/index.html");
+    } else if (zstdSize < rawSize) {
+      addPass(`RFC 8878: en/index.html.zst decodes losslessly (${zstdSize}B, ${ratio}% compression ratio)`);
     } else {
       addWarning("RFC 8878: .zst file is larger than uncompressed source");
     }

@@ -1,7 +1,6 @@
 allowBuilds:
   esbuild: true
   sharp: true
-  zstandard: true
 
 overrides:
   rollup: ">=4.59.0"

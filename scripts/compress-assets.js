@@ -10,7 +10,14 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { compress } from "@mongodb-js/zstandard";
+import { promisify } from "node:util";
+import zlib from "node:zlib";
+
+// Real RFC 8878 Zstandard via Node's built-in zlib binding (Node >= 22.15).
+// Replaces the former "@mongodb-js/zstandard" shim, which wrote a zstd magic
+// number in front of a *deflate* stream — not decodable as zstd by browsers.
+const zstdCompress = promisify(zlib.zstdCompress);
+const ZSTD_LEVEL = 19; // ultra-high ratio; fine for one-off static builds
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const distDir = path.resolve(__dirname, "../dist");
@@ -62,8 +69,12 @@ async function compressAll() {
     const rawBuffer = fs.readFileSync(file);
     if (rawBuffer.length < MIN_SIZE_BYTES) continue;
 
-    // Compress using Zstandard level 19 (Ultra-high compression for static assets)
-    const compressedBuffer = await compress(rawBuffer, 19);
+    const compressedBuffer = await zstdCompress(rawBuffer, {
+      params: {
+        [zlib.constants.ZSTD_c_compressionLevel]: ZSTD_LEVEL,
+        [zlib.constants.ZSTD_c_checksumFlag]: 1,
+      },
+    });
 
     if (compressedBuffer.length < rawBuffer.length) {
       const targetPath = `${file}.zst`;
