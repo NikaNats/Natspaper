@@ -23,6 +23,12 @@ overrides:
   postcss: ">=8.5.18"
   sharp: ">=0.35.4"
   yaml: ">=2.8.3"
+  # GHSA-238p-pmpm-9mq7: remark-math/rehype-katex pull katex 0.16.x; force the patched line.
+  katex: ">=0.18.2"
+  # GHSA-rj75-hqrm-r3gf: @tailwindcss/typography pins 6.0.10 (dev only).
+  "postcss-selector-parser@<6.1.5": "6.1.5"
+  # GHSA-3g3m-2fjr-6pw4: @vercel/nft pulls glob 13.x; patched in >=14.0.2.
+  "glob@>=9.0.0 <14.0.2": ">=14.0.2"
   # Keep the WASI runtime pair on the stable line; @napi-rs/wasm-runtime
   # otherwise resolves an @emnapi/runtime 2.x beta that is ABI-incompatible
   # with @emnapi/core 1.x and crashes `astro check`.
