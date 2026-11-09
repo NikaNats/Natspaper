@@ -7,7 +7,7 @@ import path from "node:path";
  *
  * The canonical pnpm version lives ONLY in package.json's `packageManager`
  * field. CI, CD, preview and SonarQube workflows derive it automatically via
- * pnpm/action-setup@v4; Docker derives it via corepack. This test fails if
+ * pnpm/action-setup. This test fails if
  * anyone reintroduces a hardcoded version into any pipeline file, which is
  * how the pnpm 10 vs 11 drift (previews/Sonar testing a different toolchain
  * than production) originally happened.
@@ -27,8 +27,6 @@ describe("pnpm version single source of truth", () => {
     ".github/workflows/sonarqube.yml",
   ];
 
-  const pipelineFiles = [...workflows, "Dockerfile"];
-
   it("package.json pins exactly one pnpm version via packageManager", () => {
     const pkg = JSON.parse(read("package.json")) as {
       packageManager?: string;
@@ -37,7 +35,7 @@ describe("pnpm version single source of truth", () => {
     expect(pkg.packageManager).toMatch(/^pnpm@\d+\.\d+\.\d+/);
   });
 
-  it.each(pipelineFiles)(
+  it.each(workflows)(
     "%s contains no hardcoded pnpm version",
     file => {
       const content = read(file);

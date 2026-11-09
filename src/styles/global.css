@@ -19,14 +19,13 @@
 @custom-variant mouse (@media (hover: hover));
 
 /* Ultra-wide breakpoints (3xl/4xl).
-   Tailwind v4 does not read tailwind.config.ts screens without @config,
-   so these must be declared natively or the 3xl:/4xl: utilities never
-   generate (they were silently dead code since the v4 migration). */
+   Tailwind v4 is configured CSS-first: breakpoints and tokens live in
+   @theme (there is no JS tailwind.config). */
 @theme {
   --breakpoint-3xl: 1920px;
   --breakpoint-4xl: 2560px;
 
-  /* Font family tokens (Tailwind v4 reads @theme, not tailwind.config.ts).
+  /* Font family tokens (Tailwind v4 reads @theme).
      Each token pairs a webfont with its metric-matched local fallback face
      (@font-face overrides in base.css) for zero-CLS font swaps. Generic
      families are deliberately NOT inside these tokens: composed stacks like

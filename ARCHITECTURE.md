@@ -35,7 +35,7 @@ src/
 ├── config.ts        # Site identity, FEATURES flags, socials, navigation
 ├── types.ts         # Shared TypeScript interfaces (SiteConfig, FeaturesConfig, …)
 ├── components/
-│   ├── ui/          # Dumb/Presentational (Breadcrumb, Hr, Icon, LinkButton, Pagination)
+│   ├── ui/          # Dumb/Presentational (Breadcrumb, LinkButton, Pagination)
 │   ├── features/    # Smart components (Comments, Analytics, Seo, ThemeManager)
 │   ├── layout/      # Page chrome (Header, Footer, MobileMenu, NavMenu)
 │   └── post/        # Post-specific (PostHero, PostContent, PostFooter, Tag, …)
@@ -72,7 +72,7 @@ config/
 - Accept data via props
 - No data fetching or side effects
 - Pure rendering logic
-- Examples: `Breadcrumb`, `Hr`, `Icon`, `LinkButton`, `Pagination`
+- Examples: `Breadcrumb`, `LinkButton`, `Pagination`
 
 ```astro
 <!-- ✅ Good: Dumb component receives data -->

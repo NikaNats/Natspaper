@@ -148,55 +148,6 @@ pnpm test:e2e       # Playwright E2E
 | `pnpm format:check` | Check formatting with Prettier.                                       |
 | `pnpm astro check`  | Validate TypeScript and Astro types.                                  |
 
-## 🐳 Docker Deployment & Usage
-
-Natspaper includes an enterprise-grade, multi-stage `Dockerfile` optimized for zero OS vulnerabilities, minimal image size (~150MB), and non-root runtime security.
-
-### Architecture Overview
-
-1. **Build Stage (`node:24-alpine`):** Uses Node.js 24 Alpine with `pnpm 10.20.0` and Git to build static HTML, optimize images statically via Sharp, and compute SHA-256 CSP hashes.
-2. **Runtime Stage (`nginx:alpine-slim`):** Serves pre-rendered static files via a lightweight Nginx web server configured under an unprivileged user (`USER nginx`).
-
-### Quick Start with Docker
-
-#### 1. Build the Docker Image
-
-```bash
-docker build -t natspaper:latest .
-```
-
-#### 2. Run the Container
-
-Map the container to port `8080` (or port `80` if preferred):
-
-```bash
-docker run -d -p 8080:80 --name natspaper-app natspaper:latest
-```
-
-Access your application at `http://localhost:8080/`.
-
----
-
-### Useful Docker Commands
-
-| Action                   | Command                                      |
-| :----------------------- | :------------------------------------------- |
-| **View Container Logs**  | `docker logs -f natspaper-app`               |
-| **Verify Health Status** | `curl http://localhost:8080/api/health.json` |
-| **Scan Vulnerabilities** | `docker scout cves natspaper:latest`         |
-| **Stop Container**       | `docker stop natspaper-app`                  |
-| **Remove Container**     | `docker rm natspaper-app`                    |
-
----
-
-### Running with Docker Compose
-
-To start the environment using Docker Compose:
-
-```bash
-docker compose up -d
-```
-
 ## Deployment
 
 ### Vercel (Recommended)

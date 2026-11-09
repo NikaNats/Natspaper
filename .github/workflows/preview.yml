@@ -176,8 +176,6 @@ jobs:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           # Use generic preview URL - Vercel will replace with actual deployment URL
           SITE_WEBSITE: https://preview.natspaper.dev
-          PUBLIC_SENTRY_ENVIRONMENT: preview
-          PUBLIC_SENTRY_TRACES_SAMPLE_RATE: 0.1
 
       - name: Analyze Preview Build Size
         id: build-analysis

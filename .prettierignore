@@ -20,4 +20,3 @@
 
 # Ignore generated and lock files
 pnpm-lock.yaml
-docker-compose.yml
