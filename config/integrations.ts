@@ -7,9 +7,16 @@ import { envValidationIntegration } from "../src/integrations/envValidation";
 import { finalizeDistIntegration } from "../src/integrations/finalizeDist";
 import { validateMathMLIntegration } from "../src/integrations/validateMathML";
 import { FEATURES } from "../src/config";
-import { DEFAULT_LANG, LOCALE_CODES } from "../src/i18n/config";
+import {
+  DEFAULT_LANG,
+  LOCALE_CODES,
+  SUPPORTED_LANGS,
+} from "../src/i18n/config";
+import { buildPostLastmodMap, lastmodForUrl } from "./sitemapLastmod";
 
 export function getIntegrations() {
+  const postLastmod = buildPostLastmodMap(SUPPORTED_LANGS, DEFAULT_LANG);
+
   // Build sitemap locales map from LOCALE_CODES
   const sitemapLocales: Record<string, string> = {};
   for (const [lang, code] of Object.entries(LOCALE_CODES)) {
@@ -29,6 +36,11 @@ export function getIntegrations() {
         // Exclude 404 error pages from sitemap
         if (page.includes("/404")) return false;
 
+        // Exclude the bare origin: src/pages/index.astro is a noindex
+        // language-redirect stub, and sitemaps must list only canonical,
+        // indexable URLs (/en/ and /ka/ are those).
+        if (new URL(page).pathname === "/") return false;
+
         return true;
       },
 
@@ -43,8 +55,11 @@ export function getIntegrations() {
       // SEO: Serialize function to customize sitemap entries
       // Google uses lastmod to determine crawl priority
       serialize: item => {
-        // Set lastmod to current build time for freshness signals
-        item.lastmod = new Date().toISOString();
+        // lastmod only where it is accurate (posts: modDatetime ?? pubDatetime).
+        // A build-time stamp on every URL makes crawlers distrust lastmod.
+        const lastmod = lastmodForUrl(item.url, postLastmod);
+        if (lastmod) item.lastmod = lastmod;
+        else delete item.lastmod;
 
         // Note: changefreq and priority are ignored by Google but kept for other crawlers
         // Homepage and main sections get higher priority

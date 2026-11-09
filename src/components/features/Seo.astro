@@ -25,7 +25,15 @@ const {
   noindex = false,
 } = Astro.props;
 
-const title = pageTitle ? `${pageTitle} | ${SITE.title}` : SITE.title;
+// Seo is the ONLY place that appends the site name. Pages pass a bare title;
+// the guard keeps this idempotent if a caller still passes a suffixed one.
+const siteSuffix = ` | ${SITE.title}`;
+const title =
+  !pageTitle || pageTitle === SITE.title
+    ? SITE.title
+    : pageTitle.endsWith(siteSuffix)
+      ? pageTitle
+      : `${pageTitle}${siteSuffix}`;
 const description = pageDescription ?? SITE.desc;
 const currentLocale = (Astro.currentLocale as Lang) ?? "en";
 
@@ -40,7 +48,9 @@ const bcp47Language =
 const ogLocale = toOpenGraphLocale(bcp47Language);
 const ogType = pubDatetime ? "article" : "website";
 
-const truncatedTitle = title.length > 60 ? `${title.slice(0, 57)}...` : title;
+// Titles are NOT truncated: search engines truncate by pixel width and
+// rewrite as needed, while a hard "..." cut loses words in og:/twitter:title.
+const truncatedTitle = title;
 const truncatedDescription =
   description.length > 160 ? `${description.slice(0, 157)}...` : description;
 

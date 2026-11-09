@@ -8,7 +8,7 @@ import Footer from "@/components/layout/Footer.astro";
 import PostSummaryCard from "@/components/post/PostSummaryCard.astro";
 import Pagination from "@/components/ui/Pagination.astro";
 import { PostRepository } from "@/utils/post/repository";
-import { SITE, FEATURES } from "@/config";
+import { FEATURES } from "@/config";
 import { SUPPORTED_LANGS, DEFAULT_LANG } from "@/i18n/config";
 import type { Lang } from "@/i18n";
 
@@ -46,12 +46,12 @@ const pageContentByLocale: Record<
   { title: string; pageTitle: string; pageDesc: string }
 > = {
   en: {
-    title: `Posts (Page ${page.currentPage}) | ${SITE.title}`,
+    title: `Posts (Page ${page.currentPage})`,
     pageTitle: "Posts",
     pageDesc: "All the articles I've posted.",
   },
   ka: {
-    title: `პოსტები (გვერდი ${page.currentPage}) | ${SITE.title}`,
+    title: `პოსტები (გვერდი ${page.currentPage})`,
     pageTitle: "პოსტები",
     pageDesc: "ყველა სტატია რომელიც მე დავაპოსტე.",
   },

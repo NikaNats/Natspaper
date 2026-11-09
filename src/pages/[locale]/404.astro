@@ -14,7 +14,6 @@ import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/layout/Header.astro";
 import Footer from "@/components/layout/Footer.astro";
 import LinkButton from "@/components/ui/LinkButton.astro";
-import { SITE } from "@/config";
 import { SUPPORTED_LANGS, DEFAULT_LANG } from "@/i18n/config";
 import type { Lang } from "@/i18n";
 
@@ -48,7 +47,7 @@ const contentByLocale: Record<
   }
 > = {
   en: {
-    title: `404 Not Found | ${SITE.title}`,
+    title: "404 Not Found",
     heading: "404",
     subheading: "Page Not Found",
     tryText: "Try one of these instead:",
@@ -57,7 +56,7 @@ const contentByLocale: Record<
     archives: "View Archives",
   },
   ka: {
-    title: `404 ვერ მოიძებნა | ${SITE.title}`,
+    title: "404 ვერ მოიძებნა",
     heading: "404",
     subheading: "გვერდი ვერ მოიძებნა",
     tryText: "სცადეთ ერთი ამ ვარიანტებიდან:",
@@ -72,6 +71,7 @@ const content = contentByLocale[locale];
 
 <Layout
   title={content.title}
+  noindex
   description={
     locale === "en"
       ? "The page you're looking for doesn't exist. Try searching or browsing our archives."

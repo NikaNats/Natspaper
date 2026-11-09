@@ -17,7 +17,7 @@ import type {
 export const SITE: SiteConfig = {
   website: "https://natspaper.vercel.app/", // Your production URL
   title: "NatsPaper",
-  desc: ".NET Developer | Software Engineer specializing in microservices architecture.",
+  desc: "Explorer of ideas, ex-physicist and software engineer writing about software architecture, physics, philosophy and cognition.",
   author: "Nika Natsvlishvili",
   profile: "https://www.linkedin.com/in/nika-natsvlishvili/",
 
@@ -27,7 +27,7 @@ export const SITE: SiteConfig = {
   timezone: "Asia/Tbilisi", // For scheduling and date formatting
 
   // Assets
-  ogImage: "astropaper-og.jpg", // Default OpenGraph image in /public
+  ogImage: "og-default.jpg", // Default OpenGraph image in /public (>=1200x630, 1.91:1)
 };
 
 // CONFIG VALIDATION: Ensure timezone is valid to prevent build crashes in dayjs

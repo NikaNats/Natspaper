@@ -1,5 +1,4 @@
 // src/data/about.ts
-import { SITE } from "@/config";
 import type { Lang } from "@/i18n/config";
 
 export interface SkillGroup {
@@ -66,7 +65,7 @@ export interface AboutContent {
 
 export const aboutData: Record<Lang, AboutContent> = {
   en: {
-    title: `About | ${SITE.title}`,
+    title: "About",
     description:
       "Nika Natsvlishvili — .NET Software Engineer / Backend Engineer. Microservices, Clean Architecture, DDD, and AI integration.",
     pageTitle: "About",
@@ -250,7 +249,7 @@ export const aboutData: Record<Lang, AboutContent> = {
     contactLabels: { email: "Email", linkedin: "LinkedIn", github: "GitHub" },
   },
   ka: {
-    title: `შესახებ | ${SITE.title}`,
+    title: "შესახებ",
     description:
       "ნიკა ნაცვლიშვილი — .NET პროგრამული ინჟინერი / ბექენდ დეველოპერი. მიკროსერვისები, Clean Architecture, DDD და AI ინტეგრაცია.",
     pageTitle: "ჩემ შესახებ",

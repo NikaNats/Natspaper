@@ -9,7 +9,6 @@ import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/layout/Header.astro";
 import Footer from "@/components/layout/Footer.astro";
 import Main from "@/layouts/Main.astro";
-import { SITE } from "@/config";
 import { SUPPORTED_LANGS, DEFAULT_LANG } from "@/i18n/config";
 import type { Lang } from "@/i18n";
 
@@ -36,13 +35,13 @@ const contentByLocale: Record<
   }
 > = {
   en: {
-    title: `Accessibility Statement | ${SITE.title}`,
+    title: "Accessibility Statement",
     description:
       "How Natspaper evaluates visual contrast: APCA 0.0.98G-4g and the APCA Readability Criterion, alongside WCAG 2.2 AA.",
     pageTitle: "Accessibility & Visual Contrast",
   },
   ka: {
-    title: `ხელმისაწვდომობის განცხადება | ${SITE.title}`,
+    title: "ხელმისაწვდომობის განცხადება",
     description:
       "როგორ აფასებს Natspaper ვიზუალურ კონტრასტს: APCA 0.0.98G-4g და APCA Readability Criterion, WCAG 2.2 AA-სთან ერთად.",
     pageTitle: "ხელმისაწვდომობა და ვიზუალური კონტრასტი",

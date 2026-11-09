@@ -142,7 +142,7 @@ describe('SEO Utilities', () => {
         description: '.NET Developer | Software Engineer',
         canonical: 'https://natspaper.vercel.app/',
         ogType: 'website',
-        ogImage: 'astropaper-og.jpg',
+        ogImage: 'og-default.jpg',
         twitterCard: 'summary_large_image',
       };
 

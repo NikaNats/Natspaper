@@ -8,7 +8,7 @@ import Header from "@/components/layout/Header.astro";
 import Footer from "@/components/layout/Footer.astro";
 import PostSummaryCard from "@/components/post/PostSummaryCard.astro";
 import getPostsByGroupCondition from "@/utils/post/getPostsByGroupCondition";
-import { SITE, FEATURES } from "@/config";
+import { FEATURES } from "@/config";
 import { SUPPORTED_LANGS, DEFAULT_LANG } from "@/i18n/config";
 import type { Lang } from "@/i18n";
 
@@ -81,14 +81,14 @@ const pageContentByLocale: Record<
   }
 > = {
   en: {
-    title: `Archives | ${SITE.title}`,
+    title: "Archives",
     pageTitle: "Archives",
     pageDesc: "All the articles I've archived.",
     postLabel: "post",
     postsLabel: "posts",
   },
   ka: {
-    title: `არქივი | ${SITE.title}`,
+    title: "არქივი",
     pageTitle: "არქივი",
     pageDesc: "ყველა სტატია რომელიც მე დავამარხე.",
     postLabel: "პოსტი",

@@ -9,7 +9,7 @@ import Footer from "@/components/layout/Footer.astro";
 import PostSummaryCard from "@/components/post/PostSummaryCard.astro";
 import Pagination from "@/components/ui/Pagination.astro";
 import { getUniqueTags, getPostsByTag } from "@/utils/post";
-import { SITE, FEATURES } from "@/config";
+import { FEATURES } from "@/config";
 import { SUPPORTED_LANGS } from "@/i18n/config";
 import type { Lang } from "@/i18n";
 
@@ -25,12 +25,12 @@ const pageContentByLocale: Record<
   en: {
     tagPrefix: "Tag:",
     desc: (tagName: string) => `All the articles with the tag "${tagName}".`,
-    title: (tagName: string) => `Tag: ${tagName} | ${SITE.title}`,
+    title: (tagName: string) => `Tag: ${tagName}`,
   },
   ka: {
     tagPrefix: "თეგი:",
     desc: (tagName: string) => `ყველა სტატია თეგით "${tagName}".`,
-    title: (tagName: string) => `თეგი: ${tagName} | ${SITE.title}`,
+    title: (tagName: string) => `თეგი: ${tagName}`,
   },
 };
 
