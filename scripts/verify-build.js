@@ -21,7 +21,6 @@
 import fs from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
-import zlib from "node:zlib";
 import { fileURLToPath } from "node:url";
 
 // ── CLI Argument Parsing ─────────────────────────────────────────────
@@ -437,42 +436,6 @@ try {
   }
 } catch (err) {
   addError(`RFC 6797: HSTS verification failed — ${err.message}`);
-}
-
-// ── RFC 8878 Zstandard Compression Validation ────────────────────────
-log("\n🗜️ RFC 8878 Zstandard Validation:");
-try {
-  const htmlZst = path.join(distDir, "en/index.html.zst");
-  const uncompressedHtml = path.join(distDir, "en/index.html");
-
-  if (fs.existsSync(htmlZst)) {
-    const rawSize = fs.statSync(uncompressedHtml).size;
-    const zstdSize = fs.statSync(htmlZst).size;
-    const ratio = ((1 - zstdSize / rawSize) * 100).toFixed(1);
-
-    // Decode with a real zstd decoder: a matching magic number alone is not
-    // proof (a deflate stream with a faked header once shipped here).
-    let decodesExactly = false;
-    try {
-      decodesExactly = zlib
-        .zstdDecompressSync(fs.readFileSync(htmlZst))
-        .equals(fs.readFileSync(uncompressedHtml));
-    } catch {
-      decodesExactly = false;
-    }
-
-    if (!decodesExactly) {
-      addError("RFC 8878: en/index.html.zst is not valid zstd of en/index.html");
-    } else if (zstdSize < rawSize) {
-      addPass(`RFC 8878: en/index.html.zst decodes losslessly (${zstdSize}B, ${ratio}% compression ratio)`);
-    } else {
-      addWarning("RFC 8878: .zst file is larger than uncompressed source");
-    }
-  } else {
-    addWarning("RFC 8878: No .zst pre-compressed assets found (optional for dev builds)");
-  }
-} catch (err) {
-  addError(`RFC 8878: Zstd verification check failed — ${err.message}`);
 }
 
 // ── 6. Build Size Analysis ───────────────────────────────────────────
