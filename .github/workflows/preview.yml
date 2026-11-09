@@ -15,6 +15,11 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
 
+# Least privilege: read the repo, write only the preview-URL comment on PRs.
+permissions:
+  contents: read
+  pull-requests: write
+
 # Cancel outdated preview deployments for same branch
 concurrency:
   group: preview-${{ github.ref }}
