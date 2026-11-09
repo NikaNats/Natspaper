@@ -15,6 +15,10 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
 
+# Least privilege: read-only by default; only deploy-preview may comment.
+permissions:
+  contents: read
+
 # Cancel outdated preview deployments for same branch
 concurrency:
   group: preview-${{ github.ref }}
@@ -137,6 +141,9 @@ jobs:
   deploy-preview:
     name: Deploy Preview
     needs: [validate-preview, code-quality, unit-tests]
+    permissions:
+      contents: read
+      pull-requests: write
     if: needs.validate-preview.outputs.should-deploy == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -234,12 +241,16 @@ jobs:
       - name: Comment Preview URL on PR
         if: github.event_name == 'pull_request'
         uses: actions/github-script@v9
+        env:
+          PREVIEW_URL: ${{ steps.deploy.outputs.url }}
+          BRANCH_NAME: ${{ needs.validate-preview.outputs.branch-name }}
+          BUILD_SIZE: ${{ steps.build-analysis.outputs.size_mb }}
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const previewUrl = '${{ steps.deploy.outputs.url }}';
-            const branch = '${{ needs.validate-preview.outputs.branch-name }}';
-            const buildSize = '${{ steps.build-analysis.outputs.size_mb }}';
+            const previewUrl = process.env.PREVIEW_URL;
+            const branch = process.env.BRANCH_NAME;
+            const buildSize = process.env.BUILD_SIZE;
             const commit = context.sha.substring(0, 7);
 
             const body = `## 🚀 Preview Deployment Ready

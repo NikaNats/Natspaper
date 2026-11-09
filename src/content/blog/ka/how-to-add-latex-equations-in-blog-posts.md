@@ -1,7 +1,7 @@
 ---
 author: Alberto Perdomo
 pubDatetime: 2024-09-08T20:58:52.737Z
-modDatetime: 2025-03-22T09:25:46.734Z
+modDatetime: 2026-11-09T00:00:00.000Z
 title: როგორ დავამატოთ LaTeX განტოლებები Astro ბლოგის პოსტებში
 tags:
   - docs
@@ -35,15 +35,9 @@ _ფოტო [Vitaly Gariev](https://www.pexels.com/photo/close-up-of-complicat
    pnpm install rehype-katex remark-math katex
    ```
 
-2. განაახლეთ Astro კონფიგურაცია ამ დამატებების გამოსაყენებლად:
+2. განაახლეთ Astro კონფიგურაცია, რომ LaTeX პირდაპირ კომპილირდეს ნატიურ **W3C MathML Core**-ში:
 
-   <!--
-      Expressive Code:
-      - title="astro.config.ts": აჩვენებს ფაილის სახელს
-      - ins={9-11, 13}: აფერადებს მე-9-11 და მე-13 ხაზებს მწვანედ (დამატების აღსანიშნავად)
-   -->
-
-   ```ts title="astro.config.ts" ins={9-11, 13}
+   ```ts title="astro.config.ts" ins={2-3, 9, 13-22}
    // ...
    import remarkMath from "remark-math";
    import rehypeKatex from "rehype-katex";
@@ -56,7 +50,16 @@ _ფოტო [Vitaly Gariev](https://www.pexels.com/photo/close-up-of-complicat
          [remarkToc, { heading: "(table of contents|შინაარსის ცხრილი)" }],
          [remarkCollapse, { test: "(Table of contents|შინაარსის ცხრილი)" }],
        ],
-       rehypePlugins: [rehypeKatex],
+       rehypePlugins: [
+         [
+           rehypeKatex,
+           {
+             output: "mathml",
+             strict: true,
+             throwOnError: false,
+           },
+         ],
+       ],
        shikiConfig: {
          // მეტი თემისთვის, ეწვიეთ https://shiki.style/themes
          themes: { light: "min-light", dark: "night-owl" },
@@ -67,57 +70,10 @@ _ფოტო [Vitaly Gariev](https://www.pexels.com/photo/close-up-of-complicat
    });
    ```
 
-3. **შემოიტანეთ KaTeX CSS თქვენი პოსტის განლაგების ფაილში**
-
-   KaTeX სტილების კოდ-დაყოფის მეშვეობით ეფექტურად ჩატვირთვის უზრუნველსაყოფად, შემოიტანეთ CSS პირდაპირ თქვენი პოსტის განლაგებაში (მაგ., `src/layouts/PostDetails.astro`). ეს საშუალებას აძლევს Astro-ს აგების მეშვეობით ავტომატური კოდ-დაყოფა და ბუნდელის ოპტიმიზაცია.
-
-   <!--
-      Expressive Code:
-      - {6}: ნეიტრალურად გამოყოფს მე-6 ხაზს ყურადღების მისაქცევად
-   -->
-
-   ```astro title="src/layouts/PostDetails.astro" {6}
-   ---
-   import { render, type CollectionEntry } from "astro:content";
-   import Layout from "@/layouts/Layout.astro";
-   // ... სხვა შემოტანები
-
-   import "katex/dist/katex.min.css";
-
-   export interface Props {
-     // ...
-   }
-   ---
-   ```
-
-   ეს მიდგომა აღემატება გარე CDN სტილების დაკავშირებას, რადგან:
-   - **არა ბლოკირდება რენდერი**: CSS იკრიბება თქვენი გვერდის JavaScript-ის ერთად, არა ცალკე გამოკრებულია
-   - **კოდ-დაყოფა**: CSS მხოლოდ იმ გვერდებზე ჩაიტვირთება, რომლებიც რეალურად მათემატიკურ განტოლებებს იყენებენ
-   - **ავტომატური ოპტიმიზაცია**: Astro ავტომატურად ამცირებს CSS-ს და ოპტიმიზებს
-   - **ოფლაინ მხარდაჭერა**: არ არის გარე CDN დამოკიდებულება—ყველაფერი თვითმომსახურებელი
-
-4. ბოლო ეტაპად, დაამატეთ ტექსტის ფერი `katex`-ზე `typography.css`-ში.
-
-   <!--
-      Expressive Code:
-      - ins={7-9}: აფერადებს 7-დან 9-მდე ხაზებს მწვანედ
-   -->
-
-   ```css title="src/styles/typography.css" ins={7-9}
-   @plugin "@tailwindcss/typography";
-
-   @layer base {
-     /* სხვა კლასები */
-
-     /* Katex ტექსტის ფერი */
-     .prose .katex-display {
-       @apply text-foreground;
-     }
-
-     /* ===== კოდის ბლოკები და სინტაქსის ხაზგასმა ===== */
-     /* სხვა კლასები */
-   }
-   ```
+   ამ მიდგომის მთავარი უპირატესობები:
+   - **ნულოვანი CSS დატვირთვა**: `katex.min.css` საერთოდ აღარ არის საჭირო, ამიტომ არც ცალკე სტილების შემოტანაა საჭირო და არც დამატებითი ფერის წესები `typography.css`-ში.
+   - **ნატიური რენდერი**: ფორმულებს ბრაუზერის ძრავა პირდაპირ ხატავს OpenType MATH ცხრილების გამოყენებით.
+   - **სრული ხელმისაწვდომობა**: ეკრანის წამკითხველები მათემატიკურ ელემენტებს ნატიურად წაიკითხავენ.
 
 და _voilà_, ეს სეტაპი საშუალებას გაძლევთ დაწეროთ LaTeX განტოლებები თქვენი Markdown ფაილებში, რომლებიც სათანადოდ გამოჩნდება საიტის აგების დროს. როდესაც თქვენ ეს გააკეთებთ, დოკუმენტის დანარჩენი ნაწილი სწორად დაიხატება.
 
