@@ -1,8 +1,9 @@
 import { getCollection } from "astro:content";
 import type { CollectionEntry } from "astro:content";
-import { slugifyStr } from "../core/slugify";
 import { DEFAULT_LANG, type Lang } from "@/i18n/config";
 import type { IPostRepository } from "./IPostRepository";
+import postFilter from "./postFilter";
+import { comparePostsByPubDate } from "./getSortedPosts";
 
 /**
  * Post with fallback information
@@ -16,13 +17,35 @@ export interface PostWithFallback {
   originalLocale: Lang;
 }
 
-// Encapsulate sorting/filtering logic here
+/** "ka/my-post" → "ka" */
+const getLocale = (id: string) => id.split("/")[0] as Lang;
+
+/** "ka/my-post" → "my-post" (extension stripped defensively) */
+const getSlug = (id: string) =>
+  id
+    .split("/")
+    .slice(1)
+    .join("/")
+    .replace(/\.(md|mdx)$/, "");
+
+/**
+ * Per-locale memo for `getByLocaleWithFallback`.
+ *
+ * Every post page, tag page and the archive call it, so without a memo a
+ * static build recomputes the same grouping O(pages) times. Content is
+ * immutable during a production build, so the memo is safe there; in dev it
+ * is bypassed so edits to Markdown show up immediately.
+ */
+const fallbackCache = new Map<string, Promise<PostWithFallback[]>>();
+
 export const PostRepository: IPostRepository = {
+  /**
+   * Single visibility gate for the whole site: drafts AND scheduled
+   * (future-dated) posts are excluded here, so every route that reads through
+   * the repository agrees on what is published.
+   */
   getAll: async (): Promise<CollectionEntry<"blog">[]> => {
-    const posts = await getCollection(
-      "blog",
-      ({ data }: CollectionEntry<"blog">) => !data.draft
-    );
+    const posts = await getCollection("blog", postFilter);
 
     return posts.map((post: CollectionEntry<"blog">) => {
       if (!post.slug) {
@@ -39,11 +62,7 @@ export const PostRepository: IPostRepository = {
 
   getSorted: async (): Promise<CollectionEntry<"blog">[]> => {
     const posts = await PostRepository.getAll();
-    return posts.sort(
-      (a, b) =>
-        Math.floor(new Date(b.data.pubDatetime).getTime() / 1000) -
-        Math.floor(new Date(a.data.pubDatetime).getTime() / 1000)
-    );
+    return posts.sort(comparePostsByPubDate);
   },
 
   getByLocale: async (locale: string): Promise<CollectionEntry<"blog">[]> => {
@@ -66,115 +85,67 @@ export const PostRepository: IPostRepository = {
    * @param targetLocale - Target locale to get posts for
    * @param includeFallback - Whether to include fallback posts (default: true)
    */
-  getByLocaleWithFallback: async (
+  getByLocaleWithFallback: (
     targetLocale: Lang,
     includeFallback: boolean = true
   ): Promise<PostWithFallback[]> => {
-    const allPosts = await PostRepository.getSorted();
+    const key = `${targetLocale}:${includeFallback}`;
+    const cached = import.meta.env.DEV ? undefined : fallbackCache.get(key);
+    if (cached) return cached;
 
-    // Helper: Extract slug from post ID (e.g., "ka/my-post.md" → "my-post")
-    const getSlug = (id: string) =>
-      id
-        .split("/")
-        .slice(1)
-        .join("/")
-        .replace(/\.(md|mdx)$/, "");
+    const result = (async () => {
+      const allPosts = await PostRepository.getSorted();
 
-    // Helper: Extract locale from post ID
-    const getLocale = (id: string) => id.split("/")[0] as Lang;
-
-    // Group posts by slug
-    const postsBySlug = new Map<string, CollectionEntry<"blog">[]>();
-
-    for (const post of allPosts) {
-      const slug = getSlug(post.id);
-      if (!postsBySlug.has(slug)) {
-        postsBySlug.set(slug, []);
+      const postsBySlug = new Map<string, CollectionEntry<"blog">[]>();
+      for (const post of allPosts) {
+        const slug = getSlug(post.id);
+        const group = postsBySlug.get(slug);
+        if (group) group.push(post);
+        else postsBySlug.set(slug, [post]);
       }
-      postsBySlug.get(slug)?.push(post);
-    }
 
-    const results: PostWithFallback[] = [];
+      const results: PostWithFallback[] = [];
 
-    // Iterate through each unique post slug
-    for (const [, variations] of postsBySlug.entries()) {
-      // 1. Try exact match for target locale
-      const exactMatch = variations.find(p =>
-        p.id.startsWith(`${targetLocale}/`)
-      );
+      for (const variations of postsBySlug.values()) {
+        // 1. Try exact match for target locale
+        const exactMatch = variations.find(p =>
+          p.id.startsWith(`${targetLocale}/`)
+        );
 
-      if (exactMatch) {
-        results.push({
-          post: exactMatch,
-          isFallback: false,
-          originalLocale: targetLocale,
-        });
-      } else if (includeFallback) {
-        // 2. Fallback: Use first available version (prefer DEFAULT_LANG, then any)
+        if (exactMatch) {
+          results.push({
+            post: exactMatch,
+            isFallback: false,
+            originalLocale: targetLocale,
+          });
+          continue;
+        }
+
+        if (!includeFallback) continue;
+
+        // 2. Fallback: prefer DEFAULT_LANG, then any available version
         const fallback =
-          variations.find(p => p.id.startsWith(`${DEFAULT_LANG}/`)) ||
+          variations.find(p => p.id.startsWith(`${DEFAULT_LANG}/`)) ??
           variations[0];
 
         if (fallback) {
-          const fallbackLocale = getLocale(fallback.id);
           results.push({
             post: fallback,
             isFallback: true,
-            originalLocale: fallbackLocale,
+            originalLocale: getLocale(fallback.id),
           });
         }
       }
+
+      return results.sort((a, b) => comparePostsByPubDate(a.post, b.post));
+    })();
+
+    if (!import.meta.env.DEV) {
+      fallbackCache.set(key, result);
+      // Never memoize a failure — let the next caller retry.
+      result.catch(() => fallbackCache.delete(key));
     }
-
-    // Sort by publication date (descending)
-    return results.sort(
-      (a, b) =>
-        Math.floor(new Date(b.post.data.pubDatetime).getTime() / 1000) -
-        Math.floor(new Date(a.post.data.pubDatetime).getTime() / 1000)
-    );
-  },
-
-  /**
-   * Check if a specific post has a translation in the given locale
-   */
-  hasTranslation: async (slug: string, locale: Lang): Promise<boolean> => {
-    const posts = await PostRepository.getByLocale(locale);
-    const getSlug = (id: string) => id.split("/").slice(1).join("/");
-    return posts.some(post => getSlug(post.id) === slug);
-  },
-
-  /**
-   * Get all available translations for a post
-   */
-  getTranslations: async (
-    slug: string
-  ): Promise<Map<Lang, CollectionEntry<"blog">>> => {
-    const allPosts = await PostRepository.getAll();
-    const getSlug = (id: string) => id.split("/").slice(1).join("/");
-    const getLocale = (id: string) => id.split("/")[0] as Lang;
-
-    const translations = new Map<Lang, CollectionEntry<"blog">>();
-
-    for (const post of allPosts) {
-      if (getSlug(post.id) === slug) {
-        translations.set(getLocale(post.id), post);
-      }
-    }
-
-    return translations;
-  },
-
-  getByTag: async (tag: string): Promise<CollectionEntry<"blog">[]> => {
-    const posts = await PostRepository.getSorted();
-    return posts.filter(post =>
-      // FIX: Explicitly type the 't' parameter
-      post.data.tags.map((t: string) => slugifyStr(t)).includes(tag)
-    );
-  },
-
-  getFeatured: async (): Promise<CollectionEntry<"blog">[]> => {
-    const posts = await PostRepository.getSorted();
-    return posts.filter(post => post.data.featured);
+    return result;
   },
 
   /**

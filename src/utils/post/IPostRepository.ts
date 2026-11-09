@@ -18,10 +18,17 @@ import type { Lang } from "@/i18n/config";
 import type { PostWithFallback } from "./repository";
 
 export interface IPostRepository {
-  /** Return all published (non-draft) posts, unsorted. */
+  /**
+   * Return all published posts, unsorted. "Published" means not a draft and
+   * not scheduled in the future (see `postFilter`) — this is the single
+   * visibility gate for every route.
+   */
   getAll(): Promise<CollectionEntry<"blog">[]>;
 
-  /** Return all published posts sorted by publication date (descending). */
+  /**
+   * Return all published posts, newest `pubDatetime` first (ties broken by
+   * id — see `comparePostsByPubDate`).
+   */
   getSorted(): Promise<CollectionEntry<"blog">[]>;
 
   /** Return all published posts whose ID starts with the given locale prefix. */
@@ -39,18 +46,6 @@ export interface IPostRepository {
     targetLocale: Lang,
     includeFallback?: boolean
   ): Promise<PostWithFallback[]>;
-
-  /** Return `true` if a post with the given slug exists in the given locale. */
-  hasTranslation(slug: string, locale: Lang): Promise<boolean>;
-
-  /** Return a map of locale → post for every available translation of a slug. */
-  getTranslations(slug: string): Promise<Map<Lang, CollectionEntry<"blog">>>;
-
-  /** Return all posts tagged with the given (slugified) tag string. */
-  getByTag(tag: string): Promise<CollectionEntry<"blog">[]>;
-
-  /** Return all posts where `data.featured === true`. */
-  getFeatured(): Promise<CollectionEntry<"blog">[]>;
 
   /**
    * Return all parts of a series in ascending `series.order`, respecting

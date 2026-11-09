@@ -42,10 +42,6 @@ describe("IPostRepository — interface conformance", () => {
     "getSorted",
     "getByLocale",
     "getByLocaleWithFallback",
-    "hasTranslation",
-    "getTranslations",
-    "getByTag",
-    "getFeatured",
     "getSeries",
   ];
 
@@ -73,10 +69,6 @@ describe("IPostRepository — interface conformance", () => {
       getSorted: async () => [],
       getByLocale: async () => [],
       getByLocaleWithFallback: async () => [],
-      hasTranslation: async () => false,
-      getTranslations: async () => new Map(),
-      getByTag: async () => [],
-      getFeatured: async () => [],
       getSeries: async () => [],
     };
 

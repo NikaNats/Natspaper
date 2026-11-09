@@ -236,7 +236,7 @@ describe("Post Utilities", () => {
       expect(sorted[2]?.id).toBe("post1");
     });
 
-    it("should use modDatetime if available", () => {
+    it("should ignore modDatetime (editing an old post must not bump it)", () => {
       const posts = [
         createMockPost("post1", [], true, new Date("2024-01-01"), new Date("2024-03-15")),
         createMockPost("post2", [], true, new Date("2024-03-01")),
@@ -244,8 +244,8 @@ describe("Post Utilities", () => {
 
       const sorted = getSortedPosts(posts);
 
-      // post1 has modDate of 2024-03-15, which is newer than post2's pubDate
-      expect(sorted[0]?.id).toBe("post1");
+      // post2 was published later; post1's later edit does not reorder it
+      expect(sorted.map(p => p.id)).toEqual(["post2", "post1"]);
     });
 
     it("should filter out draft posts", () => {
@@ -321,7 +321,7 @@ describe("Post Utilities", () => {
       expect(sorted.map(p => p.id)).toEqual(["post1", "post3"]);
     });
 
-    it("should prioritize modDatetime over pubDatetime for sorting", () => {
+    it("should sort by pubDatetime regardless of modDatetime", () => {
       const posts = [
         createMockPost("post1", [], true, new Date("2024-01-01"), new Date("2024-03-15")),
         createMockPost("post2", [], true, new Date("2024-03-01"), new Date("2024-02-15")),
@@ -329,8 +329,22 @@ describe("Post Utilities", () => {
 
       const sorted = getSortedPosts(posts);
 
-      // post1 has modDate 2024-03-15 which is newest
-      expect(sorted[0]?.id).toBe("post1");
+      expect(sorted.map(p => p.id)).toEqual(["post2", "post1"]);
+    });
+
+    it("should break pubDatetime ties deterministically by id", () => {
+      const sameDate = new Date("2024-01-01");
+      const posts = [
+        createMockPost("post-c", [], true, sameDate),
+        createMockPost("post-a", [], true, sameDate),
+        createMockPost("post-b", [], true, sameDate),
+      ];
+
+      expect(getSortedPosts(posts).map(p => p.id)).toEqual([
+        "post-a",
+        "post-b",
+        "post-c",
+      ]);
     });
 
     it("should handle large number of posts efficiently", () => {
@@ -345,9 +359,9 @@ describe("Post Utilities", () => {
         const current = sorted[i];
         const next = sorted[i + 1];
         if (current && next) {
-          const currentDate = new Date(current.data.modDatetime ?? current.data.pubDatetime);
-          const nextDate = new Date(next.data.modDatetime ?? next.data.pubDatetime);
-          expect(currentDate.getTime()).toBeGreaterThanOrEqual(nextDate.getTime());
+          expect(current.data.pubDatetime.getTime()).toBeGreaterThanOrEqual(
+            next.data.pubDatetime.getTime()
+          );
         }
       }
     });
