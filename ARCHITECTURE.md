@@ -37,7 +37,7 @@ src/
 ├── components/
 │   ├── ui/          # Dumb/Presentational (Breadcrumb, Hr, Icon, LinkButton, Pagination)
 │   ├── features/    # Smart components (Comments, Analytics, Seo, ThemeManager)
-│   ├── layout/      # Page chrome (Header, Footer, MobileMenu, NavMenu, NavLinks)
+│   ├── layout/      # Page chrome (Header, Footer, MobileMenu, NavMenu)
 │   └── post/        # Post-specific (PostHero, PostContent, PostFooter, Tag, …)
 ├── layouts/         # Page templates with named slots (Layout, Main, PostDetails)
 ├── pages/           # Route handlers (data fetching via PostRepository)
@@ -50,14 +50,15 @@ src/
 │   ├── rss/         # RSS feed generation & sanitization
 │   └── seo/         # Canonical URLs, structured data
 ├── i18n/            # Dictionaries & locale config
-├── integrations/    # Custom Astro integrations (env validation)
+├── integrations/    # Custom Astro integrations (env validation, dist finalize, MathML check)
 ├── styles/          # Tailwind CSS v4 layers (base, components, typography, global)
 └── types/           # Ambient declarations (global.d.ts, modules.d.ts)
 
 config/
 ├── env.ts           # Zod-validated env schema
 ├── integrations.ts  # Astro integrations registry
-└── vite.ts          # Vite plugin configuration
+├── sitemapLastmod.ts # Accurate per-post sitemap <lastmod>
+└── vite.ts          # Vite plugin configuration (keeps scripts external for CSP)
 ```
 
 ---
@@ -339,7 +340,6 @@ src/pages/
         ├── [slug].astro            # Handles all posts
         ├── [...page].astro         # Handles pagination
         ├── [...file].md.ts         # Handles .md redirects
-        ├── [...catch].ts           # Handles 404s
         └── [slug].png.ts           # Handles OG images
 ```
 
@@ -417,7 +417,7 @@ the `IPostRepository` interface (Dependency Inversion):
 ```typescript
 import { PostRepository } from "@/utils/post/repository";
 
-// Get all published posts (sorted, drafts excluded)
+// Get all published posts (drafts AND scheduled posts excluded, newest first)
 const posts = await PostRepository.getSorted();
 
 // Get posts for a specific locale
@@ -426,15 +426,20 @@ const enPosts = await PostRepository.getByLocale("en");
 // Get posts with cross-locale fallback
 const kaPosts = await PostRepository.getByLocaleWithFallback("ka");
 
-// Get posts by tag
-const taggedPosts = await PostRepository.getByTag("astro");
-
-// Get featured posts
-const featured = await PostRepository.getFeatured();
-
 // Get series parts
 const seriesParts = await PostRepository.getSeries("system-design", "en");
 ```
+
+**Visibility & ordering contract**
+
+- `PostRepository.getAll()` is the single visibility gate: it passes
+  `postFilter` to `getCollection`, so drafts are always hidden and posts with a
+  future `pubDatetime` stay hidden in production builds until
+  `pubDatetime - FEATURES.scheduledPostMargin` (in `astro dev` they are shown).
+- Every listing sorts with `comparePostsByPubDate`
+  (`src/utils/post/getSortedPosts.ts`): newest `pubDatetime` first, ties broken
+  by `id` for deterministic builds. `modDatetime` never reorders a feed.
+- `getByLocaleWithFallback` is memoized per locale in production builds only.
 
 **Why?**
 
@@ -511,6 +516,7 @@ const { variant = "primary" } = Astro.props;
 - Don't call `getCollection()` outside `PostRepository`
 - Don't modify core components directly
 - Don't hardcode feature states or UI strings
+- Don't append the site name to page titles — `Seo.astro` adds ` | SITE.title`
 - Don't duplicate styling across components
 - Don't skip type annotations (`any` is forbidden)
 - Don't use `enum` — use `const` objects with `as const`

@@ -1,0 +1,4 @@
+{
+  "exclude": [".agents/", ".claude/", ".kilo/", ".specify/"],
+  "deprioritize": ["tests/", "scripts/"]
+}
