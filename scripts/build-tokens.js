@@ -41,6 +41,7 @@ const SEMANTIC_VAR_NAMES = {
   "text.primary": "--foreground",
   "text.secondary": "--text-secondary",
   "accent.default": "--accent",
+  "accent.foreground": "--accent-foreground",
 };
 
 /**
@@ -173,6 +174,15 @@ ${lightVars.join("\n")}
 
 html[data-theme="dark"] {
 ${darkVars.join("\n")}
+}
+
+/* No-JS fallback: ThemeManager's inline script always sets data-theme, so
+   this only matches when JavaScript is disabled or blocked. It keeps the
+   dark palette in sync with the tokens instead of a hand-copied <noscript>. */
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme]) {
+${darkVars.map(line => `  ${line}`).join("\n")}
+  }
 }
 `;
 }

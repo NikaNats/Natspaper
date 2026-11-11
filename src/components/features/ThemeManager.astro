@@ -29,16 +29,13 @@
  *
  * ## CSS Integration:
  *
- * The theme is consumed via CSS custom properties in `global.css`:
- * ```css
- * html[data-theme="dark"] {
- *   --background: #121212;
- *   --foreground: #e0e0e0;
- * }
- * ```
+ * Theme colors are design tokens compiled into `src/styles/tokens.generated.css`
+ * (`:root` = light, `html[data-theme="dark"]` = dark). The same file carries a
+ * `@media (prefers-color-scheme: dark) { html:not([data-theme]) }` block, so
+ * the OS preference still applies when JavaScript is disabled.
  *
  * @see /public/toggle-theme.js - Theme toggle button logic
- * @see src/styles/global.css - Theme color definitions
+ * @see tokens/design-tokens.tokens.json - Theme color source of truth
  */
 ---
 
@@ -52,30 +49,13 @@
 </style>
 
 <!--
-  GRACEFUL DEGRADATION: Fallback styles when JavaScript is disabled.
-  Uses prefers-color-scheme to respect OS theme preference.
-  The site remains fully usable without JS - only the theme toggle button won't work.
+  GRACEFUL DEGRADATION: without JavaScript no data-theme attribute is set, and
+  tokens.generated.css falls back to prefers-color-scheme for the palette
+  (html:not([data-theme])). The only thing left to do here is hide the theme
+  toggle, which cannot work without JS.
 -->
 <noscript>
   <style>
-    /* When JS is disabled, use system preference directly */
-    @media (prefers-color-scheme: dark) {
-      html {
-        --background: #121212;
-        --foreground: #e0e0e0;
-        --accent: #6aadff;
-        --muted: #1e1e1e;
-        --border: #333333;
-        --text-secondary: #b3b3b3;
-        --code-bg: #2a2a2a;
-      }
-      html[data-theme] {
-        /* Force dark theme variables */
-        --background: #121212 !important;
-        --foreground: #e0e0e0 !important;
-      }
-    }
-    /* Hide the theme toggle button since it won't work without JS */
     #theme-btn {
       display: none !important;
     }
@@ -89,39 +69,41 @@
 -->
 <script is:inline>
   (function () {
+    const root = document.documentElement;
+    const prefersDark = window.matchMedia(
+      "(prefers-color-scheme: dark)"
+    ).matches;
+
+    // localStorage access throws in sandboxed iframes and some strict
+    // privacy modes; treat that exactly like "no saved preference".
+    let saved = null;
     try {
-      const saved = localStorage.getItem("theme");
-      const prefersDark = window.matchMedia(
-        "(prefers-color-scheme: dark)"
-      ).matches;
-      const activeTheme =
-        saved === "dark" || saved === "light"
-          ? saved
-          : prefersDark
-            ? "dark"
-            : "light";
-
-      document.documentElement.setAttribute("data-theme", activeTheme);
-      document.documentElement.classList.toggle("dark", activeTheme === "dark");
-      document.documentElement.style.colorScheme = activeTheme;
-      window.initialTheme = activeTheme;
-
-      // Update dynamic browser address bar theme-color
-      const meta = document.querySelector('meta[name="theme-color"]');
-      if (meta) {
-        meta.setAttribute(
-          "content",
-          activeTheme === "dark" ? "#141517" : "#fafafa"
-        );
-      }
+      saved = localStorage.getItem("theme");
     } catch {
-      // In private browsing or sandboxed contexts, fall back silently to system preference
-      const fallbackDark = window.matchMedia(
-        "(prefers-color-scheme: dark)"
-      ).matches;
-      document.documentElement.setAttribute(
-        "data-theme",
-        fallbackDark ? "dark" : "light"
+      saved = null;
+    }
+
+    const activeTheme =
+      saved === "dark" || saved === "light"
+        ? saved
+        : prefersDark
+          ? "dark"
+          : "light";
+
+    // Apply every theme signal on every path: data-theme (CSS tokens and the
+    // Tailwind dark: variant), the .dark class (third-party CSS), and
+    // color-scheme (native controls and scrollbars).
+    root.setAttribute("data-theme", activeTheme);
+    root.classList.toggle("dark", activeTheme === "dark");
+    root.style.colorScheme = activeTheme;
+    window.initialTheme = activeTheme;
+
+    // Update dynamic browser address bar theme-color
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) {
+      meta.setAttribute(
+        "content",
+        activeTheme === "dark" ? "#141517" : "#fafafa"
       );
     }
   })();

@@ -10,11 +10,20 @@
    * 1. GET PREFERENCE
    * Pure logic to determine the active theme.
    */
-  const getThemePreference = () => {
-    if (typeof localStorage !== "undefined") {
-      const savedTheme = localStorage.getItem(themeStorageKey);
-      if (savedTheme) return savedTheme;
+  // localStorage throws (not just returns null) in sandboxed iframes and some
+  // strict privacy modes; every access is guarded so the toggle still works
+  // for the current page.
+  const readSaved = () => {
+    try {
+      return localStorage.getItem(themeStorageKey);
+    } catch {
+      return null;
     }
+  };
+
+  const getThemePreference = () => {
+    const savedTheme = readSaved();
+    if (savedTheme === "dark" || savedTheme === "light") return savedTheme;
     return globalThis.matchMedia("(prefers-color-scheme: dark)").matches
       ? "dark"
       : "light";
@@ -25,9 +34,14 @@
    * Replacing the conflicting 'reflectPreference' declarations.
    */
   const applyTheme = theme => {
-    // WRITE: Set data attribute and class
-    document.documentElement.dataset.theme = theme;
-    document.documentElement.classList.toggle("dark", theme === "dark");
+    // WRITE: every theme signal ThemeManager sets at first paint. The inline
+    // color-scheme style must be updated too: it outranks the stylesheet's
+    // html[data-theme] rule, so leaving it stale kept native scrollbars and
+    // form controls in the old scheme until a full reload.
+    const root = document.documentElement;
+    root.dataset.theme = theme;
+    root.classList.toggle("dark", theme === "dark");
+    root.style.colorScheme = theme;
 
     // WRITE: Update ARIA label for accessibility
     const themeBtn = document.querySelector("#theme-btn");
@@ -44,7 +58,7 @@
         const bgColor = getComputedStyle(document.body).backgroundColor;
         metaThemeColor.setAttribute(
           "content",
-          bgColor || (theme === "dark" ? "#121212" : "#fafafa")
+          bgColor || (theme === "dark" ? "#141517" : "#fafafa")
         );
       }
     });
@@ -61,7 +75,11 @@
   const handleToggle = () => {
     const currentTheme = getThemePreference();
     const newTheme = currentTheme === "light" ? "dark" : "light";
-    localStorage.setItem(themeStorageKey, newTheme);
+    try {
+      localStorage.setItem(themeStorageKey, newTheme);
+    } catch {
+      // Not persisted (storage unavailable); still apply for this page.
+    }
     applyTheme(newTheme);
   };
 

@@ -8,6 +8,7 @@
   --foreground: oklch(0.2 0.01 260);
   --text-secondary: oklch(0.44 0.015 260);
   --accent: oklch(0.52 0.2 260);
+  --accent-foreground: oklch(1 0 0);
 }
 
 html[data-theme="dark"] {
@@ -18,4 +19,21 @@ html[data-theme="dark"] {
   --foreground: oklch(0.92 0.005 260);
   --text-secondary: oklch(0.74 0.008 260);
   --accent: oklch(0.72 0.13 255);
+  --accent-foreground: oklch(0.18 0.006 260);
+}
+
+/* No-JS fallback: ThemeManager's inline script always sets data-theme, so
+   this only matches when JavaScript is disabled or blocked. It keeps the
+   dark palette in sync with the tokens instead of a hand-copied <noscript>. */
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme]) {
+    --background: oklch(0.18 0.006 260);
+    --muted: oklch(0.22 0.008 260);
+    --border: oklch(0.45 0.01 260);
+    --code-bg: oklch(0.285 0.008 260);
+    --foreground: oklch(0.92 0.005 260);
+    --text-secondary: oklch(0.74 0.008 260);
+    --accent: oklch(0.72 0.13 255);
+    --accent-foreground: oklch(0.18 0.006 260);
+  }
 }

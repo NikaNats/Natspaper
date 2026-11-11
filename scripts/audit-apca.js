@@ -96,6 +96,13 @@ const checks = [
     target: 60,
   },
   {
+    name: "Light Mode - Text on Accent Fill (skip link, primary button)",
+    text: parseHex(getHex(semantic.light.accent.foreground)),
+    bg: parseHex(getHex(semantic.light.accent.default)),
+    min: 45,
+    target: 60,
+  },
+  {
     name: "Dark Mode - Primary Body Text",
     text: parseHex(getHex(semantic.dark.text.primary)),
     bg: darkBg,
@@ -113,6 +120,13 @@ const checks = [
     name: "Dark Mode - Accent (mixed role)",
     text: parseHex(getHex(semantic.dark.accent.default)),
     bg: darkBg,
+    min: 45,
+    target: 60,
+  },
+  {
+    name: "Dark Mode - Text on Accent Fill (skip link, primary button)",
+    text: parseHex(getHex(semantic.dark.accent.foreground)),
+    bg: parseHex(getHex(semantic.dark.accent.default)),
     min: 45,
     target: 60,
   },

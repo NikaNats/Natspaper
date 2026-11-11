@@ -41,6 +41,11 @@
      default system stack because --font-inter was previously never declared. */
   --font-sans: var(--font-inter), var(--font-georgian), system-ui, sans-serif;
   --font-mono: var(--font-jetbrains-mono), ui-monospace, monospace;
+
+  /* Fluid display size (generates the `text-fluid-6xl` utility used by the
+     404 pages): 3.75rem on phones → 6rem on wide screens, no breakpoints. */
+  --text-fluid-6xl: clamp(3.75rem, 2.5rem + 6vw, 6rem);
+  --text-fluid-6xl--line-height: 1;
 }
 
 /* Map CSS Variables to Tailwind Utility Classes */
@@ -48,6 +53,8 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-accent: var(--accent);
+  /* Text on accent-filled surfaces; flips dark-on-light in dark mode. */
+  --color-accent-foreground: var(--accent-foreground);
   --color-muted: var(--muted);
   --color-border: var(--border);
   --color-subtle: var(--muted);

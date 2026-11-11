@@ -127,6 +127,11 @@
         "default": {
           "$extensions": { "com.natspaper.srgb": "#005FCC" },
           "$value": { "colorSpace": "oklch", "components": [0.52, 0.2, 260] }
+        },
+        "foreground": {
+          "$description": "Text/icons on an accent-filled surface (buttons, skip link, badges). WCAG 1.4.3: 6.0:1 on accent.default.",
+          "$extensions": { "com.natspaper.srgb": "#FFFFFF" },
+          "$value": { "colorSpace": "oklch", "components": [1, 0, 0] }
         }
       }
     },
@@ -167,6 +172,11 @@
           "$description": "Desaturated for dark-mode eye comfort; dual-gate: WCAG AA + APCA.",
           "$extensions": { "com.natspaper.srgb": "#6AADFF" },
           "$value": { "colorSpace": "oklch", "components": [0.72, 0.13, 255] }
+        },
+        "foreground": {
+          "$description": "Dark-on-light: white on the light dark-mode accent is only 2.4:1, so filled accent surfaces use the dark background (7.7:1, WCAG AA + APCA).",
+          "$extensions": { "com.natspaper.srgb": "#141517" },
+          "$value": { "colorSpace": "oklch", "components": [0.18, 0.006, 260] }
         }
       }
     }

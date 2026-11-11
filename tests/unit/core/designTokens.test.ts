@@ -57,6 +57,7 @@ describe("DTCG 2025.10 Design Tokens Format Specification", () => {
       "--border:",
       "--text-secondary:",
       "--code-bg:",
+      "--accent-foreground:",
     ]) {
       expect(compiledCss).toContain(varName);
     }
@@ -64,6 +65,22 @@ describe("DTCG 2025.10 Design Tokens Format Specification", () => {
     expect(compiledCss).toContain("--code-bg: oklch(0.9551 0 0);");
     expect(compiledCss).toMatch(
       /html\[data-theme="dark"\] \{[^}]*--foreground: oklch\(0\.92 0\.005 260\);/
+    );
+  });
+
+  it("flips accent-foreground to dark-on-light in dark mode (WCAG 1.4.3)", () => {
+    const compiledCss = compileTokens(fs.readFileSync(TOKENS_PATH, "utf8"));
+    // White on the light dark-mode accent is ~2.4:1; it must use the dark bg.
+    expect(compiledCss).toContain("--accent-foreground: oklch(1 0 0);");
+    expect(compiledCss).toMatch(
+      /html\[data-theme="dark"\] \{[^}]*--accent-foreground: oklch\(0\.18 0\.006 260\);/
+    );
+  });
+
+  it("emits a prefers-color-scheme fallback for pages without data-theme (no JS)", () => {
+    const compiledCss = compileTokens(fs.readFileSync(TOKENS_PATH, "utf8"));
+    expect(compiledCss).toMatch(
+      /@media \(prefers-color-scheme: dark\) \{\s*html:not\(\[data-theme\]\) \{[^}]*--background: oklch\(0\.18 0\.006 260\);/
     );
   });
 
