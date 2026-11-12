@@ -36,17 +36,30 @@ export interface ReadingTimeResult {
  * ```
  */
 import { FEATURES } from "@/config";
+import { getI18n } from "@/i18n";
+import type { Lang } from "@/i18n/config";
+import { formatNumber, formatReadingTimeLocalized } from "@/utils/i18n/date";
+
+/**
+ * Localized "N min read" label. Number formatting and the suffix both come
+ * from the i18n layer, so Georgian pages render "5 წთ კითხვა".
+ */
+function readingTimeLabel(minutes: number, locale: Lang): string {
+  const { t, lang } = getI18n(locale);
+  return formatReadingTimeLocalized(minutes, lang, t("post.readingTime"));
+}
 
 export function calculateReadingTime(
   content: string,
   // REFACTORED: Default value comes from global settings
-  wordsPerMinute: number = FEATURES.readingTimeWPM
+  wordsPerMinute: number = FEATURES.readingTimeWPM,
+  locale: Lang = "en"
 ): ReadingTimeResult {
   if (!content || typeof content !== "string") {
     return {
       minutes: 1,
       words: 0,
-      displayText: "1 min read",
+      displayText: readingTimeLabel(1, locale),
     };
   }
 
@@ -63,14 +76,15 @@ export function calculateReadingTime(
   return {
     minutes,
     words,
-    displayText: minutes === 1 ? "1 min read" : `${minutes} min read`,
+    displayText: readingTimeLabel(minutes, locale),
   };
 }
 
 /**
  * Format reading time with word count
  *
- * @param result - Result from calculateReadingTime()
+ * @param result - Result from calculateReadingTime() (computed for the same locale)
+ * @param locale - UI locale for number formatting and the "words" label
  * @returns Formatted string like "5 min read • 1,234 words"
  *
  * @example
@@ -80,9 +94,13 @@ export function calculateReadingTime(
  * console.log(formatted); // "5 min read • 1,234 words"
  * ```
  */
-export function formatReadingTime(result: ReadingTimeResult): string {
-  const wordCount = result.words.toLocaleString("en-US");
-  return `${result.displayText} • ${wordCount} words`;
+export function formatReadingTime(
+  result: ReadingTimeResult,
+  locale: Lang = "en"
+): string {
+  const { t, lang } = getI18n(locale);
+  const wordCount = formatNumber(result.words, lang);
+  return `${result.displayText} • ${wordCount} ${t("post.words")}`;
 }
 
 /**
@@ -93,6 +111,7 @@ export function formatReadingTime(result: ReadingTimeResult): string {
  *
  * @param content - The content to analyze
  * @param includeWordCount - Whether to include word count in output
+ * @param locale - UI locale (defaults to English)
  * @returns Formatted string like "5 min read" or "5 min read • 1,234 words"
  *
  * @example
@@ -106,10 +125,13 @@ export function formatReadingTime(result: ReadingTimeResult): string {
  */
 export function getReadingTimeDisplay(
   content: string,
-  includeWordCount: boolean = true
+  includeWordCount: boolean = true,
+  locale: Lang = "en"
 ): string {
-  const result = calculateReadingTime(content);
-  return includeWordCount ? formatReadingTime(result) : result.displayText;
+  const result = calculateReadingTime(content, FEATURES.readingTimeWPM, locale);
+  return includeWordCount
+    ? formatReadingTime(result, locale)
+    : result.displayText;
 }
 
 export interface CalibratedReadingTime {
@@ -177,13 +199,14 @@ export function calculateAcademicReadingTime(
  */
 export function calculateReadingTimeFromWords(
   wordCount: number,
-  wordsPerMinute: number = FEATURES.readingTimeWPM
+  wordsPerMinute: number = FEATURES.readingTimeWPM,
+  locale: Lang = "en"
 ): ReadingTimeResult {
   if (wordCount <= 0) {
     return {
       minutes: 1,
       words: 0,
-      displayText: "1 min read",
+      displayText: readingTimeLabel(1, locale),
     };
   }
 
@@ -193,6 +216,6 @@ export function calculateReadingTimeFromWords(
   return {
     minutes,
     words: wordCount,
-    displayText: minutes === 1 ? "1 min read" : `${minutes} min read`,
+    displayText: readingTimeLabel(minutes, locale),
   };
 }

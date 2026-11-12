@@ -1,9 +1,11 @@
 ---
 import type { MarkdownHeading } from "astro";
+import { getI18n, type Lang } from "@/i18n";
 export interface Props {
   headings: MarkdownHeading[];
 }
 const { headings } = Astro.props;
+const { t } = getI18n(Astro.currentLocale as Lang);
 const toc = headings.filter(h => h.depth >= 2 && h.depth <= 3);
 ---
 
@@ -14,7 +16,7 @@ const toc = headings.filter(h => h.depth >= 2 && h.depth <= 3);
       class="group rounded-xl border border-border bg-subtle p-3"
     >
       <summary class="flex min-h-[48px] cursor-pointer list-none items-center justify-between px-2 font-semibold text-foreground focus-visible:outline-accent [&::-webkit-details-marker]:hidden">
-        <span>On this page</span>
+        <span>{t("toc.onThisPage")}</span>
         <span
           class="chevron transition-transform group-open:rotate-90"
           aria-hidden="true"
@@ -22,7 +24,7 @@ const toc = headings.filter(h => h.depth >= 2 && h.depth <= 3);
           ›
         </span>
       </summary>
-      <nav class="px-2 pt-3 pb-2" aria-label="Table of contents">
+      <nav class="px-2 pt-3 pb-2" aria-label={t("a11y.tableOfContents")}>
         <ul class="flex flex-col gap-2">
           {toc.map(heading => (
             <li class:list={[{ "ps-4": heading.depth === 3 }]}>

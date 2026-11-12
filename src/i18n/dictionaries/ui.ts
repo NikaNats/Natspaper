@@ -77,6 +77,48 @@ export const ui = {
     "a11y.postTags": "Post tags",
     "a11y.tableOfContents": "Table of contents",
     "a11y.postNavigation": "Post Navigation",
+    "a11y.breadcrumb": "Breadcrumb",
+    "a11y.pagination": "Pagination",
+    "a11y.seriesParts": "Series parts",
+    "a11y.backToTop": "Back to top of page",
+    "a11y.readPost": "Read post: {title}",
+    "a11y.readFeaturedPost": "Read featured post: {title}",
+    "a11y.languageNotice": "Language availability notice",
+
+    // Reading time
+    "post.words": "words",
+
+    // Table of contents
+    "toc.onThisPage": "On this page",
+
+    // Cards
+    "post.readArticle": "Read article",
+
+    // Back to top
+    "nav.backToTop": "Back to top",
+
+    // Series
+    "post.seriesCurrent": "Current",
+
+    // Language picker
+    "nav.switchLanguage": "Switch to {language}",
+
+    // Share links
+    "share.via": "Share this post via {platform}",
+    "share.on": "Share this post on {platform}",
+    "share.viaEmail": "Share this post via email",
+
+    // Provenance / citation
+    "post.published": "Published:",
+    "post.substantialRevision": "Substantial Revision:",
+    "post.citeThis": "Cite this treatise",
+    "post.copyBibtex": "Copy BibTeX",
+    "post.copied": "Copied!",
+
+    // Translation fallback notice
+    "post.fallbackTitle": "Article only available in English",
+    "post.fallbackBody":
+      "Site navigation remains in your selected language, but the body content is served in the original language.",
   },
   ka: {
     // Navigation - keeping "post" and "tag" in English
@@ -146,6 +188,48 @@ export const ui = {
     "a11y.postTags": "პოსტის თეგები",
     "a11y.tableOfContents": "სარჩევი",
     "a11y.postNavigation": "პოსტებში ნავიგაცია",
+    "a11y.breadcrumb": "ნავიგაციის ბილიკი",
+    "a11y.pagination": "გვერდებად დაყოფა",
+    "a11y.seriesParts": "სერიის ნაწილები",
+    "a11y.backToTop": "გვერდის თავში დაბრუნება",
+    "a11y.readPost": "პოსტის წაკითხვა: {title}",
+    "a11y.readFeaturedPost": "გამორჩეული პოსტის წაკითხვა: {title}",
+    "a11y.languageNotice": "შეტყობინება ენის ხელმისაწვდომობის შესახებ",
+
+    // Reading time
+    "post.words": "სიტყვა",
+
+    // Table of contents
+    "toc.onThisPage": "ამ გვერდზე",
+
+    // Cards
+    "post.readArticle": "სტატიის წაკითხვა",
+
+    // Back to top
+    "nav.backToTop": "თავში დაბრუნება",
+
+    // Series
+    "post.seriesCurrent": "მიმდინარე",
+
+    // Language picker
+    "nav.switchLanguage": "ენის შეცვლა: {language}",
+
+    // Share links
+    "share.via": "გაზიარება {platform}-ით",
+    "share.on": "გაზიარება {platform}-ზე",
+    "share.viaEmail": "ელფოსტით გაზიარება",
+
+    // Provenance / citation
+    "post.published": "გამოქვეყნდა:",
+    "post.substantialRevision": "არსებითი განახლება:",
+    "post.citeThis": "ციტირება",
+    "post.copyBibtex": "BibTeX-ის კოპირება",
+    "post.copied": "დაკოპირდა!",
+
+    // Translation fallback notice
+    "post.fallbackTitle": "სტატია ხელმისაწვდომია მხოლოდ ინგლისურ ენაზე",
+    "post.fallbackBody":
+      "თქვენ იმყოფებით ქართულენოვან ინტერფეისში, თუმცა წინამდებარე პუბლიკაცია წარმოდგენილია ორიგინალ ენაზე.",
   },
 } as const;
 

@@ -341,4 +341,29 @@ Then create a simple \`hello.ts\` file and compile it.
       expect(result.displayText).toMatch(/min read/);
     });
   });
+
+  describe("localization", () => {
+    it("defaults to English when no locale is given", () => {
+      expect(calculateReadingTime("one two three").displayText).toBe(
+        "1 min read"
+      );
+    });
+
+    it("renders Georgian labels and number formatting for ka", () => {
+      const result = calculateReadingTimeFromWords(1234, 200, "ka");
+      expect(result.displayText).toBe("7 წთ კითხვა");
+      expect(formatReadingTime(result, "ka")).toMatch(
+        /^7 წთ კითხვა • 1\s?234 სიტყვა$/u
+      );
+    });
+
+    it("getReadingTimeDisplay passes the locale through", () => {
+      expect(getReadingTimeDisplay("word ".repeat(10), false, "ka")).toBe(
+        "1 წთ კითხვა"
+      );
+      expect(getReadingTimeDisplay("word ".repeat(10), true, "ka")).toBe(
+        "1 წთ კითხვა • 10 სიტყვა"
+      );
+    });
+  });
 });

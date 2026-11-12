@@ -28,6 +28,7 @@ import {
 } from "@/utils/post";
 import Datetime from "./Datetime.astro";
 import ReadingTime from "./ReadingTime.astro";
+import { getI18n, type Lang } from "@/i18n";
 
 export interface Props extends HTMLAttributes<"li"> {
   href: string;
@@ -46,8 +47,12 @@ const {
   tags = [],
 } = frontmatter;
 
+const { t, lang } = getI18n(Astro.currentLocale as Lang);
+
 // Computed values
-const readingTimeText = body ? getReadingTimeDisplay(body) : undefined;
+const readingTimeText = body
+  ? getReadingTimeDisplay(body, true, lang)
+  : undefined;
 
 // Limit visible tags for clean UI
 const MAX_TAGS = 3;
@@ -63,7 +68,7 @@ const hiddenTagsCount = tags.length - MAX_TAGS;
   <a
     {href}
     class="featured-card__link"
-    aria-label={`Read featured post: ${title}`}
+    aria-label={t("a11y.readFeaturedPost", { title })}
   >
     <article class="featured-card__article">
       {/* Decorative gradient orbs */}
@@ -81,7 +86,7 @@ const hiddenTagsCount = tags.length - MAX_TAGS;
         <span class="featured-card__ribbon-icon" aria-hidden="true">
           ⭐
         </span>
-        <span class="featured-card__ribbon-text">Featured</span>
+        <span class="featured-card__ribbon-text">{t("post.featured")}</span>
       </div>
 
       {/* Content wrapper */}
@@ -105,7 +110,11 @@ const hiddenTagsCount = tags.length - MAX_TAGS;
 
         {/* Tags */}
         {visibleTags.length > 0 && (
-          <div class="featured-card__tags" role="list" aria-label="Post tags">
+          <div
+            class="featured-card__tags"
+            role="list"
+            aria-label={t("a11y.postTags")}
+          >
             {visibleTags.map((tag: string) => (
               <span class="featured-card__tag" role="listitem">
                 #{tag}
@@ -121,7 +130,7 @@ const hiddenTagsCount = tags.length - MAX_TAGS;
 
         {/* Read more indicator */}
         <div class="featured-card__cta">
-          <span class="featured-card__cta-text">Read article</span>
+          <span class="featured-card__cta-text">{t("post.readArticle")}</span>
           <svg
             class="featured-card__cta-arrow"
             width="20"

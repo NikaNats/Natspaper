@@ -22,6 +22,7 @@
  */
 
 import type { BreadcrumbItem } from "@/types";
+import { getI18n, type Lang } from "@/i18n";
 
 interface Props {
   items: BreadcrumbItem[];
@@ -29,9 +30,13 @@ interface Props {
 }
 
 const { items, class: className = "" } = Astro.props;
+const { t } = getI18n(Astro.currentLocale as Lang);
 ---
 
-<nav aria-label="Breadcrumb" class:list={["breadcrumb-nav", className]}>
+<nav
+  aria-label={t("a11y.breadcrumb")}
+  class:list={["breadcrumb-nav", className]}
+>
   <ol
     class="flex flex-wrap items-center gap-1.5 text-sm text-text-secondary"
     itemscope

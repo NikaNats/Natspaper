@@ -1,4 +1,7 @@
 ---
+import { getI18n, type Lang } from "@/i18n";
+import { formatDate } from "@/utils/i18n/date";
+
 export interface Props {
   title: string;
   author: string;
@@ -6,31 +9,34 @@ export interface Props {
   modDate?: Date | null;
   canonicalUrl: string;
   slug: string;
+  locale?: Lang;
 }
-const { title, author, pubDate, modDate, canonicalUrl, slug } = Astro.props;
+const { title, author, pubDate, modDate, canonicalUrl, slug, locale } =
+  Astro.props;
+const { t, lang } = getI18n(locale ?? (Astro.currentLocale as Lang));
 
 const bibtex = `@article{nats_${slug},
   author = {${author}},
   title = {${title}},
   url = {${canonicalUrl}},
   year = {${pubDate.getFullYear()}},
-  month = {${pubDate.toLocaleString("en-US", { month: "short" }).toLowerCase()}}
+  month = {${pubDate.toLocaleString("en-US", { month: "short", timeZone: "UTC" }).toLowerCase()}}
 }`;
 ---
 
 <div class="provenance-block my-8 rounded-lg border border-border bg-subtle p-4 text-xs text-text-secondary">
   <div class="mb-3 flex flex-wrap justify-between gap-2 border-b border-border pb-3">
     <span>
-      Published:{" "}
+      {t("post.published")}{" "}
       <time datetime={pubDate.toISOString()}>
-        {pubDate.toLocaleDateString("en-US", { dateStyle: "long" })}
+        {formatDate(pubDate, lang, "long")}
       </time>
     </span>
     {modDate && (
       <span>
-        Substantial Revision:{" "}
+        {t("post.substantialRevision")}{" "}
         <time datetime={modDate.toISOString()}>
-          {modDate.toLocaleDateString("en-US", { dateStyle: "long" })}
+          {formatDate(modDate, lang, "long")}
         </time>
       </span>
     )}
@@ -38,13 +44,16 @@ const bibtex = `@article{nats_${slug},
 
   <div class="flex items-center justify-between">
     <span class="font-semibold tracking-wider uppercase">
-      Cite this treatise
+      {t("post.citeThis")}
     </span>
     <button
+      type="button"
       class="copy-bibtex-btn rounded border border-border px-2.5 py-1 text-foreground hover:bg-muted focus-visible:outline-accent"
       data-bibtex={bibtex}
+      data-copied-label={t("post.copied")}
+      aria-live="polite"
     >
-      Copy BibTeX
+      {t("post.copyBibtex")}
     </button>
   </div>
 </div>
@@ -63,7 +72,7 @@ const bibtex = `@article{nats_${slug},
             return;
           }
           const original = btn.textContent;
-          btn.textContent = "Copied!";
+          btn.textContent = btn.dataset.copiedLabel ?? original;
           setTimeout(() => {
             btn.textContent = original;
           }, 2000);

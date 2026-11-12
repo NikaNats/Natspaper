@@ -32,7 +32,7 @@ const { t } = getI18n(Astro.currentLocale as Lang);
       "mt-auto mb-8 flex items-center justify-center gap-4",
       className,
     ]}
-    aria-label="Pagination"
+    aria-label={t("a11y.pagination")}
     data-testid="pagination"
   >
     {/* SEO: rel="prev" tells search engines about pagination sequence */}

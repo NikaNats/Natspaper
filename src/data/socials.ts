@@ -1,5 +1,6 @@
 import { SOCIALS } from "@/config";
 import type { SvgComponent } from "astro/types";
+import type { UIKey } from "@/i18n/dictionaries/ui";
 
 // Import all icons dynamically or explicitly
 import IconMail from "@/assets/icons/IconMail.svg";
@@ -32,41 +33,51 @@ export const getSocials = () => {
   }));
 };
 
-export const SHARE_LINKS = [
+/**
+ * Share targets. Labels are i18n keys (resolved with `t(titleKey, { platform:
+ * name })` in ShareLinks.astro), never hardcoded English, so Georgian pages
+ * get Georgian accessible names.
+ */
+export const SHARE_LINKS: ReadonlyArray<{
+  name: string;
+  href: string;
+  titleKey: UIKey;
+  icon: SvgComponent;
+}> = [
   {
     name: "WhatsApp",
     href: "https://wa.me/?text=",
-    linkTitle: () => `Share this post via WhatsApp`,
+    titleKey: "share.via",
     icon: IconWhatsapp,
   },
   {
     name: "Facebook",
     href: "https://www.facebook.com/sharer.php?u=",
-    linkTitle: () => `Share this post on Facebook`,
+    titleKey: "share.on",
     icon: IconFacebook,
   },
   {
     name: "X",
     href: "https://x.com/intent/post?url=",
-    linkTitle: () => `Share this post on X`,
+    titleKey: "share.on",
     icon: IconBrandX,
   },
   {
     name: "Telegram",
     href: "https://t.me/share/url?url=",
-    linkTitle: () => `Share this post via Telegram`,
+    titleKey: "share.via",
     icon: IconTelegram,
   },
   {
     name: "Pinterest",
     href: "https://pinterest.com/pin/create/button/?url=",
-    linkTitle: () => `Share this post on Pinterest`,
+    titleKey: "share.on",
     icon: IconPinterest,
   },
   {
     name: "Mail",
     href: "mailto:?subject=See%20this%20post&body=",
-    linkTitle: () => `Share this post via email`,
+    titleKey: "share.viaEmail",
     icon: IconMail,
   },
-] as const;
+];

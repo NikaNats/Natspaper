@@ -25,6 +25,7 @@ import {
   calculateReadingTimeFromWords,
   formatReadingTime,
   getPostTitleTransitionName,
+  getPostUrl,
 } from "@/utils/post";
 import Datetime from "./Datetime.astro";
 import ReadingTime from "./ReadingTime.astro";
@@ -62,16 +63,19 @@ const {
 } = Astro.props;
 
 // Get translations for current locale
-const { t } = getI18n(Astro.currentLocale as Lang);
+const { t, lang } = getI18n(Astro.currentLocale as Lang);
 
 // Polymorphic Heading for semantic flexibility
 const Heading = variant;
 
 // Computed values
-const href = `/${Astro.currentLocale}/posts/${slug}`;
+const href = getPostUrl(lang, slug);
 const readingTime =
   wordCount > 0
-    ? formatReadingTime(calculateReadingTimeFromWords(wordCount))
+    ? formatReadingTime(
+        calculateReadingTimeFromWords(wordCount, undefined, lang),
+        lang
+      )
     : null;
 
 // Limit visible tags for clean UI
@@ -81,7 +85,7 @@ const hiddenTagsCount = tags.length - MAX_TAGS;
 ---
 
 <li class="post-card" data-testid="post-card">
-  <a {href} class="post-card__link" aria-label={`Read post: ${title}`}>
+  <a {href} class="post-card__link" aria-label={t("a11y.readPost", { title })}>
     <article
       class:list={[
         "post-card__article",
@@ -123,7 +127,11 @@ const hiddenTagsCount = tags.length - MAX_TAGS;
 
       {/* Tags */}
       {visibleTags.length > 0 && (
-        <div class="post-card__tags" role="list" aria-label="Post tags">
+        <div
+          class="post-card__tags"
+          role="list"
+          aria-label={t("a11y.postTags")}
+        >
           {visibleTags.map(tag => (
             <span class="post-card__tag" role="listitem">
               #{tag}
@@ -226,8 +234,13 @@ const hiddenTagsCount = tags.length - MAX_TAGS;
     background: color-mix(in oklab, var(--color-accent) 10%, transparent);
     font-size: clamp(0.6875rem, 0.625rem + 0.125vw, 0.75rem);
     font-weight: 600;
-    /* Darken accent by 10% to achieve ≥4.5:1 contrast on the light background */
-    color: color-mix(in oklab, var(--color-accent) 90%, #000000);
+    /* Mix toward the foreground, not black: darkens in light mode and
+       lightens in dark mode, so contrast improves in both themes. */
+    color: color-mix(
+      in oklab,
+      var(--color-accent) 85%,
+      var(--color-foreground)
+    );
   }
 
   /* Language Badge - Different styling */
@@ -311,8 +324,12 @@ const hiddenTagsCount = tags.length - MAX_TAGS;
   .post-card__link:hover .post-card__tag,
   .post-card__link:focus-visible .post-card__tag {
     background: color-mix(in oklab, var(--color-accent) 10%, transparent);
-    /* Darken accent by 10% to achieve ≥4.5:1 contrast on the light background */
-    color: color-mix(in oklab, var(--color-accent) 90%, #000000);
+    /* Theme-adaptive: see .post-card__badge */
+    color: color-mix(
+      in oklab,
+      var(--color-accent) 85%,
+      var(--color-foreground)
+    );
   }
 
   .post-card__tag-overflow {

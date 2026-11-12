@@ -15,10 +15,7 @@ const { t } = getI18n(Astro.currentLocale as Lang);
     <div class="flex flex-wrap justify-center gap-1 sm:justify-start">
       {SHARE_LINKS.map(social => {
         const Icon = social.icon;
-        const linkTitle =
-          typeof social.linkTitle === "function"
-            ? social.linkTitle()
-            : social.linkTitle;
+        const linkTitle = t(social.titleKey, { platform: social.name });
 
         return (
           <LinkButton

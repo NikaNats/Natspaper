@@ -4,6 +4,8 @@
 // WCAG 2.5.3 (Label in Name): the accessible name starts with the visible code,
 // so voice-control users can say "click KA".
 
+import { getI18n, type Lang } from "@/i18n";
+
 export interface LanguageLink {
   code: string;
   name: string;
@@ -15,6 +17,7 @@ export interface Props {
 }
 
 const { links } = Astro.props;
+const { t } = getI18n(Astro.currentLocale as Lang);
 ---
 
 <div
@@ -42,8 +45,8 @@ const { links } = Astro.props;
         "focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none",
       ]}
       hreflang={code}
-      title={`Switch to ${name}`}
-      aria-label={`${code.toUpperCase()}: Switch to ${name}`}
+      title={t("nav.switchLanguage", { language: name })}
+      aria-label={`${code.toUpperCase()}: ${t("nav.switchLanguage", { language: name })}`}
     >
       {code.toUpperCase()}
     </a>

@@ -1,8 +1,8 @@
 ---
 // src/components/post/SeriesBox.astro
-import { getI18n } from "@/i18n";
+import { getI18n, type Lang } from "@/i18n";
 import type { PostWithFallback } from "@/utils/post/repository";
-import { getLastPathSegment } from "@/utils/core/slugify";
+import { getPostUrl } from "@/utils/post/postUrl";
 
 export interface Props {
   seriesParts: PostWithFallback[];
@@ -11,7 +11,7 @@ export interface Props {
 }
 
 const { seriesParts, currentPostId, locale } = Astro.props;
-const { t } = getI18n(locale as "en" | "ka");
+const { t } = getI18n(locale as Lang);
 const seriesData = seriesParts[0]?.post.data.series;
 const currentIndex = seriesParts.findIndex(p => p.post.id === currentPostId);
 ---
@@ -38,11 +38,10 @@ const currentIndex = seriesParts.findIndex(p => p.post.id === currentPostId);
     </p>
   </div>
 
-  <nav class="px-4 pt-4 pb-4" aria-label="Series parts">
+  <nav class="px-4 pt-4 pb-4" aria-label={t("a11y.seriesParts")}>
     <ul class="space-y-1">
       {seriesParts.map((part, index) => {
         const isCurrent = part.post.id === currentPostId;
-        const slug = getLastPathSegment(part.post.slug);
         // The current part is not a link: an <a> without href is not
         // keyboard-focusable as a link and fails anchor audits. A plain
         // <span> with aria-current keeps the list semantics intact.
@@ -55,7 +54,9 @@ const currentIndex = seriesParts.findIndex(p => p.post.id === currentPostId);
         ];
         const badgeClasses = [
           "flex h-5 w-5 shrink-0 items-center justify-center rounded-full border text-[10px] transition-colors",
-          isCurrent ? "border-accent bg-accent text-white" : "border-border",
+          isCurrent
+            ? "border-accent bg-accent text-accent-foreground"
+            : "border-border",
         ];
 
         return (
@@ -65,11 +66,14 @@ const currentIndex = seriesParts.findIndex(p => p.post.id === currentPostId);
                 <span class:list={badgeClasses}>{index + 1}</span>
                 <span class="flex-1 truncate">{part.post.data.title}</span>
                 <span class="text-[9px] tracking-widest uppercase opacity-60">
-                  Current
+                  {t("post.seriesCurrent")}
                 </span>
               </span>
             ) : (
-              <a href={`/${locale}/posts/${slug}`} class:list={itemClasses}>
+              <a
+                href={getPostUrl(locale, part.post.slug)}
+                class:list={itemClasses}
+              >
                 <span class:list={badgeClasses}>{index + 1}</span>
                 <span class="flex-1 truncate">{part.post.data.title}</span>
                 {part.isFallback && (
