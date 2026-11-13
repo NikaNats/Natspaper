@@ -1,7 +1,7 @@
 import type { APIRoute } from "astro";
 import type { CollectionEntry } from "astro:content";
 import { PostRepository } from "@/utils/post/repository";
-import { getLastPathSegment } from "@/utils/core/slugify";
+import { getPostSlug } from "@/utils/post/postUrl";
 import { generateOgImageForPost } from "@/utils/og";
 import { ogImageLimiter } from "@/utils/core";
 import { FEATURES } from "@/config";
@@ -30,7 +30,7 @@ export async function getStaticPaths() {
     );
 
     for (const post of posts) {
-      const slug = getLastPathSegment(String(post.id));
+      const slug = getPostSlug(post.slug);
       paths.push({
         params: { locale, slug },
         props: post,

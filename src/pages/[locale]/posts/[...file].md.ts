@@ -13,7 +13,7 @@
 
 import type { APIRoute } from "astro";
 import { PostRepository } from "@/utils/post/repository";
-import { getLastPathSegment } from "@/utils/core/slugify";
+import { getPostSlug } from "@/utils/post/postUrl";
 import { SUPPORTED_LANGS } from "@/i18n/config";
 import type { Lang } from "@/i18n";
 
@@ -31,7 +31,7 @@ export async function getStaticPaths() {
     // Map them to the [...file] param
     for (const post of posts) {
       // Extract clean slug (e.g., "my-post")
-      const slug = getLastPathSegment(post.slug);
+      const slug = getPostSlug(post.slug);
       paths.push({
         params: {
           locale,

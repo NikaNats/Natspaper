@@ -10,13 +10,18 @@ import { getI18n, type Lang } from "@/i18n";
 import { LANGUAGES, SUPPORTED_LANGS } from "@/i18n/config";
 
 const { pathname } = Astro.url;
-const { t } = getI18n(Astro.currentLocale as Lang);
+// getI18n normalizes an undefined/unknown locale (e.g. the root /404 page,
+// which lives outside the /{locale}/ namespace) to the default language.
+const { t, lang: locale } = getI18n(Astro.currentLocale as Lang);
 
-// REFACTORED: Dynamic generation of language links
+// Strip only a leading locale SEGMENT ("/en/..." or "/en"), never a substring.
+const localePrefix = new RegExp(`^/(?:${SUPPORTED_LANGS.join("|")})(?=/|$)`);
+const pathWithoutLocale = pathname.replace(localePrefix, "");
+
 const otherLanguageLinks: LanguageLink[] = SUPPORTED_LANGS.filter(
-  lang => lang !== Astro.currentLocale
+  lang => lang !== locale
 ).map(lang => {
-  const path = pathname.replace(`/${Astro.currentLocale}`, "");
+  const path = pathWithoutLocale;
   return {
     code: lang,
     name: LANGUAGES[lang], // Access friendly name from map
@@ -29,7 +34,7 @@ const otherLanguageLinks: LanguageLink[] = SUPPORTED_LANGS.filter(
   <div class="mx-auto flex w-full max-w-app items-center justify-between px-4">
     <nav class="relative flex h-16 w-full items-center justify-between gap-4 border-transparent bg-transparent transition-colors">
       <a
-        href={`/${Astro.currentLocale}/`}
+        href={`/${locale}/`}
         class="shrink-0 rounded-md font-sans text-lg font-bold text-foreground no-underline transition-colors hover:text-accent focus:outline-none"
         title={t("nav.home")}
         translate="no"
@@ -41,7 +46,7 @@ const otherLanguageLinks: LanguageLink[] = SUPPORTED_LANGS.filter(
         <!-- Mobile Menu Component -->
         <MobileMenu
           currentPath={pathname}
-          locale={Astro.currentLocale}
+          locale={locale}
           otherLanguageLinks={otherLanguageLinks}
         />
       </div>

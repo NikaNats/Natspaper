@@ -1,6 +1,6 @@
 import type { CollectionEntry } from "astro:content";
 import { FEATURES } from "@/config";
-import { getPostUrl } from "./postUrl";
+import { getPostLocale, getPostUrl } from "./postUrl";
 import type { Lang } from "@/i18n/config";
 
 /**
@@ -173,7 +173,14 @@ export function generatePostStructuredData(
     ogImage: ogImageData,
   } = post.data;
 
-  const ogImageUrl = resolveOgImageUrl(ogImageData, post.slug, siteUrl, locale);
+  // Dynamic OG images exist only under the entry's SOURCE locale; keying on
+  // the route locale would emit a 404 image URL for fallback translations.
+  const ogImageUrl = resolveOgImageUrl(
+    ogImageData,
+    post.slug,
+    siteUrl,
+    getPostLocale(post.id) ?? locale
+  );
 
   return {
     "@context": "https://schema.org",

@@ -1,7 +1,12 @@
 ---
 // src/components/features/Seo.astro (excerpt)
 import { SITE } from "@/config";
-import { SUPPORTED_LANGS, LOCALE_CODES, type Lang } from "@/i18n/config";
+import {
+  DEFAULT_LANG,
+  SUPPORTED_LANGS,
+  LOCALE_CODES,
+  type Lang,
+} from "@/i18n/config";
 import { canonicalizeLanguageTag, toOpenGraphLocale } from "@/utils/i18n/bcp47";
 import { getRelativeLocaleUrl } from "astro:i18n";
 
@@ -35,7 +40,7 @@ const title =
       ? pageTitle
       : `${pageTitle}${siteSuffix}`;
 const description = pageDescription ?? SITE.desc;
-const currentLocale = (Astro.currentLocale as Lang) ?? "en";
+const currentLocale = (Astro.currentLocale as Lang) ?? DEFAULT_LANG;
 
 const canonicalURL =
   pageCanonicalURL ?? new URL(Astro.url.pathname, Astro.site).href;
@@ -54,13 +59,15 @@ const truncatedTitle = title;
 const truncatedDescription =
   description.length > 160 ? `${description.slice(0, 157)}...` : description;
 
-function getHreflangAlternates(): Array<{ lang: string; href: string }> {
-  const pathname = Astro.url.pathname;
-  const pathWithoutLocale = pathname.replace(
-    new RegExp(`^/(${SUPPORTED_LANGS.join("|")})`),
-    ""
-  );
+// Path with its leading locale SEGMENT removed ("/ka/posts/x" → "/posts/x").
+// Derived from SUPPORTED_LANGS so adding a locale needs no change here; the
+// lookahead keeps e.g. "/english-notes" from being mistaken for "/en".
+const pathWithoutLocale = Astro.url.pathname.replace(
+  new RegExp(`^/(?:${SUPPORTED_LANGS.join("|")})(?=/|$)`),
+  ""
+);
 
+function getHreflangAlternates(): Array<{ lang: string; href: string }> {
   return SUPPORTED_LANGS.map(lang => ({
     // RFC 5646: Use exact BCP 47 tag for hreflang
     lang: LOCALE_CODES[lang] ?? lang,
@@ -74,8 +81,9 @@ let hreflangAlternates = getHreflangAlternates();
 // When noindex (locale fallback), prune non-canonical alternates and keep only
 // the English original + x-default to avoid duplicate-content indexing.
 if (noindex) {
+  const defaultTag = LOCALE_CODES[DEFAULT_LANG];
   hreflangAlternates = hreflangAlternates.filter(
-    ({ lang }) => lang === "en-US"
+    ({ lang }) => lang === defaultTag
   );
 }
 ---
@@ -105,10 +113,8 @@ if (noindex) {
   rel="alternate"
   hreflang="x-default"
   href={
-    new URL(
-      getRelativeLocaleUrl("en", Astro.url.pathname.replace(/^\/(en|ka)/, "")),
-      Astro.site
-    ).href
+    new URL(getRelativeLocaleUrl(DEFAULT_LANG, pathWithoutLocale), Astro.site)
+      .href
   }
 />
 

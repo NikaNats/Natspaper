@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { getPostSlug, getPostUrl } from "@/utils/post/postUrl";
+import { getPostLocale, getPostSlug, getPostUrl } from "@/utils/post/postUrl";
 
 describe("postUrl", () => {
   describe("getPostSlug()", () => {
@@ -55,6 +55,19 @@ describe("postUrl", () => {
       const url = getPostUrl("en", "en/cross-locale-fallback");
       expect(url).toMatch(/^\/(en|ka)\/posts\/[^/]+$/);
       expect(url.startsWith("/en/posts/en/")).toBe(false);
+    });
+  });
+
+  describe("getPostLocale()", () => {
+    it("returns the source locale of a locale-prefixed entry ID", () => {
+      expect(getPostLocale("en/my-post")).toBe("en");
+      expect(getPostLocale("ka/my-post")).toBe("ka");
+    });
+
+    it("returns undefined for bare slugs and unknown prefixes", () => {
+      expect(getPostLocale("my-post")).toBeUndefined();
+      expect(getPostLocale("fr/my-post")).toBeUndefined();
+      expect(getPostLocale(undefined)).toBeUndefined();
     });
   });
 });

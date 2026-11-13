@@ -1,6 +1,6 @@
 ---
 import type { GetStaticPaths } from "astro";
-import { getLastPathSegment } from "@/utils/core/slugify";
+import { getPostSlug } from "@/utils/post/postUrl";
 import Main from "@/layouts/Main.astro";
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/layout/Header.astro";
@@ -97,7 +97,7 @@ const pageContent = pageContentByLocale[locale];
             pubDatetime={item.data.pubDatetime}
             modDatetime={item.data.modDatetime}
             timezone={item.data.timezone}
-            slug={getLastPathSegment(item.slug)}
+            slug={getPostSlug(item.slug)}
             wordCount={wordCount}
             tags={item.data.tags}
             featured={item.data.featured}

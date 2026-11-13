@@ -1,6 +1,6 @@
 ---
 import { type CollectionEntry } from "astro:content";
-import { getLastPathSegment } from "@/utils/core/slugify";
+import { getPostSlug } from "@/utils/post/postUrl";
 import PostDetails from "@/layouts/PostDetails.astro";
 import { SUPPORTED_LANGS, DEFAULT_LANG } from "@/i18n/config";
 import type { Lang } from "@/i18n";
@@ -26,7 +26,7 @@ export async function getStaticPaths() {
 
     for (const { post, isFallback, originalLocale } of postsWithFallback) {
       postResult.push({
-        params: { locale, slug: getLastPathSegment(post.slug) },
+        params: { locale, slug: getPostSlug(post.slug) },
         props: { post, isFallback, originalLocale },
       });
     }

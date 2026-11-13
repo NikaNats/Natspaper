@@ -1,5 +1,5 @@
 import { getLastPathSegment } from "@/utils/core/slugify";
-import type { Lang } from "@/i18n/config";
+import { SUPPORTED_LANGS, type Lang } from "@/i18n/config";
 
 /**
  * Strip a trailing markdown extension, if present.
@@ -53,4 +53,22 @@ export function getPostUrl(
   postIdOrSlug: string | undefined
 ): string {
   return `/${locale}/posts/${getPostSlug(postIdOrSlug)}`;
+}
+
+/**
+ * Resolve the SOURCE locale of a blog entry from its locale-prefixed ID
+ * ("ka/my-post" → "ka").
+ *
+ * Per-entry artifacts (e.g. the dynamic OG image at
+ * "/{sourceLocale}/posts/{slug}.png") exist only for the locale the entry was
+ * written in. When a page renders a fallback translation, callers must key
+ * those artifacts on this value, never on the route locale.
+ *
+ * @returns The source locale, or `undefined` for un-prefixed IDs
+ */
+export function getPostLocale(postId: string | undefined): Lang | undefined {
+  const first = postId?.split("/")[0];
+  return first && (SUPPORTED_LANGS as readonly string[]).includes(first)
+    ? (first as Lang)
+    : undefined;
 }

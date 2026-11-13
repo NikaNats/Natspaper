@@ -1,7 +1,7 @@
 ---
 import type { GetStaticPaths } from "astro";
 import { PostRepository } from "@/utils/post/repository";
-import { getLastPathSegment } from "@/utils/core/slugify";
+import { getPostSlug } from "@/utils/post/postUrl";
 import Main from "@/layouts/Main.astro";
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/layout/Header.astro";
@@ -184,7 +184,7 @@ const pageContent = pageContentByLocale[locale];
                                 pubDatetime={data.pubDatetime}
                                 modDatetime={null}
                                 timezone={data.timezone}
-                                slug={getLastPathSegment(slug)}
+                                slug={getPostSlug(slug)}
                                 wordCount={wordCount}
                                 variant="h3"
                                 isFallback={isFallback}
