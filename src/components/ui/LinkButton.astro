@@ -62,10 +62,17 @@ const computedRel = getRelAttribute();
     <slot />
   </a>
 ) : (
+  /* Disabled state (e.g. "Previous" on page 1). ARIA in HTML forbids
+     aria-disabled on a role-less <span>; role="link" makes it a disabled
+     link that screen readers announce as "link, dimmed/unavailable", and it
+     keeps the same accessible name as the enabled variant. Not focusable,
+     matching native disabled controls. */
   <span
     id={id}
+    role="link"
     class:list={["inline-flex", className]}
     title={title}
+    aria-label={ariaLabel}
     aria-disabled="true"
   >
     <slot />

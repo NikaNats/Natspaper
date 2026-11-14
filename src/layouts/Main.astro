@@ -24,6 +24,8 @@ import { FEATURES } from "@/config";
  * - hero: Full-bleed content above the main area
  * - sidebar: Right-aligned sidebar content (TOC, related posts, etc.)
  * - before-title: Content before the page title
+ * - title: Replaces the default <h1> (custom markup, test ids, transitions).
+ *   `pageTitle` is still required: it documents the page and is the fallback.
  * - after-title: Content after the title, before description
  * - before-content: Content before main slot
  * - after-content: Content after main slot (comments, related posts)
@@ -96,6 +98,7 @@ const { width = "app", layout = "default", hideTitle = false } = props;
 
 const backUrl = FEATURES.showBackButton ? Astro.url.pathname : "/";
 const hasSidebar = Astro.slots.has("sidebar");
+const hasTitleSlot = Astro.slots.has("title");
 
 /**
  * Width configuration using min() for automatic mobile padding
@@ -127,7 +130,9 @@ const layoutClass =
       <!-- Before title slot (breadcrumbs, back links, etc.) -->
       <slot name="before-title" />
 
+      {!hideTitle && hasTitleSlot && <slot name="title" />}
       {!hideTitle &&
+        !hasTitleSlot &&
         ("titleTransition" in props ? (
           <h1 class="main-heading mb-6">
             {props.pageTitle[0]}

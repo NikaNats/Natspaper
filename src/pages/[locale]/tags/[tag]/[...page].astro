@@ -1,14 +1,13 @@
 ---
 import { PostRepository } from "@/utils/post/repository";
 import type { GetStaticPathsOptions } from "astro";
-import { getLastPathSegment } from "@/utils/core/slugify";
 import Main from "@/layouts/Main.astro";
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/layout/Header.astro";
 import Footer from "@/components/layout/Footer.astro";
 import PostSummaryCard from "@/components/post/PostSummaryCard.astro";
 import Pagination from "@/components/ui/Pagination.astro";
-import { getUniqueTags, getPostsByTag } from "@/utils/post";
+import { getUniqueTags, getPostsByTag, getPostSlug } from "@/utils/post";
 import { FEATURES } from "@/config";
 import { SUPPORTED_LANGS } from "@/i18n/config";
 import type { Lang } from "@/i18n";
@@ -80,13 +79,9 @@ const pageContent = pageContentByLocale[locale as Lang];
     pageDesc={pageContent.desc(tagName)}
     width="app"
   >
-    <h1
-      slot="title"
-      class="main-heading"
-      transition:name={tag}
-      data-testid="tag-archive-title"
-    >
-      {`${pageContent.tagPrefix}${tag}`}
+    <h1 slot="title" class="main-heading mb-6" data-testid="tag-archive-title">
+      {pageContent.tagPrefix}
+      <span transition:name={tag}>{tagName}</span>
     </h1>
     <ul class="space-y-6">
       {page.data
@@ -98,7 +93,7 @@ const pageContent = pageContentByLocale[locale as Lang];
             pubDatetime={item.data.pubDatetime}
             modDatetime={item.data.modDatetime}
             timezone={item.data.timezone}
-            slug={getLastPathSegment(item.slug)}
+            slug={getPostSlug(item.slug)}
             isFallback={item.isFallback}
             originalLocale={item.originalLocale}
           />
