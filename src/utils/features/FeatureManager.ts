@@ -27,7 +27,7 @@ import type { Feature } from "./Feature";
 import { ProgressBar } from "./progressBar";
 import { HeadingLinks } from "./headingLinks";
 
-class FeatureManager {
+export class FeatureManager {
   /**
    * Accepts an optional initial list of features for testability (Dependency
    * Injection).  In production the singleton below uses `register()` to add

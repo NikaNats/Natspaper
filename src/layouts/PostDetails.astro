@@ -3,11 +3,12 @@
 import { render, type CollectionEntry } from "astro:content";
 import { SITE, FEATURES } from "@/config";
 import { getI18n } from "@/i18n";
-import { type Lang } from "@/i18n/config";
+import { LOCALE_CODES, type Lang } from "@/i18n/config";
 import {
   resolveOgImageUrl,
   getAdjacentPosts,
   getReadingTimeDisplay,
+  getPostLocale,
   getPostUrl,
 } from "@/utils/post";
 import { PostRepository } from "@/utils/post/repository";
@@ -51,16 +52,20 @@ const {
 const { Content, headings } = await render(post);
 
 // 1. Data Preparation
-const locale = (Astro.currentLocale as Lang) || "en";
-const { t, tTag } = getI18n(locale);
-const readingTimeText = getReadingTimeDisplay(post.body || "");
+// getI18n normalizes an unknown/undefined locale to the default language
+const { t, tTag, lang: locale } = getI18n(Astro.currentLocale as Lang);
+const readingTimeText = getReadingTimeDisplay(post.body || "", true, locale);
+
+// The language the body is written in (differs from `locale` on fallbacks)
+const sourceLocale: Lang =
+  getPostLocale(post.id) ?? (isFallback ? originalLocale : undefined) ?? locale;
 
 // Dynamic OG images are keyed by the SOURCE locale of the entry
 const ogImage = resolveOgImageUrl(
   initOgImage,
   post.slug,
   Astro.url.origin,
-  isFallback && originalLocale ? originalLocale : locale
+  sourceLocale
 );
 
 // 2. Fetch Series Data
@@ -69,7 +74,7 @@ const seriesParts = post.data.series
   : [];
 
 // 3. Breadcrumb Navigation Logic
-const postsHref = locale === "en" ? "/en/posts" : `/${locale}/posts`;
+const postsHref = `/${locale}/posts`;
 const breadcrumbItems: BreadcrumbItem[] = [
   { label: t("nav.home"), href: `/${locale}` },
   { label: t("nav.posts"), href: postsHref },
@@ -132,13 +137,11 @@ const canonicalURL =
     ? new URL(getPostUrl(originalLocale, post.slug), SITE.website).href
     : frontmatterCanonical;
 
-// Chrome language (UI) vs body language (document semantics)
-const toBcp47 = (l: string) => (l === "ka" ? "ka-GE" : "en-US");
-const contentLang = toBcp47(
-  isFallback && originalLocale ? originalLocale : locale
-);
-const docLang = isFallback ? "en-US" : toBcp47(locale);
-const uiLangTag = toBcp47(locale);
+// Chrome language (UI) vs body language (document semantics), as canonical
+// BCP 47 tags from the i18n config (single source of truth for new locales).
+const contentLang = LOCALE_CODES[sourceLocale];
+const docLang = LOCALE_CODES[isFallback ? sourceLocale : locale];
+const uiLangTag = LOCALE_CODES[locale];
 ---
 
 <Layout
@@ -160,7 +163,7 @@ const uiLangTag = toBcp47(locale);
 
   <div class="article-layout">
     <!-- Desktop Sidebar (TOC) -->
-    <aside class="article-sidebar" aria-label="Table of contents">
+    <aside class="article-sidebar" aria-label={t("a11y.tableOfContents")}>
       <div class="article-sidebar__inner">
         <TableOfContents {headings} />
       </div>
@@ -175,7 +178,7 @@ const uiLangTag = toBcp47(locale);
       {isFallback && (
         <aside
           role="note"
-          aria-label="Language availability notice"
+          aria-label={t("a11y.languageNotice")}
           lang={uiLangTag}
           class="fallback-disclaimer mx-auto my-4 mb-8 max-w-app rounded-lg border border-border bg-subtle p-4 text-sm"
         >
@@ -194,16 +197,8 @@ const uiLangTag = toBcp47(locale);
             <line x1="12" y1="16" x2="12" y2="12" />
             <line x1="12" y1="8" x2="12.01" y2="8" />
           </svg>
-          <p class="font-semibold text-foreground">
-            {locale === "ka"
-              ? "სტატია ხელმისაწვდომია მხოლოდ ინგლისურ ენაზე"
-              : "Article only available in English"}
-          </p>
-          <p class="mt-1 text-text-secondary">
-            {locale === "ka"
-              ? "თქვენ იმყოფებით ქართულენოვან ინტერფეისში, თუმცა წინამდებარე პუბლიკაცია წარმოდგენილია ორიგინალ ენაზე."
-              : "Site navigation remains in your selected language, but the body content is served in the original language."}
-          </p>
+          <p class="font-semibold text-foreground">{t("post.fallbackTitle")}</p>
+          <p class="mt-1 text-text-secondary">{t("post.fallbackBody")}</p>
         </aside>
       )}
 
@@ -249,6 +244,7 @@ const uiLangTag = toBcp47(locale);
               new URL(Astro.url.pathname, SITE.website).href)
         }
         slug={(post.slug ?? post.id).replace(/\//g, "_")}
+        locale={locale}
       />
 
       <PostFooter
@@ -259,7 +255,7 @@ const uiLangTag = toBcp47(locale);
         {prevPost}
         {nextPost}
         {tTag}
-        locale={Astro.currentLocale}
+        locale={locale}
       />
     </main>
   </div>
@@ -339,17 +335,26 @@ const uiLangTag = toBcp47(locale);
 <script>
   import { featureManager } from "@/utils/features/FeatureManager";
 
-  const init = () => {
+  // Exactly one init/cleanup pair per navigation. astro:page-load fires on
+  // the initial load AND after every ClientRouter swap, so listening to
+  // astro:after-swap as well initialized every feature twice. Scroll position
+  // is owned by the ClientRouter (top on navigation, restored on back).
+  //
+  // This bundled module stays loaded after the visitor navigates away from a
+  // post, so its listeners keep firing on every later page. Post features
+  // (progress bar, heading anchors) are therefore gated on the article
+  // element (#article, rendered by PostContent) and only torn down if they
+  // were actually started.
+  let featuresActive = false;
+
+  document.addEventListener("astro:page-load", () => {
+    if (!document.getElementById("article")) return;
     featureManager.initializeFeatures();
-    if (document.documentElement.scrollTop > 0)
-      window.scrollTo({ left: 0, top: 0, behavior: "instant" });
-  };
-
-  const cleanup = () => featureManager.cleanupFeatures();
-
-  document.addEventListener("astro:page-load", () =>
-    featureManager.initializeFeatures()
-  );
-  document.addEventListener("astro:after-swap", init);
-  document.addEventListener("astro:before-swap", cleanup);
+    featuresActive = true;
+  });
+  document.addEventListener("astro:before-swap", () => {
+    if (!featuresActive) return;
+    featureManager.cleanupFeatures();
+    featuresActive = false;
+  });
 </script>

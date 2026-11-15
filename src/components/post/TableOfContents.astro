@@ -4,12 +4,14 @@
 // Uses IntersectionObserver for performant scroll tracking
 
 import type { MarkdownHeading } from "astro";
+import { getI18n, type Lang } from "@/i18n";
 
 export interface Props {
   headings: MarkdownHeading[];
 }
 
 const { headings } = Astro.props;
+const { t } = getI18n(Astro.currentLocale as Lang);
 
 // Filter: Only top-level headings (h2, h3) to keep the sidebar clean
 const toc = headings.filter(h => h.depth >= 2 && h.depth <= 3);
@@ -21,10 +23,10 @@ const toc = headings.filter(h => h.depth >= 2 && h.depth <= 3);
      some AT do not expose it; a named <nav> is universally supported.) */
   <nav
     class="toc-nav transition-opacity duration-500"
-    aria-label="Table of Contents"
+    aria-label={t("a11y.tableOfContents")}
   >
     <h2 class="mb-4 text-xs font-bold tracking-widest text-text-secondary uppercase opacity-60">
-      On this page
+      {t("toc.onThisPage")}
     </h2>
     {/* Wrapper provides the relative positioning context for the indicator */}
     <div class="relative">
@@ -62,8 +64,21 @@ const toc = headings.filter(h => h.depth >= 2 && h.depth <= 3);
    * Fluent ScrollSpy Implementation
    * Uses IntersectionObserver for high performance (no scroll event listeners)
    * Ensures TOC works perfectly with Astro View Transitions
+   *
+   * Lifecycle: one observer per page. It is disconnected on
+   * astro:before-swap so the outgoing page's headings (and this closure) can
+   * be garbage-collected instead of accumulating across navigations.
    */
+  let observer: IntersectionObserver | null = null;
+
+  function teardownScrollSpy() {
+    observer?.disconnect();
+    observer = null;
+  }
+
   function initScrollSpy() {
+    teardownScrollSpy();
+
     const nav = document.querySelector(".toc-nav");
     const links = document.querySelectorAll(".toc-link");
     const indicator = document.getElementById("toc-indicator");
@@ -86,7 +101,7 @@ const toc = headings.filter(h => h.depth >= 2 && h.depth <= 3);
 
     let activeHeadingId: string | null = null;
 
-    const observer = new IntersectionObserver(
+    observer = new IntersectionObserver(
       entries => {
         for (const entry of entries) {
           if (entry.isIntersecting) {
@@ -99,7 +114,7 @@ const toc = headings.filter(h => h.depth >= 2 && h.depth <= 3);
       { rootMargin: "-80px 0px -70% 0px", threshold: 0 }
     );
 
-    headings.forEach(h => observer.observe(h));
+    headings.forEach(h => observer?.observe(h));
 
     function updateActiveLink() {
       if (!activeHeadingId) return;
@@ -121,10 +136,9 @@ const toc = headings.filter(h => h.depth >= 2 && h.depth <= 3);
       });
     }
   }
-  const initTOC = initScrollSpy;
-
   // Run on initial page load and after View Transitions
-  document.addEventListener("astro:page-load", initTOC);
+  document.addEventListener("astro:page-load", initScrollSpy);
+  document.addEventListener("astro:before-swap", teardownScrollSpy);
 </script>
 
 <style>

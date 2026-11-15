@@ -1,5 +1,5 @@
 ---
-import { GISCUS, SITE } from "@/config";
+import { GISCUS } from "@/config";
 // ?url imports emit fingerprinted files (cache-busting on every edit) and
 // resolve to their public URLs. Fingerprinting matters here: giscus.app and
 // edge CDNs cache theme CSS aggressively, so a content hash in the filename
@@ -48,7 +48,6 @@ const SUPPORTED_GISCUS_LANGS = new Set([
 ]);
 
 const giscusLang = SUPPORTED_GISCUS_LANGS.has(locale) ? locale : "en";
-const siteWebsite = SITE.website.replace(/\/$/, "");
 ---
 
 {isEnabled && (
@@ -64,7 +63,6 @@ const siteWebsite = SITE.website.replace(/\/$/, "");
     data-giscus-input-position={GISCUS.inputPosition}
     data-giscus-lang={giscusLang}
     data-giscus-loading={GISCUS.loading}
-    data-site-url={siteWebsite}
     data-giscus-dark-url={giscusDarkUrl}
     data-giscus-light-url={giscusLightUrl}
   >
@@ -72,190 +70,158 @@ const siteWebsite = SITE.website.replace(/\/$/, "");
   </div>
 )}
 
-<script is:inline>
+<script>
   /**
-   * Giscus lazy-loader with academic theme synchronization.
+   * Giscus lazy-loader with theme synchronization.
+   *
+   * Bundled module (evaluated once per session). Astro's ClientRouter swaps
+   * pages without reloading, so all per-page work runs from astro:page-load:
+   * starting a session on the home page and then navigating to a post still
+   * initializes comments. Everything a page sets up is bound to one
+   * AbortController / observer set that astro:before-swap tears down.
+   *
    * - Defers ~150KB of JS until the comments section nears the viewport.
-   * - Injects the resolved custom-CSS theme URL up front (no unstyled flash).
-   * - Routes localhost theme fetches to the production origin, which
-   *   giscus.app cannot reach on a private loopback address.
-   * - Theme URLs carry no timestamp cache-buster so edge CDNs can cache them.
+   * - No Subresource Integrity on client.js: giscus.app serves it unversioned
+   *   and updates it in place, so a pinned hash silently disables comments on
+   *   the next upstream release. CSP `script-src https://giscus.app` already
+   *   restricts what may load.
+   * - Custom theme CSS must be fetchable by giscus.app, which cannot reach a
+   *   loopback address. On localhost the built-in light/dark themes are used
+   *   instead of guessing production URLs (whose content hash may not exist).
    */
-  (function () {
-    let giscusLoaded = false;
+  const GISCUS_ORIGIN = "https://giscus.app";
 
-    function getThemeUrl(theme, wrapper) {
-      const isLocal =
-        window.location.hostname === "localhost" ||
-        window.location.hostname === "127.0.0.1";
+  type Theme = "light" | "dark";
 
-      // giscus.app runs on an external server and cannot access localhost URLs.
-      // During development, fall back to the live domain so custom styles load properly.
-      const productionOrigin = wrapper
-        ? wrapper.dataset.siteUrl
-        : "https://natspaper.vercel.app";
-      const baseOrigin = isLocal ? productionOrigin : window.location.origin;
-      // Fingerprinted asset paths (data attributes); the content hash in the
-      // filename busts browser, edge, and giscus.app caches on every edit.
-      const path =
-        theme === "dark"
-          ? wrapper.dataset.giscusDarkUrl
-          : wrapper.dataset.giscusLightUrl;
+  let teardown: (() => void) | null = null;
 
-      return `${baseOrigin}${path}`;
-    }
+  function getCurrentTheme(): Theme {
+    return document.documentElement.dataset.theme === "dark" ? "dark" : "light";
+  }
 
-    function getCurrentTheme() {
-      return (
-        document.documentElement.dataset.theme ||
-        document.documentElement.getAttribute("data-theme") ||
-        "light"
-      );
-    }
+  function isLocalHost(): boolean {
+    const { hostname } = window.location;
+    return (
+      hostname === "localhost" ||
+      hostname === "127.0.0.1" ||
+      hostname === "[::1]"
+    );
+  }
 
-    function updateGiscusTheme(explicitTheme) {
-      const wrapper = document.querySelector(".giscus-wrapper");
-      if (!wrapper) return;
-      const theme = explicitTheme || getCurrentTheme();
-      const giscusTheme = getThemeUrl(theme, wrapper);
-      const iframe = document.querySelector("iframe.giscus-frame");
+  function resolveTheme(wrapper: HTMLElement, theme: Theme): string {
+    if (isLocalHost()) return theme;
+    const path =
+      theme === "dark"
+        ? wrapper.dataset.giscusDarkUrl
+        : wrapper.dataset.giscusLightUrl;
+    return path ? new URL(path, window.location.origin).href : theme;
+  }
 
-      if (!iframe || !iframe.contentWindow) return;
+  function postTheme(wrapper: HTMLElement, theme: Theme = getCurrentTheme()) {
+    const iframe = wrapper.querySelector<HTMLIFrameElement>(
+      "iframe.giscus-frame"
+    );
+    iframe?.contentWindow?.postMessage(
+      { giscus: { setConfig: { theme: resolveTheme(wrapper, theme) } } },
+      GISCUS_ORIGIN
+    );
+  }
 
-      try {
-        iframe.contentWindow.postMessage(
-          { giscus: { setConfig: { theme: giscusTheme } } },
-          "https://giscus.app"
-        );
-      } catch {
-        // Suppress postMessage transport errors if iframe is navigating
-      }
-    }
+  function injectClient(wrapper: HTMLElement) {
+    const d = wrapper.dataset;
+    const script = document.createElement("script");
+    script.src = `${GISCUS_ORIGIN}/client.js`;
+    script.async = true;
 
-    function loadGiscus() {
-      if (giscusLoaded) return;
-      const wrapper = document.querySelector(".giscus-wrapper");
-      if (!wrapper) return;
-
-      giscusLoaded = true;
-      const theme = getCurrentTheme();
-      const initialThemeUrl = getThemeUrl(theme, wrapper);
-
-      const script = document.createElement("script");
-      script.src = "https://giscus.app/client.js";
-      // SECURITY: SRI hash ensures script integrity (generate new hash when updating Giscus)
-      // To regenerate (PowerShell):
-      //   Invoke-WebRequest https://giscus.app/client.js -OutFile client.js
-      //   $hash = [System.Security.Cryptography.SHA384]::Create().ComputeHash((Get-Content client.js -AsByteStream))
-      //   "sha384-" + [Convert]::ToBase64String($hash)
-      script.integrity =
-        "sha384-UwLZGbJGvkTzz0719+xEzUm/idqwzs0yZN8aB9Se5vUXHbyRyDWw9yqZTIsOsJ7x";
-      script.crossOrigin = "anonymous";
-      script.async = true;
-
-      script.setAttribute("data-repo", wrapper.dataset.giscusRepo || "");
-      script.setAttribute("data-repo-id", wrapper.dataset.giscusRepoId || "");
-      script.setAttribute(
-        "data-category",
-        wrapper.dataset.giscusCategory || ""
-      );
-      script.setAttribute(
-        "data-category-id",
-        wrapper.dataset.giscusCategoryId || ""
-      );
-      script.setAttribute(
-        "data-mapping",
-        wrapper.dataset.giscusMapping || "pathname"
-      );
-      script.setAttribute("data-strict", "0");
-      script.setAttribute(
-        "data-reactions-enabled",
-        wrapper.dataset.giscusReactionsEnabled || "1"
-      );
-      script.setAttribute(
-        "data-emit-metadata",
-        wrapper.dataset.giscusEmitMetadata || "0"
-      );
-      script.setAttribute(
-        "data-input-position",
-        wrapper.dataset.giscusInputPosition || "bottom"
-      );
-      script.setAttribute("data-theme", initialThemeUrl);
-      script.setAttribute("data-lang", wrapper.dataset.giscusLang || "en");
-      script.setAttribute(
-        "data-loading",
-        wrapper.dataset.giscusLoading || "lazy"
-      );
-
-      wrapper.appendChild(script);
-    }
-
-    // Bi-directional message synchronization with the Giscus iframe.
-    // Guarded so Astro View Transitions don't stack duplicate listeners.
-    if (!window.handleGiscusMessage) {
-      window.handleGiscusMessage = function (event) {
-        if (event.origin !== "https://giscus.app") return;
-        if (event.data && typeof event.data === "object" && event.data.giscus) {
-          if (event.data.giscus.discussion || event.data.giscus.viewer) {
-            updateGiscusTheme();
-          }
-        }
-      };
-      window.addEventListener("message", window.handleGiscusMessage);
-    }
-
-    // Listen to theme toggle changes triggered by public/toggle-theme.js
-    if (window.handleGiscusThemeChange) {
-      document.removeEventListener(
-        "theme-changed",
-        window.handleGiscusThemeChange
-      );
-    }
-    window.handleGiscusThemeChange = function (e) {
-      const theme =
-        e && e.detail && e.detail.theme ? e.detail.theme : getCurrentTheme();
-      updateGiscusTheme(theme);
+    const attrs: Record<string, string> = {
+      "data-repo": d.giscusRepo ?? "",
+      "data-repo-id": d.giscusRepoId ?? "",
+      "data-category": d.giscusCategory ?? "",
+      "data-category-id": d.giscusCategoryId ?? "",
+      "data-mapping": d.giscusMapping ?? "pathname",
+      "data-strict": "0",
+      "data-reactions-enabled": d.giscusReactionsEnabled ?? "1",
+      "data-emit-metadata": d.giscusEmitMetadata ?? "0",
+      "data-input-position": d.giscusInputPosition ?? "bottom",
+      "data-theme": resolveTheme(wrapper, getCurrentTheme()),
+      "data-lang": d.giscusLang ?? "en",
+      "data-loading": d.giscusLoading ?? "lazy",
     };
-    document.addEventListener("theme-changed", window.handleGiscusThemeChange);
-
-    // Performance: initialize via IntersectionObserver 200px before scrolling into view
-    const wrapper = document.querySelector(".giscus-wrapper");
-    if (wrapper) {
-      const observer = new IntersectionObserver(
-        function (entries) {
-          entries.forEach(function (entry) {
-            if (entry.isIntersecting) {
-              loadGiscus();
-              observer.disconnect();
-            }
-          });
-        },
-        { rootMargin: "200px" }
-      );
-      observer.observe(wrapper);
-
-      // Apply theme as soon as the iframe completes DOM insertion
-      const giscusContainer = wrapper.querySelector(".giscus");
-      if (giscusContainer) {
-        const mutationObserver = new MutationObserver(function (mutations) {
-          mutations.forEach(function (mutation) {
-            if (
-              mutation.addedNodes.length > 0 &&
-              mutation.addedNodes[0].tagName === "IFRAME" &&
-              mutation.addedNodes[0].classList.contains("giscus-frame")
-            ) {
-              const iframe = mutation.addedNodes[0];
-              iframe.addEventListener("load", function () {
-                setTimeout(updateGiscusTheme, 120);
-              });
-              mutationObserver.disconnect();
-            }
-          });
-        });
-        mutationObserver.observe(giscusContainer, { childList: true });
-      }
+    for (const [name, value] of Object.entries(attrs)) {
+      script.setAttribute(name, value);
     }
-  })();
+    wrapper.appendChild(script);
+  }
+
+  function initComments() {
+    teardown?.();
+    teardown = null;
+
+    const wrapper = document.querySelector<HTMLElement>(".giscus-wrapper");
+    if (!wrapper) return;
+
+    const controller = new AbortController();
+    const { signal } = controller;
+
+    // Theme toggle (public/toggle-theme.js dispatches "theme-changed")
+    document.addEventListener(
+      "theme-changed",
+      e => {
+        const theme = (e as CustomEvent<{ theme?: Theme }>).detail?.theme;
+        postTheme(
+          wrapper,
+          theme === "dark" || theme === "light" ? theme : undefined
+        );
+      },
+      { signal }
+    );
+
+    // Re-sync once the iframe reports it is ready
+    window.addEventListener(
+      "message",
+      (event: MessageEvent) => {
+        if (event.origin !== GISCUS_ORIGIN) return;
+        const data = event.data as { giscus?: Record<string, unknown> } | null;
+        if (data?.giscus?.discussion || data?.giscus?.viewer)
+          postTheme(wrapper);
+      },
+      { signal }
+    );
+
+    // Load the client ~200px before the section scrolls into view
+    const observer = new IntersectionObserver(
+      entries => {
+        if (entries.some(entry => entry.isIntersecting)) {
+          observer.disconnect();
+          injectClient(wrapper);
+        }
+      },
+      { rootMargin: "200px" }
+    );
+    observer.observe(wrapper);
+
+    // Re-apply the theme when the iframe finishes loading, in case the user
+    // toggled it while the client was still booting.
+    const frameObserver = new MutationObserver(() => {
+      const iframe = wrapper.querySelector("iframe.giscus-frame");
+      if (!iframe) return;
+      frameObserver.disconnect();
+      iframe.addEventListener("load", () => postTheme(wrapper), { signal });
+    });
+    frameObserver.observe(wrapper, { childList: true, subtree: true });
+
+    teardown = () => {
+      observer.disconnect();
+      frameObserver.disconnect();
+      controller.abort();
+    };
+  }
+
+  document.addEventListener("astro:page-load", initComments);
+  document.addEventListener("astro:before-swap", () => {
+    teardown?.();
+    teardown = null;
+  });
 </script>
 
 <style>

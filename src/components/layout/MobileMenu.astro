@@ -36,7 +36,7 @@ const { t } = getI18n(locale as Lang);
   <div
     id="mobile-menu-overlay"
     data-state="closed"
-    class="fixed inset-0 z-100 flex flex-col items-center justify-center bg-background/95 p-4 backdrop-blur-sm transition-[visibility] transition-colors transition-opacity transition-transform duration-300 motion-reduce:transition-none md:static md:z-auto md:flex-row md:bg-transparent md:p-0 md:backdrop-blur-none"
+    class="fixed inset-0 z-100 flex flex-col items-center justify-center bg-background/95 p-4 backdrop-blur-sm transition-[opacity,transform,visibility,background-color] duration-300 motion-reduce:transition-none md:static md:z-auto md:flex-row md:bg-transparent md:p-0 md:backdrop-blur-none"
     role="dialog"
     aria-modal="true"
     aria-label={t("nav.mainMenu")}
@@ -104,15 +104,29 @@ const { t } = getI18n(locale as Lang);
     document.body.style.overflow = value;
   };
 
-  // Define custom element to encapsulate logic naturally
+  // Define custom element to encapsulate logic naturally.
+  //
+  // Lifecycle: listeners are attached in connectedCallback and ALL of them
+  // (including the document-level keydown handlers) are bound to an
+  // AbortController that disconnectedCallback aborts. The ClientRouter swaps
+  // in a fresh <mobile-menu> on every navigation, so without this the old
+  // element's document listeners — and the detached DOM they close over —
+  // would accumulate and run on every keystroke.
   class MobileMenu extends HTMLElement {
-    constructor() {
-      super();
-      // Wait for children to be parsed
-      this.init();
+    #controller: AbortController | null = null;
+
+    connectedCallback() {
+      this.#controller?.abort();
+      this.#controller = new AbortController();
+      this.init(this.#controller.signal);
     }
 
-    init() {
+    disconnectedCallback() {
+      this.#controller?.abort();
+      this.#controller = null;
+    }
+
+    init(signal: AbortSignal) {
       const openBtn = this.querySelector(
         "#menu-btn"
       ) as HTMLButtonElement | null;
@@ -184,40 +198,56 @@ const { t } = getI18n(locale as Lang);
       };
 
       // Event Listeners
-      openBtn.addEventListener("click", e => {
-        e.stopPropagation();
-        toggleMenu(true);
-      });
+      openBtn.addEventListener(
+        "click",
+        e => {
+          e.stopPropagation();
+          toggleMenu(true);
+        },
+        { signal }
+      );
 
-      closeBtn.addEventListener("click", e => {
-        e.stopPropagation();
-        toggleMenu(false);
-      });
+      closeBtn.addEventListener(
+        "click",
+        e => {
+          e.stopPropagation();
+          toggleMenu(false);
+        },
+        { signal }
+      );
 
       // Close when clicking any link (SPA navigation).
       // Skip the requestAnimationFrame focus-return to prevent a crash when
       // Chromium fires the RAF callback against a detached element during the
       // Astro View Transitions DOM swap.
       links.forEach(link => {
-        link.addEventListener("click", () => {
-          overlay.setAttribute("data-state", "closed");
-          openBtn.setAttribute("aria-expanded", "false");
-          setScrollLock(false);
-        });
+        link.addEventListener(
+          "click",
+          () => {
+            overlay.setAttribute("data-state", "closed");
+            openBtn.setAttribute("aria-expanded", "false");
+            setScrollLock(false);
+          },
+          { signal }
+        );
       });
 
       // Close on Escape key
-      document.addEventListener("keydown", e => {
-        if (
-          e.key === "Escape" &&
-          overlay.getAttribute("data-state") === "open"
-        ) {
-          toggleMenu(false);
-        }
-      });
+      document.addEventListener(
+        "keydown",
+        e => {
+          if (
+            e.key === "Escape" &&
+            overlay.getAttribute("data-state") === "open"
+          ) {
+            toggleMenu(false);
+          }
+        },
+        { signal }
+      );
 
       // WCAG 2.1.2: Add focus trap listener
-      document.addEventListener("keydown", handleTabKey);
+      document.addEventListener("keydown", handleTabKey, { signal });
     }
   }
 

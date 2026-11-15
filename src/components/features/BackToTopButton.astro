@@ -2,6 +2,9 @@
 import IconChevronLeft from "@/assets/icons/IconChevronLeft.svg";
 import IconArrowNarrowUp from "@/assets/icons/IconArrowNarrowUp.svg";
 import { FEATURES } from "@/config"; // Import configuration
+import { getI18n, type Lang } from "@/i18n";
+
+const { t } = getI18n(Astro.currentLocale as Lang);
 ---
 
 <div
@@ -14,7 +17,7 @@ import { FEATURES } from "@/config"; // Import configuration
 >
   <button
     data-button="back-to-top"
-    aria-label="Back to top of page"
+    aria-label={t("a11y.backToTop")}
     class:list={[
       "group relative bg-background px-2 py-1",
       "size-14 rounded-full shadow-xl",
@@ -32,7 +35,7 @@ import { FEATURES } from "@/config"; // Import configuration
     />
     <span class="sr-only text-sm group-hover:text-accent md:not-sr-only">
       <IconArrowNarrowUp class="inline-block size-4" aria-hidden="true" />
-      Back To Top
+      {t("nav.backToTop")}
     </span>
   </button>
 </div>
@@ -104,80 +107,99 @@ import { FEATURES } from "@/config"; // Import configuration
   }
 </style>
 
-<script is:inline data-astro-rerun>
-  function initBackToTop() {
-    const container = document.getElementById("btt-btn-container");
-    if (!container || container.dataset.initialized) return;
+<script>
+  /**
+   * Bundled module: evaluated once per session, so the astro:page-load
+   * listener below is registered exactly once. Per-page listeners hang off an
+   * AbortController that is aborted before every ClientRouter swap; the old
+   * container (and its closures) can then be garbage-collected.
+   */
+  let pageController: AbortController | null = null;
 
-    const button = container.querySelector("[data-button='back-to-top']");
-    const progressIndicator = container.querySelector("#progress-indicator");
-    const VISIBILITY_THRESHOLD = parseFloat(
+  function initBackToTop() {
+    pageController?.abort();
+    pageController = null;
+
+    const container = document.getElementById("btt-btn-container");
+    const button = container?.querySelector<HTMLButtonElement>(
+      "[data-button='back-to-top']"
+    );
+    if (!container || !button) return;
+
+    const controller = new AbortController();
+    const { signal } = controller;
+    pageController = controller;
+
+    button.addEventListener(
+      "click",
+      () => {
+        // WCAG 2.3.3: Respect user's motion preference
+        const prefersReducedMotion = window.matchMedia(
+          "(prefers-reduced-motion: reduce)"
+        ).matches;
+        window.scrollTo({
+          top: 0,
+          behavior: prefersReducedMotion ? "instant" : "smooth",
+        });
+      },
+      { signal }
+    );
+
+    // On modern engines the CSS scroll timeline owns both the reveal and the
+    // radial fill; the JS handler is only a fallback for legacy engines.
+    const hasNativeScrollTimeline =
+      typeof CSS !== "undefined" &&
+      typeof CSS.supports === "function" &&
+      CSS.supports("animation-timeline", "scroll()");
+    if (hasNativeScrollTimeline) return;
+
+    const progressIndicator = container.querySelector<HTMLElement>(
+      "#progress-indicator"
+    );
+    const visibilityThreshold = Number.parseFloat(
       container.dataset.threshold || "0.3"
     );
 
-    button.addEventListener("click", () => {
-      // WCAG 2.3.3: Respect user's motion preference
-      const prefersReducedMotion = window.matchMedia(
-        "(prefers-reduced-motion: reduce)"
-      ).matches;
-      window.scrollTo({
-        top: 0,
-        behavior: prefersReducedMotion ? "instant" : "smooth",
-      });
-    });
+    const handleScroll = () => {
+      const { scrollTop, scrollHeight, clientHeight } =
+        document.documentElement;
+      const scrollTotal = scrollHeight - clientHeight;
 
-    // Attach the JS scroll handler ONLY when scroll-driven animations are
-    // unavailable (legacy engines, test runners). On modern engines the CSS
-    // scroll timeline owns both the reveal and the radial fill.
-    const hasNativeScrollTimeline =
-      typeof CSS !== "undefined" &&
-      CSS.supports &&
-      CSS.supports("animation-timeline", "scroll()");
+      // Prevent division by zero on pages with no scroll
+      if (scrollTotal <= 0) {
+        container.dataset.visible = "false";
+        return;
+      }
 
-    if (!hasNativeScrollTimeline) {
-      const handleScroll = () => {
-        const { scrollTop, scrollHeight, clientHeight } =
-          document.documentElement;
-        const scrollTotal = scrollHeight - clientHeight;
-
-        // Prevent division by zero on pages with no scroll
-        if (scrollTotal <= 0) {
-          container.dataset.visible = "false";
-          return;
-        }
-
-        const scrollPercent = (scrollTop / scrollTotal) * 100;
-
-        if (progressIndicator) {
-          progressIndicator.style.backgroundImage = `conic-gradient(var(--accent) ${scrollPercent}%, transparent ${scrollPercent}%)`;
-        }
-
-        const isVisible = scrollTop / scrollTotal > VISIBILITY_THRESHOLD;
-        container.dataset.visible = isVisible.toString();
-      };
-
-      // Performance: Use requestAnimationFrame for smooth scroll handling
-      let ticking = false;
-      document.addEventListener(
-        "scroll",
-        () => {
-          if (!ticking) {
-            window.requestAnimationFrame(() => {
-              handleScroll();
-              ticking = false;
-            });
-            ticking = true;
-          }
-        },
-        { passive: true }
+      const scrollPercent = (scrollTop / scrollTotal) * 100;
+      if (progressIndicator) {
+        progressIndicator.style.backgroundImage = `conic-gradient(var(--accent) ${scrollPercent}%, transparent ${scrollPercent}%)`;
+      }
+      container.dataset.visible = String(
+        scrollTop / scrollTotal > visibilityThreshold
       );
-    }
+    };
 
-    // Mark as initialized to prevent re-attaching listeners on page transitions
-    container.dataset.initialized = "true";
+    // Performance: coalesce scroll events into one update per frame
+    let ticking = false;
+    document.addEventListener(
+      "scroll",
+      () => {
+        if (ticking) return;
+        ticking = true;
+        requestAnimationFrame(() => {
+          handleScroll();
+          ticking = false;
+        });
+      },
+      { passive: true, signal }
+    );
+    handleScroll();
   }
 
-  // Ensure script runs on initial load and after Astro's view transitions
-  initBackToTop();
   document.addEventListener("astro:page-load", initBackToTop);
+  document.addEventListener("astro:before-swap", () => {
+    pageController?.abort();
+    pageController = null;
+  });
 </script>
