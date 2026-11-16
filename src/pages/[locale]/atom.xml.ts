@@ -2,8 +2,8 @@ import type { APIRoute } from "astro";
 import { SITE, FEATURES, SOCIALS } from "@/config";
 import { SUPPORTED_LANGS, type Lang } from "@/i18n/config";
 import { PostRepository } from "@/utils/post/repository";
-import { getPostUrl } from "@/utils/post";
-import { escapeHtml, sanitizeDescription } from "@/utils/rss";
+import { getPostSlug, getPostUrl } from "@/utils/post";
+import { escapeHtml, toPlainText } from "@/utils/rss";
 
 export function getStaticPaths() {
   return SUPPORTED_LANGS.map(locale => ({ params: { locale } }));
@@ -62,11 +62,7 @@ export const GET: APIRoute = async ({ params, site }) => {
 
   const entriesXml = recentPosts
     .map(post => {
-      const postSlug =
-        String(post.id)
-          .split("/")
-          .pop()
-          ?.replace(/\.(md|mdx)$/, "") || post.slug;
+      const postSlug = getPostSlug(post.slug);
       const postUrl = `${siteUrl}${getPostUrl(locale, postSlug)}`;
       const publishedAt = new Date(post.data.pubDatetime);
       const updatedAt = new Date(
@@ -79,9 +75,9 @@ export const GET: APIRoute = async ({ params, site }) => {
         displayTitle = `[${post.data.series.title}, Part ${post.data.series.order}] ${displayTitle}`;
       }
 
-      const summaryText = escapeHtml(
-        sanitizeDescription(post.data.description)
-      );
+      // Escaped exactly once for XML. type="text": the summary is plain
+      // text, so readers must not re-parse it as HTML.
+      const summaryText = escapeHtml(toPlainText(post.data.description));
 
       const categoriesXml = (post.data.tags || [])
         .map(
@@ -100,7 +96,7 @@ export const GET: APIRoute = async ({ params, site }) => {
       <name>${escapeHtml(post.data.author || SITE.author)}</name>
       <uri>${escapeHtml(authorProfile)}</uri>
     </author>
-    <summary type="html">${summaryText}</summary>
+    <summary type="text">${summaryText}</summary>
     ${categoriesXml}
   </entry>`;
     })
@@ -115,7 +111,7 @@ export const GET: APIRoute = async ({ params, site }) => {
   <id>${feedUrl}</id>
   <updated>${feedUpdated}</updated>
   <rights>Copyright (c) ${new Date().getFullYear()}, ${escapeHtml(SITE.author)}</rights>
-  <generator uri="https://astro.build" version="5.x">Astro / Natspaper</generator>
+  <generator uri="https://astro.build">Astro / Natspaper</generator>
   <author>
     <name>${escapeHtml(SITE.author)}</name>
     <uri>${escapeHtml(authorProfile)}</uri>
