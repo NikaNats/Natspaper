@@ -3,41 +3,59 @@ import { html } from "satori-html";
 import { SITE } from "@/config";
 import type { CollectionEntry } from "astro:content";
 import { readFile } from "node:fs/promises";
+import { createRequire } from "node:module";
 import { join } from "node:path";
 
 // ============================================================================
-// 1. MODULE-LEVEL CACHE
+// 1. FONTS (module-level cache: read from disk once per build)
 // ============================================================================
-// Cache the buffer in memory so we only read from disk once per build.
-let fontBuffer: ArrayBuffer | null = null;
+// Satori has no system fonts: every glyph must come from a font passed in.
+// Inter Latin has no Georgian block (U+10A0–U+10FF), so Georgian titles and
+// author names rendered as tofu. Satori falls back across the `fonts` list per
+// glyph, so Inter stays primary and Noto Sans Georgian covers Georgian.
+// Satori accepts TTF/OTF/WOFF (not WOFF2).
+const require = createRequire(join(process.cwd(), "package.json"));
 
-/**
- * Local Font Loader
- * Reads the font file from the filesystem (hermetic build—no CDN dependency).
- */
-async function loadFont(): Promise<ArrayBuffer> {
-  if (fontBuffer) {
-    return fontBuffer;
-  }
+const FONT_SOURCES = [
+  {
+    name: "Inter",
+    path: join(process.cwd(), "public/fonts/inter-latin-700-normal.woff"),
+  },
+  {
+    name: "Noto Sans Georgian",
+    // Resolved through the package's `exports` map (hermetic: no CDN).
+    path: require.resolve("@fontsource/noto-sans-georgian/files/noto-sans-georgian-georgian-700-normal.woff"),
+  },
+] as const;
 
-  try {
-    // Resolve path relative to the current working directory (project root)
-    const fontPath = join(
-      process.cwd(),
-      "public/fonts/inter-latin-700-normal.woff"
-    );
+type SatoriFont = {
+  name: string;
+  data: ArrayBuffer;
+  weight: 700;
+  style: "normal";
+};
 
-    // Read file as a Node Buffer
-    const fileBuffer = await readFile(fontPath);
+let fontsPromise: Promise<SatoriFont[]> | null = null;
 
-    // Convert Node Buffer to ArrayBuffer (required by Satori)
-    fontBuffer = Uint8Array.from(fileBuffer).buffer;
-
-    return fontBuffer;
-  } catch (error) {
-    console.error("❌ [OG Image] Failed to load local font:", error);
+/** Load all OG fonts once; concurrent callers share one in-flight read. */
+function loadFonts(): Promise<SatoriFont[]> {
+  fontsPromise ??= Promise.all(
+    FONT_SOURCES.map(async ({ name, path }) => {
+      const file = await readFile(path);
+      return {
+        name,
+        // Copy into a standalone ArrayBuffer (Satori requires ArrayBuffer)
+        data: Uint8Array.from(file).buffer,
+        weight: 700 as const,
+        style: "normal" as const,
+      };
+    })
+  ).catch(error => {
+    fontsPromise = null; // allow a retry instead of caching the failure
+    console.error("❌ [OG Image] Failed to load local fonts:", error);
     throw error;
-  }
+  });
+  return fontsPromise;
 }
 
 // ============================================================================
@@ -47,8 +65,7 @@ async function loadFont(): Promise<ArrayBuffer> {
 export default async function generatePostOgImage(
   post: CollectionEntry<"blog">
 ) {
-  // Load font from disk
-  const fontData = await loadFont();
+  const fonts = await loadFonts();
 
   const markup = html`<div
     style="background-color: #fefbfb; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;"
@@ -64,7 +81,7 @@ export default async function generatePostOgImage(
         style="display: flex; flex-direction: column; justify-content: space-between; margin: 20px; width: 90%; height: 90%;"
       >
         <p
-          style="font-size: 72px; font-weight: bold; max-height: 84%; overflow: hidden;"
+          style="display: block; font-size: 64px; font-weight: bold; line-height: 1.25; line-clamp: 3; overflow: hidden;"
         >
           ${post.data.title}
         </p>
@@ -91,13 +108,6 @@ export default async function generatePostOgImage(
     width: 1200,
     height: 630,
     embedFont: true,
-    fonts: [
-      {
-        name: "Inter",
-        data: fontData,
-        weight: 700,
-        style: "normal",
-      },
-    ],
+    fonts,
   });
 }
