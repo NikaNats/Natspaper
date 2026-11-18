@@ -51,6 +51,9 @@ jobs:
       - name: Unit tests (coverage thresholds enforced)
         run: pnpm test:coverage
 
+      - name: Component tests (Astro Container API)
+        run: pnpm test:component
+
       - name: Upload coverage
         if: always()
         uses: actions/upload-artifact@v7
