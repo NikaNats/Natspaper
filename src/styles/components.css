@@ -341,3 +341,171 @@
     @apply px-4 py-3 text-base;
   }
 }
+
+/* ==========================================================================
+   IMAGE ZOOM (native <dialog> + WAAPI FLIP — see utils/features/imageZoom.ts)
+   ========================================================================== */
+@layer components {
+  .image-zoom-trigger {
+    position: relative;
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    border-radius: clamp(0.5rem, 0.25rem + 0.5vw, 1rem);
+    background: none;
+    cursor: zoom-in;
+
+    & img {
+      margin: 0;
+    }
+
+    /* Zero-DOM zoom hint: visible on touch, hover-revealed on desktop */
+    &::after {
+      content: "+";
+      position: absolute;
+      inset-block-end: 0.625rem;
+      inset-inline-end: 0.625rem;
+      display: grid;
+      place-items: center;
+      width: 1.75rem;
+      height: 1.75rem;
+      border: 1px solid oklch(1 0 0 / 0.22);
+      border-radius: 9999px;
+      background: oklch(0.14 0 0 / 0.68);
+      color: oklch(0.95 0 0);
+      font-size: 1rem;
+      font-weight: 500;
+      line-height: 1;
+      backdrop-filter: blur(4px);
+      pointer-events: none;
+      opacity: 0.85;
+      transition: opacity 0.2s ease;
+    }
+
+    /* Override global button:active scale so large photos don't shrink */
+    &:active {
+      transform: none;
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--color-accent);
+      outline-offset: 4px;
+    }
+  }
+
+  @media (hover: hover) {
+    .image-zoom-trigger::after {
+      opacity: 0;
+    }
+    .image-zoom-trigger:is(:hover, :focus-visible)::after {
+      opacity: 0.9;
+    }
+  }
+
+  /* Page behind the modal must not scroll (gutter is already stable) */
+  html:has(dialog.image-lightbox[open]) {
+    overflow: hidden;
+  }
+
+  dialog.image-lightbox {
+    inset: 0;
+    width: 100dvw;
+    height: 100dvh;
+    max-width: none;
+    max-height: none;
+    margin: 0;
+    padding: clamp(1rem, 3vw, 2.5rem);
+    border: 0;
+    background: transparent;
+    color: oklch(0.92 0 0);
+    cursor: zoom-out;
+    overflow: hidden;
+
+    /* grid only when [open] so the UA's display:none stays intact */
+    &[open] {
+      display: grid;
+      place-items: center;
+      align-content: center;
+      gap: 0.75rem;
+    }
+
+    &::backdrop {
+      background: oklch(0.1 0 0 / 0);
+      transition:
+        background 0.22s ease,
+        overlay 0.22s allow-discrete,
+        display 0.22s allow-discrete;
+    }
+
+    &[open]::backdrop {
+      background: oklch(0.1 0 0 / 0.9);
+
+      @starting-style {
+        background: oklch(0.1 0 0 / 0);
+      }
+    }
+
+    &[data-closing="true"]::backdrop {
+      background: oklch(0.1 0 0 / 0);
+    }
+
+    &[data-closing="true"] .image-lightbox__caption,
+    &[data-closing="true"] .image-lightbox__close {
+      opacity: 0;
+    }
+  }
+
+  .image-lightbox__img {
+    display: block;
+    width: auto;
+    height: auto;
+    max-width: min(92vw, 1600px);
+    max-height: 82dvh;
+    object-fit: contain;
+    border-radius: 0.5rem;
+    will-change: transform;
+  }
+
+  .image-lightbox__caption {
+    max-width: 70ch;
+    margin: 0;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    text-align: center;
+    text-wrap: pretty;
+    transition: opacity 0.18s ease;
+  }
+
+  .image-lightbox__close {
+    position: fixed;
+    inset-block-start: 1rem;
+    inset-inline-end: 1rem;
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border: 1px solid oklch(1 0 0 / 0.25);
+    border-radius: 9999px;
+    background: oklch(0.2 0 0 / 0.75);
+    color: inherit;
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: opacity 0.18s ease;
+
+    &:focus-visible {
+      outline: 2px solid var(--color-accent);
+      outline-offset: 2px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .image-zoom-trigger::after,
+    dialog.image-lightbox::backdrop,
+    .image-lightbox__caption,
+    .image-lightbox__close {
+      transition: none;
+    }
+  }
+}

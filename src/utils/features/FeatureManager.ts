@@ -10,6 +10,7 @@
  * - ProgressBar: Visual scroll position indicator
  * - HeadingLinks: Clickable anchor links for headings
  *   (Copy button functionality is handled natively by astro-expressive-code)
+ * - ImageZoom: Native <dialog> click-to-zoom for large article images
  *
  * Usage:
  * ```ts
@@ -26,6 +27,7 @@
 import type { Feature } from "./Feature";
 import { ProgressBar } from "./progressBar";
 import { HeadingLinks } from "./headingLinks";
+import { ImageZoom } from "./imageZoom";
 
 export class FeatureManager {
   /**
@@ -71,3 +73,4 @@ export class FeatureManager {
 export const featureManager = new FeatureManager();
 featureManager.register(new ProgressBar());
 featureManager.register(new HeadingLinks());
+featureManager.register(new ImageZoom());

@@ -7,6 +7,7 @@ import { DEFAULT_LANG, SUPPORTED_LANGS } from "./src/i18n/config";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 import { rehypeEagerFirstImage } from "./src/lib/rehype-eager-first-image.mjs";
+import { rehypeFigureCaptions } from "./src/lib/rehype-figure-captions.mjs";
 import vercel from "@astrojs/vercel";
 import { unified } from "@astrojs/markdown-remark";
 
@@ -54,6 +55,9 @@ export default defineConfig({
         // priority. Must run as a rehype plugin (hast <img> nodes) so Markdown
         // authors get correct loading without dropping into raw HTML.
         rehypeEagerFirstImage,
+        // Image paragraph + following *italic* paragraph -> <figure> with a
+        // real <figcaption>, so caption styles apply without raw HTML.
+        rehypeFigureCaptions,
       ],
     }),
   },
