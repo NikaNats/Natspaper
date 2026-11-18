@@ -14,8 +14,6 @@ This document demonstrates how to use LaTeX equations in your Markdown files for
 
 _Photo by [Vitaly Gariev](https://www.pexels.com/photo/close-up-of-complicated-equations-written-on-a-blackboard-22690748/)_
 
-## Table of contents
-
 ## Instructions
 
 In this section, you will find instructions on how to add support for LaTeX in your Markdown files for AstroPaper.

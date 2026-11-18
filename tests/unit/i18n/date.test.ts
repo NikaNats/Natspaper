@@ -334,3 +334,16 @@ describe("Date Formatting Utilities", () => {
     });
   });
 });
+
+describe("formatDate time zone", () => {
+  // 20:00 UTC on Nov 16 is already Nov 17 in Tbilisi (UTC+4)
+  const lateEvening = new Date("2026-11-16T20:00:00Z");
+
+  it("formats in the site time zone by default, not the machine's", () => {
+    expect(formatDate(lateEvening, "en", "short")).toBe("Nov 17, 2026");
+  });
+
+  it("honours an explicit time zone override", () => {
+    expect(formatDate(lateEvening, "en", "short", "UTC")).toBe("Nov 16, 2026");
+  });
+});

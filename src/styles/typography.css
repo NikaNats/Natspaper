@@ -145,13 +145,14 @@
        */
       overflow-x: auto;
 
-      /* 
-       * 3. UX OPTIMIZATION
-       * Prevent text from wrapping aggressively. This ensures the table
-       * keeps its shape and encourages the user to scroll, rather than
-       * seeing a tall, squashed table.
+      /*
+       * 3. WRAP FIRST, SCROLL LAST
+       * Cells wrap normally so tables that fit the measure never clip.
+       * Only genuinely wide tables overflow, and then the scrollbar is
+       * visible (the global muted scrollbar is near-invisible on dark).
        */
-      white-space: nowrap;
+      scrollbar-width: thin;
+      scrollbar-color: var(--color-text-secondary) transparent;
 
       /* 
        * 4. IOS NATIVE FEEL
@@ -189,12 +190,22 @@
       }
     }
 
+    /* Editorial tables: horizontal rules only, distinct header row */
     table th,
     table td {
-      @apply border border-border p-3 align-top;
+      @apply align-top;
+      padding: 0.625rem 0.875rem;
+      border-block-end: 1px solid
+        color-mix(in oklab, var(--color-border) 70%, transparent);
     }
     table th {
-      @apply bg-muted/30 font-semibold;
+      @apply font-semibold;
+      background: var(--color-muted);
+      border-block-end: 1px solid var(--color-border);
+      text-wrap: balance;
+    }
+    table td {
+      font-variant-numeric: tabular-nums;
     }
 
     blockquote {
@@ -268,16 +279,18 @@
 
     /* Figure Caption - Fluid typography */
     figcaption {
+      /* Centered under its image */
       @apply text-center italic;
 
       /* Fluid sizing: 0.8125rem (13px) → 0.9375rem (15px) */
       font-size: clamp(0.8125rem, 0.75rem + 0.125vw, 0.9375rem);
       line-height: 1.5;
       color: var(--text-secondary);
+      text-wrap: pretty;
 
-      /* Fluid spacing */
-      margin-block-start: clamp(0.5rem, 0.375rem + 0.25vw, 0.75rem);
-      padding-inline: clamp(0.5rem, 0.25rem + 0.5vw, 1rem);
+      /* Tight to its image, clearly apart from the next paragraph */
+      margin-block-start: 0.625rem;
+      padding-inline: 0;
     }
 
     /* Video Elements - Fluid responsive */
@@ -343,6 +356,8 @@
     /* Code */
     :not(pre) > code {
       @apply rounded bg-muted px-1.5 py-0.5 text-[0.9em] text-foreground before:hidden after:hidden;
+      /* prose defaults to 600; regular weight keeps paragraph color even */
+      font-weight: 400;
       font-family: var(--font-jetbrains-mono), monospace;
       /* Match inline code x-height to surrounding Inter prose */
       font-size-adjust: 0.5459;

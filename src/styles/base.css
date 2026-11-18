@@ -90,8 +90,9 @@
   --rail-width: 14rem;
   --rail-gap: 2.5rem;
   /* Minimum viewport width allowing rail without pinching prose:
-     768px frame + (rail 224px + gap 40px) * 2 = 1296px */
-  --rail-viewport-threshold: 81rem;
+     768px frame + (rail 252px + gap 27px at the 18px root) * 2 ≈ 1326px
+     -> 84rem (media-query rem is 16px). Keep in sync with PostDetails.astro. */
+  --rail-viewport-threshold: 84rem;
 }
 
 @layer base {
@@ -285,7 +286,6 @@
   margin-block: 1.5rem;
 }
 
-.provenance-block,
 .series-box,
 .bibliography-section {
   line-height: 1.5;
@@ -330,7 +330,6 @@
   .toc-nav,
   .article-sidebar,
   .mobile-toc-container,
-  .copy-bibtex-btn,
   .fallback-disclaimer,
   .giscus-wrapper,
   button,

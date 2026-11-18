@@ -1,5 +1,5 @@
 ---
-import { GISCUS } from "@/config";
+import { GISCUS, isGiscusConfigured } from "@/config";
 // ?url imports emit fingerprinted files (cache-busting on every edit) and
 // resolve to their public URLs. Fingerprinting matters here: giscus.app and
 // edge CDNs cache theme CSS aggressively, so a content hash in the filename
@@ -10,9 +10,6 @@ import giscusLightUrl from "@/assets/giscus-light.css?url";
 export interface Props {
   locale?: string;
 }
-
-const isEnabled =
-  GISCUS.enabled && !!GISCUS.repo && !!GISCUS.repoId && !!GISCUS.categoryId;
 
 const { locale = "en" } = Astro.props;
 
@@ -50,7 +47,7 @@ const SUPPORTED_GISCUS_LANGS = new Set([
 const giscusLang = SUPPORTED_GISCUS_LANGS.has(locale) ? locale : "en";
 ---
 
-{isEnabled && (
+{isGiscusConfigured && (
   <div
     class="giscus-wrapper"
     data-giscus-repo={GISCUS.repo}

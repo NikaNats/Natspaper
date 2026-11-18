@@ -12,18 +12,23 @@
  * - Proper heading hierarchy and accessible structure
  * - Language-aware rendering for accessibility
  */
+import { getI18n, type Lang } from "@/i18n";
 
 export interface Props {
   contentLang?: string;
 }
 
 const { contentLang } = Astro.props;
+// UI labels for the client-side image zoom (follow the page UI locale)
+const { t } = getI18n(Astro.currentLocale as Lang);
 ---
 
 <article
   id="article"
   class="post-content app-prose"
   data-testid="post-content"
+  data-zoom-label={t("a11y.enlargeImage")}
+  data-zoom-close-label={t("a11y.closeImage")}
   lang={contentLang}
 >
   <slot />
@@ -53,16 +58,6 @@ const { contentLang } = Astro.props;
     /* Prevent overflow from code blocks and tables */
     min-width: 0;
     overflow-wrap: break-word;
-  }
-
-  /* Centered headings */
-  .post-content :global(h1),
-  .post-content :global(h2),
-  .post-content :global(h3),
-  .post-content :global(h4),
-  .post-content :global(h5),
-  .post-content :global(h6) {
-    text-align: center;
   }
 
   /* ==========================================================================
@@ -132,7 +127,7 @@ const { contentLang } = Astro.props;
      ========================================================================== */
 
   /* Narrow containers (< 400px) - Mobile optimizations */
-  @container post-content (max-width: 25rem) {
+  @container post-content (max-width: 400px) {
     .post-content {
       --content-gap: 1rem;
     }
@@ -163,21 +158,31 @@ const { contentLang } = Astro.props;
       border-radius: 0;
     }
 
-    /* Compact captions on narrow containers */
+    /* Figures bleed to the screen edge here; keep captions on the text axis */
     .post-content :global(figcaption) {
-      padding-inline: 0;
+      padding-inline: var(--article-padding-inline, 1rem);
+    }
+  }
+
+  /* Phone-width columns: cells wrap on desktop, but at this width wrapping
+     squeezes multi-column tables into two-word columns. Give each cell a
+     readable minimum and let the table scroll horizontally instead. */
+  @container post-content (max-width: 640px) {
+    .post-content :global(th),
+    .post-content :global(td) {
+      min-width: 8rem;
     }
   }
 
   /* Wide containers (≥ 500px) - Enhanced spacing */
-  @container post-content (min-width: 31.25rem) {
+  @container post-content (min-width: 500px) {
     .post-content {
       --content-gap: clamp(1.75rem, 1.25rem + 1vw, 2.5rem);
     }
   }
 
   /* Extra wide containers (≥ 700px) - Maximum breathing room */
-  @container post-content (min-width: 43.75rem) {
+  @container post-content (min-width: 700px) {
     .post-content {
       --content-gap: clamp(2rem, 1.5rem + 1vw, 3rem);
     }
@@ -223,6 +228,10 @@ const { contentLang } = Astro.props;
 
       .post-content :global(img) {
         border-radius: 0;
+      }
+
+      .post-content :global(figcaption) {
+        padding-inline: 1rem;
       }
     }
   }

@@ -10,6 +10,7 @@ import IconChevronRight from "@/assets/icons/IconChevronRight.svg";
 import { slugifyStr } from "@/utils/core";
 import { getPostUrl } from "@/utils/post/postUrl";
 import { getI18n, type Lang } from "@/i18n";
+import { isGiscusConfigured } from "@/config";
 import type { CollectionEntry } from "astro:content";
 
 export interface NavigationPost {
@@ -47,16 +48,19 @@ const getPostHref = (p: { id: string }) => getPostUrl(lang, p.id);
 
 // Shared Tailwind Classes (DRY)
 const navLinkClasses =
-  "group relative flex flex-col gap-1 overflow-hidden rounded-2xl border border-border/50 bg-muted/30 p-6 transition-colors motion-reduce:transition-none hover:border-accent/40 hover:bg-muted/40 hover:shadow-sm h-full no-underline";
-const navDecorationClasses =
-  "absolute top-0 h-full w-1 bg-border/50 transition-colors group-hover:bg-accent/50";
+  "group relative flex flex-col gap-1 rounded-2xl border border-border/50 bg-muted/30 p-6 transition-colors motion-reduce:transition-none hover:border-accent/40 hover:bg-muted/40 hover:shadow-sm h-full no-underline";
 ---
 
-<footer class="mx-auto mt-[clamp(4.5rem,12vh,8rem)] mb-[clamp(3rem,8vh,6rem)] max-w-3xl">
+<!--
+  base.css gives every section/footer mx-auto, px-4 and a max-width, which
+  would inset this block 1rem from the article's left edge. The utilities
+  below override that so the landmark can stay a real <footer>.
+-->
+<footer class="mx-0 mt-12 mb-[clamp(3rem,8vh,6rem)] max-w-none px-0">
   <!-- Topics -->
   {tags.length > 0 && (
     <nav aria-label={t("a11y.postTags")} class="mb-12 space-y-3">
-      <div class="flex items-center gap-2 pl-1 text-xs font-bold tracking-widest text-text-secondary uppercase">
+      <div class="flex items-center gap-2 text-xs font-bold tracking-widest text-text-secondary uppercase">
         <IconHash class="size-3.5 opacity-60" /> <span>{t("tags.topics")}</span>
       </div>
       <ul class="flex flex-wrap gap-2">
@@ -89,12 +93,11 @@ const navDecorationClasses =
     {/* Previous Post */}
     {prevPost ? (
       <a href={getPostHref(prevPost)} class={navLinkClasses}>
-        <span class={`${navDecorationClasses} left-0`} />
         <span class="mb-1 flex items-center gap-2 text-xs font-bold tracking-wider text-text-secondary uppercase group-hover:text-accent">
           <IconChevronLeft class="size-3 transition-transform group-hover:-translate-x-1" />{" "}
           {t("nav.previousArticle")}
         </span>
-        <span class="line-clamp-2 font-medium text-foreground group-hover:text-accent">
+        <span class="line-clamp-3 font-medium text-foreground group-hover:text-accent">
           {prevPost.title}
         </span>
       </a>
@@ -108,43 +111,28 @@ const navDecorationClasses =
         href={getPostHref(nextPost)}
         class={`${navLinkClasses} items-end text-right`}
       >
-        <span class={`${navDecorationClasses} right-0`} />
         <span class="mb-1 flex items-center gap-2 text-xs font-bold tracking-wider text-text-secondary uppercase group-hover:text-accent">
           {t("nav.nextArticle")}{" "}
           <IconChevronRight class="size-3 transition-transform group-hover:translate-x-1" />
         </span>
-        <span class="line-clamp-2 font-medium text-foreground group-hover:text-accent">
+        <span class="line-clamp-3 font-medium text-foreground group-hover:text-accent">
           {nextPost.title}
         </span>
       </a>
     )}
   </nav>
 
-  <!-- Comments Section -->
-  <section class="mt-16" aria-labelledby="comments-heading">
-    <h2
-      id="comments-heading"
-      class="mb-8 flex items-center gap-2 pl-1 text-xs font-bold tracking-widest text-text-secondary uppercase"
-    >
-      <svg
-        width="24"
-        height="24"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        class="size-3.5 opacity-60"
+  <!-- Comments: rendered only when Giscus is configured (no empty heading) -->
+  {isGiscusConfigured && (
+    <section class="mt-16 px-0" aria-labelledby="comments-heading">
+      <h2
+        id="comments-heading"
+        class="mb-8 flex items-center gap-2 text-xs font-bold tracking-widest text-text-secondary uppercase"
       >
-        <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-        <path d="M5 9l14 0"></path>
-        <path d="M5 15l14 0"></path>
-        <path d="M11 4l-4 16"></path>
-        <path d="M17 4l-4 16"></path>
-      </svg>
-      <span>{t("comments.discussion")}</span>
-    </h2>
-    <Comments locale={lang} />
-  </section>
+        <IconHash class="size-3.5 opacity-60" aria-hidden="true" />
+        <span>{t("comments.discussion")}</span>
+      </h2>
+      <Comments locale={lang} />
+    </section>
+  )}
 </footer>

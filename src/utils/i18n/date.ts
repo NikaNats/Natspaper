@@ -7,6 +7,7 @@
 
 import type { Lang } from "@/i18n/config";
 import { LOCALE_CODES } from "@/i18n/config";
+import { SITE } from "@/config";
 
 /**
  * Date format options for different display contexts
@@ -46,20 +47,22 @@ type DateFormatType = keyof typeof DATE_FORMATS;
 export function formatDate(
   date: Date | string | number,
   locale: Lang,
-  format: DateFormatType = "short"
+  format: DateFormatType = "short",
+  timeZone: string = SITE.timezone
 ): string {
   const dateObj = date instanceof Date ? date : new Date(date);
 
   // Get the full locale code (e.g., "en-US", "ka-GE")
   const localeCode = LOCALE_CODES[locale] ?? locale;
 
-  // Get format options for this locale and format type
-  const options = DATE_FORMATS[format][locale];
+  // Format in the site's (or post's) time zone, never the build machine's:
+  // a CI runner on UTC would otherwise print a different calendar day.
+  const options = { ...DATE_FORMATS[format][locale], timeZone };
 
   try {
     return new Intl.DateTimeFormat(localeCode, options).format(dateObj);
   } catch {
-    // Fallback to ISO string if formatting fails
+    // Fallback if formatting fails (e.g. an invalid time zone string)
     return dateObj.toLocaleDateString(localeCode);
   }
 }

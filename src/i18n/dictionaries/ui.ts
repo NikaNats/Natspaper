@@ -84,6 +84,8 @@ export const ui = {
     "a11y.readPost": "Read post: {title}",
     "a11y.readFeaturedPost": "Read featured post: {title}",
     "a11y.languageNotice": "Language availability notice",
+    "a11y.enlargeImage": "Enlarge image",
+    "a11y.closeImage": "Close enlarged image",
 
     // Reading time
     "post.words": "words",
@@ -107,13 +109,6 @@ export const ui = {
     "share.via": "Share this post via {platform}",
     "share.on": "Share this post on {platform}",
     "share.viaEmail": "Share this post via email",
-
-    // Provenance / citation
-    "post.published": "Published:",
-    "post.substantialRevision": "Substantial Revision:",
-    "post.citeThis": "Cite this treatise",
-    "post.copyBibtex": "Copy BibTeX",
-    "post.copied": "Copied!",
 
     // Translation fallback notice
     "post.fallbackTitle": "Article only available in English",
@@ -195,6 +190,8 @@ export const ui = {
     "a11y.readPost": "პოსტის წაკითხვა: {title}",
     "a11y.readFeaturedPost": "გამორჩეული პოსტის წაკითხვა: {title}",
     "a11y.languageNotice": "შეტყობინება ენის ხელმისაწვდომობის შესახებ",
+    "a11y.enlargeImage": "სურათის გადიდება",
+    "a11y.closeImage": "გადიდებული სურათის დახურვა",
 
     // Reading time
     "post.words": "სიტყვა",
@@ -218,13 +215,6 @@ export const ui = {
     "share.via": "გაზიარება {platform}-ით",
     "share.on": "გაზიარება {platform}-ზე",
     "share.viaEmail": "ელფოსტით გაზიარება",
-
-    // Provenance / citation
-    "post.published": "გამოქვეყნდა:",
-    "post.substantialRevision": "არსებითი განახლება:",
-    "post.citeThis": "ციტირება",
-    "post.copyBibtex": "BibTeX-ის კოპირება",
-    "post.copied": "დაკოპირდა!",
 
     // Translation fallback notice
     "post.fallbackTitle": "სტატია ხელმისაწვდომია მხოლოდ ინგლისურ ენაზე",

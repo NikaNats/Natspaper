@@ -1,7 +1,7 @@
 ---
 // src/components/post/TableOfContents.astro
 // Left-rail, sticky Table of Contents with ScrollSpy functionality
-// Uses IntersectionObserver for performant scroll tracking
+// rAF-throttled position check (last heading past the reading line)
 
 import type { MarkdownHeading } from "astro";
 import { getI18n, type Lang } from "@/i18n";
@@ -61,60 +61,98 @@ const toc = headings.filter(h => h.depth >= 2 && h.depth <= 3);
 
 <script>
   /**
-   * Fluent ScrollSpy Implementation
-   * Uses IntersectionObserver for high performance (no scroll event listeners)
-   * Ensures TOC works perfectly with Astro View Transitions
+   * ScrollSpy: "the last heading that has scrolled past the reading line".
    *
-   * Lifecycle: one observer per page. It is disconnected on
-   * astro:before-swap so the outgoing page's headings (and this closure) can
-   * be garbage-collected instead of accumulating across navigations.
+   * Recomputed from heading positions on each animation frame after a scroll
+   * or resize, instead of tracking IntersectionObserver enter events. That
+   * makes it correct in the cases an enter-event spy gets wrong:
+   * - page load at the top (first heading is active immediately),
+   * - scrolling back up, fast jumps, and short sections,
+   * - the end of the page (last heading wins once you hit the bottom).
+   *
+   * Lifecycle: listeners hang off one AbortController per page, aborted on
+   * astro:before-swap so nothing accumulates across View Transitions.
    */
-  let observer: IntersectionObserver | null = null;
+  /** Distance from the viewport top (px) at which a heading becomes active. */
+  const READING_LINE = 120;
+
+  let controller: AbortController | null = null;
+
+  /** Malformed %-sequences in a hash must not abort the whole spy. */
+  function safeDecode(value: string): string {
+    try {
+      return decodeURIComponent(value);
+    } catch {
+      return value;
+    }
+  }
 
   function teardownScrollSpy() {
-    observer?.disconnect();
-    observer = null;
+    controller?.abort();
+    controller = null;
   }
 
   function initScrollSpy() {
     teardownScrollSpy();
 
     const nav = document.querySelector(".toc-nav");
-    const links = document.querySelectorAll(".toc-link");
     const indicator = document.getElementById("toc-indicator");
-
-    if (!nav || !links.length) return;
+    if (!nav) return;
 
     // Fade in navigation once JS is ready
     nav.classList.remove("opacity-0");
 
-    const headings = Array.from(
-      document.querySelectorAll<HTMLElement>("article h2, article h3")
-    );
     const tocLinks = new Map<string, HTMLAnchorElement>();
-    document.querySelectorAll<HTMLAnchorElement>(".toc-link").forEach(link => {
-      const id = link.getAttribute("href")?.slice(1);
+    nav.querySelectorAll<HTMLAnchorElement>(".toc-link").forEach(link => {
+      const id = safeDecode(link.hash.slice(1));
       if (id) tocLinks.set(id, link);
     });
 
-    if (headings.length === 0 || tocLinks.size === 0) return;
+    // Only headings that actually have a TOC entry, in document order
+    const headings = Array.from(
+      document.querySelectorAll<HTMLElement>("article h2[id], article h3[id]")
+    ).filter(h => tocLinks.has(h.id));
+
+    if (headings.length === 0) return;
+
+    controller = new AbortController();
+    const { signal } = controller;
 
     let activeHeadingId: string | null = null;
+    let frame = 0;
 
-    observer = new IntersectionObserver(
-      entries => {
-        for (const entry of entries) {
-          if (entry.isIntersecting) {
-            activeHeadingId = entry.target.id;
-            break;
-          }
-        }
+    function computeActiveId(): string {
+      const { scrollHeight } = document.documentElement;
+      // A page that fits the viewport is "at the bottom" trivially; only treat
+      // the end as reached when there is actually somewhere to scroll.
+      const isScrollable = scrollHeight - window.innerHeight > 2;
+      const scrolledToBottom =
+        isScrollable && window.innerHeight + window.scrollY >= scrollHeight - 2;
+      if (scrolledToBottom) return headings[headings.length - 1]!.id;
+
+      let current = headings[0]!.id;
+      for (const heading of headings) {
+        if (heading.getBoundingClientRect().top > READING_LINE) break;
+        current = heading.id;
+      }
+      return current;
+    }
+
+    function schedule() {
+      if (frame) return;
+      frame = requestAnimationFrame(() => {
+        frame = 0;
+        const next = computeActiveId();
+        if (next === activeHeadingId) return;
+        activeHeadingId = next;
         updateActiveLink();
-      },
-      { rootMargin: "-80px 0px -70% 0px", threshold: 0 }
-    );
+      });
+    }
 
-    headings.forEach(h => observer?.observe(h));
+    window.addEventListener("scroll", schedule, { passive: true, signal });
+    window.addEventListener("resize", schedule, { passive: true, signal });
+    signal.addEventListener("abort", () => cancelAnimationFrame(frame));
+    schedule();
 
     function updateActiveLink() {
       if (!activeHeadingId) return;

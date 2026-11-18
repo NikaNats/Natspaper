@@ -64,7 +64,7 @@ test.describe("PostContent — Container Queries", () => {
   test("narrow container (< 400px): code blocks should be full-bleed", async ({
     page,
   }) => {
-    // Force narrow viewport → container width < 25rem (400px)
+    // Force narrow viewport → container width < 400px
     await page.setViewportSize({ width: 375, height: 812 });
     await goToFirstPost(page);
 
@@ -86,10 +86,10 @@ test.describe("PostContent — Container Queries", () => {
     expect(borderRadius).toBe("0px");
   });
 
-  test("wide container (≥ 700px): images should have 1rem border-radius", async ({
+  test("wide container (≥ 700px): images should have 1rem (18px) border-radius", async ({
     page,
   }) => {
-    // Force wide viewport → container width > 43.75rem (700px)
+    // Force wide viewport → container width > 700px
     await page.setViewportSize({ width: 1280, height: 900 });
     await goToFirstPost(page);
 
@@ -103,8 +103,11 @@ test.describe("PostContent — Container Queries", () => {
       el => getComputedStyle(el).borderRadius,
     );
 
-    // @container post-content (min-width: 43.75rem) → border-radius: 1rem
-    expect(borderRadius).toBe("16px"); // 1rem = 16px
+    // @container post-content (min-width: 700px) → border-radius: 1rem.
+    // Container queries are px-based on purpose: the article column is a fixed
+    // ~732px, while rem scales with the root (18px on desktop), so a rem
+    // threshold (43.75rem = 787px) would never match inside it.
+    expect(borderRadius).toBe("18px"); // 1rem at the 18px desktop root
   });
 
   test("narrow container: images should have 0 border-radius", async ({
@@ -123,7 +126,7 @@ test.describe("PostContent — Container Queries", () => {
       el => getComputedStyle(el).borderRadius,
     );
 
-    // @container post-content (max-width: 25rem) → border-radius: 0
+    // @container post-content (max-width: 400px) → border-radius: 0
     expect(borderRadius).toBe("0px");
   });
 });

@@ -64,13 +64,14 @@ const { slug, title, pubDatetime, modDatetime, timezone, readingTimeText } =
     --hero-margin-block-end: clamp(2rem, 1.5rem + 2.5vw, 4rem);
     --hero-gap: clamp(1rem, 0.75rem + 0.5vw, 1.5rem);
     width: 100%;
-    text-align: center;
+    /* Left-aligned: shares the body text's reading axis */
+    text-align: start;
   }
 
   /* Title - Fluid typography */
   .post-hero__title {
-    /* Fluid: 1.75rem (28px) → 3rem (48px), capped at 1280px */
-    font-size: clamp(1.75rem, 1.25rem + 2.5vw, 3rem);
+    /* Fluid: 1.75rem → 2.25rem; wider containers cap at 2.5rem below */
+    font-size: clamp(1.75rem, 1.25rem + 2vw, 2.25rem);
     font-weight: 700;
     line-height: 1.15;
     letter-spacing: -0.02em;
@@ -85,7 +86,7 @@ const { slug, title, pubDatetime, modDatetime, timezone, readingTimeText } =
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     gap: clamp(0.5rem, 0.375rem + 0.375vw, 0.75rem);
     font-size: clamp(0.8125rem, 0.75rem + 0.125vw, 0.875rem);
     color: var(--color-text-secondary);
@@ -100,7 +101,7 @@ const { slug, title, pubDatetime, modDatetime, timezone, readingTimeText } =
      ========================================================================== */
 
   /* Narrow containers (< 300px) - Ultra compact */
-  @container post-hero (max-width: 18.75rem) {
+  @container post-hero (max-width: 300px) {
     .post-hero__title {
       font-size: clamp(1.5rem, 1.25rem + 1.5vw, 2rem);
     }
@@ -116,22 +117,22 @@ const { slug, title, pubDatetime, modDatetime, timezone, readingTimeText } =
   }
 
   /* Wide containers (≥ 500px) - Enhanced spacing */
-  @container post-hero (min-width: 31.25rem) {
+  @container post-hero (min-width: 500px) {
     .post-hero {
       --hero-margin-block-start: clamp(2rem, 1.5rem + 2vw, 3.5rem);
       --hero-margin-block-end: clamp(2.5rem, 2rem + 2vw, 4.5rem);
     }
 
     .post-hero__title {
-      font-size: clamp(2rem, 1.5rem + 2vw, 3.25rem);
+      font-size: clamp(2rem, 1.5rem + 1.5vw, 2.5rem);
     }
   }
 
-  /* Extra wide containers (≥ 700px) - Maximum expression */
-  @container post-hero (min-width: 43.75rem) {
+  /* Extra wide containers (≥ 700px) - capped so long titles stay 2–3 lines */
+  @container post-hero (min-width: 700px) {
     .post-hero__title {
-      font-size: clamp(2.25rem, 1.75rem + 1.5vw, 3.5rem);
-      letter-spacing: -0.03em;
+      font-size: clamp(2.25rem, 1.75rem + 1vw, 2.5rem);
+      letter-spacing: -0.025em;
     }
   }
 
@@ -156,7 +157,7 @@ const { slug, title, pubDatetime, modDatetime, timezone, readingTimeText } =
 
     @media (min-width: 64rem) {
       .post-hero__title {
-        font-size: 3rem;
+        font-size: 2.5rem;
       }
     }
   }

@@ -30,7 +30,7 @@ export const SITE: SiteConfig = {
   ogImage: "og-default.jpg", // Default OpenGraph image in /public (>=1200x630, 1.91:1)
 };
 
-// CONFIG VALIDATION: Ensure timezone is valid to prevent build crashes in dayjs
+// CONFIG VALIDATION: Ensure timezone is valid to prevent build crashes in Intl date formatting
 try {
   Intl.DateTimeFormat(undefined, { timeZone: SITE.timezone });
 } catch {
@@ -127,3 +127,7 @@ export const GISCUS: GiscusConfig = {
   lang: "en",
   loading: "lazy",
 };
+
+/** True only when Giscus is enabled AND every required env value is set. */
+export const isGiscusConfigured =
+  GISCUS.enabled && !!GISCUS.repo && !!GISCUS.repoId && !!GISCUS.categoryId;

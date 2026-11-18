@@ -26,7 +26,6 @@ import TableOfContents from "@/components/post/TableOfContents.astro";
 import MobileTableOfContents from "@/components/post/MobileTableOfContents.astro";
 import SeriesBox from "@/components/post/SeriesBox.astro";
 import Bibliography from "@/components/post/Bibliography.astro";
-import ProvenanceBlock from "@/components/post/ProvenanceBlock.astro";
 
 export interface Props {
   post: CollectionEntry<"blog">;
@@ -211,8 +210,8 @@ const uiLangTag = LOCALE_CODES[locale];
         {readingTimeText}
       />
 
-      <!-- Mobile Table of Contents (mirrors the 81rem rail threshold: no TOC gap) -->
-      <div class="block min-[81rem]:hidden">
+      <!-- Mobile Table of Contents (mirrors the 84rem rail threshold: no TOC gap) -->
+      <div class="block min-[84rem]:hidden">
         <MobileTableOfContents headings={headings} />
       </div>
 
@@ -232,21 +231,6 @@ const uiLangTag = LOCALE_CODES[locale];
         <Bibliography references={post.data.references} locale={locale} />
       )}
 
-      <ProvenanceBlock
-        title={title}
-        author={author}
-        pubDate={pubDatetime}
-        modDate={modDatetime}
-        canonicalUrl={
-          typeof canonicalURL === "string"
-            ? canonicalURL
-            : ((canonicalURL as unknown as URL)?.toString?.() ??
-              new URL(Astro.url.pathname, SITE.website).href)
-        }
-        slug={(post.slug ?? post.id).replace(/\//g, "_")}
-        locale={locale}
-      />
-
       <PostFooter
         {tags}
         {showEditPost}
@@ -264,20 +248,15 @@ const uiLangTag = LOCALE_CODES[locale];
 </Layout>
 
 <style>
+  /* Same geometry as the header (max-w-app + px-4) and Main.astro's
+     .main-layout--app, so logo, breadcrumb and footer share one left edge.
+     px on purpose: max-w-app is px-based and must not scale with root rem. */
   .article-layout {
     position: relative;
-    width: 100%;
-    max-width: calc(var(--main-width) + 2rem);
+    width: min(100%, 768px);
     margin-inline: auto;
     padding-inline: 1rem;
     padding-block: 2rem 3rem;
-  }
-
-  @media (min-width: 752px) {
-    .article-layout {
-      max-width: var(--main-width);
-      padding-inline: 0;
-    }
   }
 
   .article-container {
@@ -296,8 +275,10 @@ const uiLangTag = LOCALE_CODES[locale];
     transition: opacity 0.2s ease;
   }
 
-  /* Only mount TOC when viewport can support layout without narrowing prose (81rem = 1296px) */
-  @media (min-width: 81rem) {
+  /* Only mount the rail when it fits beside the 768px frame without leaving
+     the viewport: 768 + 2 × (rail 252px + gap 27px at the 18px root) ≈ 1326px,
+     so 84rem (1344px; media-query rem is always 16px). */
+  @media (min-width: 84rem) {
     .article-sidebar {
       display: block;
       position: absolute;
@@ -305,7 +286,8 @@ const uiLangTag = LOCALE_CODES[locale];
       right: 100%;
       width: var(--rail-width, 14rem);
       height: 100%;
-      margin-right: var(--rail-gap, 2.5rem);
+      /* The frame's 1rem padding already separates rail and text */
+      margin-right: calc(var(--rail-gap, 2.5rem) - 1rem);
     }
     .article-sidebar__inner {
       position: sticky;

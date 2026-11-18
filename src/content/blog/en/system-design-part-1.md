@@ -43,8 +43,6 @@ System design is the work of deciding what a system is made of, how those parts 
 
 This first part builds the vocabulary the rest of the series relies on. [Part 2](/en/posts/system-design-part-2) applies it to the building blocks you reach for most often: load balancers, caches and databases.
 
-## Table of contents
-
 ## Start With Requirements, Not Boxes
 
 Every design discussion that starts by drawing boxes ends up redrawing them. Before choosing any technology, pin down two kinds of requirements.

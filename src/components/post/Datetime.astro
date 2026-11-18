@@ -4,20 +4,13 @@
  *
  * Displays publication/modification dates with:
  * - Locale-aware formatting using Intl.DateTimeFormat
- * - Proper timezone handling via dayjs
+ * - Time zone handled by Intl (site zone, or the post's own override)
  * - i18n support for "Updated" label
  */
-import dayjs from "dayjs";
-import utc from "dayjs/plugin/utc";
-import timezone from "dayjs/plugin/timezone";
 import IconCalendar from "@/assets/icons/IconCalendar.svg";
 import { SITE } from "@/config";
 import { getI18n, type Lang } from "@/i18n";
 import { formatDate } from "@/utils/i18n/date";
-
-// These extensions are fine to run at the module level
-dayjs.extend(utc);
-dayjs.extend(timezone);
 
 export interface Props {
   class?: string;
@@ -39,19 +32,20 @@ const {
 const currentLocale = (Astro.currentLocale as Lang) ?? "en";
 const { t } = getI18n(currentLocale);
 
-// REFACTORED: Use dayjs's own `isAfter` method. It's more readable and idiomatic.
-const isModified =
-  modDatetime && dayjs(modDatetime).isAfter(dayjs(pubDatetime));
-
-// REFACTORED: Separate the logic for selecting the date from formatting it.
-const dateToShow = isModified ? modDatetime : pubDatetime;
 const effectiveTimezone = postTimezone ?? SITE.timezone;
+const pubDate = new Date(pubDatetime);
+const modDate = modDatetime ? new Date(modDatetime) : null;
 
-const datetime = dayjs(dateToShow).tz(effectiveTimezone);
-
-// Use Intl.DateTimeFormat for locale-aware formatting
+// Locale-aware, time-zone-correct formatting
 // Georgian: "25 დეკ. 2024" | English: "Dec 25, 2024"
-const formattedDate = formatDate(datetime.toDate(), currentLocale, "short");
+const format = (d: Date) =>
+  formatDate(d, currentLocale, "short", effectiveTimezone);
+
+// Any later modification (even the same day) counts as an update.
+const isModified = !!modDate && modDate > pubDate;
+
+const dateToShow = isModified && modDate ? modDate : pubDate;
+const formattedDate = format(dateToShow);
 ---
 
 <div
@@ -62,9 +56,9 @@ const formattedDate = formatDate(datetime.toDate(), currentLocale, "short");
     class:list={["inline-block size-5 min-w-5", { "scale-90": size === "sm" }]}
   />
 
-  {/* REFACTORED: Apply sizing classes to a single parent span to avoid repetition (DRY principle). */}
+  {/* Sizing classes live on one parent span to avoid repetition. */}
   <span class:list={["text-sm", { "sm:text-base": size === "lg" }]}>
     {isModified && `${t("post.updated")} `}
-    <time datetime={datetime.toISOString()}>{formattedDate}</time>
+    <time datetime={dateToShow.toISOString()}>{formattedDate}</time>
   </span>
 </div>

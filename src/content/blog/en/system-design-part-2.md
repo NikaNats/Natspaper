@@ -42,8 +42,6 @@ references:
 
 [Part 1](/en/posts/system-design-part-1) introduced the vocabulary: requirements, estimation, latency percentiles, scalability, availability and consistency. This part applies it to the three components that appear in almost every design. A **load balancer** spreads requests across stateless servers, a **cache** keeps hot data close to where it is needed, and a **database** holds the state everything else depends on.
 
-## Table of contents
-
 ## Load Balancing
 
 A load balancer sits in front of a pool of servers and decides which one handles each request. It gives you horizontal scaling (add servers behind it), fault tolerance (stop sending traffic to unhealthy servers) and a single stable address that clients can rely on.

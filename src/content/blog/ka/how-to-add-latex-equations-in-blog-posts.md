@@ -23,8 +23,6 @@ description: ისწავლეთ როგორ დავამატო�
 
 _ფოტო [Vitaly Gariev](https://www.pexels.com/photo/close-up-of-complicated-equations-written-on-a-blackboard-22690748/)-ის მიერ_
 
-## შინაარსის ცხრილი
-
 ## ინსტრუქციები
 
 ამ განყოფილებაში ნახავთ ინსტრუქციებს, თუ როგორ დავამატოთ LaTeX-ის მხარდაჭერა თქვენი Markdown ფაილებში AstroPaper-ზე.
