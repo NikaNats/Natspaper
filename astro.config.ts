@@ -6,7 +6,6 @@ import { SITE } from "./src/config";
 import { DEFAULT_LANG, SUPPORTED_LANGS } from "./src/i18n/config";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
-import { remarkModifiedTime } from "./src/lib/remark-modified-time.mjs";
 import { rehypeEagerFirstImage } from "./src/lib/rehype-eager-first-image.mjs";
 import vercel from "@astrojs/vercel";
 import { unified } from "@astrojs/markdown-remark";
@@ -36,7 +35,10 @@ export default defineConfig({
     // Keep the remark/rehype pipeline (KaTeX + custom plugins); Astro 7.4
     // deprecated top-level `markdown.*Plugins` in favour of a processor.
     processor: unified({
-      remarkPlugins: [remarkModifiedTime, remarkMath],
+      // modDatetime is author-curated frontmatter (single source of truth for
+      // the page, JSON-LD and sitemap <lastmod>); it is never derived from
+      // git, where formatting/lint commits would read as content revisions.
+      remarkPlugins: [remarkMath],
       rehypePlugins: [
         [
           rehypeKatex,
