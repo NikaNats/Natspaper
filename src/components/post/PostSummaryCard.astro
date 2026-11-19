@@ -158,9 +158,10 @@ const hiddenTagsCount = tags.length - MAX_TAGS;
      ========================================================================== */
 
   .post-card {
-    /* Container query context */
-    container-type: inline-size;
-    container-name: post-card;
+    /* NOTE: deliberately NOT a container (`container-type: inline-size`).
+       Playwright's WebKit crashes on client-side (ClientRouter) navigation
+       into pages that render several such cards (see issue #6). The width
+       breakpoints below are viewport media queries instead. */
 
     /* Reset list styling */
     list-style: none;
@@ -338,13 +339,15 @@ const hiddenTagsCount = tags.length - MAX_TAGS;
   }
 
   /* ==========================================================================
-     CONTAINER QUERIES - Component-level Responsiveness
+     WIDTH BREAKPOINTS
      ==========================================================================
-     Adjust layout based on the card's container width, not viewport.
+     The card fills the page column (max 768px app width minus ~2rem of
+     gutters), so its width tracks the viewport. Each breakpoint below is the
+     original card-width threshold + 2rem, expressed as a viewport query.
      ========================================================================== */
 
-  /* Narrow containers (< 300px) - compact mode */
-  @container post-card (max-width: 18.75rem) {
+  /* Narrow cards (< 300px, viewport < 332px) - compact mode */
+  @media (max-width: 20.75rem) {
     .post-card__meta {
       flex-direction: column;
       align-items: flex-start;
@@ -356,8 +359,8 @@ const hiddenTagsCount = tags.length - MAX_TAGS;
     }
   }
 
-  /* Wide containers (≥ 500px) - enhanced layout */
-  @container post-card (min-width: 31.25rem) {
+  /* Wide cards (≥ 500px, viewport ≥ 532px) - enhanced layout */
+  @media (min-width: 33.25rem) {
     .post-card__article {
       --card-padding: clamp(1.25rem, 1rem + 0.5vw, 1.75rem);
     }
@@ -371,8 +374,8 @@ const hiddenTagsCount = tags.length - MAX_TAGS;
     }
   }
 
-  /* Extra wide containers (≥ 700px) - spacious layout */
-  @container post-card (min-width: 43.75rem) {
+  /* Extra wide cards (≥ 700px, viewport ≥ 732px) - spacious layout */
+  @media (min-width: 45.75rem) {
     .post-card__article {
       display: grid;
       grid-template-columns: 1fr;
@@ -381,32 +384,6 @@ const hiddenTagsCount = tags.length - MAX_TAGS;
 
     .post-card__description {
       max-width: 90%;
-    }
-  }
-
-  /* ==========================================================================
-     VIEWPORT FALLBACKS
-     ==========================================================================
-     For browsers without container query support
-     ========================================================================== */
-
-  @supports not (container-type: inline-size) {
-    @media (min-width: 31.25rem) {
-      .post-card__article {
-        padding: 1.5rem;
-      }
-
-      .post-card__title {
-        font-size: 1.25rem;
-      }
-    }
-
-    @media (max-width: 18.75rem) {
-      .post-card__meta {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.25rem;
-      }
     }
   }
 </style>
