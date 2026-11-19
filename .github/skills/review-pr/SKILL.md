@@ -1,7 +1,7 @@
 ---
-agent: "review-pr"
-tools: ["filesystem", "git", "sequential-thinking"]
+name: review-pr
 description: "Structured PR review: architecture, correctness, perf, a11y, i18n, tests."
+disable-model-invocation: true
 ---
 
 # PR Review Checklist

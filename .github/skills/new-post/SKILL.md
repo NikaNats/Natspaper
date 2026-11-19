@@ -1,7 +1,7 @@
 ---
-agent: "new-post"
-tools: ["filesystem", "sequential-thinking"]
+name: new-post
 description: "Scaffold a new blog post with correct frontmatter, locale routing and i18n wiring."
+disable-model-invocation: true
 ---
 
 # New Blog Post Scaffold

@@ -1,7 +1,7 @@
 ---
-mode: "agent"
-tools: ["filesystem", "sequential-thinking"]
+name: write-tests
 description: "Generate comprehensive Vitest unit tests or Playwright E2E tests for a target module."
+disable-model-invocation: true
 ---
 
 # Test Generation

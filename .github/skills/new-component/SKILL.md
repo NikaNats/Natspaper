@@ -1,7 +1,7 @@
 ---
-agent: "new-component"
-tools: ["filesystem", "sequential-thinking"]
+name: new-component
 description: "Scaffold a new Astro UI (dumb) or Feature (smart) component with correct patterns."
+disable-model-invocation: true
 ---
 
 # New Component Scaffold

@@ -1,7 +1,7 @@
 ---
-agent: "fix-bug"
-tools: ["filesystem", "sequential-thinking", "git"]
+name: fix-bug
 description: "Systematic bug investigation: reproduce, isolate, fix, test, verify."
+disable-model-invocation: true
 ---
 
 # Bug Fix Workflow

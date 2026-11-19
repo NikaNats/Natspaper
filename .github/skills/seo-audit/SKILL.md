@@ -1,7 +1,7 @@
 ---
-agent: "seo-audit"
-tools: ["filesystem", "sequential-thinking"]
+name: seo-audit
 description: "Audit SEO, canonicalization, robots directives, and i18n completeness."
+disable-model-invocation: true
 ---
 
 # SEO & i18n Audit

@@ -1,7 +1,7 @@
 ---
-agent: "add-feature"
-tools: ["filesystem", "sequential-thinking"]
+name: add-feature
 description: "End-to-end feature implementation: design, code, test, verify."
+disable-model-invocation: true
 ---
 
 # Feature Implementation Workflow
