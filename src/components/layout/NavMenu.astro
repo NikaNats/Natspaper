@@ -30,7 +30,7 @@ const { t } = getI18n(locale);
         class:list={{
           "active-nav text-accent": isActive(currentPath, link.href, locale),
         }}
-        class="flex min-h-12 items-center rounded-md px-4 py-2 font-sans text-2xl font-bold tracking-wide text-foreground no-underline transition-colors hover:bg-muted hover:text-accent focus:outline-none md:min-h-9 md:px-2 md:py-1 md:text-sm md:font-medium md:tracking-normal"
+        class="flex min-h-12 items-center rounded-md px-4 py-2 font-sans text-2xl font-bold tracking-wide text-foreground no-underline transition-colors hover:bg-muted hover:text-accent md:min-h-9 md:px-2 md:py-1 md:text-sm md:font-medium md:tracking-normal"
       >
         {t(link.text as UIKey)} {/* Use i18n key from config */}
       </a>
@@ -41,7 +41,7 @@ const { t } = getI18n(locale);
       <LinkButton
         href={`/${locale}/archives`}
         class:list={[
-          "flex min-h-12 min-w-12 items-center justify-center rounded-md p-2 text-foreground transition-colors hover:bg-muted hover:text-accent focus:outline-none md:min-h-9 md:min-w-9 md:p-2.5",
+          "flex min-h-12 min-w-12 items-center justify-center rounded-md p-2 text-foreground transition-colors hover:bg-muted hover:text-accent md:min-h-9 md:min-w-9 md:p-2.5",
           {
             "active-nav text-accent": isActive(
               currentPath,
@@ -64,10 +64,9 @@ const { t } = getI18n(locale);
       <button
         id="theme-btn"
         data-testid="theme-toggle"
-        class="inline-flex min-h-12 min-w-12 items-center justify-center rounded-md p-2 text-foreground transition-colors hover:bg-muted hover:text-accent focus:outline-none md:min-h-9 md:min-w-9 md:p-2.5"
-        title="Toggle light & dark theme"
-        aria-label="Toggle theme"
-        aria-live="polite"
+        class="inline-flex min-h-12 min-w-12 items-center justify-center rounded-md p-2 text-foreground transition-colors hover:bg-muted hover:text-accent md:min-h-9 md:min-w-9 md:p-2.5"
+        title={t("nav.toggleTheme")}
+        aria-label={t("nav.toggleTheme")}
       >
         <IconMoon
           class="hidden size-7 md:size-5 dark:block"
