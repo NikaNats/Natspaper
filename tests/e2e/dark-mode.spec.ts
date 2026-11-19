@@ -1,4 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
+import { ensureMenuOpen } from "../helpers/menu";
 
 /**
  * Dark Mode Toggle E2E Tests
@@ -12,18 +13,6 @@ import { test, expect, type Page } from "@playwright/test";
  * - Theme persists across navigation (View Transitions)
  * - System preference is respected when no saved preference
  */
-
-async function ensureMenuOpen(page: Page) {
-  const menuBtn = page.locator("#menu-btn");
-  if (await menuBtn.isVisible()) {
-    const menuOverlay = page.locator("#mobile-menu-overlay");
-    const state = await menuOverlay.getAttribute("data-state");
-    if (state !== "open") {
-      await menuBtn.click();
-      await page.waitForSelector('#mobile-menu-overlay[data-state="open"]');
-    }
-  }
-}
 
 test.describe("Dark Mode Toggle", () => {
   test.beforeEach(async ({ page }) => {

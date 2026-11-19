@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { ensureMenuOpen } from "../helpers/menu";
 
 /**
  * Regressions for client-side state that must survive (or must NOT survive)
@@ -16,6 +17,8 @@ test.describe("Theme toggle keeps every theme signal in sync", () => {
     await expect(root).toHaveAttribute("data-theme", "light");
     expect(await root.evaluate(el => el.style.colorScheme)).toBe("light");
 
+    // On mobile the toggle lives inside the (initially hidden) menu overlay.
+    await ensureMenuOpen(page);
     await page.getByTestId("theme-toggle").first().click();
 
     await expect(root).toHaveAttribute("data-theme", "dark");

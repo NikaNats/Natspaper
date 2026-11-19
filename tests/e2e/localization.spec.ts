@@ -1,4 +1,5 @@
-import { test, expect, type Page } from "@playwright/test";
+import { test, expect } from "@playwright/test";
+import { ensureMenuOpen } from "../helpers/menu";
 
 /**
  * Localization (i18n) E2E Tests
@@ -13,25 +14,11 @@ import { test, expect, type Page } from "@playwright/test";
  * - RTL/LTR direction is set correctly
  */
 
-async function openMobileMenuIfNeeded(page: Page) {
-  const menuBtn = page.locator("#menu-btn");
-  if (await menuBtn.isVisible()) {
-    const menuOverlay = page.locator("#mobile-menu-overlay");
-    const state = await menuOverlay.getAttribute("data-state");
-    if (state !== "open") {
-      await menuBtn.click();
-      await page.waitForSelector('#mobile-menu-overlay[data-state="open"]');
-      await expect(menuOverlay).toBeVisible();
-      await page.waitForTimeout(300);
-    }
-  }
-}
-
 test.describe("Localization - Language Switching", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/en/");
     await page.waitForLoadState("networkidle");
-    await openMobileMenuIfNeeded(page);
+    await ensureMenuOpen(page);
   });
 
   test("should have language picker with proper accessibility", async ({
@@ -75,7 +62,7 @@ test.describe("Localization - Language Switching", () => {
     await page.goto("/ka/");
     await page.waitForLoadState("networkidle");
     
-    await openMobileMenuIfNeeded(page);
+    await ensureMenuOpen(page);
 
     // Click English language link
     const enLink = page.locator('[data-testid="lang-en"]');
@@ -100,7 +87,7 @@ test("should preserve current page path when switching language", async ({
     await page.goto("/en/posts");
     await page.waitForLoadState("networkidle");
     
-    await openMobileMenuIfNeeded(page);
+    await ensureMenuOpen(page);
 
     const kaLink = page.locator('[data-testid="lang-ka"]:visible').first();
 
@@ -141,7 +128,7 @@ test("should preserve current page path when switching language", async ({
     await page.waitForURL(/\/ka\//);
     await page.waitForLoadState("networkidle");
 
-    await openMobileMenuIfNeeded(page);
+    await ensureMenuOpen(page);
 
     // Navigation text should change (LanguagePicker shows "EN" on KA page vs "KA" on EN page)
     const kaNavText = await page.locator('[data-testid="nav-menu"]').textContent();
@@ -162,7 +149,7 @@ test.describe("Localization - Content Translation", () => {
     await page.goto("/en/");
     await page.waitForLoadState("networkidle");
     
-    await openMobileMenuIfNeeded(page);
+    await ensureMenuOpen(page);
 
     // Check for English-specific content
     // Navigation should have English text
@@ -210,7 +197,7 @@ test.describe("Localization - URL Structure", () => {
     await page.goto("/en/");
     await page.waitForLoadState("networkidle");
     
-    await openMobileMenuIfNeeded(page);
+    await ensureMenuOpen(page);
 
     // Click on Posts link
     const postsLink = page.getByRole("link", { name: /posts/i }).first();
@@ -256,7 +243,7 @@ test.describe("Localization - Accessibility", () => {
     await page.goto("/en/");
     await page.waitForLoadState("networkidle");
     
-    await openMobileMenuIfNeeded(page);
+    await ensureMenuOpen(page);
 
     const kaLink = page.locator('[data-testid="lang-ka"]');
 
