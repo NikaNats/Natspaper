@@ -3,23 +3,33 @@
  * Handles: spaces, camelCase, PascalCase, special chars, consecutive separators,
  * letter-number transitions, and dots.
  */
+/**
+ * Trims every leading/trailing occurrence of `char` with a linear scan
+ * (regex alternatives such as /^-+|-+$/ backtrack super-linearly).
+ */
+export function trimChar(str: string, char: string): string {
+  let start = 0;
+  let end = str.length;
+  while (start < end && str[start] === char) start++;
+  while (end > start && str[end - 1] === char) end--;
+  return str.slice(start, end);
+}
+
 function toKebabCase(str: string): string {
-  return str
-    .replace(/\.+/g, "-") // dots → hyphens (Node.js → Node-js)
+  const hyphenated = str
+    .replaceAll(".", "-") // dots → hyphens (Node.js → Node-js)
     .replace(/([a-z])([A-Z])/g, "$1-$2") // camelCase → camel-Case
-    .replace(/([A-Z]+)([A-Z][a-z])/g, "$1-$2") // HTMLParser → HTML-Parser
+    .replace(/([A-Z])([A-Z][a-z])/g, "$1-$2") // HTMLParser → HTML-Parser
     .replace(/([a-zA-Z])(\d)/g, "$1-$2") // letter→number: Web3 → Web-3
     .replace(/(\d)([a-zA-Z])/g, "$1-$2") // number→letter: 3D → 3-D
-    .replace(/[\s_]+/g, "-") // spaces/underscores → hyphen
+    .replace(/[\s_]/g, "-") // spaces/underscores → hyphen
     .replace(/[^\w-]/g, "") // remove non-word chars (except hyphen)
-    .replace(/-+/g, "-") // collapse consecutive hyphens
-    .replace(/^-+/, "")
-    .replace(/-+$/, "") // trim leading/trailing hyphens (two passes avoid ReDoS)
-    .toLowerCase();
+    .replace(/-{2,}/g, "-"); // collapse consecutive hyphens
+  return trimChar(hyphenated, "-").toLowerCase();
 }
 
 export const slugifyStr = (str: string) => {
-  const cleanStr = str.replace(/C#/g, "CSharp").replace(/c#/g, "csharp");
+  const cleanStr = str.replaceAll("C#", "CSharp").replaceAll("c#", "csharp");
   return toKebabCase(cleanStr);
 };
 
@@ -39,8 +49,7 @@ export const slugifyAll = (arr: string[]) => arr.map(str => slugifyStr(str));
  */
 export function getLastPathSegment(path: string | undefined): string {
   if (!path) return "";
-  const segments = path.split("/");
-  const last = segments[segments.length - 1];
+  const last = path.split("/").at(-1);
   // Guaranteed to return a string (never undefined)
   return last ?? path;
 }

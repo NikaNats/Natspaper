@@ -21,7 +21,7 @@ const CONTENT_DIR = path.resolve("src/content/blog");
 const FRONTMATTER = /^---\r?\n([\s\S]*?)\r?\n---/;
 
 function readDateKey(frontmatter: string, key: string): Date | undefined {
-  const match = new RegExp(`^${key}:\\s*["']?([^"'\\r\\n#]+)`, "m").exec(
+  const match = new RegExp(String.raw`^${key}:\s*["']?([^"'\r\n#]+)`, "m").exec(
     frontmatter
   );
   const raw = match?.[1]?.trim();

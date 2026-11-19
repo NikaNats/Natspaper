@@ -66,6 +66,6 @@ describe("RFC 9111: HTTP Caching Header Validation", () => {
   it("should flag invalid directives or non-integer delta seconds", () => {
     const invalidHeader = "public, max-age=invalid_time, unknown-directive";
     const errors = validateCacheControlHeader(invalidHeader);
-    expect(errors.length).toBe(2);
+    expect(errors).toHaveLength(2);
   });
 });

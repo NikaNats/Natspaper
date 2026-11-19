@@ -241,7 +241,11 @@ test.describe("Accessibility - Mobile", () => {
     const menuBtn = page.locator("#menu-btn");
     if (await menuBtn.isVisible()) {
       await menuBtn.click();
-      await page.waitForTimeout(350); // Animation
+      // Wait for the open animation to settle
+      await expect(page.locator("#mobile-menu-overlay")).toHaveAttribute(
+        "data-state",
+        "open"
+      );
 
       const accessibilityScanResults = await new AxeBuilder({ page })
         .include("#mobile-menu-overlay")

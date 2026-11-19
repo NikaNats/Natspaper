@@ -22,30 +22,26 @@ import type { Lang } from "@/i18n";
  * In output: 'static', we must explicitly define every path we want to catch.
  */
 export async function getStaticPaths() {
-  const paths = [];
+  // Load every supported locale concurrently
+  const postsByLocale = await Promise.all(
+    SUPPORTED_LANGS.map(async locale => ({
+      locale,
+      posts: await PostRepository.getByLocale(locale as Lang),
+    }))
+  );
 
-  // Generate paths for all supported locales
-  for (const locale of SUPPORTED_LANGS) {
-    const posts = await PostRepository.getByLocale(locale as Lang);
-
-    // Map them to the [...file] param
-    for (const post of posts) {
-      // Extract clean slug (e.g., "my-post")
-      const slug = getPostSlug(post.slug);
-      paths.push({
-        params: {
-          locale,
-          // This creates the path /{locale}/posts/my-post.md
-          file: slug,
-        },
-      });
-    }
-  }
-
-  return paths;
+  return postsByLocale.flatMap(({ locale, posts }) =>
+    posts.map(post => ({
+      params: {
+        locale,
+        // Clean slug (e.g., "my-post") -> /{locale}/posts/my-post.md
+        file: getPostSlug(post.slug),
+      },
+    }))
+  );
 }
 
-export const GET: APIRoute = async ({ params }) => {
+export const GET: APIRoute = ({ params }) => {
   // Construct the destination URL (remove .md)
   const locale = params.locale;
   const cleanSlug = params.file;

@@ -25,11 +25,11 @@ import { fileURLToPath } from "node:url";
 import { extractInlineContents } from "./generate-csp-hashes.js";
 
 // ── CLI Argument Parsing ─────────────────────────────────────────────
-const args = process.argv.slice(2);
+const args = new Set(process.argv.slice(2));
 const FLAGS = {
-  json: args.includes("--json"),
-  strict: args.includes("--strict"),
-  verbose: args.includes("--verbose"),
+  json: args.has("--json"),
+  strict: args.has("--strict"),
+  verbose: args.has("--verbose"),
 };
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -282,7 +282,8 @@ for (const { file, markers } of HTML_CONTENT_CHECKS) {
 
   const missing = markers.filter(m => !fileContains(fullPath, m));
   if (missing.length > 0) {
-    addError(`CONTENT: ${file} missing: ${missing.map(m => `"${m}"`).join(", ")}`);
+    const missingList = missing.map(m => `"${m}"`).join(", ");
+    addError(`CONTENT: ${file} missing: ${missingList}`);
   } else {
     addPass(`${file} - all ${markers.length} markers present`);
   }
@@ -300,7 +301,8 @@ for (const { file, markers, description } of SEO_CONTENT_CHECKS) {
 
   const missing = markers.filter(m => !fileContains(fullPath, m));
   if (missing.length > 0) {
-    addError(`SEO: ${file} invalid — missing: ${missing.map(m => `"${m}"`).join(", ")}`);
+    const missingList = missing.map(m => `"${m}"`).join(", ");
+    addError(`SEO: ${file} invalid — missing: ${missingList}`);
   } else {
     addPass(`${file} - valid (${description})`);
   }
@@ -407,7 +409,7 @@ try {
   const hstsHeader = globalHeaders?.headers.find(h => h.key === "Strict-Transport-Security")?.value || "";
 
   const maxAgeMatch = hstsHeader.match(/max-age=(\d+)/i);
-  const maxAge = maxAgeMatch ? parseInt(maxAgeMatch[1], 10) : 0;
+  const maxAge = maxAgeMatch ? Number.parseInt(maxAgeMatch[1], 10) : 0;
   const hasSubDomains = /includesubdomains/i.test(hstsHeader);
   const hasPreload = /preload/i.test(hstsHeader);
 
@@ -454,7 +456,7 @@ const result = {
   errors: errors.length,
   warnings: warnings.length,
   checks: passed.length,
-  distSizeMB: parseFloat(distSizeMB),
+  distSizeMB: Number.parseFloat(distSizeMB),
   htmlPages: htmlCount,
   errorDetails: errors,
   warningDetails: warnings,

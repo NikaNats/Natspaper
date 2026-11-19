@@ -21,24 +21,22 @@ export async function getStaticPaths() {
     return [];
   }
 
-  const paths = [];
+  // Load every supported locale concurrently
+  const postsByLocale = await Promise.all(
+    SUPPORTED_LANGS.map(async locale => ({
+      locale,
+      posts: (await PostRepository.getByLocale(locale as Lang)).filter(
+        ({ data }) => !data.ogImage
+      ),
+    }))
+  );
 
-  // Generate paths for all supported locales
-  for (const locale of SUPPORTED_LANGS) {
-    const posts = (await PostRepository.getByLocale(locale as Lang)).filter(
-      ({ data }) => !data.ogImage
-    );
-
-    for (const post of posts) {
-      const slug = getPostSlug(post.slug);
-      paths.push({
-        params: { locale, slug },
-        props: post,
-      });
-    }
-  }
-
-  return paths;
+  return postsByLocale.flatMap(({ locale, posts }) =>
+    posts.map(post => ({
+      params: { locale, slug: getPostSlug(post.slug) },
+      props: post,
+    }))
+  );
 }
 
 /**

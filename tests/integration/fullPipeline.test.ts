@@ -124,7 +124,7 @@ describe("Build Pipeline & Data Integrity Integration Tests", () => {
       );
       const endTime = performance.now();
 
-      expect(rssItems.length).toBe(50);
+      expect(rssItems).toHaveLength(50);
       expect(endTime - startTime).toBeLessThan(100); // Expect generation to be very fast
     });
 

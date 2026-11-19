@@ -261,7 +261,7 @@ describe("Pagination Logic", () => {
       const result = getPaginationRange(3, 10, 5);
       const numbers = result.filter((x): x is number => typeof x === "number");
       const uniqueNumbers = [...new Set(numbers)];
-      expect(numbers.length).toBe(uniqueNumbers.length);
+      expect(numbers).toHaveLength(uniqueNumbers.length);
     });
 
     it("should handle single page", () => {
@@ -362,9 +362,7 @@ describe("Pagination Logic", () => {
       const basePath = "/en/posts";
 
       // Page 1
-      expect(getPrevUrl({ currentPage: 1, totalPages: 10, basePath })).toBe(
-        undefined
-      );
+      expect(getPrevUrl({ currentPage: 1, totalPages: 10, basePath })).toBeUndefined();
       expect(getNextUrl({ currentPage: 1, totalPages: 10, basePath })).toBe(
         "/en/posts/2"
       );
@@ -381,9 +379,7 @@ describe("Pagination Logic", () => {
       expect(getPrevUrl({ currentPage: 10, totalPages: 10, basePath })).toBe(
         "/en/posts/9"
       );
-      expect(getNextUrl({ currentPage: 10, totalPages: 10, basePath })).toBe(
-        undefined
-      );
+      expect(getNextUrl({ currentPage: 10, totalPages: 10, basePath })).toBeUndefined();
     });
 
     it("should work correctly for tag pages", () => {

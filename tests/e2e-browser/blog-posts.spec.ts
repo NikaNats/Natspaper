@@ -144,7 +144,7 @@ test.describe("W3C MathML Core Verification", () => {
 
     // 3. Ensure no legacy KaTeX span classes exist in the DOM
     const legacySpans = page.locator(".katex-html, .katex-display, .vlist-t");
-    expect(await legacySpans.count()).toBe(0);
+    await expect(legacySpans).toHaveCount(0);
   });
 });
 
@@ -190,7 +190,7 @@ test.describe("Native Landmark & ARIA in HTML Semantics Verification", () => {
     }
 
     // 4. Audit-clean contract: no doc-* roles anywhere on the page
-    expect(await page.locator('[role^="doc-"]').count()).toBe(0);
+    await expect(page.locator('[role^="doc-"]')).toHaveCount(0);
   });
 
   test("should expose the series box as a named region on series posts", async ({

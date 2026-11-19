@@ -83,7 +83,7 @@ function testGetTranslatedTags() {
     const result = tags.map(tag => ({ slug: tag, name: getI18n('en').tTag(tag) }));
     
     expect(Array.isArray(result)).toBe(true);
-    expect(result.length).toBe(1);
+    expect(result).toHaveLength(1);
     expect(result[0]).toHaveProperty('slug');
     expect(result[0]).toHaveProperty('name');
   });
@@ -110,7 +110,7 @@ function testGetTranslatedTags() {
     const tags = ['docs'];
     const result = tags.map(tag => ({ slug: tag, name: getI18n('en').tTag(tag) }));
     
-    expect(result.length).toBe(tags.length);
+    expect(result).toHaveLength(tags.length);
     
     result.forEach((item, index) => {
       expect(item.slug).toBe(tags[index]);
@@ -122,7 +122,7 @@ function testGetTranslatedTags() {
     const result = [].map(tag => ({ slug: tag, name: getI18n('en').tTag(tag) }));
     
     expect(Array.isArray(result)).toBe(true);
-    expect(result.length).toBe(0);
+    expect(result).toHaveLength(0);
   });
 
   it('should maintain order of input tags', () => {
@@ -216,7 +216,7 @@ function testTranslationConsistency() {
     const result = tags.map(tag => ({ slug: tag, name: getI18n('en').tTag(tag) }));
     
     expect(tags).toEqual(tagsCopy);
-    expect(result.length).toBe(1);
+    expect(result).toHaveLength(1);
   });
 }
 

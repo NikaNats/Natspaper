@@ -44,6 +44,15 @@ const SEMANTIC_VAR_NAMES = {
   "accent.foreground": "--accent-foreground",
 };
 
+/** `[r, g, b]` 0-1 components (+ optional alpha) -> legacy rgb()/rgba(). */
+function srgbComponentsToCss(val) {
+  const [r, g, b] = val.components.map(c => Math.round(c * 255));
+  const alpha = val.alpha ?? 1;
+  return alpha < 1
+    ? `rgba(${r}, ${g}, ${b}, ${alpha})`
+    : `rgb(${r}, ${g}, ${b})`;
+}
+
 /**
  * Serialize a DTCG color value to CSS Color Module Level 5 notation.
  * OKLCH tokens (computed byte-exact from the original sRGB hexes, origin
@@ -51,23 +60,41 @@ const SEMANTIC_VAR_NAMES = {
  * remains supported for legacy tokens.
  */
 function colorToCss(val) {
-  if (val && typeof val === "object") {
-    if (val.colorSpace === "oklch" && Array.isArray(val.components)) {
-      const [l, c, h] = val.components;
-      const alpha =
-        val.alpha !== undefined && val.alpha < 1 ? ` / ${val.alpha}` : "";
-      return `oklch(${l} ${c} ${h}${alpha})`;
-    }
-    if ("hex" in val) {
-      return val.hex;
-    }
-    if ("components" in val) {
-      const [r, g, b] = val.components.map((c) => Math.round(c * 255));
-      const alpha = val.alpha !== undefined ? val.alpha : 1;
-      return alpha < 1
-        ? `rgba(${r}, ${g}, ${b}, ${alpha})`
-        : `rgb(${r}, ${g}, ${b})`;
-    }
+  if (!val || typeof val !== "object") return val;
+
+  if (val.colorSpace === "oklch" && Array.isArray(val.components)) {
+    const [l, c, h] = val.components;
+    const alpha =
+      val.alpha !== undefined && val.alpha < 1 ? ` / ${val.alpha}` : "";
+    return `oklch(${l} ${c} ${h}${alpha})`;
+  }
+  if ("hex" in val) return val.hex;
+  if ("components" in val) return srgbComponentsToCss(val);
+  return val;
+}
+
+const dimensionToCss = d => `${d.value}${d.unit}`;
+
+/** DTCG shadow composite type. */
+function shadowToCss(val) {
+  const spread = val.spread ? dimensionToCss(val.spread) : "0px";
+  const inset = val.inset ? "inset " : "";
+  const parts = [
+    dimensionToCss(val.offsetX),
+    dimensionToCss(val.offsetY),
+    dimensionToCss(val.blur),
+    spread,
+    colorToCss(val.color),
+  ];
+  return inset + parts.join(" ");
+}
+
+/** Serialize a non-alias object `$value` (dimension, color or shadow). */
+function objectValueToCss(val) {
+  if ("value" in val && "unit" in val) return dimensionToCss(val);
+  if ("hex" in val || "components" in val) return colorToCss(val);
+  if ("blur" in val && "offsetX" in val && "offsetY" in val) {
+    return shadowToCss(val);
   }
   return val;
 }
@@ -116,28 +143,7 @@ export function compileTokens(sourceJson) {
     }
 
     if (val && typeof val === "object") {
-      // DTCG dimension type
-      if ("value" in val && "unit" in val) {
-        return `${val.value}${val.unit}`;
-      }
-
-      // DTCG color types (hex form and colorSpace/components form)
-      if ("hex" in val || "components" in val) {
-        return colorToCss(val);
-      }
-
-      // DTCG shadow composite type
-      if ("blur" in val && "offsetX" in val && "offsetY" in val) {
-        const offsetX = `${val.offsetX.value}${val.offsetX.unit}`;
-        const offsetY = `${val.offsetY.value}${val.offsetY.unit}`;
-        const blur = `${val.blur.value}${val.blur.unit}`;
-        const spread = val.spread
-          ? `${val.spread.value}${val.spread.unit}`
-          : "0px";
-        const color = colorToCss(val.color);
-        const inset = val.inset ? "inset " : "";
-        return `${inset}${offsetX} ${offsetY} ${blur} ${spread} ${color}`;
-      }
+      return objectValueToCss(val);
     }
 
     return val;

@@ -25,7 +25,7 @@ export function escapeHtml(text: string): string {
  * is a literal operator (e.g. `x < 5`) and must NOT be stripped.
  */
 function isHtmlTagOpener(c: string): boolean {
-  const code = c.charCodeAt(0);
+  const code = c.codePointAt(0) ?? 0;
   return (
     c === "/" ||
     c === "!" ||
@@ -49,6 +49,74 @@ function findClosingParen(text: string, openIndex: number): number {
 }
 
 /**
+ * Strip real HTML tags while keeping bare `<` / `>` operators.
+ *
+ * The naive approach of treating every `<…>` span as a tag incorrectly strips
+ * content like `x < 5 && y > 2` (data-loss bug). Only enter tag-skip mode when
+ * `<` is immediately followed by a character that can legally open an HTML tag
+ * (letter, `/`, `!`).
+ */
+function stripHtmlTags(description: string): string {
+  const chars = Array.from(description);
+  const len = chars.length;
+  let out = "";
+  let i = 0;
+
+  while (i < len) {
+    const next = chars[i + 1];
+    if (chars[i] === "<" && next !== undefined && isHtmlTagOpener(next)) {
+      i++;
+      while (i < len && chars[i] !== ">") i++;
+      if (i < len) i++; // consume the closing `>`
+    } else {
+      out += chars[i];
+      i++;
+    }
+  }
+  return out;
+}
+
+/**
+ * Markdown links `[text](url)` -> `text`. The URL is dropped entirely, so no
+ * unsafe scheme can survive into a feed.
+ */
+function stripMarkdownLinks(text: string): string {
+  let result = text;
+  let linkIndex = 0;
+  while ((linkIndex = result.indexOf("[", linkIndex)) !== -1) {
+    const closeIndex = result.indexOf("]", linkIndex);
+    const parenIndex = closeIndex + 1;
+    const closeParenIndex =
+      closeIndex !== -1 && result[parenIndex] === "("
+        ? findClosingParen(result, parenIndex)
+        : -1;
+
+    if (closeParenIndex === -1) {
+      linkIndex++;
+      continue;
+    }
+    const linkText = result.substring(linkIndex + 1, closeIndex);
+    result =
+      result.substring(0, linkIndex) +
+      linkText +
+      result.substring(closeParenIndex + 1);
+    linkIndex += linkText.length;
+  }
+  return result;
+}
+
+/** Remove code spans: `code` -> (dropped). */
+function stripCodeSpans(text: string): string {
+  let out = "";
+  let inCode = false;
+  for (const char of text) {
+    if (char === "`") inCode = !inCode;
+    else if (!inCode) out += char;
+  }
+  return out;
+}
+
+/**
  * Convert a frontmatter description to plain text: HTML tags and markdown
  * syntax are removed, literal `<`/`>`/`&` are KEPT, and nothing is escaped.
  *
@@ -67,81 +135,17 @@ function findClosingParen(text: string, openIndex: number): number {
 export function toPlainText(description: string): string {
   if (!description) return "";
 
-  // LAYER 1: Remove actual HTML tags while preserving bare `<` / `>` operators.
-  //
-  // The naive approach of treating every `<…>` span as a tag incorrectly
-  // strips content like `x < 5 && y > 2` — classifying `5 && y` as a tag
-  // body and discarding it (data-loss bug).
-  //
-  // Fix: only enter tag-skip mode when `<` is immediately followed by a
-  // character that can legally open an HTML tag (letter, `/`, `!`).  Every
-  // other `<` is a literal operator and is kept as-is.
-  const chars = Array.from(description);
-  const len = chars.length;
-  let noTags = "";
-  let i = 0;
+  const noLinks = stripMarkdownLinks(stripHtmlTags(description));
 
-  while (i < len) {
-    if (
-      chars[i] === "<" &&
-      i + 1 < len &&
-      isHtmlTagOpener(chars[i + 1]!) // guarded by `i + 1 < len` above
-    ) {
-      // Skip the entire tag: advance past `<`, scan until matching `>`
-      i++;
-      while (i < len && chars[i] !== ">") {
-        i++;
-      }
-      if (i < len) i++; // consume the closing `>`
-    } else {
-      noTags += chars[i];
-      i++;
-    }
-  }
-
-  // LAYER 2: Remove markdown formatting using simple string replacement
-  // Process links: [text](url) -> text (the URL is dropped entirely, so no
-  // unsafe scheme can survive into a feed)
-  let noLinks = noTags;
-  let linkIndex = 0;
-  while ((linkIndex = noLinks.indexOf("[", linkIndex)) !== -1) {
-    const closeIndex = noLinks.indexOf("]", linkIndex);
-    const parenIndex = closeIndex === -1 ? -1 : closeIndex + 1;
-    const closeParenIndex =
-      noLinks[parenIndex] === "(" ? findClosingParen(noLinks, parenIndex) : -1;
-
-    if (closeIndex !== -1 && closeParenIndex !== -1) {
-      const linkText = noLinks.substring(linkIndex + 1, closeIndex);
-      noLinks =
-        noLinks.substring(0, linkIndex) +
-        linkText +
-        noLinks.substring(closeParenIndex + 1);
-      linkIndex += linkText.length;
-    } else {
-      linkIndex++;
-    }
-  }
-
-  // Process bold/italic: **text**, *text*, __text__, _text_ -> text
+  // Bold/italic: **text**, *text*, __text__, _text_ -> text
   const noEmphasis = noLinks
     .replaceAll("**", "")
     .replaceAll("__", "")
     .replaceAll("*", "")
     .replaceAll("_", "");
 
-  // Remove code spans: `code` -> (dropped)
-  let noCode = "";
-  let inCode = false;
-  for (const char of noEmphasis) {
-    if (char === "`") {
-      inCode = !inCode;
-    } else if (!inCode) {
-      noCode += char;
-    }
-  }
-
-  // LAYER 3: Safe truncation: count code points, not UTF-16 units or bytes
-  return Array.from(noCode).slice(0, 500).join("").trim();
+  // Safe truncation: count code points, not UTF-16 units or bytes
+  return Array.from(stripCodeSpans(noEmphasis)).slice(0, 500).join("").trim();
 }
 
 /**

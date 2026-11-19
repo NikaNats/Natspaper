@@ -226,7 +226,10 @@ main,
   border-radius: 9999px;
   color: var(--color-fg-muted);
   padding: 4px 10px;
-  transition: all 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
 }
 
 .gsc-reactions-button:hover,

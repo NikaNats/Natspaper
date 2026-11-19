@@ -18,7 +18,7 @@ export const envValidationIntegration = (): AstroIntegration => {
   return {
     name: "env-validation",
     hooks: {
-      "astro:build:start": async () => {
+      "astro:build:start": () => {
         if (!envManager) {
           return; // Environment manager not available
         }

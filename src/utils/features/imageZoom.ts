@@ -71,7 +71,9 @@ export class ImageZoom implements Feature {
         // of silently skipping images that were still in flight at init time.
         img.addEventListener(
           "load",
-          () => void this.#wrapIfZoomable(img, article),
+          () => {
+            this.#wrapIfZoomable(img, article);
+          },
           { once: true, signal }
         );
         zoomableCount++;

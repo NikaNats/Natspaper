@@ -45,10 +45,12 @@ export function rehypeFigureCaptions() {
     const out = [];
     const nodes = tree.children;
 
-    for (let i = 0; i < nodes.length; i++) {
+    let i = 0;
+    while (i < nodes.length) {
       const img = soleChildOfParagraph(nodes[i], "img");
       if (!img) {
         out.push(nodes[i]);
+        i++;
         continue;
       }
 
@@ -67,6 +69,7 @@ export function rehypeFigureCaptions() {
         });
         i = j; // consume the caption (and the whitespace before it)
       }
+      i++;
 
       out.push({
         type: "element",

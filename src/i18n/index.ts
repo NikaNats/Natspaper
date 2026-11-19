@@ -34,10 +34,7 @@ function createUITranslator(locale: Lang): TranslationFunction {
     if (replacements) {
       let result = translation;
       for (const [placeholder, value] of Object.entries(replacements)) {
-        result = result.replace(
-          new RegExp(`\\{${placeholder}\\}`, "g"),
-          String(value)
-        );
+        result = result.replaceAll(`{${placeholder}}`, () => String(value));
       }
       return result;
     }

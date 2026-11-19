@@ -100,8 +100,7 @@ function buildRobotsTxt(siteUrl: string, sitemapUrl: string): string {
   }
 
   // RFC 9309 Section 2.2.4: Other Records (Sitemap directive)
-  lines.push("# Sitemaps");
-  lines.push(`Sitemap: ${sitemapUrl}`);
+  lines.push("# Sitemaps", `Sitemap: ${sitemapUrl}`);
 
   return lines.join("\n") + "\n";
 }

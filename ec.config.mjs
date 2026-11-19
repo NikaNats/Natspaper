@@ -21,8 +21,8 @@ export default defineEcConfig({
           const pre = figure.children?.find(
             node => node.type === "element" && node.tagName === "pre"
           );
-          if (pre && pre.type === "element") {
-            if (!pre.properties) pre.properties = {};
+          if (pre?.type === "element") {
+            pre.properties ??= {};
             pre.properties.tabIndex = 0;
           }
         },

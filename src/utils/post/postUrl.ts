@@ -49,7 +49,7 @@ export function getPostSlug(postIdOrSlug: string | undefined): string {
  * getPostUrl("en", "my-post")                 // "/en/posts/my-post"
  */
 export function getPostUrl(
-  locale: Lang | string,
+  locale: string,
   postIdOrSlug: string | undefined
 ): string {
   return `/${locale}/posts/${getPostSlug(postIdOrSlug)}`;

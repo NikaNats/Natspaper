@@ -1,7 +1,6 @@
 import type { CollectionEntry } from "astro:content";
 import { FEATURES } from "@/config";
 import { getPostLocale, getPostUrl } from "./postUrl";
-import type { Lang } from "@/i18n/config";
 
 /**
  * Resolve the final OG image URL for a blog post.
@@ -35,7 +34,7 @@ export function resolveOgImageUrl(
   ogImage: string | { src: string } | undefined,
   slug: string,
   siteUrl: string,
-  locale: Lang | string
+  locale: string
 ): string | undefined {
   let ogImageUrl: string | undefined;
 
@@ -161,7 +160,7 @@ export function generatePostStructuredData(
   post: CollectionEntry<"blog">,
   siteUrl: string,
   postUrl: string,
-  locale: Lang | string
+  locale: string
 ) {
   const {
     title,

@@ -59,7 +59,7 @@ export function parseHex(hex: string): RgbColor {
       .map(ch => ch + ch)
       .join("");
   }
-  const num = parseInt(c, 16);
+  const num = Number.parseInt(c, 16);
   return {
     r: (num >> 16) & 255,
     g: (num >> 8) & 255,

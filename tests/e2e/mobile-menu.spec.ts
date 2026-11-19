@@ -170,7 +170,13 @@ test.describe('Mobile Menu - Scroll Lock', () => {
     // per CSSOM, still allows programmatic window.scrollBy(), so the lock
     // must be exercised with a real wheel gesture.
     await page.mouse.wheel(0, 100);
-    await page.waitForTimeout(100);
+    // Flush two animation frames so any scroll would have been applied
+    await page.evaluate(
+      () =>
+        new Promise<void>(resolve =>
+          requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+        )
+    );
     const scrollAfterAttempt = await page.evaluate(() => window.scrollY);
 
     // Scroll should not have changed

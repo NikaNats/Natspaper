@@ -214,7 +214,7 @@ describe("getPostsByGroupCondition", () => {
 
     const result = getPostsByGroupCondition(posts, getPostYearMonth);
 
-    expect(Object.keys(result).length).toBe(12);
+    expect(Object.keys(result)).toHaveLength(12);
   });
 
   it("should create separate groups for each unique key", () => {

@@ -52,7 +52,7 @@ test.describe("Dark Mode Toggle", () => {
     await themeBtn.click();
 
     // Wait for theme change
-    await page.waitForTimeout(100);
+    await expect(html).not.toHaveAttribute("data-theme", initialTheme ?? "");
 
     // Theme should have changed
     const newTheme = await html.getAttribute("data-theme");
@@ -81,7 +81,6 @@ test.describe("Dark Mode Toggle", () => {
 
     // Click toggle
     await themeBtn.click();
-    await page.waitForTimeout(100);
 
     // Should now be light
     await expect(html).toHaveAttribute("data-theme", "light");
@@ -97,7 +96,7 @@ test.describe("Dark Mode Toggle", () => {
     // Get initial theme and toggle
     const initialTheme = await html.getAttribute("data-theme");
     await themeBtn.click();
-    await page.waitForTimeout(100);
+    await expect(html).not.toHaveAttribute("data-theme", initialTheme ?? "");
 
     // Get new theme
     const newTheme = await html.getAttribute("data-theme");
@@ -123,8 +122,9 @@ test.describe("Dark Mode Toggle", () => {
     const html = page.locator("html");
 
     // Set to dark mode
+    const themeBefore = await html.getAttribute("data-theme");
     await themeBtn.click();
-    await page.waitForTimeout(100);
+    await expect(html).not.toHaveAttribute("data-theme", themeBefore ?? "");
     const expectedTheme = await html.getAttribute("data-theme");
 
     // Navigate to another page
@@ -160,11 +160,9 @@ test.describe("Dark Mode Toggle", () => {
 
     // Toggle to light
     await themeBtn.click();
-    await page.waitForTimeout(100);
 
     // dark class should be removed
-    const hasClass = await html.evaluate(el => el.classList.contains("dark"));
-    expect(hasClass).toBe(false);
+    await expect(html).not.toHaveClass(/dark/);
   });
 
   test("should show correct icon based on theme", async ({ page }) => {
@@ -341,12 +339,18 @@ test.describe("Dark Mode - Follow System", () => {
     // OS now matches the saved value: must NOT be removed (retroactive removal
     // would make pinning impossible for users whose OS switches by time of day).
     await page.emulateMedia({ colorScheme: "dark" });
-    await page.waitForTimeout(250);
+    await page.waitForFunction(
+      expected => matchMedia("(prefers-color-scheme: dark)").matches === expected,
+      true
+    );
     await expect(html).toHaveAttribute("data-theme", "dark");
     expect(await savedTheme(page)).toBe("dark");
 
     await page.emulateMedia({ colorScheme: "light" });
-    await page.waitForTimeout(250);
+    await page.waitForFunction(
+      expected => matchMedia("(prefers-color-scheme: dark)").matches === expected,
+      false
+    );
     await expect(html).toHaveAttribute("data-theme", "dark");
     expect(await savedTheme(page)).toBe("dark");
     expect(await schemeMeta(page)).toBe("dark");
@@ -362,7 +366,10 @@ test.describe("Dark Mode - Follow System", () => {
 
     await page.emulateMedia({ colorScheme: "light" });
     await page.emulateMedia({ colorScheme: "dark" });
-    await page.waitForTimeout(250);
+    await page.waitForFunction(
+      expected => matchMedia("(prefers-color-scheme: dark)").matches === expected,
+      true
+    );
     await expect(html).toHaveAttribute("data-theme", "light");
     expect(await savedTheme(page)).toBe("light");
   });

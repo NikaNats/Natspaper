@@ -125,7 +125,7 @@ describe("Progress Bar Feature", () => {
 
     // Should only have one progress bar
     const containers = document.querySelectorAll(".progress-container");
-    expect(containers.length).toBe(1);
+    expect(containers).toHaveLength(1);
   });
 
   it("should attach scroll listener with passive flag", async () => {

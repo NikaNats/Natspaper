@@ -84,22 +84,12 @@ describe("Reading Time Calculator", () => {
         expect(result.minutes).toBe(1);
       });
 
-      it("should handle multiple spaces between words", () => {
-        const content = "word1    word2     word3";
-        const result = calculateReadingTime(content);
-        expect(result.words).toBe(3);
-      });
-
-      it("should handle newlines and tabs", () => {
-        const content = "word1\nword2\tword3\n\nword4";
-        const result = calculateReadingTime(content);
-        expect(result.words).toBe(4);
-      });
-
-      it("should trim leading/trailing whitespace", () => {
-        const content = "   hello world   ";
-        const result = calculateReadingTime(content);
-        expect(result.words).toBe(2);
+      it.each([
+        ["multiple spaces between words", "word1    word2     word3", 3],
+        ["newlines and tabs", "word1\nword2\tword3\n\nword4", 4],
+        ["leading/trailing whitespace", "   hello world   ", 2],
+      ])("should handle %s", (_name, content, words) => {
+        expect(calculateReadingTime(content).words).toBe(words);
       });
     });
 

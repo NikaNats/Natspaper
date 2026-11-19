@@ -120,7 +120,7 @@ describe("Heading Links Feature", () => {
     headingLinks.init();
 
     links = document.querySelectorAll("a.heading-link");
-    expect(links.length).toBe(initialCount);
+    expect(links).toHaveLength(initialCount);
   });
 
   it("should add links to dynamically added headings", () => {

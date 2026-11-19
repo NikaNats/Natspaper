@@ -290,100 +290,45 @@ describe('RSS Feed Security - Integration Tests', () => {
     });
 
     describe('Nested Brackets in Link Text', () => {
-      it('should handle nested brackets in link text', () => {
-        const input = '[Click [here] for more](https://example.com)';
-        const result = sanitizeMarkdownUrls(input);
-        expect(result).toBe('[Click [here] for more](https://example.com)');
-      });
-
-      it('should handle deeply nested brackets', () => {
-        const input = '[Outer [Middle [Inner] text] end](https://example.com)';
-        const result = sanitizeMarkdownUrls(input);
-        expect(result).toBe('[Outer [Middle [Inner] text] end](https://example.com)');
-      });
-
-      it('should handle multiple nested bracket pairs', () => {
-        const input = '[First [a] and [b] section](https://example.com)';
-        const result = sanitizeMarkdownUrls(input);
-        expect(result).toBe('[First [a] and [b] section](https://example.com)');
+      it.each([
+        ['should handle nested brackets in link text', '[Click [here] for more](https://example.com)', '[Click [here] for more](https://example.com)'],
+        ['should handle deeply nested brackets', '[Outer [Middle [Inner] text] end](https://example.com)', '[Outer [Middle [Inner] text] end](https://example.com)'],
+        ['should handle multiple nested bracket pairs', '[First [a] and [b] section](https://example.com)', '[First [a] and [b] section](https://example.com)'],
+      ])('%s', (_name, input, expected) => {
+        expect(sanitizeMarkdownUrls(input)).toBe(expected);
       });
     });
 
     describe('Parentheses in URLs (Wikipedia-style)', () => {
-      it('should handle parentheses in URLs', () => {
-        const input = '[Equation](https://en.wikipedia.org/wiki/Equation_(mathematics))';
-        const result = sanitizeMarkdownUrls(input);
-        expect(result).toBe('[Equation](https://en.wikipedia.org/wiki/Equation_(mathematics))');
-      });
-
-      it('should handle nested parentheses in URLs', () => {
-        const input = '[Topic](https://example.com/Page_(Section_(Subsection)))';
-        const result = sanitizeMarkdownUrls(input);
-        expect(result).toBe('[Topic](https://example.com/Page_(Section_(Subsection)))');
-      });
-
-      it('should handle multiple parentheses pairs in URL', () => {
-        const input = '[Link](https://example.com/A_(B)_C_(D))';
-        const result = sanitizeMarkdownUrls(input);
-        expect(result).toBe('[Link](https://example.com/A_(B)_C_(D))');
+      it.each([
+        ['should handle parentheses in URLs', '[Equation](https://en.wikipedia.org/wiki/Equation_(mathematics))', '[Equation](https://en.wikipedia.org/wiki/Equation_(mathematics))'],
+        ['should handle nested parentheses in URLs', '[Topic](https://example.com/Page_(Section_(Subsection)))', '[Topic](https://example.com/Page_(Section_(Subsection)))'],
+        ['should handle multiple parentheses pairs in URL', '[Link](https://example.com/A_(B)_C_(D))', '[Link](https://example.com/A_(B)_C_(D))'],
+      ])('%s', (_name, input, expected) => {
+        expect(sanitizeMarkdownUrls(input)).toBe(expected);
       });
     });
 
     describe('Escaped Characters', () => {
-      it('should not match escaped opening bracket', () => {
-        const input = '\\[not a link](https://example.com)';
-        const result = sanitizeMarkdownUrls(input);
-        expect(result).toBe('\\[not a link](https://example.com)');
-      });
-
-      it('should handle escaped brackets within link text', () => {
-        const input = '[Text with \\] bracket](https://example.com)';
-        const result = sanitizeMarkdownUrls(input);
-        expect(result).toBe('[Text with \\] bracket](https://example.com)');
-      });
-
-      it('should handle escaped parens within URL', () => {
-        const input = '[Link](https://example.com/path\\)more)';
-        const result = sanitizeMarkdownUrls(input);
-        expect(result).toBe('[Link](https://example.com/path\\)more)');
+      it.each([
+        ['should not match escaped opening bracket', '\\[not a link](https://example.com)', '\\[not a link](https://example.com)'],
+        ['should handle escaped brackets within link text', '[Text with \\] bracket](https://example.com)', '[Text with \\] bracket](https://example.com)'],
+        ['should handle escaped parens within URL', '[Link](https://example.com/path\\)more)', '[Link](https://example.com/path\\)more)'],
+      ])('%s', (_name, input, expected) => {
+        expect(sanitizeMarkdownUrls(input)).toBe(expected);
       });
     });
 
     describe('URL Safety Validation', () => {
-      it('should block javascript: URLs', () => {
-        const input = '[Click me](javascript:alert("XSS"))';
-        const result = sanitizeMarkdownUrls(input);
-        expect(result).toBe('[Click me](about:blank)');
-      });
-
-      it('should block data: URLs', () => {
-        const input = '[Click](data:text/html,<script>alert(1)</script>)';
-        const result = sanitizeMarkdownUrls(input);
-        expect(result).toBe('[Click](about:blank)');
-      });
-
-      it('should allow https: URLs', () => {
-        const input = '[Safe](https://example.com)';
-        const result = sanitizeMarkdownUrls(input);
-        expect(result).toBe('[Safe](https://example.com)');
-      });
-
-      it('should allow mailto: URLs', () => {
-        const input = '[Email](mailto:test@example.com)';
-        const result = sanitizeMarkdownUrls(input);
-        expect(result).toBe('[Email](mailto:test@example.com)');
-      });
-
-      it('should allow relative URLs', () => {
-        const input = '[Page](/about)';
-        const result = sanitizeMarkdownUrls(input);
-        expect(result).toBe('[Page](/about)');
-      });
-
-      it('should allow anchor URLs', () => {
-        const input = '[Section](#heading)';
-        const result = sanitizeMarkdownUrls(input);
-        expect(result).toBe('[Section](#heading)');
+      it.each([
+        ['should block javascript: URLs', '[Click me](javascript:alert("XSS"))', '[Click me](about:blank)'],
+        ['should block data: URLs', '[Click](data:text/html,<script>alert(1)</script>)', '[Click](about:blank)'],
+        ['should allow https: URLs', '[Safe](https://example.com)', '[Safe](https://example.com)'],
+        ['should allow mailto: URLs', '[Email](mailto:test@example.com)', '[Email](mailto:test@example.com)'],
+        ['should allow relative URLs', '[Page](/about)', '[Page](/about)'],
+        ['should allow anchor URLs', '[Section](#heading)', '[Section](#heading)'],
+      ])('%s', (_name, input, expected) => {
+        expect(sanitizeMarkdownUrls(input)).toBe(expected);
       });
     });
 
@@ -401,23 +346,12 @@ describe('RSS Feed Security - Integration Tests', () => {
         expect(result).toContain('[Text]');
       });
 
-      it('should handle unbalanced brackets (not a link)', () => {
-        const input = '[Unclosed bracket text';
-        const result = sanitizeMarkdownUrls(input);
-        expect(result).toBe(input);
-      });
-
-      it('should handle unbalanced parens in URL', () => {
-        const input = '[Link](https://example.com/page(broken';
-        const result = sanitizeMarkdownUrls(input);
-        // Unbalanced - should not parse as a link
-        expect(result).toBe(input);
-      });
-
-      it('should handle bracket without following paren', () => {
-        const input = '[Just brackets] not a link';
-        const result = sanitizeMarkdownUrls(input);
-        expect(result).toBe(input);
+      it.each([
+        ['should handle unbalanced brackets (not a link)', '[Unclosed bracket text', '[Unclosed bracket text'],
+        ['should handle unbalanced parens in URL', '[Link](https://example.com/page(broken', '[Link](https://example.com/page(broken'],
+        ['should handle bracket without following paren', '[Just brackets] not a link', '[Just brackets] not a link'],
+      ])('%s', (_name, input, expected) => {
+        expect(sanitizeMarkdownUrls(input)).toBe(expected);
       });
 
       it('should trim whitespace in URLs', () => {

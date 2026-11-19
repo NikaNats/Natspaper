@@ -25,7 +25,7 @@ export interface ParsedLanguageTag {
 export function canonicalizeLanguageTag(tag: string): string {
   if (!tag || typeof tag !== "string") return "und";
 
-  const segments = tag.trim().replace(/_/g, "-").split("-");
+  const segments = tag.trim().replaceAll("_", "-").split("-");
   if (segments.length === 0 || !segments[0]) return "und";
 
   const normalizedSegments: string[] = [];
@@ -59,17 +59,25 @@ export function canonicalizeLanguageTag(tag: string): string {
   return normalizedSegments.join("-");
 }
 
+// RFC 5646 Section 2.1 ABNF (standard subset), composed from its productions.
+const BCP47_REGEX = new RegExp(
+  [
+    "^[a-z]{2,3}", // language
+    "(?:-[a-z]{3}){0,3}", // extlang
+    "(?:-[A-Z][a-z]{3})?", // script
+    "(?:-(?:[A-Z]{2}|\\d{3}))?", // region
+    "(?:-(?:[a-z\\d]{5,8}|\\d[a-z\\d]{3}))*$", // variants
+  ].join(""),
+  "i"
+);
+
 /**
  * Validates whether a tag adheres to basic RFC 5646 ABNF grammar.
  */
 export function isValidBCP47(tag: string): boolean {
   if (!tag || typeof tag !== "string") return false;
 
-  // RFC 5646 Section 2.1 ABNF regex (Standard subset)
-  const bcp47Regex =
-    /^[a-z]{2,3}(-[a-z]{3}){0,3}(-[A-Z][a-z]{3})?(-([A-Z]{2}|\d{3}))?(-([a-z\d]{5,8}|\d[a-z\d]{3}))*$/i;
-
-  return bcp47Regex.test(tag.trim().replace(/_/g, "-"));
+  return BCP47_REGEX.test(tag.trim().replaceAll("_", "-"));
 }
 
 /**
@@ -77,5 +85,5 @@ export function isValidBCP47(tag: string): boolean {
  */
 export function toOpenGraphLocale(tag: string): string {
   const canonical = canonicalizeLanguageTag(tag);
-  return canonical.replace(/-/g, "_");
+  return canonical.replaceAll("-", "_");
 }

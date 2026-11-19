@@ -101,7 +101,7 @@ def unicode_ranges(css_path: str, subsets: list[str]) -> str:
         # fontsource comment ids look like `inter-latin-400-normal`;
         # the subset is the third token from the end.
         if name.split("-")[-3] in subsets:
-            picked += re.search(r"unicode-range:\s*([^;]+);", body).group(1).split(",")
+            picked += re.search(r"unicode-range:\s*([^;\s][^;]*);", body).group(1).split(",")
     return " ".join(p.strip() for p in picked)
 
 
@@ -131,7 +131,7 @@ def main() -> None:
 
     print("\n== SYSTEM FALLBACKS ==")
     for name, p in [("Arial", arial), ("Segoe UI", segoe), ("Consolas", consolas)] + \
-                   [(f"Sylfaen", p) for p in glob.glob(f"{SYSFONTS}\\*ylfaen*")]:
+                   [("Sylfaen", p) for p in glob.glob(f"{SYSFONTS}\\*ylfaen*")]:
         show(name, read_font(p))
 
     print("\n== DERIVED OVERRIDES ==")
@@ -168,4 +168,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    main()

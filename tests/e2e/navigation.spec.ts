@@ -17,7 +17,6 @@ async function openMobileMenuIfNeeded(page: Page) {
       await menuBtn.click();
       await page.waitForSelector('#mobile-menu-overlay[data-state="open"]');
       await expect(menuOverlay).toBeVisible();
-      await page.waitForTimeout(300);
     }
   }
 }

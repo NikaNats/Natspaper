@@ -160,7 +160,7 @@ export function calculateAcademicReadingTime(
   const cleanProse = markdown
     .replace(/```[\s\S]*?```/g, "")
     .replace(/\$\$[\s\S]*?\$\$/g, "")
-    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1");
+    .replace(/\[([^[\]]+)\]\([^)]+\)/g, "$1");
 
   const words = cleanProse
     .trim()

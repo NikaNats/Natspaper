@@ -1,6 +1,4 @@
-import { NAVIGATION } from "@/config";
-
-export const navLinks = NAVIGATION;
+export { NAVIGATION as navLinks } from "@/config";
 
 export function isActive(
   currentPath: string,

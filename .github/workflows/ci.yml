@@ -30,7 +30,7 @@ jobs:
       has-test-changes: ${{ steps.changes.outputs.tests }}
       skip-e2e: ${{ steps.changes.outputs.skip-e2e }}
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           fetch-depth: 0
 
@@ -74,11 +74,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
-      - uses: pnpm/action-setup@v6
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6
 
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: "pnpm"
@@ -102,11 +102,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 3
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
-      - uses: pnpm/action-setup@v6
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6
 
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: "pnpm"
@@ -134,11 +134,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
-      - uses: pnpm/action-setup@v6
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6
 
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: "pnpm"
@@ -155,7 +155,7 @@ jobs:
 
       - name: Upload Coverage Reports
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: coverage-reports-${{ github.run_id }}
           path: coverage/
@@ -169,11 +169,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 8
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
-      - uses: pnpm/action-setup@v6
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6
 
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: "pnpm"
@@ -255,7 +255,7 @@ jobs:
 
       - name: Upload Build Artifacts
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: build-output-${{ github.run_id }}
           path: dist/
@@ -270,11 +270,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
-      - uses: pnpm/action-setup@v6
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6
 
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: "pnpm"
@@ -295,7 +295,7 @@ jobs:
           echo "Playwright version: $PLAYWRIGHT_VERSION"
 
       - name: Cache Playwright Browsers
-        uses: actions/cache@v6
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         id: playwright-cache
         with:
           path: ~/.cache/ms-playwright
@@ -316,7 +316,7 @@ jobs:
 
       - name: Upload Test Results
         if: failure()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: playwright-report-${{ github.run_id }}
           path: playwright-report/
@@ -346,6 +346,7 @@ jobs:
           COMMIT_SHA: ${{ github.sha }}
           ACTOR: ${{ github.actor }}
         run: |
+          OK=success
           CODE_QUALITY="$CODE_QUALITY_RESULT"
           SECURITY="$SECURITY_RESULT"
           UNIT_TESTS="$UNIT_TESTS_RESULT"
@@ -356,14 +357,14 @@ jobs:
             echo "### 🔍 CI Validation Summary"
             echo ""
             echo "**Job Results:**"
-            echo "- Code Quality: $([ "$CODE_QUALITY" = "success" ] && echo "✅ Passed" || echo "❌ Failed")"
-            echo "- Security Audit: $([ "$SECURITY" = "success" ] && echo "✅ Passed" || echo "❌ Failed")"
-            echo "- Unit Tests: $([ "$UNIT_TESTS" = "success" ] && echo "✅ Passed" || echo "❌ Failed")"
-            echo "- Build Verification: $([ "$BUILD" = "success" ] && echo "✅ Passed" || echo "❌ Failed")"
+            echo "- Code Quality: $([ "$CODE_QUALITY" = "$OK" ] && echo "✅ Passed" || echo "❌ Failed")"
+            echo "- Security Audit: $([ "$SECURITY" = "$OK" ] && echo "✅ Passed" || echo "❌ Failed")"
+            echo "- Unit Tests: $([ "$UNIT_TESTS" = "$OK" ] && echo "✅ Passed" || echo "❌ Failed")"
+            echo "- Build Verification: $([ "$BUILD" = "$OK" ] && echo "✅ Passed" || echo "❌ Failed")"
             
             if [ "$E2E" = "skipped" ]; then
               echo "- E2E Tests: ⏭️ Skipped (documentation/config changes only)"
-            elif [ "$E2E" = "success" ]; then
+            elif [ "$E2E" = "$OK" ]; then
               echo "- E2E Tests: ✅ Passed"
             else
               echo "- E2E Tests: ❌ Failed"
@@ -378,7 +379,7 @@ jobs:
           } >> $GITHUB_STEP_SUMMARY
 
           # Fail if any required job failed
-          if [ "$CODE_QUALITY" != "success" ] || [ "$SECURITY" != "success" ] || [ "$UNIT_TESTS" != "success" ] || [ "$BUILD" != "success" ] || ([ "$E2E" != "success" ] && [ "$E2E" != "skipped" ]); then
+          if [ "$CODE_QUALITY" != "$OK" ] || [ "$SECURITY" != "$OK" ] || [ "$UNIT_TESTS" != "$OK" ] || [ "$BUILD" != "$OK" ] || ([ "$E2E" != "$OK" ] && [ "$E2E" != "skipped" ]); then
             echo ""
             echo "::error::One or more CI checks failed"
             exit 1
@@ -404,11 +405,12 @@ jobs:
           BUILD_RESULT: ${{ needs.build-verification.result }}
           E2E_RESULT: ${{ needs.e2e-tests.result }}
         run: |
-          if [ "$CODE_QUALITY_RESULT" != "success" ] || \
-             [ "$SECURITY_RESULT" != "success" ] || \
-             [ "$UNIT_TESTS_RESULT" != "success" ] || \
-             [ "$BUILD_RESULT" != "success" ] || \
-             ([ "$E2E_RESULT" != "success" ] && [ "$E2E_RESULT" != "skipped" ]); then
+          OK=success
+          if [ "$CODE_QUALITY_RESULT" != "$OK" ] || \
+             [ "$SECURITY_RESULT" != "$OK" ] || \
+             [ "$UNIT_TESTS_RESULT" != "$OK" ] || \
+             [ "$BUILD_RESULT" != "$OK" ] || \
+             ([ "$E2E_RESULT" != "$OK" ] && [ "$E2E_RESULT" != "skipped" ]); then
             echo "::error::One or more required checks failed"
             exit 1
           fi
