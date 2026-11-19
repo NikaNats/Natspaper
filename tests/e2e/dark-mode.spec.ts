@@ -265,3 +265,210 @@ test.describe("Dark Mode - System Preference", () => {
     await expect(html).toHaveAttribute("data-theme", "light");
   });
 });
+
+/**
+ * Follow-system behaviour
+ *
+ * The toggle is two-state but must always be able to return to "follow
+ * system": toggling to a theme that equals the OS preference removes the saved
+ * value and resets <meta name="color-scheme"> to "light dark". A saved value
+ * (pinned theme) is never removed or rewritten by an OS change.
+ */
+type Scheme = "light" | "dark";
+
+const savedTheme = (page: Page) =>
+  page.evaluate(() => localStorage.getItem("theme"));
+
+const schemeMeta = (page: Page) =>
+  page.evaluate(
+    () =>
+      document
+        .querySelector('meta[name="color-scheme"]')
+        ?.getAttribute("content") ?? null
+  );
+
+async function openClean(page: Page, colorScheme: Scheme) {
+  await page.emulateMedia({ colorScheme });
+  await page.goto("/en/");
+  await page.evaluate(() => localStorage.removeItem("theme"));
+  await page.reload();
+  await page.waitForLoadState("networkidle");
+}
+
+async function clickToggle(page: Page) {
+  await ensureMenuOpen(page);
+  await page.locator('[data-testid="theme-toggle"]').click();
+}
+
+test.describe("Dark Mode - Follow System", () => {
+  test("toggling twice returns to follow-system", async ({ page }) => {
+    await openClean(page, "light");
+    const html = page.locator("html");
+    await expect(html).toHaveAttribute("data-theme", "light");
+    expect(await schemeMeta(page)).toBe("light dark");
+
+    await clickToggle(page);
+    await expect(html).toHaveAttribute("data-theme", "dark");
+    expect(await savedTheme(page)).toBe("dark");
+    expect(await schemeMeta(page)).toBe("dark");
+
+    await clickToggle(page);
+    await expect(html).toHaveAttribute("data-theme", "light");
+    expect(await savedTheme(page)).toBeNull();
+    expect(await schemeMeta(page)).toBe("light dark");
+
+    // Back on "follow system": the OS must drive the theme again.
+    await page.emulateMedia({ colorScheme: "dark" });
+    await expect(html).toHaveAttribute("data-theme", "dark");
+  });
+
+  test("OS colorScheme change with no saved value: theme follows", async ({
+    page,
+  }) => {
+    await openClean(page, "light");
+    const html = page.locator("html");
+    await expect(html).toHaveAttribute("data-theme", "light");
+
+    await page.emulateMedia({ colorScheme: "dark" });
+    await expect(html).toHaveAttribute("data-theme", "dark");
+    expect(await savedTheme(page)).toBeNull();
+    expect(await schemeMeta(page)).toBe("light dark");
+
+    await page.emulateMedia({ colorScheme: "light" });
+    await expect(html).toHaveAttribute("data-theme", "light");
+    expect(await savedTheme(page)).toBeNull();
+  });
+
+  test("OS colorScheme change WITH a saved value: stays pinned and the value is kept", async ({
+    page,
+  }) => {
+    await openClean(page, "light");
+    const html = page.locator("html");
+
+    await clickToggle(page); // pin "dark" while the OS is light
+    await expect(html).toHaveAttribute("data-theme", "dark");
+    expect(await savedTheme(page)).toBe("dark");
+
+    // OS now matches the saved value: must NOT be removed (retroactive removal
+    // would make pinning impossible for users whose OS switches by time of day).
+    await page.emulateMedia({ colorScheme: "dark" });
+    await page.waitForTimeout(250);
+    await expect(html).toHaveAttribute("data-theme", "dark");
+    expect(await savedTheme(page)).toBe("dark");
+
+    await page.emulateMedia({ colorScheme: "light" });
+    await page.waitForTimeout(250);
+    await expect(html).toHaveAttribute("data-theme", "dark");
+    expect(await savedTheme(page)).toBe("dark");
+    expect(await schemeMeta(page)).toBe("dark");
+  });
+
+  test("pinned light survives OS flips", async ({ page }) => {
+    await openClean(page, "dark");
+    await page.evaluate(() => localStorage.setItem("theme", "light"));
+    await page.reload();
+    await page.waitForLoadState("networkidle");
+    const html = page.locator("html");
+    await expect(html).toHaveAttribute("data-theme", "light");
+
+    await page.emulateMedia({ colorScheme: "light" });
+    await page.emulateMedia({ colorScheme: "dark" });
+    await page.waitForTimeout(250);
+    await expect(html).toHaveAttribute("data-theme", "light");
+    expect(await savedTheme(page)).toBe("light");
+  });
+
+  test("two pages sharing a context: the storage event syncs the second", async ({
+    page,
+  }) => {
+    await openClean(page, "light");
+    const second = await page.context().newPage();
+    await second.emulateMedia({ colorScheme: "light" });
+    await second.goto("/en/");
+    await second.waitForLoadState("networkidle");
+    const secondHtml = second.locator("html");
+    await expect(secondHtml).toHaveAttribute("data-theme", "light");
+
+    await clickToggle(page); // pin dark in the first page
+    await expect(secondHtml).toHaveAttribute("data-theme", "dark");
+    expect(await schemeMeta(second)).toBe("dark");
+
+    await clickToggle(page); // back to follow-system in the first page
+    await expect(secondHtml).toHaveAttribute("data-theme", "light");
+    expect(await savedTheme(second)).toBeNull();
+    expect(await schemeMeta(second)).toBe("light dark");
+
+    await second.close();
+  });
+});
+
+/**
+ * ClientRouter (client-side navigation)
+ *
+ * Layout.astro mounts <ClientRouter />, so navigation swaps the document's
+ * root attributes and head instead of reloading. toggle-theme.js re-applies
+ * the theme on astro:after-swap.
+ */
+test.describe("Dark Mode - ClientRouter navigation", () => {
+  async function navigateClientSide(page: Page) {
+    await page.evaluate(() => {
+      const w = window as unknown as Record<string, unknown>;
+      w.__noReload = true;
+      w.__swaps = 0;
+      document.addEventListener("astro:after-swap", () => {
+        w.__swaps = (w.__swaps as number) + 1;
+      });
+    });
+    await ensureMenuOpen(page);
+    await page.locator('a[href="/en/about"]:visible').first().click();
+    await page.waitForURL("**/en/about**");
+    await page.waitForLoadState("networkidle");
+
+    const state = await page.evaluate(() => {
+      const w = window as unknown as Record<string, unknown>;
+      return { noReload: w.__noReload === true, swaps: w.__swaps as number };
+    });
+    // Guard: this must have been a client-side swap, not a full page load.
+    expect(state.noReload).toBe(true);
+    expect(state.swaps).toBeGreaterThanOrEqual(1);
+  }
+
+  test("a pinned theme survives an astro:after-swap navigation", async ({
+    page,
+  }) => {
+    await openClean(page, "light");
+    await clickToggle(page); // pin dark
+    await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+
+    await navigateClientSide(page);
+
+    await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+    expect(await schemeMeta(page)).toBe("dark");
+    expect(
+      await page.evaluate(() => document.documentElement.style.colorScheme)
+    ).toBe("dark");
+    expect(
+      await page.evaluate(() =>
+        document
+          .querySelector('meta[name="theme-color"]')
+          ?.getAttribute("content")
+      )
+    ).toBe("#141517");
+  });
+
+  test("follow-system survives an astro:after-swap navigation and still toggles", async ({
+    page,
+  }) => {
+    await openClean(page, "light");
+    await navigateClientSide(page);
+
+    await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
+    expect(await schemeMeta(page)).toBe("light dark");
+    expect(await savedTheme(page)).toBeNull();
+
+    // The toggle button on the swapped-in page must be re-bound.
+    await clickToggle(page);
+    await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+    expect(await savedTheme(page)).toBe("dark");
+  });
+});

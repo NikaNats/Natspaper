@@ -17,15 +17,35 @@
  * 1. `color-scheme: light dark` - Tells the browser to respect OS-level preferences
  *    for form controls, scrollbars, and other native elements.
  *
- * 2. **Instant theme detection** (inline script):
+ * 2. `<meta name="color-scheme">` - Declares the supported schemes before the
+ *    stylesheet loads (correct canvas colour, no white flash). It is a hint
+ *    only: the `color-scheme` set on `<html>` by CSS / inline style wins, so
+ *    the meta never drives the theme. Its content mirrors the pin state:
+ *    - **Unpinned** (nothing saved in localStorage): `"light dark"` = follow
+ *      the OS. This is also what the server renders, so it is the state when
+ *      JavaScript never runs.
+ *    - **Pinned** (`"light"` or `"dark"` saved): the literal saved theme.
+ *    Both scripts below write it, and they MUST stay in step. The same goes
+ *    for the `theme-color` pair (#141517 dark / #fafafa light), duplicated
+ *    because this inline script cannot import `/toggle-theme.js`.
+ *
+ * 3. **Instant theme detection** (inline script):
  *    - Checks localStorage for saved preference (user has toggled before)
  *    - Falls back to `prefers-color-scheme` media query (OS preference)
  *    - Sets `data-theme` attribute on `<html>` BEFORE first paint
  *
- * 3. **Theme toggle button** (deferred external script):
+ * 4. **Theme toggle button** (deferred external script):
  *    - Loaded from `/public/toggle-theme.js`
- *    - Handles user interaction with the theme toggle
- *    - Persists choice to localStorage
+ *    - Two-state toggle: the target is the opposite of the RENDERED theme.
+ *      If the target differs from the OS preference it is saved (pinned);
+ *      if it equals the OS preference the saved value is removed, so the user
+ *      can always return to "follow system".
+ *    - While unpinned, OS changes (`matchMedia` "change") re-theme the page.
+ *      A saved value is never removed or rewritten by an OS change, even when
+ *      the OS later matches it, so a pinned theme stays pinned.
+ *    - Other tabs sync through the `storage` event.
+ *    - Re-applies everything on `astro:after-swap`: the ClientRouter resets
+ *      the root attributes and head meta tags on every navigation.
  *
  * ## CSS Integration:
  *
@@ -39,6 +59,13 @@
  */
 ---
 
+<!--
+  Declares supported schemes before the stylesheet loads (canvas colour, no
+  white flash). "light dark" = follow the OS; the inline script below and
+  /toggle-theme.js pin it to "light" / "dark" to mirror the active theme.
+  Without JS it stays "light dark", so the OS preference still applies.
+-->
+<meta name="color-scheme" content="light dark" />
 <meta name="theme-color" content="#141517" />
 
 <!-- Critical inline styles to prevent FOUC -->
@@ -96,9 +123,18 @@
     root.setAttribute("data-theme", activeTheme);
     root.classList.toggle("dark", activeTheme === "dark");
     root.style.colorScheme = activeTheme;
+    // A saved override pins the meta; otherwise it stays "light dark"
+    // (follow system). Mirrors applyTheme() in /toggle-theme.js.
+    const pinned = saved === "dark" || saved === "light";
+    const schemeMeta = document.querySelector('meta[name="color-scheme"]');
+    if (schemeMeta) {
+      schemeMeta.setAttribute("content", pinned ? activeTheme : "light dark");
+    }
     window.initialTheme = activeTheme;
 
-    // Update dynamic browser address bar theme-color
+    // Update dynamic browser address bar theme-color. Keep these two values
+    // identical to `themeColors` in /toggle-theme.js (this script runs before
+    // <body> and CSS exist, so it cannot read computed styles).
     const meta = document.querySelector('meta[name="theme-color"]');
     if (meta) {
       meta.setAttribute(
