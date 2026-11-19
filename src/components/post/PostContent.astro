@@ -136,7 +136,7 @@ const { t } = getI18n(Astro.currentLocale as Lang);
     .post-content :global(pre),
     .post-content :global(figure),
     .post-content :global(.astro-code),
-    .post-content :global(table) {
+    .post-content :global(.table-scroll) {
       margin-inline: calc(var(--article-padding-inline, 1rem) * -1);
       width: calc(100% + var(--article-padding-inline, 1rem) * 2);
       border-radius: 0;
@@ -220,7 +220,7 @@ const { t } = getI18n(Astro.currentLocale as Lang);
     @media (max-width: 640px) {
       .post-content :global(pre),
       .post-content :global(figure),
-      .post-content :global(table) {
+      .post-content :global(.table-scroll) {
         margin-inline: -1rem;
         width: calc(100% + 2rem);
         border-radius: 0;

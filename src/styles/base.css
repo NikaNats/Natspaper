@@ -281,7 +281,7 @@
 
 /* Density stratification: reference + apparatus zones */
 .post-content pre,
-.post-content table,
+.post-content :not(.table-scroll) > table,
 .post-content math[display="block"] {
   margin-block: 1.5rem;
 }

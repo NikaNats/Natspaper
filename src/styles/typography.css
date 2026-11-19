@@ -130,64 +130,46 @@
     }
 
     /* Tables */
-    table {
-      /* 
-       * 1. LAYOUT TRANSFORMATION
-       * Change from 'table' to 'block' to allow the container 
-       * to respect the parent's width constraints.
-       */
-      display: block;
-
-      /* 
-       * 2. SCROLL CONTAINMENT
-       * If content exceeds width, show scrollbar on the TABLE only,
-       * not the whole page.
-       */
+    /*
+     * Scroll region emitted by rehype-scrollable-tables around each top-level
+     * table. The WRAPPER scrolls (not the table) so it can be keyboard
+     * focusable (role=region + tabindex=0, WCAG 2.1.1) while the <table> keeps
+     * its native table semantics and layout.
+     */
+    .table-scroll {
+      /* Wrap first, scroll last: only genuinely wide tables overflow. */
       overflow-x: auto;
-
-      /*
-       * 3. WRAP FIRST, SCROLL LAST
-       * Cells wrap normally so tables that fit the measure never clip.
-       * Only genuinely wide tables overflow, and then the scrollbar is
-       * visible (the global muted scrollbar is near-invisible on dark).
-       */
       scrollbar-width: thin;
       scrollbar-color: var(--color-text-secondary) transparent;
-
-      /* 
-       * 4. IOS NATIVE FEEL
-       * Enables momentum/inertial scrolling on iPhones/iPads.
-       * Without this, scrolling feels "sticky" and broken.
-       */
+      /* iOS momentum scrolling */
       -webkit-overflow-scrolling: touch;
 
-      /* 
-       * 5. VISUAL RESET
-       * Ensure the block fills the available space.
-       */
       width: 100%;
-      margin-top: 1.5rem;
-      margin-bottom: 1.5rem;
-      border-collapse: collapse;
-      text-align: left;
+      margin-block: 1.5rem;
 
-      /* 
-       * 6. MOBILE BLEED INTEGRATION (Your Existing Logic)
-       * This logic now works safely because overflow-x handles the excess width.
-       */
+      &:focus-visible {
+        outline: 2px solid var(--color-accent);
+        outline-offset: 2px;
+      }
+
+      /* Mobile bleed: let the scroll region run edge to edge. */
       @media (max-width: 640px) {
         --bleed-margin: calc(var(--layout-padding-fluid, 1rem) * -1);
 
-        margin-left: var(--bleed-margin);
-        margin-right: var(--bleed-margin);
-
-        /* Recalculate width to account for the negative margins */
+        margin-inline: var(--bleed-margin);
         width: calc(100% + var(--layout-padding-fluid, 1rem) * 2);
-
-        border-radius: 0;
-        border-left: none;
-        border-right: none;
       }
+
+      > table {
+        margin: 0;
+      }
+    }
+
+    table {
+      width: 100%;
+      margin-block: 1.5rem;
+      border-collapse: collapse;
+      text-align: left;
     }
 
     /* Editorial tables: horizontal rules only, distinct header row */

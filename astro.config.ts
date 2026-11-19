@@ -8,6 +8,7 @@ import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 import { rehypeEagerFirstImage } from "./src/lib/rehype-eager-first-image.mjs";
 import { rehypeFigureCaptions } from "./src/lib/rehype-figure-captions.mjs";
+import { rehypeScrollableTables } from "./src/lib/rehype-scrollable-tables.mjs";
 import vercel from "@astrojs/vercel";
 import { unified } from "@astrojs/markdown-remark";
 
@@ -58,6 +59,9 @@ export default defineConfig({
         // Image paragraph + following *italic* paragraph -> <figure> with a
         // real <figcaption>, so caption styles apply without raw HTML.
         rehypeFigureCaptions,
+        // Wide tables scroll horizontally; wrap each in a focusable, named
+        // region so keyboard users can scroll them (WCAG 2.1.1).
+        rehypeScrollableTables,
       ],
     }),
   },
