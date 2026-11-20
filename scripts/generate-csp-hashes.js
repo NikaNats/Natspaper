@@ -35,7 +35,55 @@ function findHtmlFiles(dir) {
 }
 
 // ── 2. Extract inline script/style contents ─────────────────────────
-function extractInlineContents(html) {
+
+/**
+ * JavaScript MIME type essences (WHATWG MIME Sniffing §4.6). A <script> whose
+ * type is one of these (or absent/empty) is a classic script.
+ */
+const JS_MIME_TYPES = new Set([
+  "application/ecmascript",
+  "application/javascript",
+  "application/x-ecmascript",
+  "application/x-javascript",
+  "text/ecmascript",
+  "text/javascript",
+  "text/javascript1.0",
+  "text/javascript1.1",
+  "text/javascript1.2",
+  "text/javascript1.3",
+  "text/javascript1.4",
+  "text/javascript1.5",
+  "text/jscript",
+  "text/livescript",
+  "text/x-ecmascript",
+  "text/x-javascript",
+]);
+
+/** Non-classic script types that CSP script-src still governs. */
+const CSP_GOVERNED_TYPES = new Set(["module", "importmap", "speculationrules"]);
+
+/**
+ * Whether CSP `script-src` applies to an inline <script> with this opening
+ * tag (WHATWG HTML "prepare the script element").
+ *
+ * Any other type — notably `application/ld+json` structured data — is a
+ * *data block*: the browser never executes it and CSP never checks it.
+ * Hashing data blocks is not just useless, it is dangerous here: every post
+ * has unique JSON-LD, so each new post would add a hash to the single global
+ * CSP header until it outgrows edge/browser header limits (8–16 KB).
+ */
+export function isCspGovernedScript(openingTag) {
+  const typeMatch = /\stype\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/i.exec(
+    openingTag
+  );
+  if (!typeMatch) return true; // no type attribute → classic script
+  const raw = (typeMatch[1] ?? typeMatch[2] ?? typeMatch[3] ?? "").trim();
+  if (raw === "") return true;
+  const essence = raw.toLowerCase().split(";")[0].trim();
+  return JS_MIME_TYPES.has(essence) || CSP_GOVERNED_TYPES.has(essence);
+}
+
+export function extractInlineContents(html) {
   // Strip HTML comments FIRST. Comments may legitimately contain the literal
   // text "<script>" (e.g. JSDoc-style notes rendered into output); a naive
   // regex otherwise matches inside the comment and hashes everything from
@@ -50,14 +98,15 @@ function extractInlineContents(html) {
   // NOTE: `\ssrc=` (whitespace + attribute name + equals) is deliberate.
   // A word-boundary pattern like \bsrc\b also matches data-src, which
   // would wrongly exclude inline scripts carrying that attribute.
-  const scriptRegex = /<script(?![^>]*\ssrc=)[^>]*>([\s\S]*?)<\/script>/gi;
+  const scriptRegex = /(<script(?![^>]*\ssrc=)[^>]*>)([\s\S]*?)<\/script>/gi;
   let match;
   while ((match = scriptRegex.exec(clean)) !== null) {
+    if (!isCspGovernedScript(match[1])) continue;
     // Hash the RAW bytes between the tags — browsers hash the exact
     // document bytes, so trimming here would silently break the CSP.
     // Empty content is skipped only because hashing "" is meaningless,
     // not because whitespace is insignificant.
-    const content = match[1];
+    const content = match[2];
     if (content.trim().length > 0) scripts.push(content);
   }
 
@@ -74,12 +123,20 @@ function extractInlineContents(html) {
 }
 
 // ── 3. Compute SHA-256 hash in CSP format ───────────────────────────
-function cspHash(content) {
+export function cspHash(content) {
   const hash = crypto.createHash("sha256").update(content, "utf8").digest("base64");
   return `'sha256-${hash}'`;
 }
 
 // ── 4. Main ─────────────────────────────────────────────────────────
+// Guarded so tests can import the pure helpers above without side effects.
+const isCli =
+  process.argv[1] &&
+  path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+
+if (isCli) main();
+
+function main() {
 const htmlFiles = findHtmlFiles(distDir);
 if (htmlFiles.length === 0) {
   console.error("❌ No HTML files found in dist/. Please run 'astro build' first.");
@@ -160,6 +217,20 @@ const newCsp = [
   "form-action 'self'",
 ].join("; ");
 
+// Budget guard: response headers share an ~8 KB limit at many CDNs/proxies
+// (and 16 KB in browsers). The policy is per-site, not per-page, so it must
+// stay roughly constant as content grows; fail loudly if it ever creeps up.
+const CSP_BUDGET_BYTES = 4096;
+const cspBytes = Buffer.byteLength(newCsp, "utf8");
+if (cspBytes > CSP_BUDGET_BYTES) {
+  console.error(
+    `❌ Content-Security-Policy is ${cspBytes} bytes (budget ${CSP_BUDGET_BYTES}). ` +
+      `An inline script is probably varying per page; move it to a bundled ` +
+      `<script> or make its content static.`
+  );
+  process.exit(1);
+}
+
 // ── 6. Update vercel.json ───────────────────────────────────────────
 const vercelConfig = JSON.parse(fs.readFileSync(vercelJsonPath, "utf8"));
 
@@ -176,3 +247,4 @@ for (const headerBlock of vercelConfig.headers) {
 
 fs.writeFileSync(vercelJsonPath, JSON.stringify(vercelConfig, null, 2) + "\n");
 console.log(`✅ vercel.json updated with ${scriptHashes.size} script + ${styleHashes.size} style hashes`);
+}

@@ -12,20 +12,44 @@ Natspaper implements defense-in-depth with multiple security layers:
 
 ### Content Security Policy (CSP)
 
-All pages are served with a strict Content Security Policy:
+All pages are served with a hash-based Content Security Policy, set as a
+response header in `vercel.json` (the authoritative value; abridged here):
 
 ```
 default-src 'self';
+script-src 'sha256-…' … 'self' https://giscus.app https://va.vercel-scripts.com;
+style-src 'unsafe-inline' 'self' https://fonts.googleapis.com https://giscus.app;
 img-src 'self' data: https:;
 font-src 'self' data: https://fonts.gstatic.com;
-style-src 'unsafe-inline' 'self' https://fonts.googleapis.com;
-script-src 'unsafe-inline' 'wasm-unsafe-eval' 'self' data: https://giscus.app;
-form-action 'self';
-base-uri 'self';
-connect-src 'self' https://giscus.app;
+connect-src 'self' https://giscus.app https://va.vercel-scripts.com https://vitals.vercel-insights.com;
 frame-src https://giscus.app;
+object-src 'none';
 frame-ancestors 'none';
+base-uri 'self';
+form-action 'self';
 ```
+
+**`script-src` has no `'unsafe-inline'`, `'unsafe-eval'`, `'wasm-unsafe-eval'`
+or `data:`.** Inline scripts run only if their SHA-256 hash is listed:
+
+- `scripts/generate-csp-hashes.js` runs after `astro build`, hashes every
+  inline script the browser can execute (classic, `module`, `importmap`,
+  `speculationrules`) and rewrites the header in `vercel.json`.
+- Data blocks such as `<script type="application/ld+json">` are **not**
+  hashed: browsers never execute them and CSP does not apply to them. (Hashing
+  them grew the header with every new post.)
+- The build fails if the policy exceeds a 4 KB budget, or if an inline
+  `type="module"` script appears (Astro's ClientRouter would need `data:`).
+- CI and the production deploy fail if the committed `vercel.json` differs
+  from what the build generates, so stale hashes can never ship.
+- Prefer bundled `<script>` tags (emitted as external `/_astro/*.js` files,
+  covered by `'self'`) over `is:inline`; reserve `is:inline` for code that
+  must run before first paint (e.g. theme detection).
+
+`style-src` keeps `'unsafe-inline'` deliberately: Astro's View Transitions
+router injects `<style>` elements at runtime whose contents cannot be
+precomputed, and any hash in the directive would make browsers ignore
+`'unsafe-inline'` (CSP Level 3).
 
 ### Security Headers
 
@@ -49,11 +73,11 @@ Natspaper strictly enforces HTTP Strict Transport Security:
 
 ### External Resources
 
-| Resource         | Source                          | Security                           |
-| ---------------- | ------------------------------- | ---------------------------------- |
-| Giscus Comments  | `https://giscus.app`            | Isolated iframe, CSP restricted    |
-| Vercel Analytics | `https://va.vercel-scripts.com` | Script-src hash verified           |
-| MathML Equations | Native Browser Engine           | Zero external fonts or stylesheets |
+| Resource         | Source                          | Security                                                                                        |
+| ---------------- | ------------------------------- | ----------------------------------------------------------------------------------------------- |
+| Giscus Comments  | `https://giscus.app`            | Isolated iframe; origin pinned by CSP (no SRI: `client.js` is unversioned and updated in place) |
+| Vercel Analytics | `https://va.vercel-scripts.com` | Script-src hash verified                                                                        |
+| MathML Equations | Native Browser Engine           | Zero external fonts or stylesheets                                                              |
 
 ### Input Handling
 

@@ -22,6 +22,7 @@ import fs from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
 import { fileURLToPath } from "node:url";
+import { extractInlineContents } from "./generate-csp-hashes.js";
 
 // ── CLI Argument Parsing ─────────────────────────────────────────────
 const args = process.argv.slice(2);
@@ -205,21 +206,11 @@ function findHtmlFiles(dir) {
   return results;
 }
 
-// Mirrors scripts/generate-csp-hashes.js: raw bytes between tags,
-// excluding only real src attributes (\ssrc= — not data-src etc.).
-// HTML comments are stripped first (they may contain literal "<script>"
-// text which would otherwise corrupt the extraction, same as the generator).
-const INLINE_SCRIPT_REGEX = /<script(?![^>]*\ssrc=)[^>]*>([\s\S]*?)<\/script>/gi;
-
+// Single source of truth: the exact extractor the CSP generator uses (only
+// CSP-governed scripts; JSON-LD data blocks excluded). A second hand-copied
+// regex here previously drifted from the generator.
 function extractInlineScripts(html) {
-  const clean = html.replace(/<!--[\s\S]*?-->/g, "");
-  const scripts = [];
-  let match;
-  while ((match = INLINE_SCRIPT_REGEX.exec(clean)) !== null) {
-    if (match[1].trim().length > 0) scripts.push(match[1]);
-  }
-  INLINE_SCRIPT_REGEX.lastIndex = 0;
-  return scripts;
+  return extractInlineContents(html).scripts;
 }
 
 // ── 1. Required Artifacts ────────────────────────────────────────────
