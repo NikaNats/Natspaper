@@ -143,16 +143,20 @@ test.describe('Home Page - E2E Tests', () => {
   });
 
   test('should have working pagination navigation', async () => {
-    // Check if pagination exists
-    const pagination = page.locator('[role="navigation"][aria-label*="Pagination"]');
-    
-    // If pagination exists, verify next button
-    if (await pagination.isVisible()) {
-      const nextButton = pagination.locator('a[aria-label="Next"]');
-      if (await nextButton.isVisible()) {
-        expect(await nextButton.getAttribute('href')).toBeTruthy();
-      }
-    }
+    // The homepage has no pagination; the paginated listing is /en/posts
+    // (more posts than FEATURES.postPerPage).
+    await navigateWithRetry(page, '/en/posts');
+
+    const pagination = page.getByTestId('pagination');
+    await expect(pagination).toBeVisible();
+
+    const nextLink = pagination.getByRole('link', { name: 'Next Page' });
+    await expect(nextLink).toHaveAttribute('href', /\/en\/posts\/2\/?$/);
+    await expect(nextLink).toHaveAttribute('rel', 'next');
+
+    await nextLink.click();
+    await page.waitForURL(/\/en\/posts\/2\/?$/);
+    await expect(page.getByTestId('pagination')).toContainText('2');
   });
 
   test('should have accessible navigation structure', async () => {

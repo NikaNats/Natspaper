@@ -192,11 +192,10 @@ test.describe("Graceful Degradation: Third-party Service Outages", () => {
     const nav = page.getByRole("navigation").first();
     await expect(nav).toBeVisible();
 
-    // Dark mode toggle (pure JS, no third-party) must be present
-    const themeButton = page.getByTestId("theme-btn");
-    if ((await themeButton.count()) > 0) {
-      await expect(themeButton).toBeEnabled();
-    }
+    // Dark mode toggle (pure JS, no third-party) must be present and usable
+    const themeButton = page.getByTestId("theme-toggle").first();
+    await expect(themeButton).toBeAttached();
+    await expect(themeButton).toBeEnabled();
 
     // No JS exceptions from blocked resources
     const unexpectedErrors = jsErrors.filter(

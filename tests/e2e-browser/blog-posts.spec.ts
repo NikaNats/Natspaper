@@ -95,36 +95,31 @@ test.describe("Critical User Journey: Blog Posts", () => {
   test("should allow navigation from a post's tag to the tag archive page", async ({
     page,
   }) => {
-    const postCount = await blogPage.postCards.count();
-    test.skip(postCount === 0, "No blog posts found to test.");
+    // Clickable tag links live in the article footer (summary cards render
+    // tags as plain text: a link cannot be nested inside the card's link).
+    await blogPage.viewFirstPost();
 
-    // Find the first post that has tags
-    let firstPostWithTags: Locator | null = null;
-    for (const card of await blogPage.postCards.all()) {
-      if ((await card.getByTestId("post-tag-link").count()) > 0) {
-        firstPostWithTags = card;
-        break;
-      }
-    }
+    const firstTag = blogPage.postTagLinks.first();
+    await expect(firstTag).toBeVisible();
 
-    test.skip(!firstPostWithTags, "No posts with tags found to test this journey.");
-
-    const firstTag = firstPostWithTags!.getByTestId("post-tag-link").first();
-    const tagName = (await firstTag.textContent()) || "unknown";
+    const href = await firstTag.getAttribute("href");
+    expect(href).toMatch(/^\/en\/tags\/[^/]+\/$/);
+    const tagName = ((await firstTag.textContent()) ?? "").replace("#", "").trim();
+    expect(tagName).not.toBe("");
 
     await firstTag.click();
+    await page.waitForURL(`**${href}`);
 
-    // Wait for the tag URL
-    await page.waitForURL(
-      `**/en/tags/${tagName.toLowerCase().replace(" ", "-")}/**`
-    );
-
-    // Verify the tag archive page
+    // The archive heading comes from the page's `title` slot in Main.astro
     await expect(blogPage.tagArchiveTitle).toBeVisible();
     await expect(blogPage.tagArchiveTitle).toContainText(tagName, {
       ignoreCase: true,
     });
-
+    // Exactly one page heading: the slot replaced Main's default <h1>.
+    // (Scoped to <main>: CSS locators pierce the dev toolbar's shadow DOM.)
+    await expect(
+      page.getByRole("main").getByRole("heading", { level: 1 })
+    ).toHaveCount(1);
     await expect(blogPage.postCards.first()).toBeVisible();
   });
 });
@@ -224,10 +219,19 @@ test.describe("Native Landmark & ARIA in HTML Semantics Verification", () => {
     await page.goto("/en/posts");
     await page.waitForLoadState("networkidle");
 
-    // ARIA in HTML 2026: Disabled links rendered as <span> must carry explicit role="link"
-    const disabledLink = page.locator('nav[aria-label="Pagination"] span[role="link"][aria-disabled="true"]');
-    if ((await disabledLink.count()) > 0) {
-      await expect(disabledLink.first()).toBeVisible();
-    }
+    // ARIA in HTML: aria-disabled is only allowed on an element with a role,
+    // so the disabled "Previous" <span> must carry role="link" and keep the
+    // same accessible name as the enabled link.
+    const pagination = page.getByTestId("pagination");
+    await expect(pagination).toBeVisible();
+
+    const disabledPrev = pagination.locator(
+      'span[role="link"][aria-disabled="true"]'
+    );
+    await expect(disabledPrev).toHaveCount(1);
+    await expect(disabledPrev).toHaveAttribute("aria-label", "Previous Page");
+    await expect(
+      page.getByRole("link", { name: "Previous Page", disabled: true })
+    ).toBeVisible();
   });
 });
