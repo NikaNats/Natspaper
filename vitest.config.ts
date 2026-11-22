@@ -23,8 +23,20 @@ export default defineConfig({
     coverage: {
       provider: "v8",
       reporter: ["text", "json", "html", "lcov"],
-      include: ["src/**/*.ts"],
-      exclude: ["node_modules/", "tests/", "**/*.test.ts", "**/*.spec.ts"],
+      // Scope = unit-testable logic. Astro routes (src/pages), build
+      // integrations and the Satori OG template are build/runtime glue that
+      // the production build and Playwright E2E gates exercise instead;
+      // counting them here made the threshold unreachable, so it was never
+      // enforced at all.
+      include: ["src/utils/**/*.ts", "src/i18n/**/*.ts"],
+      exclude: [
+        "node_modules/",
+        "tests/",
+        "**/*.test.ts",
+        "**/*.spec.ts",
+        "**/*.d.ts",
+        "src/utils/og/templates/**",
+      ],
       thresholds: {
         lines: 80,
         functions: 80,

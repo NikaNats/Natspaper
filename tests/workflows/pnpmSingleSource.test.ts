@@ -61,4 +61,14 @@ describe("pnpm version single source of truth", () => {
       ).toBe(true);
     }
   });
+
+  it("package.json scripts use pnpm exclusively (no npm run / npx)", () => {
+    const pkg = JSON.parse(read("package.json")) as {
+      scripts: Record<string, string>;
+    };
+    const offenders = Object.entries(pkg.scripts).filter(([, cmd]) =>
+      /\b(npm run|npm exec|npx)\b/.test(cmd)
+    );
+    expect(offenders).toEqual([]);
+  });
 });

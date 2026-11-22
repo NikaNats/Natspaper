@@ -146,8 +146,9 @@ jobs:
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile --prefer-offline
 
-      - name: Run Unit Tests
-        run: pnpm run test:run
+      # Coverage thresholds (vitest.config.ts) are enforced: a drop fails CI.
+      - name: Run Unit Tests (coverage enforced)
+        run: pnpm run test:coverage
 
       - name: Upload Coverage Reports
         if: always()

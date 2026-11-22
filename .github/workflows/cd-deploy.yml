@@ -15,19 +15,14 @@ env:
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 
 jobs:
-  deploy:
-    name: Deploy to Production
+  # ── Gate 1: static checks, unit tests (coverage-enforced), audit, build ──
+  verify:
+    name: Verify
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    environment:
-      name: production
-      url: https://natspaper.vercel.app
-
     steps:
       - name: Checkout
         uses: actions/checkout@v7
-        with:
-          fetch-depth: 0 # Full git history for remark-modified-time plugin
 
       # pnpm version is read from the `packageManager` field in package.json
       - name: Setup pnpm
@@ -42,6 +37,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Security audit
+        run: pnpm security:audit
+
       - name: Type check
         run: pnpm astro check
 
@@ -50,17 +48,121 @@ jobs:
           pnpm run lint
           pnpm run format:check
 
-      - name: Unit tests
-        run: pnpm test:run
+      - name: Unit tests (coverage thresholds enforced)
+        run: pnpm test:coverage
 
-      - name: Upload test results
+      - name: Upload coverage
         if: always()
-        uses: actions/upload-artifact@v7 # Upgraded to v7 for Node 24 support
+        uses: actions/upload-artifact@v7
         with:
-          name: test-results-${{ github.run_id }}
+          name: coverage-${{ github.run_id }}
           path: coverage/
           retention-days: 7
           if-no-files-found: ignore
+
+      - name: Production build
+        run: pnpm run build:prod
+        env:
+          SITE_WEBSITE: https://natspaper.vercel.app
+
+      # `vercel build` reads vercel.json (headers incl. CSP) when it starts,
+      # but the build regenerates the CSP hashes at the end. A stale committed
+      # vercel.json would therefore ship old hashes and block inline scripts
+      # in production. Refuse to deploy unless the committed file is current.
+      - name: Verify CSP hashes are fresh
+        run: |
+          git diff --exit-code -- vercel.json || {
+            echo "::error::vercel.json is stale: committed CSP hashes do not match this build. Run 'pnpm run build:prod' locally and commit vercel.json."
+            exit 1
+          }
+
+  # ── Gate 2: browser E2E against the real site ──
+  e2e:
+    name: E2E (Chromium)
+    needs: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Get Playwright version
+        id: playwright-version
+        run: |
+          PLAYWRIGHT_VERSION=$(pnpm list @playwright/test --depth=0 --json | jq -r '.[0].devDependencies["@playwright/test"].version // empty')
+          if [ -z "$PLAYWRIGHT_VERSION" ]; then
+            echo "::error::Failed to detect Playwright version"
+            exit 1
+          fi
+          echo "version=$PLAYWRIGHT_VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v6
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-browsers-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}
+
+      - name: Install Playwright browsers
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Install system dependencies (cache hit)
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: pnpm exec playwright install-deps chromium
+
+      - name: Run E2E tests
+        run: pnpm exec playwright test --project chromium
+        env:
+          SITE_WEBSITE: https://natspaper.vercel.app
+
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-report-${{ github.run_id }}
+          path: playwright-report/
+          retention-days: 7
+          if-no-files-found: ignore
+
+  # ── Deploy: only after every gate is green ──
+  deploy:
+    name: Deploy to Production
+    needs: [verify, e2e]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: production
+      url: https://natspaper.vercel.app
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      # pnpm version is read from the `packageManager` field in package.json
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
@@ -74,6 +176,16 @@ jobs:
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: vercel build --prod --token=$VERCEL_TOKEN
+
+      # Belt and braces for the CSP gate in `verify`: if this build produced
+      # different hashes than the vercel.json it started with, the prebuilt
+      # output carries stale headers. Never deploy that.
+      - name: Assert build did not change vercel.json
+        run: |
+          git diff --exit-code -- vercel.json || {
+            echo "::error::vercel build regenerated CSP hashes; the prebuilt output would ship stale headers."
+            exit 1
+          }
 
       - name: Deploy to Vercel
         id: deploy
