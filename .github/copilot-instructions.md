@@ -1,6 +1,8 @@
 # Natspaper — AI Coding Agent Instructions
 
-**Stack**: Astro 5.x (100 % SSG) · TypeScript 5.9 strict · Tailwind CSS v4 · Vitest + Playwright
+**Stack**: Astro 7.4 (100 % SSG) · TypeScript 6 strict · Tailwind CSS 4.3 · Vitest 5 + Playwright · pnpm 12 (Node 24)
+
+> Versions are authoritative in `package.json` (`dependencies`, `packageManager`); update this line when they change.
 
 ---
 

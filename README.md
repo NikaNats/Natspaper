@@ -53,7 +53,7 @@
 ### Prerequisites
 
 - **Node.js** `v24.x` or higher
-- **pnpm** `v10.x` or higher
+- **pnpm** `v12.x` (the exact version is pinned in `package.json` → `packageManager`; `corepack enable` picks it up automatically)
 
 ### 1. Clone & Install
 
